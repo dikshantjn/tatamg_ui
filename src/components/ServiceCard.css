@@ -1,27 +1,44 @@
-.service-card {
-    text-align: center;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.service-card-container {
+    width: 100%;
     padding: 20px;
-    margin: 10px;
-    flex: 1;
-    min-width: 200px;
+    box-sizing: border-box;
+    background-color: #f8f9fa;
+    text-align: center;
+    margin: 0 auto;
 }
 
-.service-card .icon {
+.scrollable-options {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px 0;
+    justify-content: center;
+    scroll-behavior: smooth;
+}
+
+.option {
+    flex: 0 0 auto;
+    width: 200px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.option .icon {
     background-color: #e0e0e0;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     margin: 0 auto 10px;
     border-radius: 50%;
 }
 
-.service-card h3 {
+.option h4 {
     font-size: 18px;
     margin: 10px 0;
 }
 
-.service-card p {
+.option p {
     color: #6c757d;
+    font-size: 14px;
 }

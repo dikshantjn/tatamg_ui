@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from './components/Header';
-import ServiceCard from './components/ServiceCard';
+import ConsultationServiceCard from './components/ConsultationServiceCard';
 import SearchByHealthConcern from './components/SearchByHealthConcern';
 import AppointmentSection from './components/AppointmentSection';
 import Testimonials from './components/Testimonials';
@@ -12,9 +12,7 @@ function App() {
             <Header />
             <main>
                 <section className="services">
-                    <ServiceCard title="Instant Video Consultation" description="Lorem ipsum dolor sit amet..." />
-                    <ServiceCard title="Find Doctors near you" description="Lorem ipsum dolor sit amet..." />
-                    <ServiceCard title="Surgeries" description="Lorem ipsum dolor sit amet..." />
+                    <ConsultationServiceCard title="Instant Video Consultation" description="Lorem ipsum dolor sit amet..." />
                 </section>
                 <SearchByHealthConcern />
                 <AppointmentSection />

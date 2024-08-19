@@ -14,6 +14,9 @@ function Header() {
                     <button>Sign up</button>
                     <button>Log in</button>
                     <button className="emergency">Emergency!</button>
+                    <button>Cart</button>
+                    <button>Offers</button>
+                    <button>Membership</button>
                 </div>
             </div>
 
@@ -21,23 +24,24 @@ function Header() {
             <div className="main-nav">
                 <div className="logo"> {/* Add your logo here */}</div>
                 <nav className="nav-links">
-                    <a href="#">Products</a>
-                    <a href="#">Lab Tests</a>
-                    <a href="#">Consult Doctors</a>
-                    <a href="#">Blood Bank</a>
-                    <a href="#">Ambulance</a>
+                    <a href="#">PRODUCTS</a>
+                    <a href="#">LAB TESTS</a>
+                    <a href="#">CONSULT DOCTORS</a>
+                    <a href="#">BLOOD BANK</a>
+                    <a href="#">AMBULANCE</a>
+                    <a href="#">MEDICAL LOANS</a>
+                    <a href="#">MEDICAL INSURANCE</a>
+                    <a href="#">VACCINES</a>
+                    <a href="#">MATERNAL CARE</a>
+                    <a href="#">DELIVERY</a>
                     {/* Add more links as needed */}
                 </nav>
-                <div className="utility-buttons">
-                    <button>Offers</button>
-                    <button>Membership</button>
-                </div>
             </div>
 
             {/* Layer 3: Sub Navigation */}
             <div className="sub-nav">
                 <a href="#">Physiotherapy</a>
-                <a href="#">Hospital Booking</a>
+                <a href="#">Hospital Discovery</a>
                 <a href="#">Care At Home</a>
                 <a href="#">Medical Tourism</a>
                 <a href="#">Rehabilitation</a>
