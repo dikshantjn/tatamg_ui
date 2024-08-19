@@ -1,0 +1,114 @@
+.header {
+    width: 100%;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Layer 1: Top Bar */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.location-search {
+    display: flex;
+    gap: 10px;
+}
+
+.location-search input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    width: 200px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.buttons button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.buttons .emergency {
+    background-color: #dc3545;
+}
+
+.buttons button:hover {
+    opacity: 0.9;
+}
+
+/* Layer 2: Main Navigation */
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links a {
+    color: #343a40;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.nav-links a:hover {
+    color: #007bff;
+}
+
+.utility-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.utility-buttons button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.utility-buttons button:hover {
+    opacity: 0.9;
+}
+
+/* Layer 3: Sub Navigation */
+.sub-nav {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 20px;
+    background-color: #e9ecef;
+}
+
+.sub-nav a {
+    color: #495057;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sub-nav a:hover {
+    color: #007bff;
+}

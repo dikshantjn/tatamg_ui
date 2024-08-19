@@ -1,0 +1,41 @@
+.footer {
+    background-color: #343a40;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+.download-links a {
+    display: inline-block;
+    margin: 0 10px;
+    color: #fff;
+    text-decoration: none;
+    background-color: #007bff;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+.download-links a:hover {
+    background-color: #0056b3;
+}
+
+.footer-links {
+    margin: 20px 0;
+}
+
+.footer-links a {
+    display: inline-block;
+    margin: 0 10px;
+    color: #adb5bd;
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: #fff;
+}
+
+.footer p {
+    font-size: 14px;
+    margin-top: 20px;
+    color: #adb5bd;
+}

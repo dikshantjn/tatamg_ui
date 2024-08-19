@@ -1,0 +1,35 @@
+.testimonials {
+    padding: 40px 20px;
+    background-color: #f8f9fa;
+    text-align: center;
+}
+
+.testimonials h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.testimonial {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial p {
+    color: #6c757d;
+    font-style: italic;
+    margin-bottom: 10px;
+}
+
+.testimonial h3 {
+    font-size: 18px;
+    margin: 10px 0 5px;
+}
+
+.testimonial p:last-child {
+    color: #6c757d;
+    font-size: 14px;
+}
