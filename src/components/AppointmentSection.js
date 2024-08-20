@@ -3,7 +3,7 @@ import './AppointmentSection.css'; // Include CSS if needed for styling
 
 function AppointmentSection() {
     const appointments = [
-        { title: 'Dietition', img: 'image_path' },
+        { title: 'Dietition', img: '/Users/dikshantjain/Software_Development/Projects/tatamg_ui/src/assets/healthy-menu-recipe-food-diet.jpg' },
         { title: 'Physiotherapist', img: 'image_path' },
         { title: 'General Surgeon', img: 'image_path' },
         { title: 'Dentist', img: 'image_path' }

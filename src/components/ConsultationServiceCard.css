@@ -1,0 +1,46 @@
+.service-card-container {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #fff; /* Set background to white */
+    text-align: center;
+    margin: 20px auto; /* Add some margin to space it out */
+    border-radius: 8px; /* Rounded corners to match the Appointment section */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add box-shadow for depth */
+}
+
+.scrollable-options {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding: 20px 0;
+    justify-content: center;
+    scroll-behavior: smooth;
+}
+
+.option {
+    flex: 0 0 auto;
+    width: 200px;
+    background-color: #f8f9fa; /* Light grey for option cards */
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.option .icon {
+    background-color: #e0e0e0;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 10px;
+    border-radius: 50%;
+}
+
+.option h4 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.option p {
+    color: #6c757d;
+    font-size: 14px;
+}

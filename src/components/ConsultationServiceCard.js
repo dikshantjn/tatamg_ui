@@ -1,10 +1,9 @@
 import React from 'react';
-import './ServiceCard.css';
+import './ConsultationServiceCard.css';
 
 function ConsultationServiceCard() {
     return (
         <div className="service-card-container">
-            <h3>Instant Video Consultation</h3>
             <div className="scrollable-options">
                 <div className="option">
                     <div className="icon"></div>

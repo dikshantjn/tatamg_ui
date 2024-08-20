@@ -1,18 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Updated from useHistory to useNavigate
 import './Header.css';
 
 function Header() {
+    const [location, setLocation] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const navigate = useNavigate(); // Updated from useHistory to useNavigate
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery)}`); // Updated from history.push to navigate
+        }
+    };
+
     return (
         <header className="header">
             {/* Layer 1: Top Bar */}
             <div className="top-bar">
                 <div className="location-search">
-                    <input type="text" placeholder="Location" />
-                    <input type="text" placeholder="Search" />
+                    <input 
+                        type="text" 
+                        placeholder="Location" 
+                        value={location} 
+                        onChange={(e) => setLocation(e.target.value)} 
+                    />
+                    <form onSubmit={handleSearchSubmit}>
+                        <input
+                            type="text"
+                            placeholder="Search"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                        <button type="submit">Search</button>
+                    </form>
                 </div>
                 <div className="buttons">
-                    <button>Sign up</button>
-                    <button>Log in</button>
+                    <Link to="/signin">
+                        <button>Sign up</button>
+                    </Link>
+                    <Link to="/signin">
+                        <button>Log in</button>
+                    </Link>
                     <button className="emergency">Emergency!</button>
                     <button>Cart</button>
                     <button>Offers</button>
