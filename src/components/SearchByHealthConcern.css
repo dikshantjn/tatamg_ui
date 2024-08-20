@@ -1,52 +1,54 @@
 .search-health-concern {
-    padding: 40px 20px;
+    padding: 20px;
     background-color: #f8f9fa;
-    text-align: center;
 }
 
 .search-health-concern h2 {
+    text-align: center;
+    margin-bottom: 30px;
     font-size: 24px;
-    margin-bottom: 20px;
 }
 
 .concerns {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 20px;
-    flex-wrap: wrap;
 }
 
 .concern {
     background-color: #fff;
-    padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 200px;
-    flex: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 30%;
 }
 
-.concern .icon {
-    background-color: #e0e0e0;
-    width: 40px;
-    height: 40px;
-    margin: 0 auto 10px;
-    border-radius: 50%;
+.concern-image {
+    width: 100%;
+    height: auto;
+    max-height: 150px;
+    object-fit: contain; /* Ensures the entire image is visible without cropping */
+    border-radius: 8px;
+    margin-bottom: 15px;
 }
+
 
 .concern h3 {
     font-size: 18px;
-    margin: 10px 0;
+    margin-bottom: 10px;
 }
 
 .concern p {
-    color: #6c757d;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
 }
 
 .concern a {
-    display: block;
-    margin-top: 10px;
-    color: #007bff;
     text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
 }
 
 .concern a:hover {

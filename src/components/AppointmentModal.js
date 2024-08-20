@@ -1,8 +1,16 @@
 // AppointmentModal.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './AppointmentModal.css';
 
-function AppointmentModal({ show, onClose }) {
+function AppointmentModal({ show, onClose, doctor }) {
+    const navigate = useNavigate();
+
+    const handleBookNow = () => {
+        onClose();
+        navigate('/checkout', { state: { doctor } });
+    };
+
     if (!show) {
         return null;
     }
@@ -38,7 +46,7 @@ function AppointmentModal({ show, onClose }) {
                     <input type="email" placeholder="Email" />
                     <textarea placeholder="Symptoms"></textarea>
                     <textarea placeholder="Past medical conditions (if any)"></textarea>
-                    <button className="book-now">Book Now</button>
+                    <button className="book-now" onClick={handleBookNow}>Book Now</button>
                 </div>
             </div>
         </div>

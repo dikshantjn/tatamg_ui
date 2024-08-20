@@ -1,12 +1,16 @@
 import React from 'react';
 import './AppointmentSection.css'; // Include CSS if needed for styling
+import dietianImg from '../assets/healthy-menu-recipe-food-diet.jpg'; // Adjust the paths as necessary
+import physiotherapistImg from '../assets/phsiotherapist.jpg';
+import surgeonImg from '../assets/surgeon.jpg';
+import dentistImg from '../assets/dentist.jpg';
 
 function AppointmentSection() {
     const appointments = [
-        { title: 'Dietition', img: '/Users/dikshantjain/Software_Development/Projects/tatamg_ui/src/assets/healthy-menu-recipe-food-diet.jpg' },
-        { title: 'Physiotherapist', img: 'image_path' },
-        { title: 'General Surgeon', img: 'image_path' },
-        { title: 'Dentist', img: 'image_path' }
+        { title: 'Dietition', img: dietianImg },
+        { title: 'Physiotherapist', img: physiotherapistImg },
+        { title: 'General Surgeon', img: surgeonImg },
+        { title: 'Dentist', img: dentistImg }
     ];
 
     return (
