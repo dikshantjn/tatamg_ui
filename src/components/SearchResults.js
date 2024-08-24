@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './SearchResults.css';
+import femaleImg from '../assets/female doctor.jpg';
+import maleImg from '../assets/male doctor.jpg';
 
 function SearchResults() {
     const doctors = [
