@@ -1,0 +1,72 @@
+.ambulance-page {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.booking-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    flex: 1;
+}
+
+.booking-section h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.booking-section p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.booking-form input,
+.booking-form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.booking-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #008080; /* Adjust this color as needed */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.booking-form button:hover {
+    background-color: #005555; /* Darker shade for hover effect */
+}
+
+.app-download {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.app-download img {
+    width: 120px;
+    height: auto;
+}
+
+.awards-section {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.awards-section img {
+    max-width: 90%;
+    height: 500;
+    border-radius: 8px;
+}

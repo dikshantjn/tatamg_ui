@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './AppointmentSection.css'; // Include CSS if needed for styling
 import dietianImg from '../assets/healthy-menu-recipe-food-diet.jpg'; // Adjust the paths as necessary
 import physiotherapistImg from '../assets/phsiotherapist.jpg';
@@ -15,7 +16,10 @@ function AppointmentSection() {
 
     return (
         <section className="appointment-section">
-            <h2>Book an appointment for in person consultation</h2>
+            <div className="heading-with-link">
+                <h2>Book an appointment for in person consultation</h2>
+                <Link to="/search" className="view-all-link">View All</Link>
+            </div>
             <div className="appointments">
                 {appointments.map(appointment => (
                     <div className="appointment" key={appointment.title}>

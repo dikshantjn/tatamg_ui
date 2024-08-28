@@ -9,6 +9,18 @@
     margin-bottom: 20px;
 }
 
+.heading-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.heading-with-link h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
 .appointments {
     display: flex;
     justify-content: center;
@@ -43,5 +55,16 @@
 }
 
 .appointment a:hover {
+    text-decoration: underline;
+}
+
+.view-all-link {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-all-link:hover {
     text-decoration: underline;
 }

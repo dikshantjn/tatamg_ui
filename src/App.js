@@ -10,7 +10,9 @@ import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile'; 
 import SignIn from './components/SignIn'; // Import SignIn component
 import Checkout from './components/Checkout';
-
+import Products from './components/Products';
+import ProductProfilePage from './components/ProductsProfile';
+import Ambulance from './components/Ambulance';
 
 function App() {
     return (
@@ -31,6 +33,9 @@ function App() {
                         <Route path="/doctor-profile/:id" element={<DoctorProfile />} /> {/* New route */}
                         <Route path="/signin" element={<SignIn />} /> {/* Add SignIn route */}
                         <Route path="/checkout" element={<Checkout />} /> {/* Add Checkout route */}
+                        <Route path="/products" element={<Products />} />
+                        <Route path="/product/:id" element={<ProductProfilePage />} />
+                        <Route path="/ambulance" element={<Ambulance />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>

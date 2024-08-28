@@ -1,12 +1,28 @@
 .search-health-concern {
     padding: 20px;
-    background-color: #f8f9fa;
 }
 
-.search-health-concern h2 {
-    text-align: center;
-    margin-bottom: 30px;
+.heading-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.heading-with-link h2 {
+    margin: 0;
     font-size: 24px;
+}
+
+.view-all-link {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
 }
 
 .concerns {
@@ -25,14 +41,13 @@
 }
 
 .concern-image {
-    width: 100%;
+    width: 100;
     height: auto;
     max-height: 150px;
-    object-fit: contain; /* Ensures the entire image is visible without cropping */
+    object-fit: cover;
     border-radius: 8px;
     margin-bottom: 15px;
 }
-
 
 .concern h3 {
     font-size: 18px;

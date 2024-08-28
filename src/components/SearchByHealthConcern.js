@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './SearchByHealthConcern.css';
 import pregnancyImg from '../assets/pregnant.png'; // Adjust the paths as necessary
 import acneImg from '../assets/gallery.png';
@@ -25,14 +26,17 @@ function SearchByHealthConcern() {
 
     return (
         <section className="search-health-concern">
-            <h2>Search by health concern</h2>
+            <div className="heading-with-link">
+                <h2>Search by health concern</h2>
+                <Link to="/search" className="view-all-link">View All</Link>
+            </div>
             <div className="concerns">
                 {concerns.map(concern => (
                     <div className="concern" key={concern.title}>
                         <img src={concern.image} alt={concern.title} className="concern-image" />
                         <h3>{concern.title}</h3>
                         <p>{concern.description}</p>
-                        <a href="#">Learn more →</a>
+                        <Link to={`/search-results?concern=${concern.title}`}>Learn more →</Link>
                     </div>
                 ))}
             </div>

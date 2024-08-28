@@ -1,0 +1,160 @@
+.products-page {
+    padding: 20px;
+}
+
+/* Product Deals Section */
+.product-deals {
+    margin-bottom: 40px;
+}
+
+.product-deals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.product-deals-header h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.product-deals-header .browse-all {
+    font-size: 14px;
+    color: #ff4081; /* Pink color */
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.product-deals-header .browse-all:hover {
+    text-decoration: underline;
+}
+
+.deals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.deal-card {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    height: 200px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.deal-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+}
+
+.deal-overlay h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.deal-overlay a {
+    font-size: 14px;
+    color: white;
+    text-decoration: none;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.deal-overlay a:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Product Categories Section */
+.product-categories {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.product-categories h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.product-categories p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.categories-grid {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.category-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: left;
+    width: 300px; /* Fixed width for each category card */
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+}
+
+.category-icon {
+    width: 300px;
+    height: 180px;
+    margin-bottom: 20px;
+}
+
+.category-card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.category-card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.category-card a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.category-card a:hover {
+    text-decoration: underline;
+}
+
+/* Testimonials Section */
+.testimonials {
+    margin-top: 40px;
+}
+
+.testimonials h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.heading-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.heading-with-link h2 {
+    margin: 0;
+    font-size: 24px;
+}

@@ -13,7 +13,7 @@ function Checkout() {
 
     return (
         <div className="checkout-container">
-            <h2>Checkout</h2>
+            <h2>Booking Confirmation</h2>
             <div className="checkout-content">
                 <div className="checkout-items">
                     <div className="doctor-card">

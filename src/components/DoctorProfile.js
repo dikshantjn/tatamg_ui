@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import AppointmentModal from './AppointmentModal';
 import './DoctorProfile.css';
+import male from '../assets/male doctor.jpg';
 
 function DoctorProfile() {
     const [showModal, setShowModal] = useState(false);
@@ -16,7 +17,7 @@ function DoctorProfile() {
     return (
         <div className="doctor-profile">
             <div className="profile-header">
-                <img src="doctor-image-url" alt="Doctor" className="doctor-image" />
+                <img src={male} alt="Doctor" className="doctor-image" />
                 <div className="doctor-info">
                     <h2>Dr. Adam Smith</h2>
                     <p>150 reviews</p>

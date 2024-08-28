@@ -54,16 +54,16 @@ function Header() {
             <div className="main-nav">
                 <div className="logo"> {/* Add your logo here */}</div>
                 <nav className="nav-links">
-                    <a href="#">PRODUCTS</a>
-                    <a href="#">LAB TESTS</a>
-                    <a href="#">CONSULT DOCTORS</a>
-                    <a href="#">BLOOD BANK</a>
-                    <a href="#">AMBULANCE</a>
-                    <a href="#">MEDICAL LOANS</a>
-                    <a href="#">MEDICAL INSURANCE</a>
-                    <a href="#">VACCINES</a>
-                    <a href="#">MATERNAL CARE</a>
-                    <a href="#">DELIVERY</a>
+                    <Link to="/products">PRODUCTS</Link>
+                    <Link to="/lab-tests">LAB TESTS</Link>
+                    <Link to="/consult-doctors">CONSULT DOCTORS</Link>
+                    <Link to="/blood-bank">BLOOD BANK</Link>
+                    <Link to="/ambulance">AMBULANCE</Link>
+                    <Link to="/medical-loans">MEDICAL LOANS</Link>
+                    <Link to="/medical-insurance">MEDICAL INSURANCE</Link>
+                    <Link to="/vaccines">VACCINES</Link>
+                    <Link to="/maternal-care">MATERNAL CARE</Link>
+                    <Link to="/delivery">DELIVERY</Link>
                     {/* Add more links as needed */}
                 </nav>
             </div>
