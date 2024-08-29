@@ -25,7 +25,7 @@ function AppointmentSection() {
                     <div className="appointment" key={appointment.title}>
                         <img src={appointment.img} alt={appointment.title} />
                         <h3>{appointment.title}</h3>
-                        <a href="#">Learn more →</a>
+                        {/* <a href="#">Learn more →</a> */}
                     </div>
                 ))}
             </div>
