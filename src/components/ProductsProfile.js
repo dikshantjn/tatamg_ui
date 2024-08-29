@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './ProductProfile.css';
 import drops from '../assets/drops.jpg';
+import wearable from '../assets/wearable.jpg';
+import otc from '../assets/otc.jpg';
 
 function ProductProfile({ product }) {
     const [selectedImage, setSelectedImage] = useState(product.images[0]);
@@ -39,9 +41,9 @@ const sampleProduct = {
     description: 'This is a detailed description of the sample product. It has many features and benefits.',
     price: '$199.99',
     images: [
-        'product1a.jpg', // Replace with actual image paths
-        'product1b.jpg',
-        'product1c.jpg',
+        drops, // Replace with actual image paths
+        wearable,
+        otc,
     ],
 };
 
