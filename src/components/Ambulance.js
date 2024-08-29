@@ -37,8 +37,8 @@ function Ambulance() {
                     <button type="submit" onClick={handleCallbackClick}>GET A CALL BACK</button>
                 </form>
                 {/* <div className="app-download">
-                    <a href="#"><img src="google-play-badge.png" alt="Google Play" /></a>
-                    <a href="#"><img src="app-store-badge.png" alt="App Store" /></a>
+                    <a><img src="google-play-badge.png" alt="Google Play" /></a>
+                    <a><img src="app-store-badge.png" alt="App Store" /></a>
                 </div> */}
             </div>
             <div className="awards-section">

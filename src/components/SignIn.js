@@ -16,7 +16,7 @@ function SignIn() {
                     </div>
                     <div className="input-group">
                         <label>Password</label>
-                        <a href="#" className="forgot-password">Forgot Password?</a>
+                        <a className="forgot-password">Forgot Password?</a>
                         <input type="password" placeholder="Enter your password" />
                     </div>
                     <button type="submit" className="login-button">Login</button>
