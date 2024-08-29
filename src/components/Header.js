@@ -70,12 +70,12 @@ function Header() {
 
             {/* Layer 3: Sub Navigation */}
             <div className="sub-nav">
-                <a>Physiotherapy</a>
-                <a>Hospital Discovery</a>
-                <a>Care At Home</a>
-                <a>Medical Tourism</a>
-                <a>Rehabilitation</a>
-                <a>Early Detection</a>
+                <a href="/">Physiotherapy</a>
+                <a href="/">Hospital Discovery</a>
+                <a href="/">Care At Home</a>
+                <a href="/">Medical Tourism</a>
+                <a href="/">Rehabilitation</a>
+                <a href="/">Early Detection</a>
             </div>
         </header>
     );
