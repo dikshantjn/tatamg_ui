@@ -56,7 +56,7 @@ function Header() {
                 <nav className="nav-links">
                     <Link to="/products">PRODUCTS</Link>
                     <Link to="/lab-tests">LAB TESTS</Link>
-                    <Link to="/consult-doctors">CONSULT DOCTORS</Link>
+                    <Link to="/">CONSULT DOCTORS</Link>
                     <Link to="/blood-bank">BLOOD BANK</Link>
                     <Link to="/ambulance">AMBULANCE</Link>
                     <Link to="/medical-loans">MEDICAL LOANS</Link>
