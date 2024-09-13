@@ -1,46 +1,35 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './SearchByHealthConcern.css';
-import pregnancyImg from '../assets/pregnant.png'; // Adjust the paths as necessary
-import acneImg from '../assets/acne.png';
-import coldImg from '../assets/cold.png';
-import diabetesImg from '../assets/diabetes-test.png';
-import liverImg from '../assets/liver.png';
+import './SearchByCategory.css';
+import brand1 from '../assets/otc.jpg'; // Adjust the paths as necessary
+import brand2 from '../assets/wearable.jpg';
+import brand3 from '../assets/nonwearable.jpg';
 
 
-function SearchByHealthConcern() {
+
+function SearchByCategory() {
     const concerns = [
         {
-            title: 'Pregnancy',
+            title: 'OTC',
             description: '',
-            image: pregnancyImg,
+            image: brand1,
         },
         {
-            title: 'Acne',
+            title: 'Wearable',
             description: '',
-            image: acneImg,
+            image: brand2,
         },
         {
-            title: 'Cold',
+            title: 'Non-Wearable',
             description: '',
-            image: coldImg,
-        },
-        {
-            title: 'Diabetes',
-            description: '',
-            image: diabetesImg,
-        },
-        {
-            title: 'Liver Care',
-            description: '',
-            image: liverImg,
+            image: brand3,
         },
     ];
 
     return (
         <section className="search-health-concern">
             <div className="heading-with-link">
-                <h2>Search by health concern</h2>
+                <h2>Search by Category</h2>
                 <Link to="/search" className="view-all-link">View All</Link>
             </div>
             <div className="concerns">
@@ -57,4 +46,4 @@ function SearchByHealthConcern() {
     );
 }
 
-export default SearchByHealthConcern;
+export default SearchByCategory;

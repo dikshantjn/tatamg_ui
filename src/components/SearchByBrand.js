@@ -1,46 +1,46 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './SearchByHealthConcern.css';
-import pregnancyImg from '../assets/pregnant.png'; // Adjust the paths as necessary
-import acneImg from '../assets/acne.png';
-import coldImg from '../assets/cold.png';
-import diabetesImg from '../assets/diabetes-test.png';
-import liverImg from '../assets/liver.png';
+import brand1 from '../assets/brand_1.png'; // Adjust the paths as necessary
+import brand2 from '../assets/brand_2.png';
+import brand3 from '../assets/brand_3.png';
+import brand4 from '../assets/brand_4.png';
+import brand5 from '../assets/brand_5.png';
 
 
-function SearchByHealthConcern() {
+function SearchByBrand() {
     const concerns = [
         {
-            title: 'Pregnancy',
+            title: 'Brand 1',
             description: '',
-            image: pregnancyImg,
+            image: brand1,
         },
         {
-            title: 'Acne',
+            title: 'Brand 2',
             description: '',
-            image: acneImg,
+            image: brand2,
         },
         {
-            title: 'Cold',
+            title: 'Brand 3',
             description: '',
-            image: coldImg,
+            image: brand3,
         },
         {
-            title: 'Diabetes',
+            title: 'brand 4',
             description: '',
-            image: diabetesImg,
+            image: brand4,
         },
         {
-            title: 'Liver Care',
+            title: 'brand 5',
             description: '',
-            image: liverImg,
+            image: brand5,
         },
     ];
 
     return (
         <section className="search-health-concern">
             <div className="heading-with-link">
-                <h2>Search by health concern</h2>
+                <h2>Search by Brands</h2>
                 <Link to="/search" className="view-all-link">View All</Link>
             </div>
             <div className="concerns">
@@ -57,4 +57,4 @@ function SearchByHealthConcern() {
     );
 }
 
-export default SearchByHealthConcern;
+export default SearchByBrand;

@@ -43,6 +43,10 @@
     background-color: #dc3545;
 }
 
+.buttons .speak {
+    background-color: #1ba967;
+}
+
 .buttons button:hover {
     opacity: 0.9;
 }

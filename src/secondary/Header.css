@@ -1,0 +1,237 @@
+/* General header styling */
+.header {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Top bar styling */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 20px;
+    background-color: #fff; /* White background */
+    height: 60px; /* Reduce height for compactness */
+}
+
+.logo-container {
+    flex-shrink: 0; /* Prevent the logo from shrinking */
+}
+
+.logo {
+    width: 100px; /* Smaller logo size */
+    height: auto;
+}
+
+.top-bar-info {
+    font-size: 14px;
+    color: #666; /* Subtle gray for the text */
+    margin-right: auto; /* Push customer support info to the left */
+    padding-left: 20px;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.buttons button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px; /* Smaller font size for buttons */
+}
+
+.buttons button:hover {
+    background-color: #0056b3;
+}
+
+/* Emergency button with blinking effect */
+@keyframes blink {
+    0% {
+        background-color: #e74c3c; /* Initial red color */
+    }
+    50% {
+        background-color: #ff6f61; /* Lighter red or orange for blinking effect */
+    }
+    100% {
+        background-color: #e74c3c; /* Return to original red */
+    }
+}
+
+
+@keyframes blinks {
+    0% {
+        background-color: #46ebb2; /* Initial red color */
+    }
+    50% {
+        background-color: #0aaf75; /* Lighter red or orange for blinking effect */
+    }
+    100% {
+        background-color: #074e26; /* Return to original red */
+    }
+}
+
+.emergency {
+    background-color: #e74c3c; /* Red for emergency button */
+    color: white;
+    font-weight: bold;
+    animation: blink 1s infinite; /* Blinking effect */
+}
+
+.emergency:hover {
+    background-color: #c0392b; /* Darker red for hover */
+    animation: none; /* Stop blinking when hovered */
+}
+
+.speak {
+    background-color: #119845; /* Red for emergency button */
+    color: white;
+    font-weight: bold;
+    animation: blinks 1s infinite; /* Blinking effect */
+}
+
+.speak:hover {
+    background-color: #c0392b; /* Darker red for hover */
+    animation: none; /* Stop blinking when hovered */
+}
+
+.cart-button {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 8px 16px;
+}
+
+.cart-button:hover {
+    background-color: #0056b3;
+}
+
+.cart-icon {
+    width: 15px;
+    height: 12px;
+    fill: white; /* If using an SVG with a fill property */
+}
+
+.cart-button span {
+    font-size: 14px;
+    color: white;
+}
+
+
+
+/* Main navigation */
+.main-nav {
+    background-color: #f8f9fa;
+    padding: 10px 0;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Reduce gap between links */
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 500;
+    font-size: 14px; /* Slightly smaller font for minimalism */
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+    .top-bar, .main-nav, .buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .top-bar-info {
+        margin-right: 0;
+        padding-left: 0;
+        margin-bottom: 10px;
+    }
+}
+
+/* Sub Navigation (Third Bar) */
+.sub-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #f8f9fa7e;
+}
+
+.search-location-container {
+    display: flex;
+    gap: 2px;
+}
+
+.category-search{
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 300px; /* Adjust width */
+}
+
+.location-search {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100px; /* Adjust width */
+}
+
+.sub-nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+.sub-nav-links a {
+    text-decoration: none;
+    color: #4b4c4d;
+    font-size: 14px;
+}
+
+.sub-nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .top-bar, .main-nav, .sub-nav {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sub-nav-links {
+        justify-content: center;
+    }
+}

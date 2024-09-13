@@ -44,6 +44,7 @@ function Header() {
                         <button>Log in</button>
                     </Link>
                     <button className="emergency">Emergency!</button>
+                    <button className="speak">Speak</button>
                     <button>&#x1F6D2; {/* Unicode for shopping cart symbol */}</button>
                     <button>Offers</button>
                     <button>Membership</button>
@@ -77,6 +78,8 @@ function Header() {
                 <a href="/">Rehabilitation</a>
                 <a href="/">Early Detection</a>
             </div>
+
+            
         </header>
     );
 }

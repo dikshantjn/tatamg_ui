@@ -1,0 +1,71 @@
+.search-health-concern {
+    padding: 20px;
+}
+
+.heading-with-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.heading-with-link h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.view-all-link {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+.concerns {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.concern {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    width: 30%;
+}
+
+.concern-image {
+    width: 100;
+    height: auto;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.concern h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.concern p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.concern a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+.concern a:hover {
+    text-decoration: underline;
+}
