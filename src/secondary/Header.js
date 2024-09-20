@@ -54,6 +54,7 @@ function Header() {
                     <Link to="/maternal-care">MATERNAL CARE</Link>
                     <Link to="/child-care">CHILD CARE</Link>
                     <Link to="/delivery">MEDICINE DELIVERY</Link>
+                    <Link to="/delivery">AYURVEDA</Link>
                 </nav>
             </div>
 
