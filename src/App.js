@@ -17,6 +17,7 @@ import Offers from './components/Offers';
 import Membership from './components/Membership';
 import Home from './components/Home';
 import ConsultDoctors from './components/ConsultDoctors';
+import LabTests from './components/LabTests';
 
 function App() {
     return (
@@ -44,6 +45,7 @@ function App() {
                         <Route path="/ambulance" element={<Ambulance />} />
                         <Route path="/offers" element={<Offers />} />
                         <Route path="/membership" element={<Membership />} />
+                        <Route path="/lab-tests" element={<LabTests />} /> {/* LabTests Page */}
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>

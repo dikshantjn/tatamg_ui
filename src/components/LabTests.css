@@ -1,0 +1,165 @@
+/* General styling */
+.lab-tests-page {
+    padding: 20px;
+}
+
+/* Trust Section */
+.trust-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.trust-section h2 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.trust-section p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.trust-icons {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.trust-icon {
+    text-align: center;
+}
+
+.trust-icon img {
+    width: 80px;
+    height: 80px;
+}
+
+.trust-icon p {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.view-packages-btn {
+    padding: 12px 24px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-packages-btn:hover {
+    opacity: 0.9;
+}
+
+
+/* Popular Health Checkups Section */
+.popular-tests-section {
+    margin-top: 40px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between; /* Align heading on the left and button on the right */
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 24px;
+}
+
+.category-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.category-buttons button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.category-buttons button.active {
+    background-color: #0056b3;
+}
+
+/* Scrollable test list */
+.tests-list {
+    display: flex;
+    overflow-x: auto;
+    gap: 20px;
+    padding-bottom: 10px;
+}
+
+.tests-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tests-list::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 10px;
+}
+
+.tests-list::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+.test-card {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    width: 250px; /* Fixed width for scrollable cards */
+    flex-shrink: 0; /* Prevent the card from shrinking */
+}
+
+.test-card h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+.test-card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.test-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.view-btn, .add-to-cart-btn {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-btn:hover, .add-to-cart-btn:hover {
+    background-color: #0056b3;
+}
+
+.view-all-button {
+    padding: 12px 24px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-all-button:hover {
+    background-color: #218838;
+}
+
