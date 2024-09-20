@@ -1,0 +1,86 @@
+.find-donor-page {
+    padding: 40px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.find-donor-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.find-donor-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.find-donor-btn:hover {
+    background-color: #c0392b;
+}
+
+.results-section {
+    margin-top: 30px;
+    text-align: left;
+}
+
+.results-section h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+}
+
+.result-item {
+    padding: 15px;
+    background-color: #fff;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.result-item h3 {
+    margin-top: 0;
+}
+
+.result-item p {
+    margin: 5px 0;
+    font-size: 1em;
+}
+
+.no-results {
+    font-size: 1.2em;
+    color: red;
+    margin-top: 30px;
+}

@@ -45,7 +45,9 @@ function Header() {
                     </Link>
                     <button className="emergency">Emergency!</button>
                     <button className="speak">Speak</button>
-                    <button>&#x1F6D2; {/* Unicode for shopping cart symbol */}</button>
+                    <Link to="/checkout">
+                        <button>&#x1F6D2; {/* Unicode for shopping cart symbol */}</button>
+                    </Link>
                     <button>Offers</button>
                     <button>Membership</button>
                 </div>

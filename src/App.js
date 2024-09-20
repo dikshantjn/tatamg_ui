@@ -1,10 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './secondary/Header';
-// import ConsultationServiceCard from './components/ConsultationServiceCard';
-// import SearchByHealthConcern from './components/SearchByHealthConcern';
-// import AppointmentSection from './components/AppointmentSection';
-// import Testimonials from './components/Testimonials';
 import Footer from './components/Footer';
 import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile'; 
@@ -18,6 +14,11 @@ import Membership from './components/Membership';
 import Home from './components/Home';
 import ConsultDoctors from './components/ConsultDoctors';
 import LabTests from './components/LabTests';
+import BloodBank from './components/BloodBank';
+import FindDonor from './components/FindDonor';
+import RegisterDonor from './components/RegisterDonor';
+import MedicalLoans from './components/MedicalLoans';
+import LoanForm from './components/LoanForm';
 
 function App() {
     return (
@@ -46,6 +47,11 @@ function App() {
                         <Route path="/offers" element={<Offers />} />
                         <Route path="/membership" element={<Membership />} />
                         <Route path="/lab-tests" element={<LabTests />} /> {/* LabTests Page */}
+                        <Route path="/blood-bank" element={<BloodBank />} />
+                        <Route path="/find-donor" element={<FindDonor />} />
+                        <Route path="/register-donor" element={<RegisterDonor />} />
+                        <Route path="/medical-loans" element={<MedicalLoans />} />
+                        <Route path="/loan-form" element={<LoanForm />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>

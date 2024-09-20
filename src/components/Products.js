@@ -5,6 +5,7 @@ import Testimonials from './Testimonials'; // Import Testimonials component
 import otc from '../assets/otc.jpg'; // Adjust the paths as necessary
 import wearable from '../assets/wearable.jpg';
 import nonwearable from '../assets/nonwearable.jpg';
+import SearchByBrand from './SearchByBrand';
 
 function Products() {
     const productDeals = [
@@ -49,6 +50,9 @@ function Products() {
     return (
         <div className="products-page">
             {/* Product Deals Section */}
+            <div className="search-section brand">
+                <SearchByBrand />
+            </div>
             <section className="product-deals">
                 <div className="heading-with-link">
                     <h2>Shop by Category</h2>
@@ -69,7 +73,7 @@ function Products() {
             {/* Product Categories Section */}
             <section className="product-categories">
                 <div className="heading-with-link">
-                    <h2>Brand related / illness related deal</h2>
+                    <h2>Deals by Product type</h2>
                     <Link to="/search" className="view-all-link">View All</Link>
                 </div>
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.</p>

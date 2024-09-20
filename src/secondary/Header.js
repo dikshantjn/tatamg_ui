@@ -28,10 +28,12 @@ function Header() {
                         <button>Sign up / Log In</button>
                     </Link>
                     <button>Contact Us</button>
-                    <button>
-                        <img src={cart} alt="Cart" className="cart-icon" />
-                        <span>Cart</span>
-                    </button>
+                    <Link to="/checkout">
+                        <button>
+                            <img src={cart} alt="Cart" className="cart-icon" />
+                            <span>Cart</span>
+                        </button>
+                    </Link>
                     <button className="speak">Speak</button>
                     <button className="emergency">Emergency!</button>
                     

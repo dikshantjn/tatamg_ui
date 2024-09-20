@@ -1,0 +1,73 @@
+/* General Styles */
+.blood-bank-page {
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: background-image 1s ease-in-out; /* Smooth transition between background images */
+}
+
+.blood-bank-content {
+    z-index: 2;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark transparent background for better readability */
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.blood-bank-content h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: white;
+}
+
+.blood-bank-content p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.buttons .register-btn, .buttons .find-donor-btn {
+    background-color: black;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.buttons .find-donor-btn {
+    background-color: #e74c3c; /* Red button */
+}
+
+.buttons .register-btn:hover, .buttons .find-donor-btn:hover {
+    background-color: #333;
+}
+
+@media (max-width: 768px) {
+    .blood-bank-content h1 {
+        font-size: 1.8em;
+    }
+
+    .buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .buttons .register-btn, .buttons .find-donor-btn {
+        width: 100%;
+    }
+}

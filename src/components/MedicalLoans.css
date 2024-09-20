@@ -1,0 +1,70 @@
+.medical-loans-page {
+    padding: 40px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.loan-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.loan-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.loan-option img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.loan-option h3 {
+    font-size: 1.2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.loan-option .view-button {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.loan-option .view-button:hover {
+    background-color: #0056b3;
+}
+
+.loan-option:hover {
+    transform: translateY(-10px);
+}
+
+@media (max-width: 768px) {
+    .loan-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .loan-option {
+        width: 80%;
+        margin-bottom: 20px;
+    }
+}
