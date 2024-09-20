@@ -36,7 +36,7 @@ function BloodBank() {
         <p>Your contribution can save someone’s life today!</p>
         <div className="buttons">
           <button className="register-btn" onClick={() => navigate('/register-donor')}>
-            Find a Donor
+            Register as a Donor
           </button>
           <button className="find-donor-btn" onClick={() => navigate('/find-donor')}>
             Find a Donor

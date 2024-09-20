@@ -49,7 +49,8 @@ function SearchByHealthConcern() {
                         <img src={concern.image} alt={concern.title} className="concern-image" />
                         <h3>{concern.title}</h3>
                         <p>{concern.description}</p>
-                        <Link to={`/search-results?concern=${concern.title}`}>Learn more →</Link>
+                        {/* <Link to={`/search-?concern=${concern.title}`}>Learn more →</Link> */}
+                        <Link to="/search">Learn more →</Link>
                     </div>
                 ))}
             </div>
