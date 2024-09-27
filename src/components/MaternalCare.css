@@ -1,0 +1,97 @@
+.maternal-care-page {
+    padding: 40px;
+    text-align: center;
+}
+
+/* Key Features Section */
+.key-features-section {
+    margin-bottom: 40px;
+}
+
+.key-features-section h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.features {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.feature {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.feature h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.feature p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Plans Section */
+.plans-section {
+    margin-bottom: 40px;
+}
+
+.plans {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.plan {
+    width: 300px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.plan img {
+    width: 100px;
+    height: 180px;
+    margin-bottom: 20px;
+}
+
+.plan h3 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+.plan ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+}
+
+.plan ul li {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.join-now-btn {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.join-now-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Testimonials Section */

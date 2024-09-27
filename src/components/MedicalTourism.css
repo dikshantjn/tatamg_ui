@@ -1,0 +1,61 @@
+.medical-tourism-page {
+    padding: 40px;
+    text-align: center;
+}
+
+.hero-section {
+    background-color: #f4f4f4;
+    padding: 80px 20px;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-size: 2.8em;
+    margin-bottom: 20px;
+}
+
+.get-started-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+}
+
+.services-section {
+    margin-bottom: 40px;
+}
+
+.services {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.service {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.service img {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.service h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.why-choose-us-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.contact-section {
+    padding: 60px 20px;
+    background-color: #f8f9fa;
+}

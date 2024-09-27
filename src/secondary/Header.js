@@ -49,7 +49,7 @@ function Header() {
                     <Link to="/blood-bank">BLOOD BANK</Link>
                     <Link to="/ambulance">AMBULANCE</Link>
                     <Link to="/medical-loans">MEDICAL LOANS</Link>
-                    <Link to="/medical-insurance">MEDICAL INSURANCE</Link>
+                    <Link to="/insurance">MEDICAL INSURANCE</Link>
                     <Link to="/vaccines">VACCINES</Link>
                     <Link to="/maternal-care">MATERNAL CARE</Link>
                     <Link to="/child-care">CHILD CARE</Link>
@@ -66,10 +66,10 @@ function Header() {
                 </div>
 
                 <div className="sub-nav-links">
-                    <a href="/">Physiotherapy</a>
-                    <a href="/">Hospital Discovery</a>
-                    <a href="/">Care At Home</a>
-                    <a href="/">Medical Tourism</a>
+                    <Link to="/physiotherapy">Physiotherapy</Link>
+                    <Link to="/hosiptal-discovery">Hospital Discovery</Link>
+                    <Link to="/care-at-home">Care At Home</Link>
+                    <Link to="/medical-tourism">Medical Tourism</Link>
                     <a href="/">Rehabilitation</a>
                     <a href="/">Early Detection</a>
                     <a href="/">Nutrition</a>

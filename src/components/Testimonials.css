@@ -1,35 +1,88 @@
 .testimonials {
-    padding: 40px 20px;
-    background-color: #f8f9fa;
+    padding: 40px;
     text-align: center;
+    position: relative;
 }
 
 .testimonials h2 {
-    font-size: 24px;
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+.testimonial-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 20px;
 }
 
 .testimonial {
     max-width: 600px;
-    margin: 0 auto;
-    background-color: #fff;
+    background-color: #f4f4f4;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-.testimonial p {
-    color: #6c757d;
+.testimonial-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+}
+
+.testimonial-text {
     font-style: italic;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .testimonial h3 {
-    font-size: 18px;
-    margin: 10px 0 5px;
+    font-size: 1.2em;
+    margin-bottom: 5px;
 }
 
-.testimonial p:last-child {
-    color: #6c757d;
-    font-size: 14px;
+.arrows {
+    display: flex;
+    justify-content: space-between;
+    width: 60px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+}
+
+.arrow-left, .arrow-right {
+    font-size: 2em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.arrow-left:hover, .arrow-right:hover {
+    color: #0056b3;
+}
+
+.dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dot.active {
+    background-color: #007bff;
+}
+
+.dot:hover {
+    background-color: #0056b3;
 }

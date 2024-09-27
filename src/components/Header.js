@@ -63,7 +63,7 @@ function Header() {
                     <Link to="/blood-bank">BLOOD BANK</Link>
                     <Link to="/ambulance">AMBULANCE</Link>
                     <Link to="/medical-loans">MEDICAL LOANS</Link>
-                    <Link to="/medical-insurance">MEDICAL INSURANCE</Link>
+                    <Link to="/insurance">MEDICAL INSURANCE</Link>
                     <Link to="/vaccines">VACCINES</Link>
                     <Link to="/maternal-care">MATERNAL CARE</Link>
                     <Link to="/delivery">DELIVERY</Link>

@@ -1,0 +1,119 @@
+.care-at-home-page {
+    padding: 40px;
+    text-align: center;
+}
+
+/* Hero Section */
+.hero-section {
+    background-color: #f4f4f4;
+    padding: 80px 20px;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-size: 2.8em;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.3em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.get-started-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.get-started-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Services Section */
+.services-section {
+    margin-bottom: 40px;
+}
+
+.services {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.service {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.service img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.service h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.service p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Why Choose Us Section */
+.why-choose-us-section {
+    margin-bottom: 40px;
+}
+
+.why-choose-us-section h2 {
+    margin-bottom: 20px;
+}
+
+.why-choose-us-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    max-width: 600px;
+    text-align: left;
+}
+
+.why-choose-us-section ul li {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+/* Contact Us Section */
+.contact-us-section {
+    padding: 60px 20px;
+    background-color: #f8f9fa;
+}
+
+.contact-us-section h2 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+}
+
+.contact-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.contact-btn:hover {
+    background-color: #218838;
+}

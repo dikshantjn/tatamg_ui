@@ -1,0 +1,89 @@
+.medical-insurance-page {
+    padding: 40px;
+    text-align: center;
+}
+
+/* Why Trust Us Section */
+.trust-section {
+    margin-bottom: 40px;
+}
+
+.trust-metrics {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.trust-metric {
+    width: 250px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.trust-metric img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 10px;
+}
+
+.trust-metric h3 {
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+.trust-metric p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Process Section */
+.process-section {
+    margin-bottom: 40px;
+}
+
+.process-steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.step {
+    width: 200px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.step img {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+
+.step h3 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+.step p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Partner Brands Section */
+.partner-brands-section {
+    margin-bottom: 40px;
+}
+
+.partner-brands {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.partner-brands img {
+    width: 100px;
+    height: 100px;
+    margin: 10px;
+}
+
+/* Testimonials Section - Use existing styles from Testimonials component */

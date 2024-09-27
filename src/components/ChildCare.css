@@ -1,0 +1,57 @@
+.child-care-page {
+    padding: 40px;
+    text-align: center;
+}
+
+/* Introduction Section */
+.intro-section {
+    margin-bottom: 40px;
+}
+
+.intro-section h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.intro-section p {
+    font-size: 1.2em;
+    color: #666;
+    line-height: 1.6;
+}
+
+/* Therapy Options Section */
+.therapy-options-section {
+    margin-bottom: 40px;
+}
+
+.therapy-options {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.therapy-option {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.therapy-option img {
+    width: 240px;
+    height: 180px;
+    margin-bottom: 10px;
+}
+
+.therapy-option h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.therapy-option p {
+    font-size: 1em;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Testimonials Section */

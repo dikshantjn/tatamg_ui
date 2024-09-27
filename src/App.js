@@ -19,6 +19,16 @@ import FindDonor from './components/FindDonor';
 import RegisterDonor from './components/RegisterDonor';
 import MedicalLoans from './components/MedicalLoans';
 import LoanForm from './components/LoanForm';
+import MedicalInsurance from './components/MedicalInsurance';
+import Vaccines from './components/Vaccines';
+import MaternalCare from './components/MaternalCare';
+import ChildCare from './components/ChildCare';
+import MedicineDelivery from './components/MedicineDelivery';
+import Physiotherapy from './components/Physiotherapy';
+import HospitalDiscovery from './components/HospitalDiscovery.js';
+import HospitalResults from './components/HospitalResults';
+import CareAtHome from './components/CareAtHome.js';
+import MedicalTourism from './components/MedicalTourism.js';
 
 function App() {
     return (
@@ -52,6 +62,16 @@ function App() {
                         <Route path="/register-donor" element={<RegisterDonor />} />
                         <Route path="/medical-loans" element={<MedicalLoans />} />
                         <Route path="/loan-form" element={<LoanForm />} />
+                        <Route path="/insurance" element={<MedicalInsurance />} />
+                        <Route path="/vaccines" element={<Vaccines />} />
+                        <Route path="/maternal-care" element={<MaternalCare />} />
+                        <Route path="/child-care" element={<ChildCare />} />
+                        <Route path="/delivery" element={<MedicineDelivery />} />
+                        <Route path="/physiotherapy" element={<Physiotherapy />} />
+                        <Route path="/hosiptal-discovery" element={<HospitalDiscovery />} />
+                        <Route path="/hospital-results" element={<HospitalResults />} />
+                        <Route path="/care-at-home" element={<CareAtHome />} />
+                        <Route path="/medical-tourism" element={<MedicalTourism />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>
