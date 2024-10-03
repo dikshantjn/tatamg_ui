@@ -70,11 +70,11 @@ function Header() {
                     <Link to="/hosiptal-discovery">Hospital Discovery</Link>
                     <Link to="/care-at-home">Care At Home</Link>
                     <Link to="/medical-tourism">Medical Tourism</Link>
-                    <a href="/">Rehabilitation</a>
-                    <a href="/">Early Detection</a>
-                    <a href="/">Nutrition</a>
-                    <a href="/">Pet Care</a>
-                    <a href="/">Organ/Hair Donation</a>
+                    <Link to="/rehabilitation">Rehabilitation</Link>
+                    <Link to="/early-detection">Early Detection</Link>
+                    <Link to="/early-detection">Nutrition</Link>
+                    <Link to="/early-detection">Pet Care</Link>
+                    <Link to="/early-detection">Organ/Hair Donation</Link>
                 </div>
             </div>
         </header>

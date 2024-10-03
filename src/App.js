@@ -29,6 +29,8 @@ import HospitalDiscovery from './components/HospitalDiscovery.js';
 import HospitalResults from './components/HospitalResults';
 import CareAtHome from './components/CareAtHome.js';
 import MedicalTourism from './components/MedicalTourism.js';
+import Rehabilitation from './components/Rehabilitation.js';
+import EarlyDetection from './components/EarlyDetection.js';
 
 function App() {
     return (
@@ -72,6 +74,8 @@ function App() {
                         <Route path="/hospital-results" element={<HospitalResults />} />
                         <Route path="/care-at-home" element={<CareAtHome />} />
                         <Route path="/medical-tourism" element={<MedicalTourism />} />
+                        <Route path="/rehabilitation" element={<Rehabilitation />} />
+                        <Route path="/early-detection" element={<EarlyDetection />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>
