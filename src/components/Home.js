@@ -14,6 +14,10 @@ function Home() {
                 <img src={sale} alt="Special Offers" className="banner-image" />
             </div>
 
+            <div className="banner">
+                <img src={sale} alt="Special Offers" className="banner-image" />
+            </div>
+
             {/* Search by Health Concern Section */}
             <div className="search-section health-concern">
                 <SearchByHealthConcern />

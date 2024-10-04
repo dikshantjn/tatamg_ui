@@ -31,6 +31,10 @@ import CareAtHome from './components/CareAtHome.js';
 import MedicalTourism from './components/MedicalTourism.js';
 import Rehabilitation from './components/Rehabilitation.js';
 import EarlyDetection from './components/EarlyDetection.js';
+import Nutrition from './components/Nutrition.js';
+import PetCare from './components/PetCare.js';
+import OrganDonation from './components/OrganDonation.js';
+import Ayurveda from './components/Ayurveda.js';
 
 function App() {
     return (
@@ -76,6 +80,10 @@ function App() {
                         <Route path="/medical-tourism" element={<MedicalTourism />} />
                         <Route path="/rehabilitation" element={<Rehabilitation />} />
                         <Route path="/early-detection" element={<EarlyDetection />} />
+                        <Route path="/nutrition" element={<Nutrition />} />
+                        <Route path="/pet-care" element={<PetCare />} />
+                        <Route path="/organ-donation" element={<OrganDonation />} />\
+                        <Route path="/ayurveda" element={<Ayurveda />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>

@@ -54,7 +54,7 @@ function Header() {
                     <Link to="/maternal-care">MATERNAL CARE</Link>
                     <Link to="/child-care">CHILD CARE</Link>
                     <Link to="/delivery">MEDICINE DELIVERY</Link>
-                    <Link to="/delivery">AYURVEDA</Link>
+                    <Link to="/ayurveda">AYURVEDA</Link>
                 </nav>
             </div>
 
@@ -72,9 +72,9 @@ function Header() {
                     <Link to="/medical-tourism">Medical Tourism</Link>
                     <Link to="/rehabilitation">Rehabilitation</Link>
                     <Link to="/early-detection">Early Detection</Link>
-                    <Link to="/early-detection">Nutrition</Link>
-                    <Link to="/early-detection">Pet Care</Link>
-                    <Link to="/early-detection">Organ/Hair Donation</Link>
+                    <Link to="/nutrition">Nutrition</Link>
+                    <Link to="/pet-care">Pet Care</Link>
+                    <Link to="/organ-donation">Organ/Hair Donation</Link>
                 </div>
             </div>
         </header>

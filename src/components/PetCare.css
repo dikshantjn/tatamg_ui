@@ -1,0 +1,103 @@
+.petcare-page {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  /* Banner Section */
+  .banner {
+    text-align: center;
+    padding: 60px;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    background-blend-mode: darken;
+    background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for better text visibility */
+  }
+  
+  .banner h1 {
+    font-size: 2.5rem;
+  }
+  
+  .banner p {
+    font-size: 1.2rem;
+  }
+  
+  /* Pet Selector */
+  .pet-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .pet-button {
+    padding: 10px 30px;
+    border: 2px solid #ccc;
+    border-radius: 25px; /* Rounded corners */
+    margin: 0;
+    background-color: white;
+    color: grey;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  .pet-button:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .pet-button:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  
+  .pet-button.active {
+    background-color: #007bff; /* Turquoise active button color */
+    color: black;
+    border-color: #007bff;
+  }
+  
+  .pet-button:hover {
+    background-color: #d3f2ef;
+  }
+  
+  
+  /* Categories Section */
+  .categories {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .category-card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    width: 30%;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .category-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .category-card p {
+    margin: 10px 0;
+  }
+  
+  .category-card button {
+    padding: 10px 20px;
+    background-color: #f9f9f9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .category-card button:hover {
+    background-color: #007bff;
+  }
+  

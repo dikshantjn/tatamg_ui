@@ -1,0 +1,146 @@
+.nutrition-page {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+  }
+  
+  .banner {
+    text-align: center;
+    padding: 60px;
+    background-size: cover;
+    background-position: center;
+    opacity: 80;
+    color: white;
+    background-blend-mode: darken;
+    background-color: rgba(0, 0, 0, 0.4); /* Dark overlay for better text visibility */
+  }
+  
+  .banner h1 {
+    font-size: 2.5rem;
+  }
+  
+  .banner p {
+    font-size: 1.2rem;
+  }
+  
+  .insights-section {
+    text-align: center;
+    margin: 40px 0;
+    background-color: #e0f7fa;
+    padding: 30px;
+    border-radius: 10px;
+  }
+  
+  .insights-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+  
+  .insights-section p {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+  
+  .cta-btn {
+    padding: 12px 25px;
+    background-color: #ff6f61;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .plans-section {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+  }
+  
+  .plan {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 30%;
+  }
+  
+  .plan h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  
+  .plan p {
+    margin-bottom: 15px;
+  }
+  
+  .plan ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .plan button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .plan button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Booking Form Popup */
+  .booking-form-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .booking-form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    width: 400px;
+  }
+  
+  .booking-form h2 {
+    margin-bottom: 20px;
+  }
+  
+  .booking-form label {
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .booking-form input,
+  .booking-form select,
+  .booking-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .booking-form button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .booking-form button:hover {
+    background-color: #218838;
+  }
+  
