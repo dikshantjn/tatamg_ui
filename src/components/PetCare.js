@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './PetCare.css';
-import bannerImage from '../assets/PetCare Banner Photo.jpg'; // Example banner image
+import bannerImage from '../assets/PetCare Banner Photo.jpg'; // Placeholder banner image
 
 function PetCare() {
   const [selectedPet, setSelectedPet] = useState('Dog'); // Default to Dog
@@ -22,13 +22,15 @@ function PetCare() {
   return (
     <div className="petcare-page">
       {/* Banner Section */}
-      <section 
-        className="banner" 
-        style={{ backgroundImage: `url(${bannerImage})` }} // Using the banner image
-      >
-        <h1>Comprehensive Pet Care for Dogs and Cats</h1>
-        <p>Explore food, wellness, and pharmacy options tailored for your pet.</p>
+      {/* Banner Section */}
+      <section className="banner">
+        <img src={bannerImage} alt="Pet Care Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Comprehensive Pet Care for Dogs and Cats</h1>
+          <p>Explore food, wellness, and pharmacy options tailored for your pet.</p>
+        </div>
       </section>
+
 
       {/* Pet Selector Buttons */}
       <div className="pet-selector">
@@ -45,7 +47,6 @@ function PetCare() {
             CAT
         </button>
       </div>
-
 
       {/* Categories Section */}
       <div className="categories">

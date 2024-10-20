@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate to navigate to the results page
+import { useNavigate } from 'react-router-dom';
 import './HospitalDiscovery.css';
+import Testimonials from './Testimonials'; // Importing Testimonials
+import bannerImage from '../assets/Hospital Banner photo.jpg'; // Placeholder image
 
 function HospitalDiscovery() {
   const [formData, setFormData] = useState({
@@ -25,6 +27,15 @@ function HospitalDiscovery() {
 
   return (
     <div className="hospital-discovery-page">
+      {/* Banner Section */}
+      <section className="banner-section">
+        <img src={bannerImage} alt="Hospital Discovery Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Locate Nearby Hospitals/Clinics</h1>
+        </div>
+      </section>
+
+      {/* Form Section */}
       <div className="form-container">
         <h1>Locate Hospitals</h1>
         <form onSubmit={handleSubmit}>
@@ -54,6 +65,9 @@ function HospitalDiscovery() {
           <button type="submit" className="submit-btn">Search Hospitals</button>
         </form>
       </div>
+
+      {/* Testimonials Section */}
+      <Testimonials />
     </div>
   );
 }

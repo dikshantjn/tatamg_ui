@@ -3,6 +3,30 @@
     padding: 20px;
 }
 
+/* Banner Section */
+.banner {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .banner-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+  }
+
 /* Trust Section */
 .trust-section {
     text-align: center;

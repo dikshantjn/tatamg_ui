@@ -3,30 +3,29 @@
 }
 
 /* Banner Section */
-/* Reset all margins and paddings */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* Banner Section */
 .banner {
-    text-align: center;
+    position: relative;
     margin-bottom: 30px;
-    background-color: transparent;
-    padding: 0; /* Remove padding from the banner container */
-    width: 100%;
-}
-
-.banner-image {
+  }
+  
+  .banner-image {
     width: 100%;
     height: auto;
-    max-height: 200px;
     object-fit: cover;
-    display: block;
+  }
+  
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
     border-radius: 8px;
-}
+  }
+  
 
 /* Consultation Section */
 .consultation-section {

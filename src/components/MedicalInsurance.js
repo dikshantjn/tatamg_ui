@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './MedicalInsurance.css';
 import Testimonials from './Testimonials';
 // Placeholder imports for icons and logos
@@ -12,10 +12,68 @@ import step1Image from '../assets/step1.png';
 import step2Image from '../assets/step3.png';
 import step3Image from '../assets/step2.png';
 import step4Image from '../assets/step4.png';
+import bannerImage from '../assets/Medical Insurance.jpg';  // Placeholder for banner image
 
 function MedicalInsurance() {
+  const [showForm, setShowForm] = useState(false);
+
+  const toggleForm = () => {
+    setShowForm(!showForm);
+  };
+
   return (
     <div className="medical-insurance-page">
+      {/* Banner Section */}
+      <section className="banner-section">
+        <img src={bannerImage} alt="Insurance Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Get the Best Medical Insurance Now</h1>
+          <button className="contact-btn" onClick={toggleForm}>
+            Contact Us
+          </button>
+        </div>
+      </section>
+
+      {/* Popup Form */}
+      {showForm && (
+        <div className="popup-form-overlay">
+          <div className="popup-form">
+            <h2>Get in Touch</h2>
+            <form>
+              <label>
+                Insurance Type:
+                <select>
+                  <option value="1_adult">1 Adult</option>
+                  <option value="2_adults">2 Adults</option>
+                  <option value="adult_child">Adult + Child</option>
+                  <option value="elders">Elders</option>
+                  <option value="family_plan">Family Plan</option>
+                  <option value="corporate">Corporate</option>
+                </select>
+              </label>
+              <label>
+                Name:
+                <input type="text" name="name" required />
+              </label>
+              <label>
+                Mobile Number:
+                <input type="tel" name="phone" required />
+              </label>
+              <label>
+                Email ID:
+                <input type="email" name="email" required />
+              </label>
+              <label>
+                Location:
+                <input type="text" name="location" required />
+              </label>
+              <button type="submit">Submit</button>
+              <button type="button" onClick={toggleForm} className="close-btn">Close</button>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Why Trust Us Section */}
       <section className="trust-section">
         <h1>Why Trust Us for Medical Insurance?</h1>
@@ -72,7 +130,6 @@ function MedicalInsurance() {
           <img src={brandLogo1} alt="Brand 1" />
           <img src={brandLogo2} alt="Brand 2" />
           <img src={brandLogo3} alt="Brand 3" />
-          {/* Add more brand logos as needed */}
         </div>
       </section>
 

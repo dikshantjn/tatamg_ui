@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Products.css';
-import Testimonials from './Testimonials'; // Import Testimonials component
-import otc from '../assets/otc.jpg'; // Adjust the paths as necessary
+import Testimonials from './Testimonials';
+import bannerImage from '../assets/Healthcare products.jpg'; // Adjust the path as necessary
+import otc from '../assets/otc.jpg';
 import wearable from '../assets/wearable.jpg';
 import nonwearable from '../assets/nonwearable.jpg';
 import SearchByBrand from './SearchByBrand';
@@ -11,17 +12,17 @@ function Products() {
     const productDeals = [
         {
             title: 'New Arrivals',
-            image: 'new-arrivals.jpg', // Replace with the actual image path
+            image: 'new-arrivals.jpg',
             link: '/shop/new-arrivals'
         },
         {
             title: 'Accessories',
-            image: 'accessories.jpg', // Replace with the actual image path
+            image: 'accessories.jpg',
             link: '/shop/accessories'
         },
         {
             title: 'Workspace',
-            image: 'workspace.jpg', // Replace with the actual image path
+            image: 'workspace.jpg',
             link: '/shop/workspace'
         },
     ];
@@ -29,26 +30,35 @@ function Products() {
     const productCategories = [
         {
             title: 'Wearable',
-            description: 'Lorem ipsum dolor sit amet nulla adipiscing elit. Nunc maximus, nec ut commodo.',
-            icon: wearable,// Replace with actual icon path
+            description: 'Find the best wearable devices to track your health and fitness.',
+            icon: wearable,
             link: wearable
         },
         {
             title: 'Non-wearable',
-            description: 'Lorem ipsum dolor sit amet nulla adipiscing elit. Nunc maximus, nec ut commodo.',
-            icon: nonwearable, // Replace with actual icon path
+            description: 'Discover a variety of non-wearable health products for your needs.',
+            icon: nonwearable,
             link: nonwearable
         },
         {
             title: 'OTC Products',
-            description: 'Lorem ipsum dolor sit amet nulla adipiscing elit. Nunc maximus, nec ut commodo.',
-            icon: otc, // Replace with actual icon path
+            description: 'Over-the-counter products for your everyday health requirements.',
+            icon: otc,
             link: otc
         },
     ];
 
     return (
         <div className="products-page">
+            {/* Banner Section */}
+            <section className="banner">
+                <img src={bannerImage} alt="Products Banner" className="banner-image" />
+                <div className="banner-content">
+                    <h1>Discover the Best Health Products</h1>
+                    <p>Explore a wide range of products to meet your health and wellness needs.</p>
+                </div>
+            </section>
+
             {/* Product Deals Section */}
             <div className="search-section brand">
                 <SearchByBrand />
@@ -73,10 +83,9 @@ function Products() {
             {/* Product Categories Section */}
             <section className="product-categories">
                 <div className="heading-with-link">
-                    <h2>Deals by Product type</h2>
+                    <h2>Deals by Product Type</h2>
                     <Link to="/search" className="view-all-link">View All</Link>
                 </div>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat.</p>
                 <div className="categories-grid">
                     {productCategories.map(category => (
                         <div key={category.title} className="category-card">

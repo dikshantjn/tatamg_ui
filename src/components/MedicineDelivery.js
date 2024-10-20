@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './MedicineDelivery.css';
 import Testimonials from './Testimonials';
 // Placeholder imports for category images and featured products
@@ -8,16 +8,59 @@ import categoryImage3 from '../assets/category3.jpg';
 import featuredProduct1 from '../assets/otc.jpg';
 import featuredProduct2 from '../assets/drops.jpg';
 import featuredProduct3 from '../assets/tabs.jpg';
+import bannerImage from '../assets/Medicine Delivery Banner Photo.jpg';  // Placeholder for the banner image
 
 function MedicineDelivery() {
+  const [showForm, setShowForm] = useState(false);
+
+  const toggleForm = () => {
+    setShowForm(!showForm);
+  };
+
   return (
     <div className="medicine-delivery-page">
-      {/* Hero Section */}
+      {/* Hero Section with Banner Image */}
       <section className="hero-section">
-        <h1>Get Your Medicines Delivered to Your Doorstep</h1>
-        <p>Order your prescription and over-the-counter medicines from the comfort of your home.</p>
-        <button className="shop-now-btn">Start Shopping</button>
+        <img src={bannerImage} alt="Medicine Delivery Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Get Your Medicines Delivered From Nearby Medical Shops</h1>
+          <p>Order your prescription and over-the-counter medicines from the comfort of your home.</p>
+          <button className="shop-now-btn" onClick={toggleForm}>
+            Search Medicine / Upload Prescription
+          </button>
+        </div>
       </section>
+
+      {/* Popup Form */}
+      {showForm && (
+        <div className="popup-form-overlay">
+          <div className="popup-form">
+            <h2>Search for Medicines</h2>
+            <form>
+              <label>Medicine Name:</label>
+              <input type="text" required />
+
+              <label>Brand Name:</label>
+              <input type="text" required />
+
+              <label>Quantity:</label>
+              <input type="number" required />
+
+              <label>Doctor Name:</label>
+              <input type="text" required />
+
+              <label>Delivery Time:</label>
+              <select required>
+                <option value="same_day">Same Day</option>
+                <option value="next_day">Next Day</option>
+              </select>
+
+              <button type="submit">Add to Cart</button>
+              <button type="button" onClick={toggleForm} className="close-btn">Close</button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Product Categories Section */}
       <section className="categories-section">

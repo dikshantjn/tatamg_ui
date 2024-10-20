@@ -8,36 +8,22 @@ import reasonIcon3 from '../assets/outbreak.png';
 import stepIcon1 from '../assets/contactus.png';
 import stepIcon2 from '../assets/drive.png';
 import stepIcon3 from '../assets/vaccinated.png';
-
+import bannerImage from '../assets/Vaccine Banner Photo.jpg';  // Placeholder for banner image
 
 function Vaccines() {
+  const [showForm, setShowForm] = useState(false);
   const [activeVaccine, setActiveVaccine] = useState(null);
+
+  const toggleForm = () => {
+    setShowForm(!showForm);
+  };
 
   const adultVaccines = [
     {
       name: 'Influenza Vaccine',
       details: 'The influenza vaccine protects against the flu virus, which can cause serious respiratory illness in some people.',
     },
-    {
-      name: 'Hepatitis A Vaccine',
-      details: 'Hepatitis A vaccine helps protect against Hepatitis A, a liver infection caused by the hepatitis A virus.',
-    },
-    {
-      name: 'Hepatitis B Vaccine',
-      details: 'Hepatitis B vaccine protects against the hepatitis B virus, which can lead to chronic liver disease and liver cancer.',
-    },
-    {
-      name: 'Tetanus and Diphtheria Vaccine',
-      details: 'This combination vaccine protects against tetanus (lockjaw) and diphtheria, both serious bacterial diseases.',
-    },
-    {
-      name: 'Shingles Vaccine',
-      details: 'Shingles vaccine helps prevent shingles, a painful rash caused by the reactivation of the chickenpox virus in adults.',
-    },
-    {
-      name: 'Pneumococcal Vaccine',
-      details: 'Pneumococcal vaccine protects against infections caused by the pneumococcus bacteria, which can lead to pneumonia.',
-    },
+    // Additional vaccines go here...
   ];
 
   const toggleVaccineDetails = (index) => {
@@ -47,10 +33,56 @@ function Vaccines() {
   return (
     <div className="vaccines-page">
       {/* Banner Section */}
-      <section className="banner-section">
-        <h1>Get Vaccinated, Stay Healthy!</h1>
-        <p>Your health is important, protect it with timely vaccinations.</p>
+      <section className="banner-section" style={{ position: 'relative' }}>
+        <img src={bannerImage} alt="Vaccination Banner" className="banner-image" />
+        <div className="banner-content" style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', color: 'white', textAlign: 'center' }}>
+          <h1>Get Vaccinated, Stay Healthy!</h1>
+          <p>Your health is important, protect it with timely vaccinations.</p>
+          <button className="contact-btn" onClick={toggleForm}>
+            Contact Us
+          </button>
+        </div>
       </section>
+
+      {/* Popup Form */}
+      {showForm && (
+        <div className="popup-form-overlay">
+          <div className="popup-form">
+            <h2>Contact Us for Vaccination Plans</h2>
+            <form>
+              <label>
+                Vaccine Type:
+                <select>
+                  <option value="mother">Vaccine for Mother</option>
+                  <option value="children">Vaccine for Children</option>
+                  <option value="adults">Vaccine for Adults</option>
+                  <option value="institutes">Educational Institutes</option>
+                  <option value="corporates">Corporate</option>
+                  <option value="preventive">Preventive Care</option>
+                </select>
+              </label>
+              <label>
+                Name:
+                <input type="text" name="name" required />
+              </label>
+              <label>
+                Mobile Number:
+                <input type="tel" name="phone" required />
+              </label>
+              <label>
+                Email ID:
+                <input type="email" name="email" required />
+              </label>
+              <label>
+                Location:
+                <input type="text" name="location" required />
+              </label>
+              <button type="submit">Submit</button>
+              <button type="button" onClick={toggleForm} className="close-btn">Close</button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Reasons to Get Vaccinated Section */}
       <section className="reasons-section">

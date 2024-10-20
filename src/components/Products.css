@@ -2,6 +2,30 @@
     padding: 20px;
 }
 
+/* Banner Section */
+.banner {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .banner-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+  }
+  
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 8px;
+  }
+
 /* Product Deals Section */
 .product-deals {
     margin-bottom: 40px;
@@ -101,7 +125,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: left;
-    width: 300px; /* Fixed width for each category card */
+    width: auto; /* Fixed width for each category card */
     transition: transform 0.3s ease;
 }
 
@@ -110,7 +134,7 @@
 }
 
 .category-icon {
-    width: 300px;
+    width: 160px;
     height: 180px;
     margin-bottom: 20px;
 }

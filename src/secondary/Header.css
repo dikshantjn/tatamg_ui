@@ -61,7 +61,7 @@
         background-color: #ff6f61; /* Lighter red or orange for blinking effect */
     }
     100% {
-        background-color: #e74c3c; /* Return to original red */
+        background-color: #b51f0e; /* Return to original red */
     }
 }
 

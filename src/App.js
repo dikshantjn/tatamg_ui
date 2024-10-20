@@ -35,6 +35,9 @@ import Nutrition from './components/Nutrition.js';
 import PetCare from './components/PetCare.js';
 import OrganDonation from './components/OrganDonation.js';
 import Ayurveda from './components/Ayurveda.js';
+import CheckoutProducts from './components/checkoutproduct.js';
+import CheckoutDelivery from './components/checkoutdelivery.js';
+import CheckoutAmbulance from './components/checkoutambulance.js';
 
 function App() {
     return (
@@ -84,6 +87,9 @@ function App() {
                         <Route path="/pet-care" element={<PetCare />} />
                         <Route path="/organ-donation" element={<OrganDonation />} />\
                         <Route path="/ayurveda" element={<Ayurveda />} />
+                        <Route path="/checkout-2" element={<CheckoutProducts />} />
+                        <Route path="/checkout-3" element={<CheckoutDelivery />} />
+                        <Route path="/checkout-4" element={<CheckoutAmbulance />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>

@@ -2,7 +2,92 @@
     padding: 40px;
     text-align: center;
 }
-
+/* Banner Section */
+.banner-section {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .banner-image {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+  }
+  
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+  }
+  
+  .contact-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .contact-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Popup Form */
+.popup-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure the overlay is on top of other elements */
+  }
+  
+  .popup-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+    z-index: 10000; /* Ensure the form is above the overlay */
+    position: relative;
+  }
+  
+  
+  /* Other sections styling */
+  .services-section,
+  .why-choose-us-section {
+    padding: 20px;
+  }
+  
+  .services {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .service {
+    max-width: 25%;
+  }
+  
+  .service img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+  
+  .why-choose-us-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+  }
+  
 /* Hero Section */
 .hero-section {
     background-color: #f4f4f4;

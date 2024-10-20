@@ -20,12 +20,12 @@ function Nutrition() {
   return (
     <div className="nutrition-page">
       {/* Banner Section with Image */}
-      <section 
-        className="banner" 
-        style={{ backgroundImage: bannerImage }} // Using the banner image as background 
-        >
-        <h1>Personalized Nutrition Tracking and Counseling</h1>
-        <p>Stay on top of your health with customized nutrition plans for every stage of life.</p>
+      <section className="banner">
+        <img src={bannerImage} alt="Nutrition Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Personalized Nutrition Tracking and Counseling</h1>
+          <p>Stay on top of your health with customized nutrition plans for every stage of life.</p>
+        </div>
       </section>
 
       {/* Nutrition Insights Section */}

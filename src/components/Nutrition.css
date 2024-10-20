@@ -3,38 +3,57 @@
     padding: 20px;
   }
   
-  /* Reset all margins and paddings */
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+/* Banner Section */
+.banner {
+  position: relative;
+  margin-bottom: 30px;
+}
 
-  /* Banner Section */
-  .banner {
-    text-align: center;
-    margin-bottom: 30px;
-    background-color: transparent;
-    padding: 0; /* Remove padding from the banner container */
-    width: 100%;
-  }
+.banner-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
 
-  .banner-image {
-    width: 100%;
-    height: auto;
-    max-height: 200px;
-    object-fit: cover;
-    display: block;
-    border-radius: 8px;
-  }
-  
-  .banner h1 {
-    font-size: 2.5rem;
-  }
-  
-  .banner p {
-    font-size: 1.2rem;
-  }
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+}
+
+/* Booking Form Popup */
+.booking-form-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.booking-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.booking-form .submit-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+}
+
   
   .insights-section {
     text-align: center;

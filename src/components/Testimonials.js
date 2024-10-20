@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import './Testimonials.css'; // Include CSS
+import female1 from '../assets/Testimonial female face 1.jpg';
+import male1 from '../assets/Testimonial male face 1.jpg';
+import female2 from '../assets/Testimonial female face 2.jpg';
+import male2 from '../assets/Testimonial male face 3.jpg';
 
 function Testimonials() {
   const testimonialsData = [
@@ -7,25 +11,25 @@ function Testimonials() {
       name: 'Adam Smith',
       designation: 'CEO, Company',
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-      image: 'placeholder.png', // Replace with actual image path
+      image: male1, // Replace with actual image path
     },
     {
       name: 'Jane Doe',
       designation: 'Marketing Manager',
       text: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...',
-      image: 'placeholder.png',
+      image: female1,
     },
     {
       name: 'John Brown',
       designation: 'Senior Developer',
       text: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...',
-      image: 'placeholder.png',
+      image: male2,
     },
     {
       name: 'Emily White',
       designation: 'Product Designer',
       text: 'Duis aute irure dolor in reprehenderit in voluptate velit esse...',
-      image: 'placeholder.png',
+      image: female2,
     },
   ];
 

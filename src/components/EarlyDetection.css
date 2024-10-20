@@ -1,144 +1,128 @@
-.early-detection-page {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-  }
-  
-/* Reset all margins and paddings */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 /* Banner Section */
-.banner {
-  text-align: center;
+.banner-section {
+  position: relative;
   margin-bottom: 30px;
-  background-color: transparent;
-  padding: 0; /* Remove padding from the banner container */
-  width: 100%;
 }
 
-.banner-img {
+.banner-image {
   width: 100%;
   height: auto;
-  max-height: 200px;
+  max-height: 300px;
   object-fit: cover;
-  display: block;
-  border-radius: 8px;
 }
-  
-  .banner-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: rgb(255, 255, 255);
-    text-align: center;
-    font-size: 0.5rem;
-    font-weight: bold;
-  }
-  
-  /* Scrollable Diseases Section */
-  .disease-section {
-    padding: 20px 0;
-  }
-  
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .section-header h2 {
-    font-size: 1.8rem;
-  }
-  
-  .view-all {
-    color: #007bff;
-    font-size: 1rem;
-    text-decoration: none;
-  }
-  
-  .diseases-container {
-    display: flex;
-    overflow-x: scroll;
-    gap: 20px;
-    padding-bottom: 10px;
-  }
-  
-  .disease-box {
-    min-width: 300px;
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-  }
-  
-  .icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 15px;
-  }
-  
-  button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  /* Booking Form */
-  .booking-form {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-  }
-  
-  .booking-form h2 {
-    margin-bottom: 20px;
-  }
-  
-  .booking-form label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-  
-  .booking-form input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-  }
-  
-  .booking-form button {
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .booking-form button:hover {
-    background-color: #218838;
-  }
-  
+
+.banner-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Diseases Section */
+.disease-section {
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.view-all {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.diseases-container {
+  display: flex;
+  overflow-x: auto;
+}
+
+.disease-box {
+  flex: 0 0 25%;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  margin-right: 20px;
+  padding: 20px;
+  text-align: center;
+}
+
+.disease-box img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.disease-box h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.disease-box p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.disease-box button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.disease-box button:hover {
+  background-color: #0056b3;
+}
+
+/* Popup Form */
+.popup-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-form {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  z-index: 10000;
+}
+
+.popup-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.popup-form input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.popup-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}

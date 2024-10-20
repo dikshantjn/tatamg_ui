@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import './MedicalLoans.css';
-import cardiologyIcon from '../assets/cardiology.png'; // Replace with actual icons
+import cardiologyIcon from '../assets/cardiology.png';
 import orthoIcon from '../assets/orthopedic.png';
 import pregnancyImg from '../assets/pregnant.png'; 
+import bannerImage from '../assets/Medical Loan-1 (1).jpg'; // Example banner image
 import Testimonials from './Testimonials'; // Import the Testimonials component
 
 function MedicalLoans() {
@@ -12,17 +13,22 @@ function MedicalLoans() {
     { name: 'Cardiology', icon: cardiologyIcon },
     { name: 'Orthopedic Surgery', icon: orthoIcon },
     { name: 'Gynaecology', icon: pregnancyImg },
-    // Add more healthcare concerns as needed
   ];
 
   const handleViewClick = (loanName) => {
-    // Pass the loanName as state to the LoanForm page for context
     navigate('/loan-form', { state: { loanName } });
   };
 
   return (
     <div className="medical-loans-page">
-      <h1>Medical Loans for Healthcare Concerns</h1>
+      {/* Banner Section */}
+      <section className="banner">
+        <img src={bannerImage} alt="Medical Loans Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Easy Medical Loans for Your Healthcare Needs</h1>
+          <p>Get financial support for all your medical treatments with quick and hassle-free loans.</p>
+        </div>
+      </section>
       
       {/* Loan Options Section */}
       <div className="loan-options">

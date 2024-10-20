@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './OrganDonation.css';
-import bannerImage from '../assets/Organ Donation Banner Photo.jpg'; // Add your banner image
+import bannerImage from '../assets/Organ Donation.jpg'; // Add your banner image
 import organIcon from '../assets/organ.png'; // Placeholder for organ icons
 import tissueIcon from '../assets/tissue.png'; // Placeholder for tissue icons
 

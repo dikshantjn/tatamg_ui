@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './EarlyDetection.css';
+import Testimonials from './Testimonials';
 // Import placeholder icons and banner image
 import tuberculosisIcon from '../assets/tuberculosis.png';
 import epilepsyIcon from '../assets/epilepsy.png';
@@ -25,9 +26,9 @@ function EarlyDetection() {
   return (
     <div className="early-detection-page">
       {/* Banner Section */}
-      <section className="banner">
-        <img src={bannerImage} alt="Early Detection Banner" />
-        <div className="banner-text">
+      <section className="banner-section">
+        <img src={bannerImage} alt="Early Detection Banner" className="banner-image" />
+        <div className="banner-content">
           <h1><b>Early detection can save lives. Schedule your tests now for a healthier future.</b></h1>
         </div>
       </section>
@@ -68,23 +69,28 @@ function EarlyDetection() {
 
       {/* Booking Form */}
       {showForm && (
-        <div className="booking-form">
-          <h2>Book A Test for {selectedTest}</h2>
-          <form onSubmit={handleFormSubmit}>
-            <label>Name:</label>
-            <input type="text" required />
-            <label>Mobile Number:</label>
-            <input type="text" required />
-            <label>Email ID:</label>
-            <input type="email" required />
-            <label>Age:</label>
-            <input type="number" required />
-            <label>Location:</label>
-            <input type="text" required />
-            <button type="submit">Submit</button>
-          </form>
+        <div className="popup-form-overlay">
+          <div className="popup-form">
+            <h2>Book A Test for {selectedTest}</h2>
+            <form onSubmit={handleFormSubmit}>
+              <label>Name:</label>
+              <input type="text" required />
+              <label>Mobile Number:</label>
+              <input type="text" required />
+              <label>Email ID:</label>
+              <input type="email" required />
+              <label>Age:</label>
+              <input type="number" required />
+              <label>Location:</label>
+              <input type="text" required />
+              <button type="submit">Submit</button>
+            </form>
+          </div>
         </div>
       )}
+
+      {/* Testimonials Section */}
+      <Testimonials />
     </div>
   );
 }

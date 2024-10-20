@@ -5,10 +5,10 @@ import report from '../assets/report.png';
 import hygiene from '../assets/hygiene.png';
 import pickup from '../assets/home_pickup.png';
 import consultation from '../assets/consultation.png';
+import bannerImage from '../assets/Lab tests.jpg'; // Make sure the path is correct and matches your project structure
 import Testimonials from './Testimonials';
 
 function LabTests() {
-    // Categories and Tests Data
     const categories = ['Blood Tests', 'COVID-19 Tests', 'Diabetes Tests', 'Allergy Tests'];
     const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -37,10 +37,18 @@ function LabTests() {
 
     return (
         <div className="lab-tests-page">
+            {/* Banner Section */}
+            <section className="banner">
+                <img src={bannerImage} alt="Lab Tests Banner" className="banner-image" />
+                <div className="banner-content">
+                    <h1>Lab Tests from the Comfort of Your Home</h1>
+                    <p>Trusted by 40 Lakhs+ satisfied customers | 1 Crore+ lab tests booked</p>
+                </div>
+            </section>
+
             {/* Why Trust "Get Tested at Home" Section */}
             <div className="trust-section">
-                <h2>Lab Test From The Comfort Of Your Home</h2>
-                <p>Trusted by 40 Lakhs+ satisfied customers | 1 Crore+ lab tests booked</p>
+                <h2>Why Trust Us?</h2>
                 <div className="trust-icons">
                     <div className="trust-icon">
                         <img src={hygiene} alt="100% Safe & Hygienic" />
@@ -68,7 +76,6 @@ function LabTests() {
 
             {/* Popular Health Checkups Section */}
             <div className="popular-tests-section">
-                {/* Heading and View All button container */}
                 <div className="section-header">
                     <h2>Popular Health Checkups</h2>
                     <button className="view-all-button" onClick={() => window.location.href='/search-results'}>

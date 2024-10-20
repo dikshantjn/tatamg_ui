@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Rehabilitation.css';
+import Testimonials from './Testimonials'; // Import Testimonials
 // Placeholder icons for each service
 import mentalWellnessIcon from '../assets/mental-health.png';
 import dementiaIcon from '../assets/dementia.png';
@@ -19,75 +20,87 @@ function Rehabilitation() {
     setShowForm(false);
   };
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
+
   return (
     <div className="rehabilitation-page">
       {/* Banner Section */}
-      <section className="banner">
-        <img src={bannerImage} alt="Rehabilitation Banner" />
-        <h1>Comprehensive Rehabilitation Services</h1>
-        <p>Your trusted partner for recovery, wellness, and a healthier future.</p>
+      <section className="banner-section">
+        <img src={bannerImage} alt="Rehabilitation Banner" className="banner-image" />
+        <div className="banner-content">
+          <h1>Comprehensive Rehabilitation Services</h1>
+          <p>Your trusted partner for recovery, wellness, and a healthier future.</p>
+        </div>
       </section>
 
-      {/* Mental Wellness */}
-      <section className="service">
-        <img src={mentalWellnessIcon} alt="Mental Wellness" className="service-icon" />
-        <h2>Mental Wellness</h2>
-        <p>
-          Comprehensive mental wellness programs focused on helping patients recover from mental health conditions such as depression, schizophrenia, and anxiety. Our approach includes therapy, counseling, and medical care for emotional well-being.
-        </p>
-        <button onClick={handleBookNowClick}>Book Now</button>
-      </section>
+      {/* Services Section */}
+      <section className="services-container">
+        <div className="service">
+          <img src={mentalWellnessIcon} alt="Mental Wellness" className="service-icon" />
+          <h2>Mental Wellness</h2>
+          <p>
+            Comprehensive mental wellness programs for conditions like depression, schizophrenia, and anxiety.
+          </p>
+          <button onClick={handleBookNowClick}>Book Now</button>
+        </div>
 
-      {/* Dementia Care */}
-      <section className="service">
-        <img src={dementiaIcon} alt="Dementia Care" className="service-icon" />
-        <h2>Dementia Care</h2>
-        <p>
-          Specialized dementia care programs to improve the quality of life for patients suffering from Alzheimer's and other cognitive disorders. Our approach includes cognitive therapies, occupational therapy, and support for maintaining independence.
-        </p>
-        <button onClick={handleBookNowClick}>Book Now</button>
-      </section>
+        <div className="service">
+          <img src={dementiaIcon} alt="Dementia Care" className="service-icon" />
+          <h2>Dementia Care</h2>
+          <p>
+            Specialized dementia care programs to improve the quality of life for patients with Alzheimer's and other cognitive disorders.
+          </p>
+          <button onClick={handleBookNowClick}>Book Now</button>
+        </div>
 
-      {/* De-addiction */}
-      <section className="service">
-        <img src={deAddictionIcon} alt="De-addiction" className="service-icon" />
-        <h2>De-addiction</h2>
-        <p>
-          We offer de-addiction programs to help overcome substance abuse and behavioral addictions, including alcohol and drugs. Our programs include detoxification, cognitive-behavioral therapy, and long-term support for recovery.
-        </p>
-        <button onClick={handleBookNowClick}>Book Now</button>
+        <div className="service">
+          <img src={deAddictionIcon} alt="De-addiction" className="service-icon" />
+          <h2>De-addiction</h2>
+          <p>
+            Programs to help overcome substance abuse and behavioral addictions.
+          </p>
+          <button onClick={handleBookNowClick}>Book Now</button>
+        </div>
       </section>
 
       {/* Booking Form Pop-up */}
       {showForm && (
-        <div className="booking-form">
-          <h2>Book a Service</h2>
-          <form onSubmit={handleFormSubmit}>
-            <label>Name:</label>
-            <input type="text" required />
-            
-            <label>Mobile Number:</label>
-            <input type="text" required />
-            
-            <label>Email ID:</label>
-            <input type="email" required />
-            
-            <label>Age:</label>
-            <input type="number" required />
-            
-            <label>Gender:</label>
-            <select required>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-            
-            <label>Location:</label>
-            <input type="text" required />
-            
-            <button type="submit">Submit</button>
-          </form>
+        <div className="popup-form-overlay">
+          <div className="popup-form">
+            <h2>Book a Service</h2>
+            <form onSubmit={handleFormSubmit}>
+              <label>Name:</label>
+              <input type="text" required />
+
+              <label>Mobile Number:</label>
+              <input type="text" required />
+
+              <label>Email ID:</label>
+              <input type="email" required />
+
+              <label>Age:</label>
+              <input type="number" required />
+
+              <label>Gender:</label>
+              <select required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+
+              <label>Location:</label>
+              <input type="text" required />
+
+              <button type="submit">Submit</button>
+              <button type="button" onClick={handleCloseForm} className="close-btn">Close</button>
+            </form>
+          </div>
         </div>
       )}
+
+      {/* Testimonials Section */}
+      <Testimonials />
     </div>
   );
 }
