@@ -1,27 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './SearchByCategory.css';
-import brand1 from '../assets/otc.jpg'; // Adjust the paths as necessary
+import brand1 from '../assets/otc.jpg';
 import brand2 from '../assets/wearable.jpg';
 import brand3 from '../assets/nonwearable.jpg';
-
-
 
 function SearchByCategory() {
     const concerns = [
         {
             title: 'OTC',
-            description: '',
+            description: 'Explore our range of over-the-counter medicines.',
             image: brand1,
         },
         {
             title: 'Wearable',
-            description: '',
+            description: 'Wearable healthcare devices for monitoring your health.',
             image: brand2,
         },
         {
             title: 'Non-Wearable',
-            description: '',
+            description: 'Find non-wearable healthcare solutions for daily needs.',
             image: brand3,
         },
     ];
@@ -38,7 +36,6 @@ function SearchByCategory() {
                         <img src={concern.image} alt={concern.title} className="concern-image" />
                         <h3>{concern.title}</h3>
                         <p>{concern.description}</p>
-                        {/* <Link to={`/search-results?concern=${concern.title}`}>Learn more →</Link> */}
                         <Link to="/search">Learn more →</Link>
                     </div>
                 ))}
@@ -48,3 +45,4 @@ function SearchByCategory() {
 }
 
 export default SearchByCategory;
+
