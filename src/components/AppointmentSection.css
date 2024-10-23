@@ -23,26 +23,29 @@
 
 .appointments {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allows cards to wrap onto the next line if they don't fit */
+    gap: 20px; /* Space between each card */
+    justify-content: space-around; /* Adjust alignment as needed (center, space-between, etc.) */
+    margin-top: 20px; /* Add spacing above the cards if needed */
 }
 
 .appointment {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 200px;
-    flex: 1;
-    min-width: 150px;
+    flex: 1 1 calc(25% - 20px); /* Adjusts each card to take up roughly 25% of the container width */
+    max-width: 300px; /* Adjust to control the max width of each card */
+    background: #f9f9f9; /* Add a background color if needed */
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a shadow for better appearance */
+    text-align: center; /* Center the content inside the card */
 }
 
 .appointment img {
     width: 100%;
+    height: auto;
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 10px; /* Space between image and title */
 }
+
 
 .appointment h3 {
     font-size: 18px;

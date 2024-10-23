@@ -6,6 +6,8 @@ import AppointmentSection from './AppointmentSection';
 import Testimonials from './Testimonials';
 import bannerImage from '../assets/Doctor Consultation.jpg'; // Replace with your actual image path
 
+
+
 function ConsultDoctors() {
     return (
         <div className="consult-doctors-page">
@@ -28,7 +30,7 @@ function ConsultDoctors() {
             </div>
 
             {/* Appointment Section */}
-            <div className="search-section category">
+            <div className="appointement-section">
                 <AppointmentSection />
             </div>
 
