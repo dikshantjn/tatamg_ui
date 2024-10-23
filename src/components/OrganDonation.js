@@ -38,7 +38,6 @@ function OrganDonation() {
       {/* Banner Section */}
       <div className="banner-section">
         <img src={bannerImage} alt="Organ Donation" className="banner-image" />
-        <h1>Organ & Tissue Donation: A Gift of Life</h1>
       </div>
 
       {/* Organ Donation Section */}
