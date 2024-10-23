@@ -12,17 +12,17 @@ function Products() {
     const productDeals = [
         {
             title: 'New Arrivals',
-            image: 'new-arrivals.jpg',
+            image: otc,
             link: '/shop/new-arrivals'
         },
         {
             title: 'Accessories',
-            image: 'accessories.jpg',
+            image: wearable,
             link: '/shop/accessories'
         },
         {
             title: 'Workspace',
-            image: 'workspace.jpg',
+            image: nonwearable,
             link: '/shop/workspace'
         },
     ];
