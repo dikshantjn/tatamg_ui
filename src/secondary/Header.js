@@ -34,6 +34,21 @@ function Header() {
                             <span>Cart</span>
                         </button>
                     </Link>
+                    <Link to="/checkout-2">
+                        <button>
+                            <span>Cart 2</span>
+                        </button>
+                    </Link>
+                    <Link to="/checkout-3">
+                        <button>
+                            <span>Cart 3</span>
+                        </button>
+                    </Link>
+                    <Link to="/checkout-4">
+                        <button>
+                            <span>Cart 4</span>
+                        </button>
+                    </Link>
                     <button className="speak">Speak</button>
                     <button className="emergency">Emergency!</button>
                     
