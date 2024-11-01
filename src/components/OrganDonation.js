@@ -1,23 +1,31 @@
 import React, { useState } from 'react';
 import './OrganDonation.css';
-import bannerImage from '../assets/Organ Donation.jpg'; // Add your banner image
-import organIcon from '../assets/organ.png'; // Placeholder for organ icons
-import tissueIcon from '../assets/tissue.png'; // Placeholder for tissue icons
+import bannerImage from '../assets/Organ Donation.jpg';
+import liverIcon from '../assets/liver.png'; // Replace with actual icons for each organ
+import heartIcon from '../assets/heart.png';
+import lungsIcon from '../assets/lungs.png';
+import kidneyIcon from '../assets/kidney.png';
+import pancreasIcon from '../assets/pancreas.png';
+import corneasIcon from '../assets/cornea.png';
+import boneIcon from '../assets/bone.png';
+import skinIcon from '../assets/Skin.png';
+import tendonsIcon from '../assets/Tendons.png';
+import heartValveIcon from '../assets/Heart Valves.png';
 
 const organOptions = [
-  { name: 'Liver', description: 'Donate to save lives suffering from liver failure.' },
-  { name: 'Heart', description: 'Help heart patients with your donation.' },
-  { name: 'Lungs', description: 'Your lungs can help someone breathe better.' },
-  { name: 'Kidneys', description: 'Kidney donation can save those with kidney failure.' },
-  { name: 'Pancreas', description: 'Donate pancreas to help people with diabetes.' }
+  { name: 'Liver', description: 'Donate to save lives suffering from liver failure.', icon: liverIcon },
+  { name: 'Heart', description: 'Help heart patients with your donation.', icon: heartIcon },
+  { name: 'Lungs', description: 'Your lungs can help someone breathe better.', icon: lungsIcon },
+  { name: 'Kidneys', description: 'Kidney donation can save those with kidney failure.', icon: kidneyIcon },
+  { name: 'Pancreas', description: 'Donate pancreas to help people with diabetes.', icon: pancreasIcon }
 ];
 
 const tissueOptions = [
-  { name: 'Corneas', description: 'Cornea donation restores sight to the blind.' },
-  { name: 'Bone', description: 'Bone donation can help patients with orthopedic needs.' },
-  { name: 'Skin', description: 'Skin donation helps burn victims.' },
-  { name: 'Tendons', description: 'Tendon donation improves mobility for many.' },
-  { name: 'Heart Valves', description: 'Heart valve donation helps repair damaged hearts.' }
+  { name: 'Corneas', description: 'Cornea donation restores sight to the blind.', icon: corneasIcon },
+  { name: 'Bone', description: 'Bone donation can help patients with orthopedic needs.', icon: boneIcon },
+  { name: 'Skin', description: 'Skin donation helps burn victims.', icon: skinIcon },
+  { name: 'Tendons', description: 'Tendon donation improves mobility for many.', icon: tendonsIcon },
+  { name: 'Heart Valves', description: 'Heart valve donation helps repair damaged hearts.', icon: heartValveIcon }
 ];
 
 function OrganDonation() {
@@ -46,7 +54,7 @@ function OrganDonation() {
         <div className="donation-cards">
           {organOptions.map((organ) => (
             <div key={organ.name} className="donation-card">
-              <img src={organIcon} alt={organ.name} className="icon" />
+              <img src={organ.icon} alt={organ.name} className="icon" />
               <h3>{organ.name}</h3>
               <p>{organ.description}</p>
               <button onClick={() => handleOpenForm(organ.name)}>Learn More</button>
@@ -61,7 +69,7 @@ function OrganDonation() {
         <div className="donation-cards">
           {tissueOptions.map((tissue) => (
             <div key={tissue.name} className="donation-card">
-              <img src={tissueIcon} alt={tissue.name} className="icon" />
+              <img src={tissue.icon} alt={tissue.name} className="icon" />
               <h3>{tissue.name}</h3>
               <p>{tissue.description}</p>
               <button onClick={() => handleOpenForm(tissue.name)}>Learn More</button>
@@ -109,3 +117,4 @@ function OrganDonation() {
 }
 
 export default OrganDonation;
+
