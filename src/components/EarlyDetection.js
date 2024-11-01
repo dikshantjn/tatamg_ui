@@ -17,6 +17,10 @@ function EarlyDetection() {
     setShowForm(true);
   };
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
+
   const handleFormSubmit = (e) => {
     e.preventDefault();
     alert(`Test for ${selectedTest} booked successfully!`);
@@ -71,6 +75,7 @@ function EarlyDetection() {
       {showForm && (
         <div className="popup-form-overlay">
           <div className="popup-form">
+            <span className="close-btn" onClick={handleCloseForm}>&times;</span> {/* Close button */}
             <h2>Book A Test for {selectedTest}</h2>
             <form onSubmit={handleFormSubmit}>
               <label>Name:</label>

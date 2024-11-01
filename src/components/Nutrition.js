@@ -17,6 +17,10 @@ function Nutrition() {
     setShowForm(false);
   };
 
+  const handleCloseForm = () => {
+    setShowForm(false);
+  };
+
   return (
     <div className="nutrition-page">
       {/* Banner Section with Image */}
@@ -77,6 +81,7 @@ function Nutrition() {
       {showForm && (
         <div className="booking-form-popup">
           <div className="booking-form">
+            <span className="close-btn" onClick={handleCloseForm}>&times;</span> {/* Close button */}
             <h2>Book an Appointment for {selectedPlan}</h2>
             <form onSubmit={handleFormSubmit}>
               <label>Name:</label>
