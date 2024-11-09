@@ -1,5 +1,6 @@
 import React from 'react';
 import './checkoutambulance.css';
+import ambulanceimg from '../assets/ambulance.jpg';
 
 function CheckoutAmbulance() {
     const ambulance = {
@@ -7,7 +8,7 @@ function CheckoutAmbulance() {
         price: 1500,
         gst: 270,
         discount: 5, // 5% discount
-        image: "https://via.placeholder.com/150" // Placeholder ambulance image
+        image: ambulanceimg // Placeholder ambulance image
     };
 
     const total = ((ambulance.price + ambulance.gst) * (1 - ambulance.discount / 100)).toFixed(2);

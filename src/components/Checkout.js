@@ -1,12 +1,13 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import './Checkout.css';
+import male from '../assets/male doctor.jpg';
 
 function Checkout() {
     const location = useLocation();
     const doctor = location.state?.doctor || {
         name: "Dr. John Doe",
-        image: "https://via.placeholder.com/150", // Placeholder image URL
+        image: male, // Placeholder image URL
         specialty: "Cardiologist",
         fee: 250,
     };
