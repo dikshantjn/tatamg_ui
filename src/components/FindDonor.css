@@ -84,3 +84,30 @@ h1 {
     color: red;
     margin-top: 30px;
 }
+
+.header-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .back-button {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    border-radius: 4px;
+    margin-right: 15px;
+  }
+  
+  .back-button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .header-container h1 {
+    margin: 0;
+    font-size: 24px;
+  }
+  

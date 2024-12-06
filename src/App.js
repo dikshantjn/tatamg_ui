@@ -54,14 +54,15 @@ function App() {
                                 <Testimonials />
                             </>
                         } /> */}
+                        <Route path="/" element={<SearchResults />} />
+                        <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
+                        <Route path="/product/:id" element={<ProductProfilePage />} />
                         <Route path="/" element={<Home />} /> {/* Home Page */}
                         <Route path="/search" element={<SearchResults />} />
                         <Route path="/doctors" element={<ConsultDoctors />} />
-                        <Route path="/doctor-profile/:id" element={<DoctorProfile />} /> {/* New route */}
                         <Route path="/signin" element={<SignIn />} /> {/* Add SignIn route */}
                         <Route path="/checkout" element={<Checkout />} /> {/* Add Checkout route */}
                         <Route path="/products" element={<Products />} />
-                        <Route path="/product/:id" element={<ProductProfilePage />} />
                         <Route path="/ambulance" element={<Ambulance />} />
                         <Route path="/offers" element={<Offers />} />
                         <Route path="/membership" element={<Membership />} />

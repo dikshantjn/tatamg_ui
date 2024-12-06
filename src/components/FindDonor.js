@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './FindDonor.css';
 
 function FindDonor() {
+  const navigate = useNavigate();
   const [bloodType, setBloodType] = useState('');
   const [location, setLocation] = useState('');
   const [results, setResults] = useState([]);
 
-  // Mock data: list of donors or hospitals
   const donorData = [
     { name: 'John Doe', bloodType: 'A+', location: 'New York', contact: '555-1234', type: 'Donor' },
     { name: 'St. Peter Hospital', bloodType: 'A+', location: 'New York', contact: '555-5678', type: 'Hospital' },
     { name: 'Jane Smith', bloodType: 'O-', location: 'Los Angeles', contact: '555-8765', type: 'Donor' },
     { name: 'General Hospital', bloodType: 'O-', location: 'Los Angeles', contact: '555-4321', type: 'Hospital' },
-    // Add more donors/hospitals as needed
   ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Filter donor/hospital list based on user input
     const filteredResults = donorData.filter(donor =>
       donor.bloodType === bloodType && donor.location.toLowerCase().includes(location.toLowerCase())
     );
@@ -26,9 +25,11 @@ function FindDonor() {
 
   return (
     <div className="find-donor-page">
-      <h1>Find a Blood Donor or Hospital</h1>
+      <div className="header-container">
+        <button className="back-button" onClick={() => navigate(-1)}>Back</button>
+        <h1>Find a Blood Donor or Hospital</h1>
+      </div>
       
-      {/* Form for user input */}
       <form className="find-donor-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Blood Type:</label>
@@ -57,7 +58,6 @@ function FindDonor() {
         <button type="submit" className="find-donor-btn">Find Donors or Hospitals</button>
       </form>
 
-      {/* Results Section */}
       {results.length > 0 && (
         <div className="results-section">
           <h2>Results</h2>

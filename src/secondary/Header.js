@@ -50,7 +50,18 @@ function Header() {
                         </button>
                     </Link>
                     <button className="speak">Speak</button>
-                    <button className="emergency">Emergency!</button>
+                    <button 
+                        className="emergency" 
+                        onClick={() => {
+                            const confirmCall = window.confirm("Do you want to call emergency services?");
+                            if (confirmCall) {
+                            window.location.href = "tel:+919921003190";
+                            }
+                        }}
+                        >
+                        Emergency!
+                    </button>
+
                     
                 </div>
             </div>
