@@ -54,7 +54,6 @@ function App() {
                                 <Testimonials />
                             </>
                         } /> */}
-                        <Route path="/" element={<SearchResults />} />
                         <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
                         <Route path="/product/:id" element={<ProductProfilePage />} />
                         <Route path="/" element={<Home />} /> {/* Home Page */}
