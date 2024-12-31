@@ -36,3 +36,32 @@
     transform: rotate(360deg);
   }
 }
+
+/* For tablets (screen width 768px and below) */
+@media (max-width: 768px) {
+  .container {
+      width: 95%;
+  }
+
+  .header {
+      flex-direction: column; /* Stack header elements vertically */
+      text-align: center;
+  }
+}
+
+/* For mobile phones (screen width 480px and below) */
+@media (max-width: 480px) {
+  .container {
+      width: 100%;
+  }
+
+  .menu {
+      display: none; /* Hide menus for smaller screens */
+  }
+
+  .emergency {
+      width: 100%; /* Make the emergency button full width */
+      padding: 10px;
+      font-size: 18px;
+  }
+}
