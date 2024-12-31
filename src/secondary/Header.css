@@ -4,234 +4,118 @@
     flex-direction: column;
     width: 100%;
     background-color: white;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Top bar styling */
+/* Top Bar */
 .top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 20px;
-    background-color: #fff; /* White background */
-    height: 60px; /* Reduce height for compactness */
-}
-
-.logo-container {
-    flex-shrink: 0; /* Prevent the logo from shrinking */
+    padding: 10px 20px;
 }
 
 .logo {
-    width: 100px; /* Smaller logo size */
+    width: 120px;
     height: auto;
 }
 
-.top-bar-info {
-    font-size: 14px;
-    color: #666; /* Subtle gray for the text */
-    margin-right: auto; /* Push customer support info to the left */
-    padding-left: 20px;
-}
-
-.buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.buttons button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: white;
+.hamburger {
+    display: none;
+    font-size: 24px;
+    background: none;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 12px; /* Smaller font size for buttons */
 }
 
-.buttons button:hover {
-    background-color: #0056b3;
+.hamburger:focus {
+    outline: none;
 }
 
-/* Emergency button with blinking effect */
-@keyframes blink {
-    0% {
-        background-color: #e74c3c; /* Initial red color */
-    }
-    50% {
-        background-color: #ff6f61; /* Lighter red or orange for blinking effect */
-    }
-    100% {
-        background-color: #b51f0e; /* Return to original red */
-    }
-}
-
-
-@keyframes blinks {
-    0% {
-        background-color: #46ebb2; /* Initial red color */
-    }
-    50% {
-        background-color: #0aaf75; /* Lighter red or orange for blinking effect */
-    }
-    100% {
-        background-color: #074e26; /* Return to original red */
-    }
-}
-
-.emergency {
-    background-color: #e74c3c; /* Red for emergency button */
-    color: white;
-    font-weight: bold;
-    animation: blink 1s infinite; /* Blinking effect */
-}
-
-.emergency:hover {
-    background-color: #c0392b; /* Darker red for hover */
-    animation: none; /* Stop blinking when hovered */
-}
-
-.speak {
-    background-color: #119845; /* Red for emergency button */
-    color: white;
-    font-weight: bold;
-    animation: blinks 1s infinite; /* Blinking effect */
-}
-
-.speak:hover {
-    background-color: #c0392b; /* Darker red for hover */
-    animation: none; /* Stop blinking when hovered */
-}
-
-.cart-button {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Space between icon and text */
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 8px 16px;
-}
-
-.cart-button:hover {
-    background-color: #0056b3;
-}
-
-.cart-icon {
-    width: 15px;
-    height: 12px;
-    fill: white; /* If using an SVG with a fill property */
-}
-
-.cart-button span {
-    font-size: 14px;
-    color: white;
-}
-
-
-
-/* Main navigation */
+/* Main Navigation */
 .main-nav {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background-color: #f8f9fa;
     padding: 10px 0;
     border-top: 1px solid #e9ecef;
     border-bottom: 1px solid #e9ecef;
 }
 
-.nav-links {
-    display: flex;
-    justify-content: center;
-    gap: 15px; /* Reduce gap between links */
+.main-nav.open {
+    flex-direction: column;
+    padding: 10px;
+    gap: 20px;
 }
 
 .nav-links a {
     text-decoration: none;
     color: #007bff;
     font-weight: 500;
-    font-size: 14px; /* Slightly smaller font for minimalism */
+    margin: 0 10px;
+    font-size: 14px;
 }
 
 .nav-links a:hover {
     text-decoration: underline;
 }
 
-/* For mobile responsiveness */
-@media (max-width: 768px) {
-    .top-bar, .main-nav, .buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .top-bar-info {
-        margin-right: 0;
-        padding-left: 0;
-        margin-bottom: 10px;
-    }
-}
-
-/* Sub Navigation (Third Bar) */
-.sub-nav {
+/* Buttons in Hamburger Menu */
+.menu-buttons {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #f8f9fa7e;
 }
 
-.search-location-container {
-    display: flex;
-    gap: 2px;
-}
-
-.category-search{
-    padding: 8px;
-    border: 1px solid #ccc;
+.menu-buttons button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
     border-radius: 4px;
-    width: 300px; /* Adjust width */
-}
-
-.location-search {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 100px; /* Adjust width */
-}
-
-.sub-nav-links {
-    display: flex;
-    gap: 20px;
-}
-
-.sub-nav-links a {
-    text-decoration: none;
-    color: #4b4c4d;
     font-size: 14px;
+    cursor: pointer;
+    width: 80%; /* Buttons take up most of the width */
+    text-align: center;
 }
 
-.sub-nav-links a:hover {
-    text-decoration: underline;
+.menu-buttons .emergency {
+    background-color: #e74c3c;
+    animation: blink 1s infinite;
 }
 
-/* Mobile responsiveness */
+.menu-buttons .cart-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.menu-buttons button:hover {
+    background-color: #0056b3;
+}
+
+/* Cart Icon */
+.cart-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive Styling */
 @media (max-width: 768px) {
-    .top-bar, .main-nav, .sub-nav {
-        flex-direction: column;
-        align-items: center;
+    .hamburger {
+        display: block;
     }
 
-    .nav-links {
-        flex-wrap: wrap;
-        justify-content: center;
+    .main-nav {
+        display: none;
     }
 
-    .sub-nav-links {
-        justify-content: center;
+    .main-nav.open {
+        display: flex;
     }
 }
