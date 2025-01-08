@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import './checkoutproducts.css';
+import blood from '../assets/blood test.jpg';
+import { Link } from 'react-router-dom';
 
 function CheckoutProducts() {
     const [quantity, setQuantity] = useState(1);
 
     const product = {
-        name: "Skincare",
+        name: "Blood Tester",
         price: 150,
         gst: 27,
         deliveryCost: 15,
         discount: 5, // 5% discount
-        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGO_PmVHJRa0Sj_LJIzasD4TiC1-FO-uLRJqRP6zlmS_d5nuZUBgXhXZMPUrspOTRUozU&usqp=CAU" // Placeholder product image
-    };
+        image: blood
+        };
 
     const total = ((product.price + product.gst + product.deliveryCost) * (1 - product.discount / 100)).toFixed(2);
 
@@ -66,7 +68,9 @@ function CheckoutProducts() {
                             <span>₹{total}</span>
                         </div>
                     </div>
+                    <Link to='/gateway'>
                     <button className="checkout-button">Checkout</button>
+                    </Link>
                 </div>
             </div>
         </div>
