@@ -36,6 +36,7 @@ function Footer() {
                     <div className="footer-column">
                         <h4>Company</h4>
                         <a href="/">About</a>
+                        <a href="/">Experts</a>
                         <a href="/">Blog</a>
                         <a href="/">Jobs</a>
                         <a href="/">Press</a>
