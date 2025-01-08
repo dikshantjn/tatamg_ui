@@ -62,10 +62,12 @@ function Header() {
                     >
                         Emergency!
                     </button>
+                    <Link to="/checkout">
                     <button className="cart-button">
                         <img src={cart} alt="Cart" className="cart-icon" />
                         <span>Cart</span>
                     </button>
+                    </Link>
                 </div>
             </nav>
 

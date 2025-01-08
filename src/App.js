@@ -38,6 +38,7 @@ import Ayurveda from './components/Ayurveda.js';
 import CheckoutProducts from './components/checkoutproduct.js';
 import CheckoutDelivery from './components/checkoutdelivery.js';
 import CheckoutAmbulance from './components/checkoutambulance.js';
+import PaymentGateway from './components/PaymentGateway.js';
 
 function App() {
     return (
@@ -90,6 +91,7 @@ function App() {
                         <Route path="/checkout-2" element={<CheckoutProducts />} />
                         <Route path="/checkout-3" element={<CheckoutDelivery />} />
                         <Route path="/checkout-4" element={<CheckoutAmbulance />} />
+                        <Route path="/gateway" element={<PaymentGateway />} />
                         {/* Add more routes here if needed */}
                     </Routes>
                 </main>
