@@ -66,6 +66,7 @@ function Header() {
                     >
                         Emergency!
                     </button>
+                    <button className="speak">Speak</button>
                     <Link to="/checkout">
                     <button className="cart-button">
                         <img src={cart} alt="Cart" className="cart-icon" />
