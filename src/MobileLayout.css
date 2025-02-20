@@ -1,0 +1,191 @@
+/* Mobile Layout */
+.mobile-container {
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* Top Navbar */
+.mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Hamburger Menu */
+.menu-button img {
+    width: 30px;
+    cursor: pointer;
+}
+
+/* Logo */
+.logo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.mobile-logo {
+    width: 90px;
+}
+
+/* Cart & Emergency Icons */
+.top-right-icons {
+    display: flex;
+    gap: 15px;
+}
+
+.cart-icon, .emergency-icon {
+    width: 30px;
+    cursor: pointer;
+}
+
+/* Location & Search */
+.location-search-container {
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+.location-input, .search-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Sticky Search on Scroll */
+.sticky-search {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 999;
+}
+
+/* Horizontal Scrollable Nav */
+.horizontal-scroll-nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 10px;
+    background: #fff;
+}
+
+.horizontal-scroll-nav a {
+    flex: 0 0 auto;
+    margin-right: 15px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Testimonials */
+.testimonials {
+    display: flex;
+    overflow-x: scroll;
+    gap: 10px;
+}
+
+.testimonial-card {
+    flex: 0 0 auto;
+    width: 80%;
+}
+
+/* Bottom Navigation */
+.mobile-bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+}
+
+.mobile-bottom-nav a {
+    text-decoration: none;
+    font-size: 14px;
+}
+
+/* Side Modal */
+.side-modal {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 75%;
+    height: 100%;
+    background: white;
+    z-index: 1000;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.close-modal img {
+    width: 30px;
+    cursor: pointer;
+}
+
+.side-menu a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+
+/* Ad Banner */
+.ad-banner {
+    margin: 10px 0;
+    text-align: center;
+}
+
+.ad-banner img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Search by Health Concern */
+.health-concern-section {
+    padding: 10px;
+}
+
+.health-concern-cards {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.health-card {
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    padding: 20px;
+    min-width: 120px;
+    min-height: 150px;
+    flex-shrink: 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Testimonials */
+.testimonials-section {
+    padding: 10px;
+}
+
+.testimonial-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+}
+
+.testimonial-card p {
+    font-size: 14px;
+    color: #333;
+}
+
+.testimonial-card h4 {
+    margin-top: 10px;
+    color: #007bff;
+}
