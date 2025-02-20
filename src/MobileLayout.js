@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import {Link } from "react-router-dom";
 import "./MobileLayout.css";
 import logo from "./assets/logo.jpg";
 import cartIcon from "./assets/cart.svg";
@@ -75,13 +75,17 @@ function MobileLayout() {
 
             {/* Search by Health Concern */}
             <section className="health-concern-section">
-                <h2>Search by Health Concern</h2>
+                <div className="heading-with-link">
+                    <h2>Search by Health Concern</h2>
+                    <Link to="/search" className="view-all-link">View All</Link>
+                </div>
                 <div className="health-concern-cards">
                     <div className="health-card">Card 1</div>
                     <div className="health-card">Card 2</div>
                     <div className="health-card">Card 3</div>
                 </div>
             </section>
+
 
             {/* Testimonials Section */}
             <section className="testimonials-section">
