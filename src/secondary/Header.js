@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';  // Added useNavigate for redirecting
 import './Header.css';
 import logo from '../assets/logo.jpg';
 import cart from '../assets/cart.svg';
@@ -13,6 +13,7 @@ function Header() {
         phone: '',
         query: ''
     });
+    const navigate = useNavigate(); // Hook to navigate programmatically
 
     // Handle Emergency Button Click
     const handleEmergencyClick = () => {
@@ -47,6 +48,16 @@ function Header() {
         handleCloseContactModal();
     };
 
+    // Handle Logout
+    const handleLogout = () => {
+        // Clear any stored user info in localStorage (or sessionStorage)
+        localStorage.removeItem('user');  // Assuming the user data is stored in localStorage
+        localStorage.setItem('isAuthenticated', 'false'); // Set authentication status to false
+
+        // Redirect to sign-in page after logout
+        navigate("/signin");
+    };
+
     return (
         <>
             <header className="header">
@@ -65,9 +76,18 @@ function Header() {
                         <Link to="/membership">
                             <button>Membership</button>
                         </Link>
-                        <Link to="/signin">
-                            <button>Sign up / Log In</button>
-                        </Link>
+
+                        {/* Sign up / Log In or Logout button */}
+                        <div>
+                            {localStorage.getItem('isAuthenticated') === 'true' ? (
+                                <button onClick={handleLogout}>Logout</button> // Logout functionality
+                            ) : (
+                                <Link to="/signin">
+                                    <button>Sign up / Log In</button>
+                                </Link>
+                            )}
+                        </div>
+
                         <button onClick={handleContactClick}>Contact Us</button>
                         <Link to="/checkout">
                             <button>
