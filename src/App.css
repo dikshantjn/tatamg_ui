@@ -65,3 +65,149 @@
       font-size: 18px;
   }
 }
+
+/* Reset any potential conflicting styles */
+.app {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Side Panel Styles */
+.side-panel-overlay {
+  position: fixed !important; /* Force override */
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  z-index: 99999 !important; /* Even higher z-index */
+  animation: fadeIn 0.3s ease-out;
+  will-change: opacity;
+  pointer-events: auto !important;
+}
+
+.side-panel {
+  position: relative !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  background: white !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1) !important;
+  animation: slideIn 0.3s ease-out;
+  z-index: 100000 !important;
+  will-change: transform;
+  transform: none !important; /* Ensure no transforms are affecting it */
+}
+
+.close-panel {
+  position: absolute !important;
+  top: 20px !important;
+  right: 20px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 24px !important;
+  cursor: pointer !important;
+  color: #333 !important;
+  z-index: 100001 !important;
+  padding: 8px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background-color 0.2s !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+}
+
+.close-panel:hover {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Ensure animations work */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    visibility: visible;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    visibility: visible;
+  }
+  to {
+    transform: translateX(0);
+    visibility: visible;
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 480px) {
+  .side-panel {
+    max-width: 100% !important;
+  }
+  
+  .close-panel {
+    top: 10px !important;
+    right: 10px !important;
+  }
+}
+
+/* Ensure body doesn't scroll when panel is open */
+body.panel-open {
+  overflow: hidden !important;
+}
+
+/* Adjust SignIn component styles when in side panel */
+.side-panel .sign-in-container {
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.side-panel .sign-in-left {
+  display: none;
+}
+
+.side-panel .sign-in-right {
+  width: 100%;
+  padding: 60px 20px 20px;
+  background: white;
+  overflow-y: visible;
+}
+
+.side-panel .sign-in-box {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.side-panel .login-tabs {
+  margin-bottom: 30px;
+}
+
+.side-panel .welcome-text {
+  margin-bottom: 30px;
+}
+
+.side-panel .welcome-text h2 {
+  font-size: 24px;
+}
+
+.side-panel .input-group {
+  margin-bottom: 20px;
+}

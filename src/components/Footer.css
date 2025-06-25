@@ -40,106 +40,361 @@
     color: #adb5bd;
 }  */
 
-
-
 .footer {
-    background-color: #343a40;
-    padding: 40px 20px;
-    font-size: 14px;
-    color: #fff;;
+    background: linear-gradient(135deg, #232526 0%, #414345 100%);
+    color: #f3f4f6;
+    padding: 4rem 2rem 1rem;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    box-shadow: 0 -2px 24px 0 rgba(30,41,59,0.10);
+    margin-top: 48px;
 }
 
-.footer-top {
+.footer-main {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
-    border-bottom: 1px solid #eaeaea;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    gap: 4rem;
+    margin-bottom: 2rem;
 }
 
-.footer-logo-section {
+.footer-brand {
     flex: 1;
-    min-width: 250px;
-    margin-right: 20px;
 }
 
-.footer-logo {
-    width: 150px;
-    margin-bottom: 10px;
+.footer-description {
+    color: #cbd5e1;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 320px;
 }
 
-.footer-logo-section p {
-    max-width: 300px;
+.footer-social {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.footer-social-icons a {
-    margin-right: 10px;
-    font-size: 18px;
+.footer-social-icon {
+    color: #f3f4f6;
+    background: #232526;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(30,41,59,0.10);
+}
+
+.footer-social-icon:hover {
+    background: #38A3A5;
     color: #fff;
-    text-decoration: none;
-}
-
-.footer-social-icons a:hover {
-    color: #007bff;
+    transform: translateY(-2px) scale(1.08);
 }
 
 .footer-links {
-    flex: 3;
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
+    gap: 4rem;
 }
 
 .footer-column {
-    min-width: 150px;
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .footer-column h4 {
-    font-weight: bold;
-    margin-bottom: 10px;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .footer-column a {
-    display: block;
-    color: #fff;
+    color: #cbd5e1;
     text-decoration: none;
-    margin-bottom: 5px;
+    transition: color 0.2s;
+    font-size: 0.98rem;
 }
 
 .footer-column a:hover {
-    color: #007bff;
+    color: #38A3A5;
+}
+
+.app-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid;
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.app-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.appstore-icon,
+.playstore-icon {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
 }
 
 .footer-bottom {
+    background: #232526;
+    padding: 2rem 0 1rem;
+    border-top: 1px solid #2d2f31;
+}
+
+.footer-bottom-content {
+    max-width: 1200px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
+    align-items: center;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.footer-bottom-links {
+    display: flex;
+    gap: 1rem;
     align-items: center;
 }
 
-.footer-download {
+.footer-bottom-links a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-bottom-links a:hover {
+    color: #38A3A5;
+}
+
+@media (max-width: 768px) {
+    .footer {
+        padding: 3rem 1rem 1rem;
+        border-radius: 24px 24px 0 0;
+    }
+
+    .footer-main {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+
+    .footer-column {
+        flex: 1 1 40%;
+        min-width: 120px;
+    }
+
+    .footer-bottom-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .footer-description {
+        max-width: 100%;
+    }
+}
+
+.footer-newsletter {
+    flex: 1 1 260px;
+    min-width: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+}
+.footer-newsletter h4 {
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.newsletter-form {
+    display: flex;
+    width: 100%;
+    gap: 0;
+    margin-bottom: 10px;
+}
+.newsletter-form input[type="email"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    font-size: 1rem;
+    outline: none;
+    background: #f3f4f6;
+    color: #232526;
+}
+.newsletter-form button {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    background: #38A3A5;
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.newsletter-form button:hover {
+    background: #2D8587;
+}
+
+.footer-apps {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+.app-btn {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
+    gap: 10px;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.98rem;
+    text-decoration: none;
+    color: #fff;
+    background: #232526;
+    border: 1.5px solid #38A3A5;
+    transition: background 0.2s, color 0.2s, border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(56,163,165,0.08);
+}
+.app-btn img.appstore-icon, .app-btn img.playstore-icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 6px;
+    padding: 2px;
+    box-shadow: 0 1px 4px rgba(30,41,59,0.10);
+}
+.app-btn.ios:hover {
+    background: #38A3A5;
+    border-color: #38A3A5;
+    color: #fff;
+}
+.app-btn.android:hover {
+    background: #38A3A5;
+    border-color: #38A3A5;
+    color: #fff;
 }
 
-.footer-download a {
-    margin-right: 10px;
+.footer-legal-apps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 0 auto 18px auto;
+    max-width: 1300px;
+    padding: 0 32px;
+}
+.footer-legal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+.footer-legal h4 {
+    color: #fff;
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    margin-top: 0;
+}
+.footer-legal a {
+    color: #cbd5e1;
+    text-decoration: none;
+    margin-bottom: 2px;
+    font-size: 0.98rem;
+    transition: color 0.2s;
+}
+.footer-legal a:hover {
+    color: #38A3A5;
+}
+.footer-apps-centered {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    align-items: center;
+    margin: 24px auto 0 auto;
+    padding-bottom: 8px;
+}
+.app-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    border-radius: 14px;
+    background: #232526;
+    border: 1.5px solid #38A3A5;
+    transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px 0 rgba(56,163,165,0.08);
+    width: 160px;
+    height: 64px;
+}
+.app-btn img.appstore-icon,
+.app-btn img.playstore-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 10px;
+    padding: 2px;
+    box-shadow: 0 1px 4px rgba(30,41,59,0.10);
+}
+.app-btn img.appstore-icon.large,
+.app-btn img.playstore-icon.large {
+    width: 150px;
+    height: 48px;
+    border-radius: 6px;
+}
+.app-btn.ios:hover, .app-btn.android:hover {
+    background: #38A3A5;
+    border-color: #38A3A5;
 }
 
-.footer-download img {
-    height: 40px;
+@media (max-width: 900px) {
+    .footer-legal-apps {
+        padding: 0 12px;
+    }
 }
-
-.footer-copyright {
-    font-size: 12px;
-    color: #666;
-    text-align: center;
-    flex: 1;
-}
-
-.footer-copyright a:hover {
-    text-decoration: underline;
+@media (max-width: 600px) {
+    .footer-legal-apps {
+        padding: 0 4px;
+    }
+    .footer-apps-centered {
+        gap: 20px;
+        padding-bottom: 4px;
+    }
+    .app-btn {
+        width: 120px;
+        height: 48px;
+    }
+    .app-btn img.appstore-icon.large,
+    .app-btn img.playstore-icon.large {
+        width: 32px;
+        height: 32px;
+    }
 }

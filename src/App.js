@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from './secondary/Header';
 import Footer from './components/Footer';
 import SearchResults from './components/SearchResults';
@@ -39,95 +39,97 @@ import CheckoutProducts from './components/checkoutproduct.js';
 import CheckoutDelivery from './components/checkoutdelivery.js';
 import CheckoutAmbulance from './components/checkoutambulance.js';
 import PaymentGateway from './components/PaymentGateway.js';
+import UserProfile from './components/UserProfile';
+import { isAuthenticated as checkAuth } from './services/auth.utils';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem("isAuthenticated") === "true"
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(checkAuth());
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sync authentication state with localStorage
   useEffect(() => {
-    localStorage.setItem("isAuthenticated", isAuthenticated);
-  }, [isAuthenticated]);
-
-  // Listen for logout across multiple tabs
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const authStatus = localStorage.getItem("isAuthenticated") === "true";
-      setIsAuthenticated(authStatus);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    // Check authentication status on mount
+    const authStatus = checkAuth();
+    setIsAuthenticated(authStatus);
+    setIsLoading(false);
   }, []);
+
+  // Handle auth state changes
+  const handleAuthChange = (newState) => {
+    console.log('Auth state changing to:', newState);
+    setIsAuthenticated(newState);
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Router>
-      <AppContent isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+      <div className="app">
+        <Header 
+          isAuthenticated={isAuthenticated} 
+          onAuthChange={handleAuthChange}
+        />
+        <main className="main-content">
+          <Routes>
+            <Route 
+              path="/signin" 
+              element={
+                isAuthenticated ? 
+                <Navigate to="/" replace /> : 
+                <SignIn onAuthChange={handleAuthChange} />
+              } 
+            />
+            {/* Protected routes */}
+            {isAuthenticated ? (
+              <>
+                <Route path="/profile" element={<UserProfile />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
+                <Route path="/product/:id" element={<ProductProfilePage />} />
+                <Route path="/search" element={<SearchResults />} />
+                <Route path="/doctors" element={<ConsultDoctors />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/ambulance" element={<Ambulance />} />
+                <Route path="/offers" element={<Offers />} />
+                <Route path="/membership" element={<Membership />} />
+                <Route path="/lab-tests" element={<LabTests />} />
+                <Route path="/blood-bank" element={<BloodBank />} />
+                <Route path="/find-donor" element={<FindDonor />} />
+                <Route path="/register-donor" element={<RegisterDonor />} />
+                <Route path="/medical-loans" element={<MedicalLoans />} />
+                <Route path="/loan-form" element={<LoanForm />} />
+                <Route path="/insurance" element={<MedicalInsurance />} />
+                <Route path="/vaccines" element={<Vaccines />} />
+                <Route path="/maternal-care" element={<MaternalCare />} />
+                <Route path="/child-care" element={<ChildCare />} />
+                <Route path="/delivery" element={<MedicineDelivery />} />
+                <Route path="/physiotherapy" element={<Physiotherapy />} />
+                <Route path="/hosiptal-discovery" element={<HospitalDiscovery />} />
+                <Route path="/hospital-results" element={<HospitalResults />} />
+                <Route path="/care-at-home" element={<CareAtHome />} />
+                <Route path="/medical-tourism" element={<MedicalTourism />} />
+                <Route path="/rehabilitation" element={<Rehabilitation />} />
+                <Route path="/early-detection" element={<EarlyDetection />} />
+                <Route path="/nutrition" element={<Nutrition />} />
+                <Route path="/pet-care" element={<PetCare />} />
+                <Route path="/organ-donation" element={<OrganDonation />} />
+                <Route path="/ayurveda" element={<Ayurveda />} />
+                <Route path="/checkout-2" element={<CheckoutProducts />} />
+                <Route path="/checkout-3" element={<CheckoutDelivery />} />
+                <Route path="/checkout-4" element={<CheckoutAmbulance />} />
+                <Route path="/gateway" element={<PaymentGateway />} />
+              </>
+            ) : null}
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
     </Router>
-  );
-}
-
-function AppContent({ isAuthenticated, setIsAuthenticated }) {
-  const location = useLocation();
-  const hideHeaderFooter = location.pathname === "/signin"; // Hide header and footer on sign-in page
-
-  return (
-    <div className="App">
-      {!hideHeaderFooter && <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />}
-      <main>
-        <Routes>
-          {/* Public Route */}
-          <Route path="/signin" element={<SignIn setIsAuthenticated={setIsAuthenticated} />} />
-
-          {/* Protected Routes */}
-          {isAuthenticated ? (
-            <>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
-                    <Route path="/product/:id" element={<ProductProfilePage />} />
-                    <Route path="/search" element={<SearchResults />} />
-                    <Route path="/doctors" element={<ConsultDoctors />} />
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/ambulance" element={<Ambulance />} />
-                    <Route path="/offers" element={<Offers />} />
-                    <Route path="/membership" element={<Membership />} />
-                    <Route path="/lab-tests" element={<LabTests />} />
-                    <Route path="/blood-bank" element={<BloodBank />} />
-                    <Route path="/find-donor" element={<FindDonor />} />
-                    <Route path="/register-donor" element={<RegisterDonor />} />
-                    <Route path="/medical-loans" element={<MedicalLoans />} />
-                    <Route path="/loan-form" element={<LoanForm />} />
-                    <Route path="/insurance" element={<MedicalInsurance />} />
-                    <Route path="/vaccines" element={<Vaccines />} />
-                    <Route path="/maternal-care" element={<MaternalCare />} />
-                    <Route path="/child-care" element={<ChildCare />} />
-                    <Route path="/delivery" element={<MedicineDelivery />} />
-                    <Route path="/physiotherapy" element={<Physiotherapy />} />
-                    <Route path="/hosiptal-discovery" element={<HospitalDiscovery />} />
-                    <Route path="/hospital-results" element={<HospitalResults />} />
-                    <Route path="/care-at-home" element={<CareAtHome />} />
-                    <Route path="/medical-tourism" element={<MedicalTourism />} />
-                    <Route path="/rehabilitation" element={<Rehabilitation />} />
-                    <Route path="/early-detection" element={<EarlyDetection />} />
-                    <Route path="/nutrition" element={<Nutrition />} />
-                    <Route path="/pet-care" element={<PetCare />} />
-                    <Route path="/organ-donation" element={<OrganDonation />} />
-                    <Route path="/ayurveda" element={<Ayurveda />} />
-                    <Route path="/checkout-2" element={<CheckoutProducts />} />
-                    <Route path="/checkout-3" element={<CheckoutDelivery />} />
-                    <Route path="/checkout-4" element={<CheckoutAmbulance />} />
-                    <Route path="/gateway" element={<PaymentGateway />} />
-            </>
-          ) : (
-            <Route path="*" element={<Navigate to="/signin" />} />
-          )}
-        </Routes>
-      </main>
-      {!hideHeaderFooter && <Footer />}
-    </div>
   );
 }
 
