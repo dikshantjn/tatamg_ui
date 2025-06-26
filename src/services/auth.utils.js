@@ -1,15 +1,39 @@
 // Token and User ID storage keys
 const TOKEN_KEY = 'user_token';
 const USER_ID_KEY = 'user_id';
+const AUTH_TIMESTAMP_KEY = 'auth_timestamp';
+const USER_DATA_KEY = 'user_data';
 
 // Store token and user ID
-export const storeAuthData = (token, userId) => {
+export const storeAuthData = (token, userId, userData = null) => {
     try {
-        sessionStorage.setItem(TOKEN_KEY, token);
-        sessionStorage.setItem(USER_ID_KEY, userId);
+        if (!token || !userId) {
+            console.warn('❌ Invalid auth data provided:', { token: !!token, userId: !!userId });
+            clearAuthData();
+            return false;
+        }
+
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(USER_ID_KEY, userId);
+        localStorage.setItem(AUTH_TIMESTAMP_KEY, Date.now().toString());
+        
+        if (userData) {
+            localStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
+        }
+        
+        // Verify the data was stored correctly
+        const storedToken = localStorage.getItem(TOKEN_KEY);
+        const storedUserId = localStorage.getItem(USER_ID_KEY);
+        
+        if (!storedToken || !storedUserId) {
+            console.error('❌ Failed to verify stored auth data in localStorage');
+            return false;
+        }
+        
+        console.log('✅ Auth data stored successfully');
         return true;
     } catch (error) {
-        console.error('Error storing auth data:', error);
+        console.error('❌ Error storing auth data in localStorage:', error);
         return false;
     }
 };
@@ -17,9 +41,25 @@ export const storeAuthData = (token, userId) => {
 // Get stored token
 export const getToken = () => {
     try {
-        return sessionStorage.getItem(TOKEN_KEY);
+        const token = localStorage.getItem(TOKEN_KEY);
+        const timestamp = localStorage.getItem(AUTH_TIMESTAMP_KEY);
+        
+        if (!token || !timestamp) {
+            console.log('❌ No token or timestamp found in localStorage');
+            return null;
+        }
+
+        // Check if token is expired (24 hours)
+        const tokenAge = Date.now() - parseInt(timestamp);
+        if (tokenAge > 24 * 60 * 60 * 1000) {
+            console.log('❌ Token expired in localStorage');
+            clearAuthData();
+            return null;
+        }
+
+        return token;
     } catch (error) {
-        console.error('Error getting token:', error);
+        console.error('❌ Error getting token from localStorage:', error);
         return null;
     }
 };
@@ -27,27 +67,69 @@ export const getToken = () => {
 // Get stored user ID
 export const getUserId = () => {
     try {
-        return sessionStorage.getItem(USER_ID_KEY);
+        const userId = localStorage.getItem(USER_ID_KEY);
+        if (!userId) {
+            console.log('No user ID found in localStorage');
+            return null;
+        }
+        return userId;
     } catch (error) {
-        console.error('Error getting user ID:', error);
+        console.error('Error getting user ID from localStorage:', error);
+        return null;
+    }
+};
+
+// Get user data
+export const getUserData = () => {
+    try {
+        const userDataStr = localStorage.getItem(USER_DATA_KEY);
+        if (!userDataStr) {
+            return null;
+        }
+        return JSON.parse(userDataStr);
+    } catch (error) {
+        console.error('Error getting user data from localStorage:', error);
         return null;
     }
 };
 
 // Check if user is authenticated
 export const isAuthenticated = () => {
-    const token = getToken();
-    return !!token;
+    try {
+        const token = getToken();
+        const userId = getUserId();
+
+        if (!token || !userId) {
+            console.log('❌ Missing token or userId in localStorage');
+            return false;
+        }
+
+        // Check if token is a valid JWT format (xxx.yyy.zzz)
+        const tokenParts = token.split('.');
+        if (tokenParts.length !== 3) {
+            console.log('❌ Invalid token format in localStorage');
+            clearAuthData();
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('❌ Error checking authentication in localStorage:', error);
+        return false;
+    }
 };
 
 // Clear auth data (for logout)
 export const clearAuthData = () => {
     try {
-        sessionStorage.removeItem(TOKEN_KEY);
-        sessionStorage.removeItem(USER_ID_KEY);
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_ID_KEY);
+        localStorage.removeItem(AUTH_TIMESTAMP_KEY);
+        localStorage.removeItem(USER_DATA_KEY);
+        console.log('Auth data cleared successfully from localStorage');
         return true;
     } catch (error) {
-        console.error('Error clearing auth data:', error);
+        console.error('Error clearing auth data from localStorage:', error);
         return false;
     }
 };
@@ -55,5 +137,11 @@ export const clearAuthData = () => {
 // Get auth header for API requests
 export const getAuthHeader = () => {
     const token = getToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    if (!token) {
+        return {};
+    }
+    return { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
 }; 

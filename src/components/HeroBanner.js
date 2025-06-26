@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './HeroBanner.css';
 
-const HeroBanner = () => {
+const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
+    const navigate = useNavigate();
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
@@ -201,6 +203,18 @@ const HeroBanner = () => {
     const handleMouseEnter = () => setIsPaused(true);
     const handleMouseLeave = () => setIsPaused(false);
 
+    // Handle navigation with authentication check
+    const handleNavigation = (path, e) => {
+        if (e) {
+            e.preventDefault(); // Prevent default only if event is provided
+        }
+        if (isAuthenticated) {
+            navigate(path, { replace: true });
+        } else {
+            onAuthChange('showSignin');
+        }
+    };
+
     return (
         <section 
             className="hero-banner"
@@ -227,7 +241,7 @@ const HeroBanner = () => {
                             <span className="slide-subtitle">{slide.subtitle}</span>
                             <h2 className="slide-title">{slide.title}</h2>
                             <p className="slide-description">{slide.description}</p>
-                            <a href={slide.link} className="slide-cta">
+                            <a href={slide.link} className="slide-cta" onClick={(e) => handleNavigation(slide.link, e)}>
                                 {slide.cta}
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M5 12h14M12 5l7 7-7 7"/>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './SearchByBrand.css';
 import brand1 from '../assets/brand_1.png'; // Adjust the paths as necessary
 import brand2 from '../assets/brand_2.png';
@@ -12,6 +12,7 @@ function SearchByBrand() {
     const scrollRef = useRef(null);
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(true);
+    const navigate = useNavigate();
 
     const brands = [
         {
@@ -98,17 +99,25 @@ function SearchByBrand() {
         };
     }, []);
 
+    // Simplified navigation without auth check
+    const handleNavigation = (path, e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        navigate(path);
+    };
+
     return (
         <section className="search-by-brand">
             <div className="section-header">
                 <div className="header-content">
                     <h4>Featured Brands</h4>
-                    <Link to="/search" className="view-all-button">
+                    <a href="/search" className="view-all-button" onClick={(e) => handleNavigation('/search', e)}>
                         View All Brands
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
-                    </Link>
+                    </a>
                 </div>
             </div>
 
@@ -122,10 +131,11 @@ function SearchByBrand() {
                 )}
                 <div className="brands-grid" ref={scrollRef}>
                     {brands.map((brand) => (
-                        <Link 
-                            to={brand.link} 
+                        <a 
+                            href={brand.link} 
                             className="brand-item" 
                             key={brand.title}
+                            onClick={(e) => handleNavigation(brand.link, e)}
                         >
                             <div className="brand-logo-wrapper">
                                 <img 
@@ -135,7 +145,7 @@ function SearchByBrand() {
                                 />
                             </div>
                             <h3>{brand.title}</h3>
-                        </Link>
+                        </a>
                     ))}
                 </div>
                 {showRightButton && (

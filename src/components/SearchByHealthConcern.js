@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './SearchByHealthConcern.css';
 import pregnancyImg from '../assets/pregnant.png';
 import acneImg from '../assets/acne.png';
@@ -11,6 +11,7 @@ function SearchByHealthConcern() {
     const scrollRef = useRef(null);
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(true);
+    const navigate = useNavigate();
 
     const handleScroll = () => {
         if (scrollRef.current) {
@@ -24,7 +25,6 @@ function SearchByHealthConcern() {
         const scrollElement = scrollRef.current;
         if (scrollElement) {
             scrollElement.addEventListener('scroll', handleScroll);
-            // Check initial scroll buttons visibility
             handleScroll();
             return () => scrollElement.removeEventListener('scroll', handleScroll);
         }
@@ -38,6 +38,14 @@ function SearchByHealthConcern() {
                 behavior: 'smooth'
             });
         }
+    };
+
+    // Simplified navigation without auth check
+    const handleNavigation = (path, e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        navigate(path);
     };
 
     const concerns = [
@@ -83,12 +91,12 @@ function SearchByHealthConcern() {
             <div className="section-header">
                 <div className="header-content">
                     <h4>Search by Health Concern</h4>
-                    <Link to="/search" className="view-all-button">
+                    <a href="/search" className="view-all-button" onClick={(e) => handleNavigation('/search', e)}>
                         View All Concerns
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
-                    </Link>
+                    </a>
                 </div>
             </div>
 
@@ -132,7 +140,7 @@ function SearchByHealthConcern() {
                                     <h3>{concern.title}</h3>
                                     <p>{concern.description}</p>
                                 </div>
-                                <Link to={concern.link} className="concern-link">
+                                <a href={concern.link} className="concern-link" onClick={(e) => handleNavigation(concern.link, e)}>
                                     Explore Solutions
                                     <svg 
                                         xmlns="http://www.w3.org/2000/svg" 
@@ -145,7 +153,7 @@ function SearchByHealthConcern() {
                                     >
                                         <path d="M5 12h14m-7-7 7 7-7 7"/>
                                     </svg>
-                                </Link>
+                                </a>
                             </div>
                             <div className="card-background">
                                 <div className="geometric-shape"></div>

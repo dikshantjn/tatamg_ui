@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './SearchByCategory.css';
 import category1 from '../assets/category1.jpg';
 import category2 from '../assets/category2.jpg';
@@ -9,6 +9,7 @@ function SearchByCategory() {
     const scrollRef = useRef(null);
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(true);
+    const navigate = useNavigate();
 
     const categories = [
         {
@@ -81,17 +82,25 @@ function SearchByCategory() {
         };
     }, []);
 
+    // Simplified navigation without auth check
+    const handleNavigation = (path, e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        navigate(path);
+    };
+
     return (
         <section className="search-by-category">
             <div className="section-header">
                 <div className="header-content">
                     <h4>Shop by Category</h4>
-                    <Link to="/search" className="view-all-button">
+                    <a href="/search" className="view-all-button" onClick={(e) => handleNavigation('/search', e)}>
                         View All categories
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                         </svg>
-                    </Link>
+                    </a>
                 </div>
             </div>
 
@@ -105,10 +114,11 @@ function SearchByCategory() {
                 )}
                 <div className="categories-grid" ref={scrollRef}>
                     {categories.map((category) => (
-                        <Link 
-                            to={category.link} 
+                        <a 
+                            href={category.link} 
                             className="category-item" 
                             key={category.title}
+                            onClick={(e) => handleNavigation(category.link, e)}
                         >
                             <div className="category-image-wrapper">
                                 <img 
@@ -121,7 +131,7 @@ function SearchByCategory() {
                                 <h3>{category.title}</h3>
                                 <p>{category.description}</p>
                             </div>
-                        </Link>
+                        </a>
                     ))}
                 </div>
                 {showRightButton && (

@@ -17,6 +17,8 @@ import bannerImage from '../assets/Medical Insurance.jpg';  // Placeholder for b
 function MedicalInsurance() {
   const [showForm, setShowForm] = useState(false);
 
+  console.log('🏥 MedicalInsurance component rendered!');
+
   const toggleForm = () => {
     setShowForm(!showForm);
   };
