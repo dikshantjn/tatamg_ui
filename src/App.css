@@ -70,6 +70,31 @@
 .app {
   position: relative;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+
+/* Ensure body doesn't scroll when panel is open */
+body.panel-open {
+  overflow: hidden !important;
+}
+
+/* Loading screen styles */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
 }
 
 /* Side Panel Styles */
@@ -162,11 +187,6 @@
   }
 }
 
-/* Ensure body doesn't scroll when panel is open */
-body.panel-open {
-  overflow: hidden !important;
-}
-
 /* Adjust SignIn component styles when in side panel */
 .side-panel .sign-in-container {
   height: 100%;
@@ -213,19 +233,6 @@ body.panel-open {
 }
 
 /* Loading Screen Styles */
-.loading-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
 .loading-spinner {
   display: flex;
   align-items: center;
@@ -273,5 +280,12 @@ body.panel-open {
   .loading-spinner {
     width: 50px;
     height: 50px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .app {
+    padding-bottom: 64px; /* Height of bottom navigation */
   }
 }

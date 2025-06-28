@@ -43,7 +43,7 @@
 .footer {
     background: linear-gradient(135deg, #232526 0%, #414345 100%);
     color: #f3f4f6;
-    padding: 4rem 2rem 1rem;
+    padding: 4rem 2rem 0;
     font-size: 15px;
     letter-spacing: 0.01em;
     border-top-left-radius: 32px;
@@ -63,45 +63,45 @@
 
 .footer-brand {
     flex: 1;
+    max-width: 320px;
 }
 
 .footer-description {
     color: #cbd5e1;
     margin-bottom: 1.5rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
     line-height: 1.6;
-    max-width: 320px;
 }
 
 .footer-social {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .footer-social-icon {
     color: #f3f4f6;
-    background: #232526;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
-    box-shadow: 0 2px 8px 0 rgba(30,41,59,0.10);
+    transition: all 0.3s ease;
 }
 
 .footer-social-icon:hover {
     background: #38A3A5;
     color: #fff;
-    transform: translateY(-2px) scale(1.08);
+    transform: translateY(-2px);
 }
 
 .footer-links {
-    display: flex;
-    gap: 4rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
 }
 
 .footer-column {
@@ -112,49 +112,57 @@
 
 .footer-column h4 {
     color: #fff;
-    margin-bottom: 0.5rem;
-    font-size: 1.1rem;
-    font-weight: 700;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .footer-column a {
     color: #cbd5e1;
     text-decoration: none;
-    transition: color 0.2s;
-    font-size: 0.98rem;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    line-height: 1.8;
+    display: block;
+    padding: 2px 0;
 }
 
 .footer-column a:hover {
     color: #38A3A5;
+    transform: translateX(4px);
 }
 
 .app-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid;
-    border-radius: 8px;
-    padding: 0.5rem;
-    transition: all 0.2s;
-    background: rgba(255, 255, 255, 0.1);
+    border: 1.5px solid;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    margin-top: 1rem;
 }
 
 .app-btn:hover {
     transform: translateY(-2px);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #38A3A5;
 }
 
 .appstore-icon,
 .playstore-icon {
-    height: 32px;
+    height: 28px;
     width: auto;
     object-fit: contain;
 }
 
 .footer-bottom {
-    background: #232526;
-    padding: 2rem 0 1rem;
-    border-top: 1px solid #2d2f31;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem 2rem;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .footer-bottom-content {
@@ -164,12 +172,12 @@
     justify-content: space-between;
     align-items: center;
     color: #cbd5e1;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .footer-bottom-links {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     align-items: center;
 }
 
@@ -183,25 +191,43 @@
     color: #38A3A5;
 }
 
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
     .footer {
-        padding: 3rem 1rem 1rem;
+        padding: 3rem 1.5rem 0;
         border-radius: 24px 24px 0 0;
+        margin-top: 32px;
     }
 
     .footer-main {
         flex-direction: column;
-        gap: 2rem;
+        gap: 2.5rem;
+    }
+
+    .footer-brand {
+        max-width: 100%;
+        text-align: center;
+    }
+
+    .footer-description {
+        margin: 0 auto 1.5rem;
+        max-width: 400px;
+    }
+
+    .footer-social {
+        justify-content: center;
+        gap: 1.25rem;
     }
 
     .footer-links {
-        flex-wrap: wrap;
-        gap: 2rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem 1.5rem;
+        text-align: left;
     }
 
-    .footer-column {
-        flex: 1 1 40%;
-        min-width: 120px;
+    .footer-bottom {
+        padding: 1.25rem 1.5rem;
+        margin-top: 2.5rem;
     }
 
     .footer-bottom-content {
@@ -210,8 +236,52 @@
         text-align: center;
     }
 
-    .footer-description {
-        max-width: 100%;
+    .footer-bottom-links {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* Small Mobile Screens */
+@media (max-width: 480px) {
+    .footer {
+        padding: 2.5rem 1rem 0;
+    }
+
+    .footer-links {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .footer-column {
+        text-align: center;
+    }
+
+    .footer-column a:hover {
+        transform: none;
+    }
+
+    .footer-social-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .app-btn {
+        padding: 0.4rem 0.75rem;
+    }
+
+    .appstore-icon,
+    .playstore-icon {
+        height: 24px;
+    }
+}
+
+/* Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+    .footer-column a,
+    .footer-social-icon,
+    .app-btn {
+        transition: none;
     }
 }
 

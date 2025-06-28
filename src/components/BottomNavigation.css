@@ -1,0 +1,177 @@
+.bottom-nav-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+
+.bottom-nav-container.hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bottom-nav {
+    position: relative;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: #38A3A5; /* Primary color from colors.js */
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 16px 16px 0 0;
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    position: relative;
+    border-radius: 20px;
+}
+
+.nav-item svg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 2px;
+    stroke: #fff;
+    transition: stroke 0.2s;
+}
+
+.nav-item.active {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+}
+
+.nav-item.active svg,
+.nav-item:active svg {
+    stroke: #fff;
+}
+
+.emergency-call svg {
+    stroke: #fff;
+    width: 24px;
+    height: 24px;
+}
+
+.phone-blink-bg {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: blink-red-bg 1s infinite alternate;
+    margin-bottom: 2px;
+}
+
+@keyframes blink-red-bg {
+    0% { background: #DC2626; }
+    100% { background: #ff4d4f; }
+}
+
+.emergency-call span {
+    color: #fff;
+}
+
+@media (min-width: 769px) {
+    .bottom-nav {
+        display: none;
+    }
+}
+
+/* Adjust for smaller screens */
+@media (max-width: 360px) {
+    .nav-item {
+        padding: 8px 12px;
+    }
+    
+    .mic-circle {
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+    }
+
+    .nav-background::before {
+        width: 56px;
+        height: 56px;
+        top: -28px;
+    }
+    
+    .mic-circle svg {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Mobile Only */
+@media (max-width: 768px) {
+    .bottom-nav {
+        display: flex;
+    }
+}
+
+/* Remove the app padding style completely */
+.app {
+    padding-bottom: 0 !important;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .bottom-nav .nav-item,
+    .bottom-nav .phone-icon-wrapper,
+    .bottom-nav .phone-icon-wrapper::before {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* Focus states for accessibility */
+.bottom-nav .nav-item:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.bottom-nav .nav-item:first-child svg {
+    width: 32px;
+    height: 32px;
+}
+
+/* Preserve emergency call button styling */
+.emergency-call.active {
+    background: none;
+    transform: none;
+}
+
+.emergency-call.active::after {
+    display: none;
+} 

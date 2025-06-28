@@ -5,9 +5,19 @@ export const colors = {
     primaryDark: '#2D8587',
     primaryGradient: 'linear-gradient(135deg, #38A3A5 0%, #4FB5B7 100%)',
     
+    // Category icon colors and backgrounds
+    categoryColors: {
+        health: { icon: '#38A3A5', bg: '#F0FAFA' },
+        monitor: { icon: '#4FB5B7', bg: '#F0FAFA' },
+        medicine: { icon: '#38A3A5', bg: '#F0FAFA' },
+        care: { icon: '#4FB5B7', bg: '#F0FAFA' },
+        emergency: { icon: '#38A3A5', bg: '#F0FAFA' },
+        consultation: { icon: '#4FB5B7', bg: '#F0FAFA' }
+    },
+    
     // AI gradient colors
-    aiGradient: 'linear-gradient(45deg, #8A2BE2, #4169E1, #AC4A79, #8A2BE2)',
-    aiGradientHover: 'linear-gradient(45deg, #9B4BE3, #527BF2, #BD5A8A, #9B4BE3)',
+    aiGradient: 'linear-gradient(45deg, #38A3A5, #4FB5B7)',
+    aiGradientHover: 'linear-gradient(45deg, #2D8587, #38A3A5)',
     
     // Text colors
     textPrimary: '#1A365D',
@@ -25,23 +35,28 @@ export const colors = {
     success: '#059669',
     
     // Overlay colors
-    overlay: 'rgba(56, 163, 165, 0.1)' // Based on primary color
+    overlay: 'rgba(56, 163, 165, 0.1)', // Based on primary color
+    micGradient: 'linear-gradient(45deg, #38A3A5, #4FB5B7)',
 };
 
 // Common color combinations for components
 export const colorStyles = {
     buttonPrimary: {
-        background: colors.primaryGradient,
+        background: colors.primary,
         color: colors.backgroundWhite,
         hover: {
-            shadow: '0 4px 12px rgba(56, 163, 165, 0.2)'
+            background: colors.backgroundWhite,
+            color: colors.primary,
+            border: `1px solid ${colors.primary}`
         }
     },
     buttonAI: {
-        background: colors.aiGradient,
+        background: colors.primary,
         color: colors.backgroundWhite,
         hover: {
-            shadow: '0 4px 12px rgba(138, 43, 226, 0.3)'
+            background: colors.backgroundWhite,
+            color: colors.primary,
+            border: `1px solid ${colors.primary}`
         }
     },
     inputField: {

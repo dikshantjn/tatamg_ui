@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-import Header from './secondary/Header';
+import Header from './components/header/Header';
 import Footer from './components/Footer';
 import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile';
@@ -36,19 +36,24 @@ import Nutrition from './components/Nutrition';
 import PetCare from './components/PetCare';
 import OrganDonation from './components/OrganDonation';
 import Ayurveda from './components/Ayurveda';
-import CheckoutProducts from './components/checkoutproduct';
+import CheckoutProducts from './components/checkoutproductmedicine';
 import CheckoutDelivery from './components/checkoutdelivery';
 import CheckoutAmbulance from './components/checkoutambulance';
 import PaymentGateway from './components/PaymentGateway';
 import UserProfile from './components/UserProfile';
+import BottomNavigation from './components/BottomNavigation';
+import ProductList from './components/ProductList';
 
 import { isAuthenticated as checkAuth } from './services/auth.utils';
 
 // Component to handle route-based SignIn display
-const AppContent = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
+const AppContent = ({ isAuthenticated, onAuthChange }) => {
   const location = useLocation();
   const [showSignInPanel, setShowSignInPanel] = useState(false);
   const [shouldShowSignInForProtectedRoute, setShouldShowSignInForProtectedRoute] = useState(false);
+
+  console.log('📍 Current location:', location.pathname);
+  console.log('🔐 Is authenticated:', isAuthenticated);
 
   // Check if current path is a protected route
   const isProtectedRoute = (path) => {
@@ -60,20 +65,32 @@ const AppContent = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
       '/hospital-discovery', '/hospital-results', '/care-at-home', '/medical-tourism', 
       '/rehabilitation', '/early-detection', '/nutrition', '/pet-care', 
       '/organ-donation', '/ayurveda', '/checkout-2', '/checkout-3', '/checkout-4', 
-      '/gateway', '/profile', '/orders'
+      '/checkout-product-medicine', '/gateway', '/profile', '/orders'
     ];
-    return protectedPaths.some(protectedPath => path.startsWith(protectedPath));
+    const isProtected = protectedPaths.some(protectedPath => path.startsWith(protectedPath));
+    console.log('🛡️ Route protection check:', { path, isProtected });
+    return isProtected;
   };
 
   // Check if we should show SignIn panel for protected route access
   useEffect(() => {
+    console.log('🔍 Checking route protection for:', location.pathname);
     if (!isAuthenticated && isProtectedRoute(location.pathname)) {
+      console.log('🚨 Showing SignIn panel for protected route');
       setShouldShowSignInForProtectedRoute(true);
+    } else {
+      console.log('✅ Route access allowed or not protected');
+      setShouldShowSignInForProtectedRoute(false);
     }
   }, [location.pathname, isAuthenticated]);
 
   const handleShowSignIn = () => {
     setShowSignInPanel(true);
+  };
+
+  const handleCloseSignIn = () => {
+    setShowSignInPanel(false);
+    setShouldShowSignInForProtectedRoute(false);
   };
 
   const handleAuthChange = (authState) => {
@@ -86,21 +103,22 @@ const AppContent = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     }
   };
 
-  const handleCloseSignIn = () => {
-    setShowSignInPanel(false);
-    setShouldShowSignInForProtectedRoute(false);
-  };
-
   return (
     <div className="app">
-      <Header isAuthenticated={isAuthenticated} onAuthChange={onAuthChange} onShowSignIn={handleShowSignIn} />
+      <Header 
+        isAuthenticated={isAuthenticated} 
+        onAuthChange={onAuthChange} 
+        onShowSignIn={handleShowSignIn} 
+      />
       <main className="main-content">
         <Routes>
-          {/* Public */}
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/product/:id" element={<ProductProfilePage />} />
+          <Route path="/products/:category" element={<ProductList />} />
 
-          {/* Protected - redirect to home if not authenticated */}
+          {/* Protected Routes */}
           <Route path="/doctor-profile/:id" element={
             isAuthenticated ? <DoctorProfile /> : <Navigate to="/" replace />
           } />
@@ -188,7 +206,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
           <Route path="/ayurveda" element={
             isAuthenticated ? <Ayurveda /> : <Navigate to="/" replace />
           } />
-          <Route path="/checkout-2" element={
+          <Route path="/checkout-product-medicine" element={
             isAuthenticated ? <CheckoutProducts /> : <Navigate to="/" replace />
           } />
           <Route path="/checkout-3" element={
@@ -211,51 +229,65 @@ const AppContent = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <Footer />
-      
-      {/* SignIn Panel - shown as overlay when needed */}
       <SignIn 
         isOpen={showSignInPanel || shouldShowSignInForProtectedRoute} 
         onClose={handleCloseSignIn}
         onAuthChange={handleAuthChange}
       />
+      <BottomNavigation />
+      <Footer />
     </div>
   );
 };
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      const authStatus = await checkAuth();
-      console.log("🔐 Auth status check:", authStatus);
-      setIsAuthenticated(authStatus);
-      setIsCheckingAuth(false);
-    };
     verifyAuth();
   }, []);
 
+  const verifyAuth = async () => {
+    try {
+      setIsLoading(true);
+      // Small delay to ensure localStorage is accessible
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const authState = await checkAuth();
+      console.log('🔍 Auth verification result:', authState);
+      setIsAuthenticated(authState);
+    } catch (error) {
+      console.error('❌ Error verifying auth:', error);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAuthChange = (authState) => {
-    console.log("🔄 Auth state changed:", authState);
+    console.log("🔄 App level auth state changed:", authState);
     setIsAuthenticated(authState);
   };
 
-  if (isCheckingAuth) {
+  // Show loading while checking authentication
+  if (isLoading) {
     return (
-      <div className="loading-screen">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-        </div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        fontSize: '18px'
+      }}>
+        Loading...
       </div>
     );
   }
 
   return (
     <Router>
-      <AppContent 
-        isAuthenticated={isAuthenticated} 
+      <AppContent
+        isAuthenticated={isAuthenticated}
         onAuthChange={handleAuthChange}
       />
     </Router>

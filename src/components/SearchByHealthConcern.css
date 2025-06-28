@@ -1,6 +1,5 @@
 .search-health-concern {
-    padding: 40px 0;
-    background: #F8FAFC;
+    padding: 32px 0;
     overflow: hidden;
 }
 
@@ -74,22 +73,19 @@
 .search-health-concern .concerns-container {
     position: relative;
     padding: 0 20px;
-    border-radius: 12px;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .concerns-grid {
     display: flex;
     gap: 20px;
-    padding: 0 20px;
+    padding: 0;
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .concerns-grid::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
 }
 
 .concern-card {
@@ -100,13 +96,14 @@
     transition: all 0.3s ease;
     border: 1px solid #E2E8F0;
     flex: 1;
-    min-width: 0; /* Allows card to shrink below its content size */
-    max-width: calc(20% - 16px); /* 20% width for 5 items, accounting for gap */
+    min-width: 280px;
+    max-width: 320px;
 }
 
 .concern-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.06);
+    border-color: var(--card-color);
 }
 
 .card-content {

@@ -62,6 +62,19 @@ const SignIn = ({ isOpen, onClose, onAuthChange }) => {
         };
     }, []);
 
+    // Handle body scroll
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add('panel-open');
+        } else {
+            document.body.classList.remove('panel-open');
+        }
+
+        return () => {
+            document.body.classList.remove('panel-open');
+        };
+    }, [isOpen]);
+
     // Initialize reCAPTCHA verifier
     const initializeRecaptcha = async () => {
         try {

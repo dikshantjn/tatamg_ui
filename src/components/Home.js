@@ -30,20 +30,7 @@ function Home() {
                 <SearchByBrand />
             </div>
 
-            {/* ✅ New Navigate to Profile Button */}
-            <div style={{ textAlign: 'center', marginTop: '40px' }}>
-                <button onClick={goToProfile} style={{
-                    padding: '12px 24px',
-                    fontSize: '16px',
-                    backgroundColor: '#3B82F6',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                }}>
-                    Go to Profile
-                </button>
-            </div>
+           
 
             <div className="testimonials-section">
                 <Testimonials />
