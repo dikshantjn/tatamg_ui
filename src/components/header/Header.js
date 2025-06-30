@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import './Header.css';
 import logo from '../../assets/logo.png';
 import { colors } from '../../styles/colors';
 import { useMediaQuery } from 'react-responsive';
 import { clearAuthData, getUserId } from '../../services/auth.utils';
 import { userService } from '../../services/user.service';
+import { fetchCartItems, selectCartItemCount, selectCartLoading } from '../../store/slices/cartSlice';
 
 const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
+    const dispatch = useDispatch();
+    const cartItemCount = useSelector(selectCartItemCount);
+    const cartLoading = useSelector(selectCartLoading);
+    
     const [showEmergencyModal, setShowEmergencyModal] = useState(false);
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
     const [showLocationDropdown, setShowLocationDropdown] = useState(false);
@@ -44,6 +50,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     ];
 
     const isMobile = useMediaQuery({ maxWidth: 768 });
+
+    // Fetch cart items when user is authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(fetchCartItems());
+        }
+    }, [dispatch, isAuthenticated]);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -296,6 +309,11 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
+        )},
+        { path: '/track-order', text: 'Track Order', icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
         )}
     ];
 
@@ -352,11 +370,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
 
                         {isMobile ? (
                             <div className={`mobile-header-icons ${isScrolled ? 'hidden' : ''}`}>
-                                <Link to="/checkout" className="mobile-header-icon primary-icon">
+                                <Link to="/checkout-product-medicine" className="mobile-header-icon primary-icon">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                     </svg>
-                                    <span className="cart-count">3</span>
+                                    {cartItemCount > 0 && (
+                                        <span className="cart-count">{cartItemCount}</span>
+                                    )}
                                 </Link>
                                 {!isAuthenticated && (
                                     <button className="mobile-signin-btn" onClick={handleLoginClick}>
@@ -516,12 +536,14 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                             <span>Emergency</span>
                         </button>
 
-                        <Link to="/checkout" className="action-link">
+                        <Link to="/checkout-product-medicine" className="action-link">
                             <div className="action-icon cart-icon">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={colors.textPrimary}>
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
-                                <span className="cart-badge">0</span>
+                                {cartItemCount > 0 && (
+                                    <span className="cart-badge">{cartItemCount}</span>
+                                )}
                             </div>
                             <span>Cart</span>
                         </Link>
@@ -703,12 +725,35 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                                 </Link>
                             ))}
                             {isAuthenticated && (
-                                <button className="drawer-logout-btn" onClick={handleLogout}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                    </svg>
-                                    Logout
-                                </button>
+                                <>
+                                    <Link 
+                                        to="/profile" 
+                                        className="drawer-nav-item" 
+                                        onClick={() => handleLinkClick('/profile')}
+                                    >
+                                        My Profile
+                                    </Link>
+                                    <Link 
+                                        to="/orders" 
+                                        className="drawer-nav-item" 
+                                        onClick={() => handleLinkClick('/orders')}
+                                    >
+                                        My Orders
+                                    </Link>
+                                    <Link 
+                                        to="/track-order" 
+                                        className="drawer-nav-item" 
+                                        onClick={() => handleLinkClick('/track-order')}
+                                    >
+                                        Track Order
+                                    </Link>
+                                    <button className="drawer-logout-btn" onClick={handleLogout}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        Logout
+                                    </button>
+                                </>
                             )}
                         </nav>
                     </div>

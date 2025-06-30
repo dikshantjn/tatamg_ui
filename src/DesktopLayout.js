@@ -52,7 +52,7 @@ function DesktopLayout() {
                     <Route path="/search" element={<SearchResults />} />
                     <Route path="/doctors" element={<ConsultDoctors />} />
                     <Route path="/signin" element={<SignIn />} />
-                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/checkout-product-medicine" element={<Checkout />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/ambulance" element={<Ambulance />} />
                     <Route path="/offers" element={<Offers />} />

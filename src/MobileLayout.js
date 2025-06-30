@@ -39,7 +39,7 @@ function MobileLayout() {
 
                 {/* Cart & Emergency */}
                 <div className="top-right-icons">
-                    <Link to="/checkout">
+                    <Link to="/checkout-product-medicine">
                         <img src={cartIcon} alt="Cart" className="cart-icon" />
                     </Link>
                     <Link to="/emergency">

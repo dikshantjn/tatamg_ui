@@ -43,6 +43,7 @@ import PaymentGateway from './components/PaymentGateway';
 import UserProfile from './components/UserProfile';
 import BottomNavigation from './components/BottomNavigation';
 import ProductList from './components/ProductList';
+import TrackOrder from './components/TrackOrder';
 
 import { isAuthenticated as checkAuth } from './services/auth.utils';
 
@@ -65,7 +66,7 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
       '/hospital-discovery', '/hospital-results', '/care-at-home', '/medical-tourism', 
       '/rehabilitation', '/early-detection', '/nutrition', '/pet-care', 
       '/organ-donation', '/ayurveda', '/checkout-2', '/checkout-3', '/checkout-4', 
-      '/checkout-product-medicine', '/gateway', '/profile', '/orders'
+      '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/track-order'
     ];
     const isProtected = protectedPaths.some(protectedPath => path.startsWith(protectedPath));
     console.log('🛡️ Route protection check:', { path, isProtected });
@@ -223,6 +224,9 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           } />
           <Route path="/orders" element={
             isAuthenticated ? <UserProfile /> : <Navigate to="/" replace />
+          } />
+          <Route path="/track-order" element={
+            isAuthenticated ? <TrackOrder /> : <Navigate to="/" replace />
           } />
 
           {/* Fallback */}

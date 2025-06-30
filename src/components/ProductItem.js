@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import './ProductItem.css';
 import { colors } from '../styles/colors';
 import { VendorProductService } from '../services/vendor-product.service';
 import { getUserId, isAuthenticated } from '../services/auth.utils';
+import { fetchCartItems } from '../store/slices/cartSlice';
 
 // Image Fallback Icon Component
 const ImageIcon = () => (
@@ -39,6 +41,7 @@ const Toast = ({ message, onClose, showGoToCart, onGoToCart }) => {
 };
 
 const ProductItem = ({ product }) => {
+    const dispatch = useDispatch();
     const [imageError, setImageError] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -110,6 +113,10 @@ const ProductItem = ({ product }) => {
             console.log('Add to cart API response:', result);
             
             setIsInCart(true);
+            
+            // Dispatch Redux action to refresh cart items in header
+            dispatch(fetchCartItems());
+            
             setToast({
                 message: result.message || 'Product added to cart successfully!',
                 showGoToCart: true

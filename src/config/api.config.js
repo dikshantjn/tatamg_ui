@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.42:5000/api',
+    BASE_URL: 'http://192.168.1.45:5000/api',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -25,7 +25,26 @@ export const API_CONFIG = {
         CART: {
             ADD_TO_CART: '/product-cart/add',
             CHECK_IN_CART: '/product-cart/check',
-            GET_CART_ITEMS: '/product-cart/get-cart-items/:userId'
+            GET_CART_ITEMS: '/product-cart/get-cart-items/:userId',
+            DELETE_CART_ITEM: '/product-cart/delete-cart-item/:cartId',
+            UPDATE_CART_QUANTITY: '/product-cart/update-cart-item-qantity/:cartId',
+            CLEAR_CART: '/product-cart/clear-cart/:userId'
+        },
+        DELIVERY_ADDRESS: {
+            SAVE_ADDRESS: '/deliveryAddress/delivery-address',
+            GET_ADDRESSES: '/deliveryAddress/getDeliveryAddress/:userId',
+            DELETE_ADDRESS: '/deliveryAddress/deleteDeliveryAddress/:addressId'
+        },
+        PRODUCT_ORDER: {
+            CREATE_ORDER: '/product-order/order',
+            GET_ORDER: '/product-order/order/:orderId',
+            GET_USER_ORDERS: '/product-order/orders/:userId',
+            GET_USER_ORDERS_TRACKING: '/product-order/orders/user/:userId'
+        },
+        PAYMENTS: {
+            GET_PAYMENT_HISTORY: '/payments/history',
+            GET_PAYMENT_DETAILS: '/payments/:paymentId',
+            CREATE_RAZORPAY_ORDER: '/payments/create-razorpay-order'
         }
         // Add other endpoint categories as needed
     }

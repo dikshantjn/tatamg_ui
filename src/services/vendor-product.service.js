@@ -125,5 +125,107 @@ export const VendorProductService = {
             });
             throw error;
         }
+    },
+
+    clearCart: async (userId) => {
+        try {
+            console.log('Clearing cart for user:', userId);
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.CLEAR_CART, { userId });
+            console.log('Using endpoint:', getApiUrl(endpoint));
+            
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            console.log('Clear cart response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                console.error('Error response data:', errorData);
+                throw new Error(errorData?.message || 'Failed to clear cart');
+            }
+
+            const data = await response.json();
+            console.log('Cart cleared successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error clearing cart:', {
+                error,
+                message: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
+    },
+
+    deleteCartItem: async (cartId) => {
+        try {
+            console.log('Deleting cart item:', cartId);
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.DELETE_CART_ITEM, { cartId });
+            console.log('Using endpoint:', getApiUrl(endpoint));
+            
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            console.log('Delete cart item response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                console.error('Error response data:', errorData);
+                throw new Error(errorData?.message || 'Failed to delete cart item');
+            }
+
+            const data = await response.json();
+            console.log('Cart item deleted successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error deleting cart item:', {
+                error,
+                message: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
+    },
+
+    updateCartItemQuantity: async (cartId, quantity) => {
+        try {
+            console.log('Updating cart item quantity:', { cartId, quantity });
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.UPDATE_CART_QUANTITY, { cartId });
+            console.log('Using endpoint:', getApiUrl(endpoint));
+            
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantity })
+            });
+
+            console.log('Update cart quantity response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                console.error('Error response data:', errorData);
+                throw new Error(errorData?.message || 'Failed to update cart item quantity');
+            }
+
+            const data = await response.json();
+            console.log('Cart item quantity updated successfully:', data);
+            return data;
+        } catch (error) {
+            console.error('Error updating cart item quantity:', {
+                error,
+                message: error.message,
+                stack: error.stack
+            });
+            throw error;
+        }
     }
 }; 

@@ -1,0 +1,213 @@
+/* Delivery Partner Modal Styles */
+
+/* Backdrop */
+.delivery-partner-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 9998;
+}
+
+/* Modal Container */
+.delivery-partner-modal-container {
+    position: fixed;
+    z-index: 9999;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Desktop Side Panel */
+.delivery-partner-modal-container.desktop {
+    top: 0;
+    right: 0;
+    width: 480px;
+    height: 100vh;
+    border-radius: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slideInRight 0.3s ease-out;
+}
+
+/* Mobile Bottom Sheet */
+.delivery-partner-modal-container.mobile {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 24px 24px 0 0;
+    border-bottom: none;
+    animation: slideInUp 0.3s ease-out;
+}
+
+/* Content */
+.delivery-partner-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+    text-align: center;
+    gap: 32px;
+}
+
+/* Animation Container */
+.animation-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+}
+
+/* Text Content */
+.text-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+}
+
+.text-content h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1A365D;
+    margin: 0;
+    line-height: 1.3;
+    letter-spacing: -0.5px;
+}
+
+.text-content p {
+    font-size: 16px;
+    color: #64748B;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 500;
+    max-width: 320px;
+}
+
+/* Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .delivery-partner-modal-container.mobile {
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .delivery-partner-content {
+        padding: 40px 24px;
+        gap: 28px;
+    }
+    
+    .animation-container {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .text-content h2 {
+        font-size: 20px;
+    }
+    
+    .text-content p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .delivery-partner-modal-container.mobile {
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .delivery-partner-content {
+        padding: 32px 20px;
+        gap: 24px;
+    }
+    
+    .animation-container {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .text-content h2 {
+        font-size: 18px;
+    }
+    
+    .text-content p {
+        font-size: 13px;
+    }
+}
+
+/* Loading State */
+.delivery-partner-modal-container.loading {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.02);
+    }
+}
+
+/* Fallback Spinner */
+.fallback-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 200px;
+    height: 200px;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3182ce;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+} 

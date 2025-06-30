@@ -21,67 +21,68 @@ import dentist from '../assets/dentist.jpg';
 import surgeon from '../assets/surgeon.jpg';
 import phsiotherapist from '../assets/phsiotherapist.jpg';
 
-// Circular Loading Component
+// Enhanced Loading Components
 const CircularLoader = () => (
     <div className="circular-loader">
-        <div className="spinner"></div>
+        <div className="spinner-ring"></div>
+        <div className="spinner-text">Loading...</div>
     </div>
 );
 
-// Skeleton Loading Component
 const ProductCardSkeleton = () => (
-    <div className="product-box skeleton">
+    <div className="product-box skeleton-card">
         <div className="skeleton-image"></div>
         <div className="skeleton-content">
             <div className="skeleton-title"></div>
+            <div className="skeleton-description"></div>
             <div className="skeleton-price"></div>
             <div className="skeleton-button"></div>
         </div>
     </div>
 );
 
-// Category color mapping
+// Enhanced Category color mapping with gradients
 const categoryColors = {
-    'Dental Care': '#E3F2FD',
-    'Genetic Testing': '#E8F5E9',
-    'Heart Care': '#FFEBEE',
-    'Baby Care': '#F3E5F5',
-    'Elder Care': '#FFF3E0',
-    'Women Care': '#FCE4EC',
-    'Digital Health Tracker': '#E0F7FA',
-    'Digital Health Ring': '#E8F5E9',
-    'Epilepsy Care': '#E3F2FD',
-    'UTI Test Kit': '#F3E5F5',
-    'Wellness Care Kit': '#FFF3E0',
-    'Pregnancy Care': '#FCE4EC',
-    'Wound Care': '#E0F7FA',
-    'Portable ECG': '#E8F5E9',
-    'Period Care': '#F3E5F5',
-    default: '#E3F2FD'
+    'Dental Care': { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' },
+    'Genetic Testing': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
+    'Heart Care': { bg: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', icon: '#D32F2F' },
+    'Baby Care': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
+    'Elder Care': { bg: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', icon: '#F57C00' },
+    'Women Care': { bg: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', icon: '#C2185B' },
+    'Digital Health Tracker': { bg: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', icon: '#0097A7' },
+    'Digital Health Ring': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
+    'Epilepsy Care': { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' },
+    'UTI Test Kit': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
+    'Wellness Care Kit': { bg: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', icon: '#F57C00' },
+    'Pregnancy Care': { bg: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', icon: '#C2185B' },
+    'Wound Care': { bg: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', icon: '#0097A7' },
+    'Portable ECG': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
+    'Period Care': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
+    default: { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' }
 };
 
-// Geometric Shape Component
+// Enhanced Geometric Shape Component with animations
 const GeometricShapes = ({ type }) => {
     const shapes = {
         popular: [
-            { className: 'shape-1 shape-circle', background: '#E3F2FD' },
-            { className: 'shape-2 shape-square', background: '#E8F5E9' },
-            { className: 'shape-3 shape-triangle', background: '#FFEBEE' }
+            { className: 'shape-1 shape-circle', background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', animation: 'float 6s ease-in-out infinite' },
+            { className: 'shape-2 shape-square', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 2s' },
+            { className: 'shape-3 shape-triangle', background: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', animation: 'float 6s ease-in-out infinite 4s' }
         ],
         electronic: [
-            { className: 'shape-1 shape-square', background: '#E0F7FA' },
-            { className: 'shape-2 shape-triangle', background: '#E8F5E9' },
-            { className: 'shape-3 shape-circle', background: '#E3F2FD' }
+            { className: 'shape-1 shape-square', background: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', animation: 'float 6s ease-in-out infinite' },
+            { className: 'shape-2 shape-triangle', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 2s' },
+            { className: 'shape-3 shape-circle', background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', animation: 'float 6s ease-in-out infinite 4s' }
         ],
         featured: [
-            { className: 'shape-1 shape-triangle', background: '#F3E5F5' },
-            { className: 'shape-2 shape-circle', background: '#FFF3E0' },
-            { className: 'shape-3 shape-square', background: '#FCE4EC' }
+            { className: 'shape-1 shape-triangle', background: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', animation: 'float 6s ease-in-out infinite' },
+            { className: 'shape-2 shape-circle', background: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', animation: 'float 6s ease-in-out infinite 2s' },
+            { className: 'shape-3 shape-square', background: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', animation: 'float 6s ease-in-out infinite 4s' }
         ],
         personal: [
-            { className: 'shape-1 shape-square', background: '#FCE4EC' },
-            { className: 'shape-2 shape-circle', background: '#E0F7FA' },
-            { className: 'shape-3 shape-triangle', background: '#E8F5E9' }
+            { className: 'shape-1 shape-square', background: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', animation: 'float 6s ease-in-out infinite' },
+            { className: 'shape-2 shape-circle', background: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', animation: 'float 6s ease-in-out infinite 2s' },
+            { className: 'shape-3 shape-triangle', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 4s' }
         ]
     };
 
@@ -91,17 +92,20 @@ const GeometricShapes = ({ type }) => {
                 <div 
                     key={index} 
                     className={`section-shape ${shape.className}`}
-                    style={{ background: shape.background }}
+                    style={{ 
+                        background: shape.background,
+                        animation: shape.animation
+                    }}
                 />
             ))}
         </>
     );
 };
 
-// Category Box Component
+// Enhanced Category Box Component
 const CategoryBox = ({ category, onClick }) => {
     const navigate = useNavigate();
-    const backgroundColor = categoryColors[category.name] || categoryColors.default;
+    const categoryStyle = categoryColors[category.name] || categoryColors.default;
 
     const handleClick = () => {
         navigate(`/products/${encodeURIComponent(category.name)}`);
@@ -111,23 +115,30 @@ const CategoryBox = ({ category, onClick }) => {
         <div 
             className="category-box" 
             onClick={handleClick}
-            style={{ '--category-color': backgroundColor }}
+            style={{ '--category-bg': categoryStyle.bg }}
         >
-            <div className="category-icon-wrapper" style={{ background: backgroundColor }}>
-                <category.icon size={24} style={{ color: category.name.toLowerCase().includes('care') ? '#FF6B6B' : '#38A3A5' }} />
+            <div className="category-icon-wrapper" style={{ background: categoryStyle.bg }}>
+                <category.icon size={28} style={{ color: categoryStyle.icon }} />
             </div>
             <div className="category-info">
                 <h3>{category.name}</h3>
-                <p>{category.subCategories.length} items</p>
+                <p>{category.subCategories.length} items available</p>
+                <div className="category-arrow">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 18l6-6-6-6" />
+                    </svg>
+                </div>
             </div>
+            <div className="category-overlay"></div>
         </div>
     );
 };
 
-// Product Box Component with Image Loading
+// Enhanced Product Box Component
 const ProductBox = ({ product }) => {
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleImageLoad = () => {
         setImageLoading(false);
@@ -139,11 +150,20 @@ const ProductBox = ({ product }) => {
     };
 
     return (
-        <div className="product-box">
+        <div 
+            className="product-box" 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
             <div className="product-image-container">
                 {imageLoading && <CircularLoader />}
                 {imageError ? (
                     <div className="image-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
                         <span>Image not available</span>
                     </div>
                 ) : (
@@ -157,19 +177,50 @@ const ProductBox = ({ product }) => {
                 )}
                 <div className="product-overlay">
                     <button className="quick-view-btn">Quick View</button>
+                    <button className="add-to-cart-overlay-btn">Add to Cart</button>
                 </div>
-                {product.prescription && <span className="badge prescription" style={{ backgroundColor: colors.error }}>
-                    Prescription Required
-                </span>}
-                {product.stock === 'low' && <span className="badge stock-low" style={{ backgroundColor: '#F59E0B' }}>
-                    Low Stock
-                </span>}
-                {product.stock === 'out' && <span className="badge out-of-stock" style={{ backgroundColor: colors.textSecondary }}>
-                    Out of Stock
-                </span>}
-                {product.discount > 0 && <span className="badge discount" style={{ backgroundColor: colors.success }}>
-                    {product.discount}% OFF
-                </span>}
+                {product.prescription && (
+                    <span className="badge prescription">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                        Prescription Required
+                    </span>
+                )}
+                {product.stock === 'low' && (
+                    <span className="badge stock-low">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        Low Stock
+                    </span>
+                )}
+                {product.stock === 'out' && (
+                    <span className="badge out-of-stock">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        Out of Stock
+                    </span>
+                )}
+                {product.discount > 0 && (
+                    <span className="badge discount">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 14l6-6"/>
+                            <circle cx="6" cy="6" r="3"/>
+                            <circle cx="18" cy="18" r="3"/>
+                        </svg>
+                        {product.discount}% OFF
+                    </span>
+                )}
             </div>
             <div className="product-content">
                 <h3 className="product-name">{product.name}</h3>
@@ -188,63 +239,93 @@ const ProductBox = ({ product }) => {
                 <button 
                     className="add-to-cart-btn" 
                     disabled={product.stock === 'out'}
-                    style={{
-                        background: product.stock === 'out' ? colors.textSecondary : colors.primaryGradient
-                    }}
                 >
-                    {product.stock === 'out' ? 'Out of Stock' : 'Add to Cart'}
+                    {product.stock === 'out' ? (
+                        <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Out of Stock
+                        </>
+                    ) : (
+                        <>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
+                                <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
+                                <path d="M12 21c0-1-1-2-2-2s-2 1-2 2 1 2 2 2 2-1 2-2z"/>
+                                <path d="M12 3c0 1 1 2 2 2s2-1 2-2-1-2-2-2-2 1-2 2z"/>
+                            </svg>
+                            Add to Cart
+                        </>
+                    )}
                 </button>
             </div>
         </div>
     );
 };
 
-// Offer Banner Component
-const OfferBanner = ({ title, subtitle, ctaText, bgColor, textColor }) => (
+// Enhanced Offer Banner Component
+const OfferBanner = ({ title, subtitle, ctaText, bgColor, textColor, icon }) => (
     <div className="offer-banner" style={{ 
         background: bgColor || colors.primaryGradient,
         color: textColor || colors.backgroundWhite
     }}>
         <div className="offer-content">
             <div className="offer-text">
+                {icon && <div className="offer-icon">{icon}</div>}
                 <h2>{title}</h2>
                 <p>{subtitle}</p>
             </div>
-            <button className="offer-cta">{ctaText}</button>
+            <button className="offer-cta">
+                {ctaText}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14"/>
+                    <path d="M12 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+        <div className="offer-shapes">
+            <div className="offer-shape circle"></div>
+            <div className="offer-shape square"></div>
+            <div className="offer-shape triangle"></div>
         </div>
     </div>
 );
 
 function Products() {
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState('all');
-    const [products, setProducts] = useState([]);
-    const popularCategoriesRef = useRef(null);
     const [showLeftScroll, setShowLeftScroll] = useState(false);
-    const [showRightScroll, setShowRightScroll] = useState(true);
+    const [showRightScroll, setShowRightScroll] = useState(false);
+    const [showPersonalLeftScroll, setShowPersonalLeftScroll] = useState(false);
+    const [showPersonalRightScroll, setShowPersonalRightScroll] = useState(false);
+    
+    const popularCategoriesRef = useRef(null);
+    const personalCareRef = useRef(null);
 
-    // Fetch products when category changes
+    // Fetch products from API
     useEffect(() => {
         const fetchProducts = async () => {
-            setLoading(true);
             try {
-                if (activeCategory !== 'all') {
-                    const fetchedProducts = await VendorProductService.getProductsByCategory(activeCategory);
-                    setProducts(fetchedProducts);
-                } else {
-                    // You might want to implement a get all products endpoint
-                    setProducts([]);
+                setLoading(true);
+                const response = await VendorProductService.getAllProducts();
+                if (response && response.data) {
+                    setProducts(response.data);
                 }
             } catch (error) {
                 console.error('Error fetching products:', error);
-                // You might want to show an error message to the user
+                setProducts([]);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchProducts();
-    }, [activeCategory]);
+    }, []);
 
     // Check scroll position for popular categories
     const checkScroll = () => {
@@ -252,6 +333,15 @@ function Products() {
             const { scrollLeft, scrollWidth, clientWidth } = popularCategoriesRef.current;
             setShowLeftScroll(scrollLeft > 0);
             setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    };
+
+    // Check scroll position for personal care categories
+    const checkPersonalScroll = () => {
+        if (personalCareRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = personalCareRef.current;
+            setShowPersonalLeftScroll(scrollLeft > 0);
+            setShowPersonalRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
         }
     };
 
@@ -266,21 +356,49 @@ function Products() {
         }
     };
 
-    // Add scroll event listener
-    useEffect(() => {
-        const currentRef = popularCategoriesRef.current;
-        if (currentRef) {
-            currentRef.addEventListener('scroll', checkScroll);
-            checkScroll(); // Initial check
-            
-            // Check on window resize
-            window.addEventListener('resize', checkScroll);
-            
-            return () => {
-                currentRef.removeEventListener('scroll', checkScroll);
-                window.removeEventListener('resize', checkScroll);
-            };
+    // Handle scroll for personal care categories
+    const handlePersonalScroll = (direction) => {
+        if (personalCareRef.current) {
+            const scrollAmount = direction === 'left' ? -200 : 200;
+            personalCareRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
         }
+    };
+
+    // Add scroll event listeners
+    useEffect(() => {
+        const popularRef = popularCategoriesRef.current;
+        const personalRef = personalCareRef.current;
+        
+        if (popularRef) {
+            popularRef.addEventListener('scroll', checkScroll);
+            checkScroll();
+        }
+        
+        if (personalRef) {
+            personalRef.addEventListener('scroll', checkPersonalScroll);
+            checkPersonalScroll();
+        }
+        
+        window.addEventListener('resize', () => {
+            checkScroll();
+            checkPersonalScroll();
+        });
+        
+        return () => {
+            if (popularRef) {
+                popularRef.removeEventListener('scroll', checkScroll);
+            }
+            if (personalRef) {
+                personalRef.removeEventListener('scroll', checkPersonalScroll);
+            }
+            window.removeEventListener('resize', () => {
+                checkScroll();
+                checkPersonalScroll();
+            });
+        };
     }, []);
 
     const handleCategoryClick = (categoryName) => {
@@ -404,8 +522,17 @@ function Products() {
             <section className="categories-section popular">
                 <GeometricShapes type="popular" />
                 <div className="section-header">
-                    <h2>Popular Categories</h2>
-                    <Link to="/categories" className="view-all-link">View All Categories</Link>
+                    <div className="section-title">
+                        <h2>Popular Categories</h2>
+                        <p>Explore our most sought-after health categories</p>
+                    </div>
+                    <Link to="/categories" className="view-all-link">
+                        View All Categories
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                        </svg>
+                    </Link>
                 </div>
                 <div className="categories-container">
                     {showLeftScroll && (
@@ -414,7 +541,7 @@ function Products() {
                             onClick={() => handleScroll('left')}
                             aria-label="Scroll left"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M15 18l-6-6 6-6" />
                             </svg>
                         </button>
@@ -433,7 +560,7 @@ function Products() {
                             onClick={() => handleScroll('right')}
                             aria-label="Scroll right"
                         >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M9 18l6-6-6-6" />
                             </svg>
                         </button>
@@ -453,8 +580,17 @@ function Products() {
             <section className="categories-section electronic">
                 <GeometricShapes type="electronic" />
                 <div className="section-header">
-                    <h2>Electronic Health Devices</h2>
-                    <Link to="/electronics" className="view-all-link">View All Electronics</Link>
+                    <div className="section-title">
+                        <h2>Electronic Health Devices</h2>
+                        <p>Smart devices for modern healthcare</p>
+                    </div>
+                    <Link to="/electronics" className="view-all-link">
+                        View All Electronics
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                        </svg>
+                    </Link>
                 </div>
                 <div className="categories-grid">
                     {electronicCategories.map((category, index) => (
@@ -470,7 +606,10 @@ function Products() {
             <section className="products-section">
                 <GeometricShapes type="featured" />
                 <div className="section-header">
-                    <h2>{activeCategory === 'all' ? 'Featured Products' : activeCategory}</h2>
+                    <div className="section-title">
+                        <h2>{activeCategory === 'all' ? 'Featured Products' : activeCategory}</h2>
+                        <p>Handpicked products for your health and wellness</p>
+                    </div>
                 </div>
                 <div className="products-grid">
                     {loading ? (
@@ -483,7 +622,12 @@ function Products() {
                         ))
                     ) : (
                         <div className="no-products-message">
-                            <p>No products found in this category.</p>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21l-4.35-4.35"/>
+                            </svg>
+                            <h3>No products found</h3>
+                            <p>We couldn't find any products in this category. Try browsing other categories.</p>
                         </div>
                     )}
                 </div>
@@ -501,20 +645,53 @@ function Products() {
             <section className="categories-section personal">
                 <GeometricShapes type="personal" />
                 <div className="section-header">
-                    <h2>Personal Care</h2>
-                    <Link to="/personal-care" className="view-all-link">View All Care Products</Link>
+                    <div className="section-title">
+                        <h2>Personal Care</h2>
+                        <p>Essential products for daily wellness</p>
+                    </div>
+                    <Link to="/personal-care" className="view-all-link">
+                        View All Care Products
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M5 12h14"/>
+                            <path d="M12 5l7 7-7 7"/>
+                        </svg>
+                    </Link>
                 </div>
-                <div className="categories-grid">
-                    {personalCareCategories.map((category, index) => (
-                        <CategoryBox 
-                            key={index} 
-                            category={category}
-                        />
-                    ))}
+                <div className="categories-container">
+                    {showPersonalLeftScroll && (
+                        <button 
+                            className="scroll-button left"
+                            onClick={() => handlePersonalScroll('left')}
+                            aria-label="Scroll left"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M15 18l-6-6 6-6" />
+                            </svg>
+                        </button>
+                    )}
+                    <div className="categories-grid" ref={personalCareRef}>
+                        {personalCareCategories.map((category, index) => (
+                            <CategoryBox 
+                                key={index} 
+                                category={category}
+                            />
+                        ))}
+                    </div>
+                    {showPersonalRightScroll && (
+                        <button 
+                            className="scroll-button right"
+                            onClick={() => handlePersonalScroll('right')}
+                            aria-label="Scroll right"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 18l6-6-6-6" />
+                            </svg>
+                        </button>
+                    )}
                 </div>
             </section>
         </div>
     );
 }
 
-export default Products;
+export default Products; 

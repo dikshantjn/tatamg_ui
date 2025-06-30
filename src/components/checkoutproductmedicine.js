@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { colors } from '../styles/colors';
 import { VendorProductService } from '../services/vendor-product.service';
 import { getUserId, isAuthenticated } from '../services/auth.utils';
 import './checkoutproductmedicine.css';
+import CheckoutProductModal from './CheckoutProductModal';
+import { fetchCartItems } from '../store/slices/cartSlice';
 
 // Image Fallback Icon Component
 const ImageIcon = () => (
@@ -49,11 +52,20 @@ const TabButton = ({ active, children, onClick }) => (
 );
 
 function CheckoutProducts() {
+    const dispatch = useDispatch();
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('products'); // 'products' or 'medicine'
+    const [notification, setNotification] = useState(null);
+    const [showCheckoutModal, setShowCheckoutModal] = useState(false);
     const navigate = useNavigate();
+
+    // Show notification function
+    const showNotification = (message, type = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 3000);
+    };
 
     useEffect(() => {
         const fetchCartItems = async () => {
@@ -80,13 +92,43 @@ function CheckoutProducts() {
     }, [navigate]);
 
     const handleQuantityChange = async (cartId, newQuantity) => {
-        // TODO: Implement quantity update API
-        console.log('Updating quantity:', { cartId, newQuantity });
+        try {
+            await VendorProductService.updateCartItemQuantity(cartId, newQuantity);
+            
+            // Update local state
+            setCartItems(prevItems => 
+                prevItems.map(item => 
+                    item.cartId === cartId 
+                        ? { ...item, quantity: newQuantity }
+                        : item
+                )
+            );
+            
+            // Dispatch Redux action to refresh cart items in header
+            dispatch(fetchCartItems());
+            
+            showNotification('Quantity updated successfully!');
+        } catch (error) {
+            console.error('Failed to update quantity:', error);
+            showNotification('Failed to update quantity. Please try again.', 'error');
+        }
     };
 
     const handleRemoveItem = async (cartId) => {
-        // TODO: Implement remove item API
-        console.log('Removing item:', cartId);
+        try {
+            await VendorProductService.deleteCartItem(cartId);
+            
+            // Update local state
+            setCartItems(prevItems => prevItems.filter(item => item.cartId !== cartId));
+            
+            // Dispatch Redux action to refresh cart items in header
+            dispatch(fetchCartItems());
+            
+            showNotification('Item removed from cart successfully!');
+        } catch (error) {
+            console.error('Failed to remove item:', error);
+            showNotification('Failed to remove item. Please try again.', 'error');
+        }
     };
 
     const calculateSubtotal = () => {
@@ -261,16 +303,16 @@ function CheckoutProducts() {
                                 <span>₹{total.toLocaleString()}</span>
                             </div>
                         </div>
-                        <Link 
-                            to="/gateway" 
+                        <button 
                             className="checkout-button"
+                            onClick={() => setShowCheckoutModal(true)}
                             style={{ 
                                 background: colors.primary,
                                 color: '#fff'
                             }}
                         >
                             Proceed to Checkout
-                        </Link>
+                        </button>
                         <Link 
                             to="/" 
                             className="continue-shopping"
@@ -317,6 +359,13 @@ function CheckoutProducts() {
 
     return (
         <div className="checkout-container">
+            {/* Notification */}
+            {notification && (
+                <div className={`notification ${notification.type}`}>
+                    {notification.message}
+                </div>
+            )}
+            
             <h2>Your Cart</h2>
             
             {/* Tabs */}
@@ -339,6 +388,32 @@ function CheckoutProducts() {
 
             {/* Tab Content */}
             {activeTab === 'products' ? renderProductsTab() : renderMedicineTab()}
+            
+            {/* Unified Checkout Modal */}
+            <CheckoutProductModal 
+                isOpen={showCheckoutModal}
+                onClose={() => setShowCheckoutModal(false)}
+                onPayNow={(orderData) => {
+                    setShowCheckoutModal(false);
+                    navigate('/gateway');
+                }}
+                orderData={{
+                    orderId: 'ORD-' + Date.now(),
+                    items: cartItems.map(item => ({
+                        id: item.cartId,
+                        name: item.product.name,
+                        quantity: item.quantity,
+                        price: item.product.price,
+                        image: item.product.images && item.product.images[0] ? item.product.images[0] : null
+                    })),
+                    deliveryAddress: null, // Will be selected in the modal
+                    subtotal: calculateSubtotal(),
+                    platformFee: 10.00,
+                    discount: 20.00,
+                    deliveryCharge: calculateDelivery(),
+                    total: calculateSubtotal() + calculateGST(calculateSubtotal()) + calculateDelivery() - 20.00 // Including discount
+                }}
+            />
         </div>
     );
 }
