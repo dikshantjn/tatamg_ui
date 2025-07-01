@@ -1,0 +1,190 @@
+import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
+import { getUserId } from '../Auth/auth.utils';
+
+class TrackOrderService {
+    constructor() {
+        this.baseURL = API_CONFIG.BASE_URL;
+    }
+
+    // Get all orders for the current user
+    async getUserOrders() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_ORDER.GET_USER_ORDERS_TRACKING, { userId });
+            const url = getApiUrl(endpoint);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching user orders:', error);
+            throw error;
+        }
+    }
+
+    // Get order details by order ID
+    async getOrderById(orderId) {
+        try {
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_ORDER.GET_ORDER, { orderId });
+            const url = getApiUrl(endpoint);
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching order details:', error);
+            throw error;
+        }
+    }
+
+    // Generate timeline steps based on order status
+    generateTimelineSteps(status) {
+        const allSteps = [
+            {
+                id: 1,
+                status: 'pending',
+                title: 'Order Placed',
+                description: 'Your order has been successfully placed',
+                icon: '📋',
+                color: '#6B7280'
+            },
+            {
+                id: 2,
+                status: 'confirmed',
+                title: 'Order Confirmed',
+                description: 'Order has been confirmed and is being processed',
+                icon: '✅',
+                color: '#6B7280'
+            },
+            {
+                id: 3,
+                status: 'processing',
+                title: 'Processing',
+                description: 'Your order is being prepared for shipment',
+                icon: '⚙️',
+                color: '#F59E0B'
+            },
+            {
+                id: 4,
+                status: 'shipped',
+                title: 'Shipped',
+                description: 'Order has been shipped from warehouse',
+                icon: '📦',
+                color: '#3B82F6'
+            },
+            {
+                id: 5,
+                status: 'out_for_delivery',
+                title: 'Out for Delivery',
+                description: 'Package is out for final delivery',
+                icon: '🚚',
+                color: '#3B82F6'
+            },
+            {
+                id: 6,
+                status: 'delivered',
+                title: 'Delivered',
+                description: 'Package has been delivered successfully',
+                icon: '🎉',
+                color: '#10B981'
+            }
+        ];
+
+        const statusMap = {
+            "pending": 0,
+            "confirmed": 1,
+            "processing": 2,
+            "shipped": 3,
+            "out_for_delivery": 4,
+            "delivered": 5,
+            "cancelled": -1
+        };
+
+        const currentStepIndex = statusMap[status] || 0;
+        const isCancelled = status === 'cancelled';
+
+        return allSteps.map((step, index) => ({
+            ...step,
+            completed: isCancelled ? false : index <= currentStepIndex,
+            active: index === currentStepIndex && !isCancelled,
+            cancelled: isCancelled && index === 0
+        }));
+    }
+
+    // Format order data for display
+    formatOrderData(order) {
+        const timelineSteps = this.generateTimelineSteps(order.status);
+        const currentStep = timelineSteps.find(step => step.active) || timelineSteps[0];
+        
+        return {
+            orderId: order.orderId,
+            status: order.status,
+            totalAmount: order.totalAmount,
+            placedAt: new Date(order.placedAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            items: order.items || [],
+            timelineSteps,
+            currentStep,
+            isCancelled: order.status === 'cancelled'
+        };
+    }
+
+    // Get status color for UI
+    getStatusColor(status) {
+        const statusColors = {
+            'pending': '#6B7280',
+            'confirmed': '#6B7280',
+            'processing': '#F59E0B',
+            'shipped': '#3B82F6',
+            'out_for_delivery': '#3B82F6',
+            'delivered': '#10B981',
+            'cancelled': '#EF4444'
+        };
+        return statusColors[status] || '#6B7280';
+    }
+
+    // Get status display text
+    getStatusDisplayText(status) {
+        const statusTexts = {
+            'pending': 'Order Pending',
+            'confirmed': 'Order Confirmed',
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'out_for_delivery': 'Out for Delivery',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
+        };
+        return statusTexts[status] || 'Unknown Status';
+    }
+}
+
+export const trackOrderService = new TrackOrderService(); 

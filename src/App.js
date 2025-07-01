@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
+  import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-import Header from './components/header/Header';
+import Header from './components/User/header/Header';
 import Footer from './components/Footer';
 import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile';
-import SignIn from './components/SignIn';
+import Login from './components/Login';
+import DummySidePanel from './components/DummySidePanel';
 import Checkout from './components/Checkout';
-import Products from './components/Products';
+import Products from './components/User/Products/Products';
 import ProductProfilePage from './components/ProductsProfile';
-import Ambulance from './components/Ambulance';
+import Ambulance from './components/User/Ambulance/Ambulance';
 import Offers from './components/Offers';
 import Membership from './components/Membership';
-import Home from './components/Home';
+import Home from './components/User/Home/Home';
 import ConsultDoctors from './components/ConsultDoctors';
 import LabTests from './components/LabTests';
 import BloodBank from './components/BloodBank';
@@ -24,7 +25,7 @@ import MedicalInsurance from './components/MedicalInsurance';
 import Vaccines from './components/Vaccines';
 import MaternalCare from './components/MaternalCare';
 import ChildCare from './components/ChildCare';
-import MedicineDelivery from './components/MedicineDelivery';
+import MedicineDelivery from './components/User/MedicineOrder/MedicineDelivery';
 import Physiotherapy from './components/Physiotherapy';
 import HospitalDiscovery from './components/HospitalDiscovery';
 import HospitalResults from './components/HospitalResults';
@@ -36,22 +37,25 @@ import Nutrition from './components/Nutrition';
 import PetCare from './components/PetCare';
 import OrganDonation from './components/OrganDonation';
 import Ayurveda from './components/Ayurveda';
-import CheckoutProducts from './components/checkoutproductmedicine';
+import CheckoutProducts from './components/User/Cart/checkoutproductmedicine';
 import CheckoutDelivery from './components/checkoutdelivery';
 import CheckoutAmbulance from './components/checkoutambulance';
 import PaymentGateway from './components/PaymentGateway';
-import UserProfile from './components/UserProfile';
+import UserProfile from './components/User/UserProfile/UserProfile';
 import BottomNavigation from './components/BottomNavigation';
-import ProductList from './components/ProductList';
-import TrackOrder from './components/TrackOrder';
+import ProductList from './components/User/Products/ProductList';
+import TrackOrder from './components/User/TrackOrder/TrackOrder';
+import OrderHistory from './components/User/OrderHistory/OrderHistory';
 
-import { isAuthenticated as checkAuth } from './services/auth.utils';
+import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 
 // Component to handle route-based SignIn display
 const AppContent = ({ isAuthenticated, onAuthChange }) => {
   const location = useLocation();
   const [showSignInPanel, setShowSignInPanel] = useState(false);
   const [shouldShowSignInForProtectedRoute, setShouldShowSignInForProtectedRoute] = useState(false);
+
+  console.log('🎭 AppContent initial render - showSignInPanel:', showSignInPanel);
 
   console.log('📍 Current location:', location.pathname);
   console.log('🔐 Is authenticated:', isAuthenticated);
@@ -66,7 +70,7 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
       '/hospital-discovery', '/hospital-results', '/care-at-home', '/medical-tourism', 
       '/rehabilitation', '/early-detection', '/nutrition', '/pet-care', 
       '/organ-donation', '/ayurveda', '/checkout-2', '/checkout-3', '/checkout-4', 
-      '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/track-order'
+      '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/order-history', '/track-order'
     ];
     const isProtected = protectedPaths.some(protectedPath => path.startsWith(protectedPath));
     console.log('🛡️ Route protection check:', { path, isProtected });
@@ -86,12 +90,25 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
   }, [location.pathname, isAuthenticated]);
 
   const handleShowSignIn = () => {
+    console.log('🎯 handleShowSignIn called');
+    console.log('📊 Current state - showSignInPanel:', showSignInPanel);
     setShowSignInPanel(true);
+    console.log('✅ showSignInPanel set to true');
   };
 
+  // Debug state changes
+  useEffect(() => {
+    console.log('🔄 showSignInPanel state changed to:', showSignInPanel);
+    console.log('🔄 shouldShowSignInForProtectedRoute state changed to:', shouldShowSignInForProtectedRoute);
+    console.log('🔄 Combined isOpen value:', showSignInPanel || shouldShowSignInForProtectedRoute);
+  }, [showSignInPanel, shouldShowSignInForProtectedRoute]);
+
   const handleCloseSignIn = () => {
+    console.log('🎯 handleCloseSignIn called');
+    console.log('📊 Current state before close - showSignInPanel:', showSignInPanel);
     setShowSignInPanel(false);
     setShouldShowSignInForProtectedRoute(false);
+    console.log('✅ showSignInPanel set to false');
   };
 
   const handleAuthChange = (authState) => {
@@ -171,7 +188,7 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           <Route path="/child-care" element={
             isAuthenticated ? <ChildCare /> : <Navigate to="/" replace />
           } />
-          <Route path="/delivery" element={
+          <Route path="/medicine-order" element={
             isAuthenticated ? <MedicineDelivery /> : <Navigate to="/" replace />
           } />
           <Route path="/physiotherapy" element={
@@ -223,7 +240,10 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
             isAuthenticated ? <UserProfile /> : <Navigate to="/" replace />
           } />
           <Route path="/orders" element={
-            isAuthenticated ? <UserProfile /> : <Navigate to="/" replace />
+            isAuthenticated ? <OrderHistory /> : <Navigate to="/" replace />
+          } />
+          <Route path="/order-history" element={
+            isAuthenticated ? <OrderHistory /> : <Navigate to="/" replace />
           } />
           <Route path="/track-order" element={
             isAuthenticated ? <TrackOrder /> : <Navigate to="/" replace />
@@ -233,11 +253,17 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
-      <SignIn 
+      <Login 
         isOpen={showSignInPanel || shouldShowSignInForProtectedRoute} 
         onClose={handleCloseSignIn}
         onAuthChange={handleAuthChange}
       />
+      {console.log('🎭 Login component render state:', {
+        showSignInPanel,
+        shouldShowSignInForProtectedRoute,
+        isOpen: showSignInPanel || shouldShowSignInForProtectedRoute
+      })}
+      {console.log('🎭 About to render Login component with isOpen:', showSignInPanel || shouldShowSignInForProtectedRoute)}
       <BottomNavigation />
       <Footer />
     </div>

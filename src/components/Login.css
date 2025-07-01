@@ -1,0 +1,445 @@
+/* Login Component Styles */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.login-panel {
+    background: #FFFFFF;
+    width: 400px;
+    height: 100vh;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    position: relative;
+    animation: slideIn 0.3s ease-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.login-header {
+    padding: 20px 24px 16px;
+    text-align: center;
+    border-bottom: 1px solid #E2E8F0;
+    background: linear-gradient(135deg, #38A3A5 0%, #4FB5B7 100%);
+    color: white;
+    position: relative;
+}
+
+.login-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+    color: white;
+}
+
+/* Close Button */
+.login-close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.login-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Tabs */
+.login-tabs {
+    display: flex;
+    background: #F8FAFC;
+    padding: 4px;
+    margin: 16px 24px 0;
+    border-radius: 8px;
+    border: 1px solid #E2E8F0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: #64748B;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background: #38A3A5;
+    color: white;
+    box-shadow: 0 2px 4px rgba(56, 163, 165, 0.2);
+}
+
+.tab-btn:hover:not(.active) {
+    background: rgba(56, 163, 165, 0.1);
+    color: #38A3A5;
+}
+
+/* Form */
+.login-form {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1A365D;
+    margin-bottom: 4px;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 16px;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #38A3A5;
+    box-shadow: 0 0 0 3px rgba(56, 163, 165, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #94A3B8;
+}
+
+/* Phone Input */
+.phone-input {
+    display: flex;
+    align-items: center;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.phone-input:focus-within {
+    border-color: #38A3A5;
+    box-shadow: 0 0 0 3px rgba(56, 163, 165, 0.1);
+}
+
+.country-code {
+    padding: 12px 12px 12px 16px;
+    background: #F1F5F9;
+    color: #64748B;
+    font-weight: 500;
+    border-right: 1px solid #E2E8F0;
+    border-radius: 6px 0 0 6px;
+}
+
+.phone-input input {
+    border: none;
+    border-radius: 0 6px 6px 0;
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 14px;
+    background: white;
+    box-shadow: none;
+}
+
+.phone-input input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* OTP Input */
+.otp-input-container {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.otp-input {
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #E2E8F0;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.otp-input:focus {
+    outline: none;
+    border-color: #38A3A5;
+    box-shadow: 0 0 0 3px rgba(56, 163, 165, 0.1);
+}
+
+.otp-input:not(:placeholder-shown) {
+    border-color: #38A3A5;
+    background: #F0FAFA;
+}
+
+/* Buttons */
+.login-submit-btn {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.get-otp-btn {
+    background: #38A3A5;
+    color: white;
+}
+
+.get-otp-btn:hover:not(:disabled) {
+    background: #2D8587;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 163, 165, 0.3);
+}
+
+.verify-otp-btn {
+    background: #38A3A5;
+    color: white;
+}
+
+.verify-otp-btn:hover:not(:disabled) {
+    background: #2D8587;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 163, 165, 0.3);
+}
+
+.vendor-login-btn {
+    background: #38A3A5;
+    color: white;
+}
+
+.vendor-login-btn:hover:not(:disabled) {
+    background: #2D8587;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(56, 163, 165, 0.3);
+}
+
+.login-submit-btn:disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Resend Button */
+.resend-btn {
+    background: none;
+    border: none;
+    color: #38A3A5;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+    margin-top: 8px;
+}
+
+.resend-btn:hover {
+    color: #2D8587;
+}
+
+.otp-timer {
+    text-align: center;
+    color: #64748B;
+    font-size: 14px;
+    margin: 8px 0;
+}
+
+/* Messages */
+.error-message,
+.success-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.error-message {
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+}
+
+.success-message {
+    background: #F0FDF4;
+    color: #059669;
+    border: 1px solid #BBF7D0;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loading-spinner::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Footer */
+.login-footer {
+    padding: 20px 24px;
+    text-align: center;
+    border-top: 1px solid #E2E8F0;
+    background: #F8FAFC;
+}
+
+.login-footer p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748B;
+}
+
+.signup-link {
+    color: #38A3A5;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.signup-link:hover {
+    color: #2D8587;
+}
+
+/* Select Input */
+.select-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .login-panel {
+        width: 100%;
+        height: 100vh;
+    }
+    
+    .login-header {
+        padding: 16px 20px 12px;
+    }
+    
+    .login-header h2 {
+        font-size: 18px;
+    }
+    
+    .login-form {
+        padding: 20px;
+    }
+    
+    .otp-input {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+    
+    .login-submit-btn {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+}
+
+/* Hide reCAPTCHA */
+#recaptcha-container {
+    display: none !important;
+}
+
+.grecaptcha-badge {
+    visibility: hidden !important;
+} 

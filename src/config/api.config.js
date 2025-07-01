@@ -1,5 +1,6 @@
 export const API_CONFIG = {
     BASE_URL: 'http://192.168.1.45:5000/api',
+    SOCKET_URL: 'http://192.168.1.45:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -39,12 +40,19 @@ export const API_CONFIG = {
             CREATE_ORDER: '/product-order/order',
             GET_ORDER: '/product-order/order/:orderId',
             GET_USER_ORDERS: '/product-order/orders/:userId',
-            GET_USER_ORDERS_TRACKING: '/product-order/orders/user/:userId'
+            GET_USER_ORDERS_TRACKING: '/product-order/orders/user/:userId',
+            GET_DELIVERED_ORDERS: '/product-order/orders/user/:userId/delivered'
         },
         PAYMENTS: {
             GET_PAYMENT_HISTORY: '/payments/history',
             GET_PAYMENT_DETAILS: '/payments/:paymentId',
             CREATE_RAZORPAY_ORDER: '/payments/create-razorpay-order'
+        },
+        AMBULANCE: {
+            GET_ALL: '/ambulance/ambulances',
+            REQUEST: '/ambulanceBooking/request',
+            GET_ACTIVE_BOOKINGS: '/ambulanceBooking/active-requests/user/:userId',
+            UPDATE_PAYMENT_COMPLETED: '/ambulanceBooking/update-payment-completed/:requestId'
         }
         // Add other endpoint categories as needed
     }

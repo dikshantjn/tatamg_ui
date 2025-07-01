@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './MaternalCare.css';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 // Placeholder imports for plan images
 import planImage1 from '../assets/maternal1.jpg';
 import planImage2 from '../assets/maternal2.jpg';

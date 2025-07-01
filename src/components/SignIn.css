@@ -352,42 +352,46 @@ input:focus {
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: flex-end;
-    z-index: 1000;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
 }
 
 .side-panel {
-    width: min(95vw, 480px);
+    width: 400px;
     height: 100vh;
-    background: white;
-    padding: 0;
+    background-color: white;
     position: relative;
-    animation: slideIn 0.3s ease-out;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    z-index: 10000;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
 .close-panel {
     position: absolute;
-        top: 16px;
-    right: 16px;
-    background: rgba(255, 255, 255, 0.2);
+    top: 20px;
+    right: 20px;
+    background: #f1f5f9;
+    color: #64748b;
     border: none;
-    font-size: 20px;
-    color: white;
+    font-size: 24px;
     cursor: pointer;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s;
-    z-index: 2;
+    transition: all 0.2s ease;
+    z-index: 10;
 }
 
 .close-panel:hover {
-    background-color: rgba(255, 255, 255, 0.3);
+    background: #e2e8f0;
+    color: #475569;
+    transform: scale(1.1);
 }
 
 @keyframes slideIn {
@@ -396,6 +400,33 @@ input:focus {
     }
     to {
         transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(100%);
     }
 }
 
@@ -847,4 +878,47 @@ form {
 
 .register-vendor-button:active {
     transform: translateY(1px);
+}
+
+/* Responsive styles for side panel */
+@media (max-width: 768px) {
+    .side-panel {
+        width: 100vw;
+        max-width: 400px;
+    }
+    
+    .side-panel-overlay {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .side-panel {
+        width: 100vw;
+        height: 100vh;
+    }
+    
+    .close-panel {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+    }
+    
+    .panel-header {
+        padding: 20px 15px 15px;
+    }
+    
+    .panel-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .panel-header p {
+        font-size: 0.9rem;
+    }
+    
+    .panel-body {
+        padding: 15px;
+    }
 }

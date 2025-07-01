@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Vaccines.css';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 // Placeholder imports for icons
 import reasonIcon1 from '../assets/self.png';
 import reasonIcon2 from '../assets/others.png';

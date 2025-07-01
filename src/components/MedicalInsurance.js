@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './MedicalInsurance.css';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 // Placeholder imports for icons and logos
 import trustIcon1 from '../assets/trust.png';
 import trustIcon2 from '../assets/instant.png';

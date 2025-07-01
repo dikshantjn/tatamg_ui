@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './ChildCare.css';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 // Placeholder imports for therapy icons and banner
 import therapyIcon1 from '../assets/therapy1.jpg';
 import therapyIcon2 from '../assets/therapy2.jpg';

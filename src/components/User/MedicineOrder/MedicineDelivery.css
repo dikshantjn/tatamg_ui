@@ -1,0 +1,347 @@
+.medicine-delivery-page {
+    padding: 40px;
+    text-align: center;
+}
+/* Hero Section */
+.hero-section {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .banner-image {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: cover;
+  }
+  
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+  }
+  
+  .shop-now-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .shop-now-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Popup Form */
+  .popup-form-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .popup-form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 100%;
+  }
+  
+  .popup-form label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .popup-form input,
+  .popup-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .popup-form button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .popup-form .close-btn {
+    background-color: #ff4d4d;
+    margin-left: 10px;
+  }
+  
+/* Hero Section */
+.hero-section {
+    background-color: #f4f4f4;
+    padding: 80px 20px;
+    margin-bottom: 40px;
+}
+
+.hero-section h1 {
+    font-size: 2.8em;
+    margin-bottom: 20px;
+}
+
+.hero-section p {
+    font-size: 1.3em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.shop-now-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.shop-now-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Product Categories Section */
+.categories-section {
+    margin-bottom: 40px;
+}
+
+.categories {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.category {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.category img {
+    width: 200px;
+    height: 120px;
+    margin-bottom: 10px;
+}
+
+.category h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.category p {
+    font-size: 1em;
+    color: #666;
+}
+
+/* Featured Products Section */
+.featured-products-section {
+    margin-bottom: 40px;
+}
+
+.featured-products {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.product {
+    width: 250px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.product img {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
+}
+
+.product h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.product p {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.buy-now-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.buy-now-btn:hover {
+    background-color: #218838;
+}
+
+/* Testimonials Section */
+
+.medicine-delivery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.upload-section {
+  margin-bottom: 40px;
+}
+
+.upload-section h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.upload-section p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.upload-btn {
+  background-color: #00796B;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+  background-color: #00695C;
+}
+
+.selected-file {
+  margin-top: 20px;
+  padding: 10px;
+  background-color: #E8F5E9;
+  border-radius: 4px;
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 40px 0;
+}
+
+.divider span {
+  background-color: white;
+  padding: 0 15px;
+  color: #666;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: #E0E0E0;
+  z-index: 0;
+}
+
+.order-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.order-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  background-color: white;
+}
+
+.order-option:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.order-option img {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.order-option span {
+  font-size: 14px;
+  color: #333;
+}
+
+.whatsapp {
+  border-color: #25D366;
+}
+
+.whatsapp:hover {
+  background-color: #25D366;
+  color: white;
+}
+
+.scan {
+  border-color: #00796B;
+}
+
+.scan:hover {
+  background-color: #00796B;
+  color: white;
+}
+
+.call {
+  border-color: #0288D1;
+}
+
+.call:hover {
+  background-color: #0288D1;
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .order-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .medicine-delivery-container {
+    padding: 20px;
+  }
+}

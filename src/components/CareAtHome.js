@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './CareAtHome.css';
-import Testimonials from './Testimonials';  // Importing Testimonials
+import Testimonials from './User/Home/Testimonials';  // Importing Testimonials
 // Placeholder imports for icons or images
 import healthSupportIcon from '../assets/others.png';
 import homeCareIcon from '../assets/home care.png';

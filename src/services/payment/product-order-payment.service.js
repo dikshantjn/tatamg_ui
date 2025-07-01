@@ -1,7 +1,7 @@
 import { API_CONFIG, replaceUrlParams } from '../../config/api.config';
 import { PAYMENT_CONFIG, PAYMENT_ERRORS, PAYMENT_SUCCESS, validateRazorpayKey } from '../../config/payment.config';
-import { getToken, getUserId, getUserData } from '../auth.utils';
-import { VendorProductService } from '../vendor-product.service';
+import { getToken, getUserId, getUserData } from '../User/Auth/auth.utils';
+import { VendorProductService } from '../User/Products/vendor-product.service';
 
 class PaymentService {
     constructor() {

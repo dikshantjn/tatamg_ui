@@ -4,11 +4,11 @@ import Header from './secondary/Header';
 import Footer from './components/Footer';
 import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile'; 
-import SignIn from './components/SignIn';
+import Login from './components/Login';
 import Checkout from './components/Checkout';
 import Products from './components/Products';
 import ProductProfilePage from './components/ProductsProfile';
-import Ambulance from './components/Ambulance';
+import Ambulance from './components/User/Ambulance/Ambulance.js';
 import Offers from './components/Offers';
 import Membership from './components/Membership';
 import Home from './components/Home';
@@ -51,7 +51,7 @@ function DesktopLayout() {
                     <Route path="/product/:id" element={<ProductProfilePage />} />
                     <Route path="/search" element={<SearchResults />} />
                     <Route path="/doctors" element={<ConsultDoctors />} />
-                    <Route path="/signin" element={<SignIn />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/checkout-product-medicine" element={<Checkout />} />
                     <Route path="/products" element={<Products />} />
                     <Route path="/ambulance" element={<Ambulance />} />
@@ -67,7 +67,7 @@ function DesktopLayout() {
                     <Route path="/vaccines" element={<Vaccines />} />
                     <Route path="/maternal-care" element={<MaternalCare />} />
                     <Route path="/child-care" element={<ChildCare />} />
-                    <Route path="/delivery" element={<MedicineDelivery />} />
+                    <Route path="/medicine-delivery" element={<MedicineDelivery />} />
                     <Route path="/physiotherapy" element={<Physiotherapy />} />
                     <Route path="/hosiptal-discovery" element={<HospitalDiscovery />} />
                     <Route path="/hospital-results" element={<HospitalResults />} />

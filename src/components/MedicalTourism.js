@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './MedicalTourism.css';
-import Testimonials from './Testimonials'; // Import Testimonials
+import Testimonials from './User/Home/Testimonials'; // Import Testimonials
 // Placeholder images/icons
 import hospitalIcon from '../assets/hospital.png';
 import consultationIcon from '../assets/consultation.png';

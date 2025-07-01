@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Rehabilitation.css';
-import Testimonials from './Testimonials'; // Import Testimonials
+import Testimonials from './User/Home/Testimonials'; // Import Testimonials
 // Placeholder icons for each service
 import mentalWellnessIcon from '../assets/mental-health.png';
 import dementiaIcon from '../assets/dementia.png';

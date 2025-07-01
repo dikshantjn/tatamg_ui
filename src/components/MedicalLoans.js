@@ -5,7 +5,7 @@ import cardiologyIcon from '../assets/cardiology.png';
 import orthoIcon from '../assets/orthopedic.png';
 import pregnancyImg from '../assets/pregnant.png'; 
 import bannerImage from '../assets/Medical Loan-1 (1).jpg'; // Example banner image
-import Testimonials from './Testimonials'; // Import the Testimonials component
+import Testimonials from './User/Home/Testimonials'; // Import the Testimonials component
 
 function MedicalLoans() {
   const navigate = useNavigate();

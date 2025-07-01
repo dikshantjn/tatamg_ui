@@ -1,9 +1,9 @@
 import React from 'react';
 import './ConsultDoctors.css';
 import ConsultationServiceCard from './ConsultationServiceCard';
-import SearchByHealthConcern from './SearchByHealthConcern';
+import SearchByHealthConcern from './User/Home/SearchByHealthConcern';
 import AppointmentSection from './AppointmentSection';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 import bannerImage from '../assets/Doctor Consultation.jpg'; // Replace with your actual image path
 
 

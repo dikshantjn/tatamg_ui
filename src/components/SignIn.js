@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import "./SignIn.css";
 import { auth } from '../firebase/config';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
-import { authService } from '../services/auth.service';
-import { storeAuthData } from '../services/auth.utils';
+import { authService } from '../services/User/Auth/auth.service';
+import { storeAuthData } from '../services/User/Auth/auth.utils';
 import { colors } from '../styles/colors';
 
 const SignIn = ({ isOpen, onClose, onAuthChange }) => {
+    console.log('🎭 SignIn component called with props:', { isOpen, onClose: !!onClose, onAuthChange: !!onAuthChange });
     const [activeTab, setActiveTab] = useState('user');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -20,6 +21,7 @@ const SignIn = ({ isOpen, onClose, onAuthChange }) => {
     const [timer, setTimer] = useState(0);
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
+    const [isClosing, setIsClosing] = useState(false);
 
     const vendorRoles = {
         "Hospital": 1,
@@ -64,14 +66,18 @@ const SignIn = ({ isOpen, onClose, onAuthChange }) => {
 
     // Handle body scroll
     useEffect(() => {
+        console.log('🎭 Body scroll effect - isOpen:', isOpen);
         if (isOpen) {
             document.body.classList.add('panel-open');
+            console.log('✅ Added panel-open class to body');
         } else {
             document.body.classList.remove('panel-open');
+            console.log('✅ Removed panel-open class from body');
         }
 
         return () => {
             document.body.classList.remove('panel-open');
+            console.log('✅ Cleanup: Removed panel-open class from body');
         };
     }, [isOpen]);
 
@@ -486,240 +492,179 @@ const SignIn = ({ isOpen, onClose, onAuthChange }) => {
 
     // Handle Panel Close
     const handlePanelClose = () => {
-        console.log('Closing signin panel');
+        console.log('🎭 handlePanelClose called');
+        setIsClosing(true);
+        setTimeout(() => {
+            setIsClosing(false);
         onClose();
         
         // Clean up reCAPTCHA when panel is closed
-        setTimeout(() => {
             cleanupRecaptcha();
-        }, 100);
+        }, 300); // Match the animation duration
     };
 
-    if (!isOpen) return null;
+    console.log('🎭 SignIn component render check - isOpen:', isOpen);
+    if (!isOpen) {
+        console.log('❌ SignIn component not rendering - isOpen is false');
+        return null;
+    }
+    console.log('✅ SignIn component rendering - isOpen is true - ABOUT TO RENDER JSX');
+    
+    // Debug: Check if element exists in DOM after render
+    setTimeout(() => {
+        const overlay = document.querySelector('.side-panel-overlay');
+        const panel = document.querySelector('.side-panel');
+        console.log('🔍 DOM Debug:', {
+            overlay: !!overlay,
+            panel: !!panel,
+            overlayStyles: overlay ? {
+                position: window.getComputedStyle(overlay).position,
+                display: window.getComputedStyle(overlay).display,
+                zIndex: window.getComputedStyle(overlay).zIndex,
+                visibility: window.getComputedStyle(overlay).visibility,
+                opacity: window.getComputedStyle(overlay).opacity,
+                width: window.getComputedStyle(overlay).width,
+                height: window.getComputedStyle(overlay).height
+            } : null,
+            panelStyles: panel ? {
+                position: window.getComputedStyle(panel).position,
+                display: window.getComputedStyle(panel).display,
+                zIndex: window.getComputedStyle(panel).zIndex,
+                visibility: window.getComputedStyle(panel).visibility,
+                opacity: window.getComputedStyle(panel).opacity,
+                width: window.getComputedStyle(panel).width,
+                height: window.getComputedStyle(panel).height
+            } : null
+        });
+        
+        // Check if the element is actually visible
+        if (overlay) {
+            const rect = overlay.getBoundingClientRect();
+            console.log('🔍 Overlay bounding rect:', rect);
+            console.log('🔍 Overlay is visible:', rect.width > 0 && rect.height > 0);
+        }
+        
+        if (panel) {
+            const rect = panel.getBoundingClientRect();
+            console.log('🔍 Panel bounding rect:', rect);
+            console.log('🔍 Panel is visible:', rect.width > 0 && rect.height > 0);
+        }
+    }, 100);
 
+    console.log('🎭 About to return JSX for SignIn component');
     return (
-        <div className="side-panel-overlay" onClick={onClose}>
-            <div className="side-panel" onClick={e => e.stopPropagation()}>
-                <button className="close-panel" onClick={onClose}>×</button>
+        <div 
+            className="side-panel-overlay" 
+            onClick={handlePanelClose}
+            style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                zIndex: 9999
+            }}
+        >
+            <div 
+                className="side-panel" 
+                onClick={e => e.stopPropagation()}
+                style={{
+                    width: '400px',
+                    height: '100vh',
+                    backgroundColor: 'white',
+                    position: 'relative',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    zIndex: 10000,
+                    boxShadow: '-4px 0 20px rgba(0, 0, 0, 0.15)'
+                }}
+            >
+                <button 
+                    className="close-panel" 
+                    onClick={handlePanelClose}
+                    style={{
+                        position: 'absolute',
+                        top: '20px',
+                        right: '20px',
+                        background: '#f1f5f9',
+                        color: '#64748b',
+                        border: 'none',
+                        fontSize: '24px',
+                        cursor: 'pointer',
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 10
+                    }}
+                >
+                    ×
+                </button>
                 
-                {/* Header Section */}
-                <div className="panel-header">
-                    <div className="geometric-shape shape-1"></div>
-                    <div className="geometric-shape shape-2"></div>
-                    <h1>Welcome to Vedika.health</h1>
-                    <p>Your trusted healthcare partner</p>
+                {/* Test Header */}
+                <div style={{ 
+                    padding: '60px 20px 20px', 
+                    textAlign: 'center',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white'
+                }}>
+                    <h1 style={{ margin: '0 0 10px 0', fontSize: '24px' }}>Welcome to Vedika.health</h1>
+                    <p style={{ margin: 0, opacity: 0.9 }}>Your trusted healthcare partner</p>
                 </div>
                 
-                {/* Body Section */}
-                <div className={`panel-body ${activeTab === 'vendor' ? 'vendor-tab' : ''}`}>
-                    <div className="sign-in-container in-side-panel">
-                    <div className="login-tabs">
+                {/* Test Body */}
+                <div style={{ 
+                    flex: 1, 
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                }}>
+                    <div style={{ textAlign: 'center' }}>
+                        <h2 style={{ color: '#333', marginBottom: '20px' }}>Sign In Panel Test</h2>
+                        <p style={{ color: '#666', marginBottom: '30px' }}>If you can see this, the side panel is working!</p>
+                        
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                         <button 
-                            className={`tab-button ${activeTab === 'user' ? 'active' : ''}`}
                             onClick={() => handleTabChange('user')}
+                                style={{
+                                    padding: '10px 20px',
+                                    background: activeTab === 'user' ? '#38A3A5' : '#f1f5f9',
+                                    color: activeTab === 'user' ? 'white' : '#64748b',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                }}
                         >
                             User Login
                         </button>
                         <button 
-                            className={`tab-button ${activeTab === 'vendor' ? 'active' : ''}`}
                             onClick={() => handleTabChange('vendor')}
+                                style={{
+                                    padding: '10px 20px',
+                                    background: activeTab === 'vendor' ? '#38A3A5' : '#f1f5f9',
+                                    color: activeTab === 'vendor' ? 'white' : '#64748b',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                }}
                         >
                             Vendor Login
                         </button>
                     </div>
                     
-                        <form onSubmit={handleSubmit}>
-                        {activeTab === 'user' ? (
-                                <>
-                                    {!showOtp && (
-                                    <div className="input-group">
-                                            <label htmlFor="phone">Phone Number</label>
-                                        <div className="input-with-prefix">
-                                            <span className="prefix">+91</span>
-                                            <input
-                                                type="tel"
-                                                    id="phone"
-                                                    pattern="[0-9]{10}"
-                                                    maxLength="10"
-                                                    required
-                                                placeholder="Enter your mobile number"
-                                                value={mobileNumber}
-                                                    onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
-                                                    className="text-input"
-                                            />
-                                        </div>
-                                        <button 
-                                            type="submit" 
-                                            className="login-button"
-                                                disabled={loading}
-                                        >
-                                            {loading ? (
-                                                'Sending OTP...'
-                                            ) : (
-                                                'Get OTP'
-                                        )}
-                                        </button>
-                                    </div>
-                                    )}
-
-                                    {showOtp && (
-                                        <div className="input-group">
-                                            {successMessage && (
-                                                <div className="success-message">
-                                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                        <path d="M8 0C3.6 0 0 3.6 0 8C0 12.4 3.6 16 8 16C12.4 16 16 12.4 16 8C16 3.6 12.4 0 8 0ZM6.8 11.2L3.2 7.6L4.4 6.4L6.8 8.8L11.6 4L12.8 5.2L6.8 11.2Z" fill="#10B981"/>
-                                                    </svg>
-                                                    {successMessage}
-                                                </div>
-                                            )}
-                                            <label htmlFor="otp">Enter OTP</label>
-                                            <div className="otp-input-container">
-                                                {[0, 1, 2, 3, 4, 5].map((index) => (
-                                                    <input
-                                                        key={index}
-                                                        type="text"
-                                                        maxLength="1"
-                                                        className="otp-input"
-                                                        value={otp[index] || ''}
-                                                        onChange={(e) => {
-                                                            const newOtp = otp.split('');
-                                                            newOtp[index] = e.target.value.replace(/\D/g, '');
-                                                            setOtp(newOtp.join(''));
-                                                            
-                                                            // Auto-focus next input
-                                                            if (e.target.value && index < 5) {
-                                                                e.target.nextElementSibling?.focus();
-                                                            }
-                                                        }}
-                                                        onKeyDown={(e) => {
-                                                            // Handle backspace
-                                                            if (e.key === 'Backspace' && !otp[index] && index > 0) {
-                                                                e.target.previousElementSibling?.focus();
-                                                            }
-                                                        }}
-                                                        onPaste={(e) => {
-                                                            e.preventDefault();
-                                                            const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-                                                            setOtp(pastedData);
-                                                        }}
-                                                    />
-                                                ))}
-                                            </div>
-                                            {timer > 0 && (
-                                                <p className="otp-timer">Resend OTP in {timer}s</p>
-                                            )}
-                                            {timer === 0 && (
-                                                <button
-                                                    type="button"
-                                                    className="forgot-password-button"
-                                                    onClick={resendOtp}
-                                                >
-                                                    Resend OTP
-                                                </button>
-                                            )}
-                                            <button 
-                                                type="submit" 
-                                                className="login-button"
-                                                    disabled={loading}
-                                        >
-                                                {loading ? (
-                                                    'Verifying OTP...'
-                                                ) : (
-                                                    'Verify OTP'
-                                            )}
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <>
-                                <div className="input-group">
-                                        <label htmlFor="role">Select Role</label>
-                                        <select
-                                            id="role"
-                                            value={selectedRole}
-                                            onChange={(e) => setSelectedRole(e.target.value)}
-                                            required
-                                            className="select-input"
-                                        >
-                                            <option value="">Select your role</option>
-                                            {Object.entries(vendorRoles).map(([role, id]) => (
-                                                <option key={id} value={role}>
-                                                    {role}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                <div className="input-group">
-                                        <label htmlFor="email">Email Address</label>
-                                    <input
-                                        type="email"
-                                            id="email"
-                                        placeholder="Enter your email address"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        required
-                                            className="text-input"
-                                    />
+                        <div style={{ marginTop: '30px', padding: '20px', background: '#f8fafc', borderRadius: '8px' }}>
+                            <p style={{ margin: '0 0 10px 0', fontWeight: 'bold' }}>Current Tab: {activeTab}</p>
+                            <p style={{ margin: 0, fontSize: '14px', color: '#666' }}>
+                                This is a test to verify the side panel is working correctly.
+                            </p>
                                 </div>
-
-                                <div className="input-group">
-                                        <label htmlFor="password">Password</label>
-                                        <input
-                                            type="password"
-                                            id="password"
-                                            placeholder="Enter your password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            required
-                                            className="text-input"
-                                        />
-                                        <button
-                                            type="button"
-                                            className="forgot-password-button"
-                                            onClick={handleForgotPassword}
-                                        >
-                                            Forgot Password?
-                                        </button>
-                                    </div>
-
-                                    <div className="vendor-buttons">
-                                        <button
-                                            type="submit"
-                                            className="login-button"
-                                            disabled={loading}
-                                        >
-                                            {loading ? (
-                                                'Logging in as Vendor...'
-                                            ) : (
-                                                'Login as Vendor'
-                                            )}
-                                        </button>
-                                        
-                                        <button
-                                            type="button"
-                                            className="register-vendor-button"
-                                            onClick={() => {
-                                                // Handle vendor registration
-                                                console.log('Register as Vendor clicked');
-                                            }}
-                                        >
-                                            Register as Vendor
-                                        </button>
-                                    </div>
-                                </>
-                            )}
-
-                            {error && (
-                                <div className="error-message">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                        <path d="M8 0C3.6 0 0 3.6 0 8C0 12.4 3.6 16 8 16C12.4 16 16 12.4 16 8C16 3.6 12.4 0 8 0ZM8.8 12H7.2V10.4H8.8V12ZM8.8 8.8H7.2V4H8.8V8.8Z" fill="#DC2626"/>
-                                    </svg>
-                                    {error}
-                                </div>
-                            )}
-                            </form>
                     </div>
                 </div>
             </div>

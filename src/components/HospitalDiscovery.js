@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HospitalDiscovery.css';
-import Testimonials from './Testimonials'; // Importing Testimonials
+import Testimonials from './User/Home/Testimonials'; // Importing Testimonials
 import bannerImage from '../assets/Hospital Banner photo.jpg'; // Placeholder image
 
 function HospitalDiscovery() {

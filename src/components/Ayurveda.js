@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Ayurveda.css';
-import Testimonials from './Testimonials'; // Import Testimonials
+import Testimonials from './User/Home/Testimonials'; // Import Testimonials
 import bannerImage from '../assets/Ayurveda Banner Photo.jpg'; // Placeholder for banner
 
 import panchakarma from '../assets/Ayurveda Panchakarma.jpg'; // Placeholder for banner

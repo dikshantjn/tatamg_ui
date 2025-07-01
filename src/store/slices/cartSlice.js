@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { VendorProductService } from '../../services/vendor-product.service';
-import { getUserId, isAuthenticated } from '../../services/auth.utils';
+import { VendorProductService } from '../../services/User/Products/vendor-product.service';
+import { getUserId, isAuthenticated } from '../../services/User/Auth/auth.utils';
 
 // Async thunk for fetching cart items from backend
 export const fetchCartItems = createAsyncThunk(

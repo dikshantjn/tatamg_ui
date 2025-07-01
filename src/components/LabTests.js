@@ -6,7 +6,7 @@ import hygiene from '../assets/hygiene.png';
 import pickup from '../assets/home_pickup.png';
 import consultation from '../assets/consultation.png';
 import bannerImage from '../assets/Lab tests.jpg'; // Make sure the path is correct and matches your project structure
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 
 function LabTests() {
     const categories = ['Blood Tests', 'COVID-19 Tests', 'Diabetes Tests', 'Allergy Tests'];

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './EarlyDetection.css';
-import Testimonials from './Testimonials';
+import Testimonials from './User/Home/Testimonials';
 // Import placeholder icons and banner image
 import tuberculosisIcon from '../assets/tuberculosis.png';
 import epilepsyIcon from '../assets/epilepsy.png';
