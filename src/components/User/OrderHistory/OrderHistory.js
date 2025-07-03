@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductOrderHistory from './ProductOrderHistory';
+import AmbulanceOrderHistory from './AmbulanceOrderHistory';
+import BloodBankOrderHistory from './BloodBankOrderHistory';
 import './OrderHistory.css';
 
 const OrderHistory = () => {
@@ -14,13 +16,15 @@ const OrderHistory = () => {
         product: []
     });
     const [loading, setLoading] = useState(false);
+    const [ambulanceCount, setAmbulanceCount] = useState(0);
+    const [bloodBankCount, setBloodBankCount] = useState(0);
 
     const tabs = [
         { id: 'medicine', label: 'Medicine Orders', icon: '💊', count: 12 },
-        { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: 3 },
+        { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: ambulanceCount },
         { id: 'bed', label: 'Bed Bookings', icon: '🛏️', count: 5 },
         { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: 8 },
-        { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: 2 },
+        { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: bloodBankCount },
         { id: 'clinic', label: 'Clinic Bookings', icon: '🏥', count: 15 },
         { id: 'product', label: 'Product Orders', icon: '📦', count: 7 }
     ];
@@ -130,6 +134,19 @@ const OrderHistory = () => {
             setOrders(mockOrders);
             setLoading(false);
         }, 1000);
+        // Or, fetch count directly using the service
+        import('../../../services/User/orderHistory.service').then(mod => {
+            if (mod && mod.default && mod.default.getCompletedAmbulanceBookings) {
+                mod.default.getCompletedAmbulanceBookings().then(res => {
+                    if (res && res.success) setAmbulanceCount(res.data.length);
+                });
+            }
+            if (mod && mod.default && mod.default.getCompletedBloodBankBookings) {
+                mod.default.getCompletedBloodBankBookings().then(res => {
+                    if (res && res.success) setBloodBankCount(res.data.length);
+                });
+            }
+        });
     }, []);
 
     const getStatusColor = (status) => {
@@ -332,6 +349,88 @@ const OrderHistory = () => {
 
                     <div className="main-content">
                         <ProductOrderHistory />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Render AmbulanceOrderHistory component when ambulance tab is active
+    if (activeTab === 'ambulance') {
+        return (
+            <div className="order-history-container">
+                <div className="order-history-layout">
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="geometric-shapes">
+                                <div className="shape shape-1"></div>
+                                <div className="shape shape-2"></div>
+                                <div className="shape shape-3"></div>
+                            </div>
+                            <h2 className="sidebar-title">My Orders</h2>
+                            <p className="sidebar-subtitle">Select category to view orders</p>
+                        </div>
+                        <div className="sidebar-buttons">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    <div className="button-content">
+                                        <span className="button-icon">{tab.icon}</span>
+                                        <div className="button-info">
+                                            <span className="button-label">{tab.label}</span>
+                                            <span className="button-count">{tab.count} orders</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="main-content">
+                        <AmbulanceOrderHistory />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Render BloodBankOrderHistory component when bloodBank tab is active
+    if (activeTab === 'bloodBank') {
+        return (
+            <div className="order-history-container">
+                <div className="order-history-layout">
+                    <div className="sidebar">
+                        <div className="sidebar-header">
+                            <div className="geometric-shapes">
+                                <div className="shape shape-1"></div>
+                                <div className="shape shape-2"></div>
+                                <div className="shape shape-3"></div>
+                            </div>
+                            <h2 className="sidebar-title">My Orders</h2>
+                            <p className="sidebar-subtitle">Select category to view orders</p>
+                        </div>
+                        <div className="sidebar-buttons">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    <div className="button-content">
+                                        <span className="button-icon">{tab.icon}</span>
+                                        <div className="button-info">
+                                            <span className="button-label">{tab.label}</span>
+                                            <span className="button-count">{tab.count} orders</span>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="main-content">
+                        <BloodBankOrderHistory />
                     </div>
                 </div>
             </div>

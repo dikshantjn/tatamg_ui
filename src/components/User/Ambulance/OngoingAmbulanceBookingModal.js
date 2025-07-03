@@ -42,7 +42,7 @@ function Timeline({ steps, currentStepIndex }) {
       nodeRefs.current[currentStepIndex].scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
-        inline: 'center',
+        inline: currentStepIndex === 0 ? 'start' : 'center',
       });
     }
   }, [currentStepIndex]);

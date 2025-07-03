@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import orderHistoryService from '../../../services/User/orderHistory';
+import orderHistoryService from '../../../services/User/orderHistory.service';
 import './ProductOrderHistory.css';
 
 const ProductOrderHistory = () => {

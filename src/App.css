@@ -208,12 +208,12 @@ body.panel-open {
 
 html, body {
   overflow-x: hidden !important;
-  width: 100vw;
-  max-width: 100vw;
+  /* width: 100vw; */
+  /* max-width: 100vw; */
 }
 
 .ambulance-map-wrapper {
   overflow-x: hidden;
-  width: 100vw;
-  max-width: 100vw;
+  /* width: 100vw; */
+  /* max-width: 100vw; */
 }

@@ -5,13 +5,17 @@ import { getUserId } from '../../../services/User/Auth/auth.utils';
 import { useSocket } from '../../../hooks/useSocket';
 import { ToastContainer } from '../../ui/Toast';
 import './TrackOrder.css';
+import BloodBankPaymentService from '../../../services/payment/blood-bank-payment.service';
 
 const TrackOrder = () => {
     const [orders, setOrders] = useState([]);
+    const [ambulanceBookings, setAmbulanceBookings] = useState([]);
+    const [bloodBankBookings, setBloodBankBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedOrders, setExpandedOrders] = useState({});
     const [toasts, setToasts] = useState([]);
+    const [paymentStatusMsg, setPaymentStatusMsg] = useState(null);
     const navigate = useNavigate();
     const userId = getUserId();
     const timelineRefs = useRef({});
@@ -40,6 +44,29 @@ const TrackOrder = () => {
             setError('Failed to load orders. Please try again.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Fetch ambulance bookings
+    const fetchAmbulanceBookings = async () => {
+        try {
+            const bookings = await trackOrderService.getActiveAmbulanceBookings();
+            const formatted = bookings.map(trackOrderService.formatAmbulanceBooking.bind(trackOrderService));
+            setAmbulanceBookings(formatted);
+        } catch (error) {
+            console.error('Error fetching ambulance bookings:', error);
+            setError('Failed to load ambulance bookings. Please try again.');
+        }
+    };
+
+    // Fetch blood bank bookings
+    const fetchBloodBankBookings = async () => {
+        try {
+            const bookings = await trackOrderService.getActiveBloodBankBookings();
+            setBloodBankBookings(bookings);
+        } catch (error) {
+            console.error('Error fetching blood bank bookings:', error);
+            setError('Failed to load blood bank bookings. Please try again.');
         }
     };
 
@@ -106,7 +133,7 @@ const TrackOrder = () => {
             addToast({
                 type: 'success',
                 title: 'Order Status Updated',
-                message: `Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
+                message: `Product Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
                 duration: 3000
             });
         } catch (error) {
@@ -123,6 +150,40 @@ const TrackOrder = () => {
         }
     }, [addToast, scrollToActiveNode]);
 
+    // Handle ambulance booking status updates
+    const handleAmbulanceStatusUpdate = useCallback((data) => {
+        try {
+            const bookingData = typeof data === 'string' ? JSON.parse(data) : data;
+            const { requestId, status: newStatus } = bookingData;
+            if (!requestId || !newStatus) return;
+            setAmbulanceBookings(prev => prev.map(booking => {
+                if (booking.requestId === requestId) {
+                    const updated = { ...booking, status: newStatus };
+                    const formatted = trackOrderService.formatAmbulanceBooking(updated);
+                    setTimeout(() => {
+                        scrollToActiveNode(requestId, formatted.timelineSteps);
+                    }, 100);
+                    return formatted;
+                }
+                return booking;
+            }));
+            addToast({
+                type: 'success',
+                title: 'Ambulance Status Updated',
+                message: `Booking #${requestId.slice(-8)} status changed to ${newStatus}`,
+                duration: 3000
+            });
+        } catch (error) {
+            addToast({
+                type: 'error',
+                title: 'Ambulance Update Failed',
+                message: 'Failed to update ambulance status. Refreshing bookings...',
+                duration: 3000
+            });
+            fetchAmbulanceBookings();
+        }
+    }, [addToast, scrollToActiveNode]);
+
     // Subscribe to socket events
     useEffect(() => {
         subscribe('orderStatusUpdated', handleOrderStatusUpdate);
@@ -131,9 +192,33 @@ const TrackOrder = () => {
         };
     }, [subscribe, unsubscribe, handleOrderStatusUpdate]);
 
+    // Subscribe to ambulance booking socket events
+    useEffect(() => {
+        subscribe('ambulanceBookingUpdated', handleAmbulanceStatusUpdate);
+        return () => {
+            unsubscribe('ambulanceBookingUpdated', handleAmbulanceStatusUpdate);
+        };
+    }, [subscribe, unsubscribe, handleAmbulanceStatusUpdate]);
+
+    // Subscribe to blood bank booking socket events
+    useEffect(() => {
+        const handleBloodBankBookingUpdate = (data) => {
+            // Accept both stringified and object data
+            const bookingData = typeof data === 'string' ? JSON.parse(data) : data;
+            if (!bookingData?.bookingId && !bookingData?.requestId) return;
+            fetchBloodBankBookings();
+        };
+        subscribe('bloodBankBookingUpdated', handleBloodBankBookingUpdate);
+        return () => {
+            unsubscribe('bloodBankBookingUpdated', handleBloodBankBookingUpdate);
+        };
+    }, [subscribe, unsubscribe]);
+
     // Initial orders fetch
     useEffect(() => {
         fetchOrders();
+        fetchAmbulanceBookings();
+        fetchBloodBankBookings();
     }, []);
 
     // Show socket connection error toast
@@ -164,6 +249,25 @@ const TrackOrder = () => {
         return isExpanded ? items : items.slice(0, 3);
     };
 
+    const handleBloodBankPayNow = (booking) => {
+        setPaymentStatusMsg(null);
+        BloodBankPaymentService.processPayment(
+          {
+            amount: booking.totalAmount,
+            bookingId: booking.bookingId,
+            user: booking.user,
+            description: `Blood Bank Booking #${booking.bookingId}`
+          },
+          (response) => {
+            setPaymentStatusMsg('Payment successful!');
+            fetchBloodBankBookings();
+          },
+          (error) => {
+            setPaymentStatusMsg('Payment failed: ' + error);
+          }
+        );
+    };
+
     if (loading) {
         return (
             <div className="track-order-container">
@@ -182,7 +286,7 @@ const TrackOrder = () => {
                     <div className="error-icon">⚠️</div>
                     <h3>Error Loading Orders</h3>
                     <p>{error}</p>
-                    <button className="retry-button" onClick={fetchOrders}>
+                    <button className="retry-button" onClick={() => { fetchOrders(); fetchAmbulanceBookings(); fetchBloodBankBookings(); }}>
                         Try Again
                     </button>
                 </div>
@@ -190,13 +294,13 @@ const TrackOrder = () => {
         );
     }
 
-    if (orders.length === 0) {
+    if (orders.length === 0 && ambulanceBookings.length === 0 && bloodBankBookings.length === 0) {
         return (
             <div className="track-order-container">
                 <div className="empty-state">
                     <div className="empty-icon">📦</div>
-                    <h3>No Orders Found</h3>
-                    <p>You haven't placed any orders yet.</p>
+                    <h3>No Orders or Ambulance Bookings Found</h3>
+                    <p>You haven't placed any orders or ambulance bookings yet.</p>
                     <button className="shop-button" onClick={() => navigate('/products')}>
                         Start Shopping
                     </button>
@@ -221,18 +325,209 @@ const TrackOrder = () => {
                 <h1>Track Your Orders</h1>
             </div>
 
+            {/* Ambulance Bookings Timeline */}
+            {ambulanceBookings.length > 0 && (
+                <div className="orders-grid">
+                    {ambulanceBookings.map((booking) => (
+                        <div key={booking.requestId} className="order-card ambulance-booking-card">
+                            <div className="order-header">
+                                <h3>Ambulance Booking #{booking.requestId.slice(-8)}</h3>
+                                <span className="order-date">{booking.placedAt}</span>
+                                <span className="order-status">{booking.status}</span>
+                            </div>
+                            <div className="timeline-container trackorder-timeline-container">
+                                <div className="timeline trackorder-timeline">
+                                    {booking.timelineSteps.map((step, index, steps) => (
+                                        <div
+                                            key={step.id}
+                                            className="timeline-item"
+                                            ref={el => timelineRefs.current[`${booking.requestId}-${index}`] = el}
+                                        >
+                                            {index > 0 && (
+                                                <div className={`timeline-line before ${steps[index - 1].completed ? 'completed' : ''}`}></div>
+                                            )}
+                                            <div className={`timeline-circle ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}>
+                                                {step.completed ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : step.active ? (
+                                                    <svg className="tick-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : (
+                                                    <span className="step-number">{step.id}</span>
+                                                )}
+                                            </div>
+                                            <div className="timeline-label">
+                                                <span className="step-title">{step.title}</span>
+                                            </div>
+                                            {index < steps.length - 1 && (
+                                                <div className={`timeline-line after ${step.completed ? 'completed' : ''}`}></div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="order-items">
+                                <h4>Agency: {booking.agencyProfile?.agencyName || 'N/A'}</h4>
+                                <div className="item-row">
+                                    <div className="item-info">
+                                        <span className="item-name">Contact: {booking.agencyProfile?.contactNumber || 'N/A'}</span>
+                                    </div>
+                                    <div className="item-details">
+                                        <span className="item-quantity">Status: {booking.status}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Blood Bank Bookings Timeline */}
+            {bloodBankBookings.length > 0 && (
+                <div className="orders-grid">
+                    {bloodBankBookings.map((booking) => {
+                        // Timeline logic (replicate from OngoingBloodBankBookingModal.js)
+                        const status = booking.status || booking.bloodRequest?.status || 'PENDING';
+                        let currentStepIndex = 0;
+                        if (status === 'WaitingForPayment' || status === 'PaymentCompleted') {
+                          currentStepIndex = 2;
+                        } else if (status === 'WaitingForPickup') {
+                          currentStepIndex = 3;
+                        } else if (status === 'COMPLETED') {
+                          currentStepIndex = 4;
+                        } else if (status === 'CONFIRMED') {
+                          currentStepIndex = 1;
+                        } else {
+                          currentStepIndex = 0;
+                        }
+                        const STEPS = [
+                          'PENDING',
+                          'CONFIRMED',
+                          'PAYMENT',
+                          'WaitingForPickup',
+                          'COMPLETED',
+                        ];
+                        const DISPLAY_NAMES = {
+                          'PENDING': 'Pending',
+                          'CONFIRMED': 'Confirmed',
+                          'PAYMENT': 'Waiting for Payment',
+                          'WaitingForPickup': 'Waiting for Pickup',
+                          'COMPLETED': 'Completed',
+                        };
+                        const getLabelLines = (label) => {
+                          if (label === 'Waiting for Pickup') return ['Waiting', 'for Pickup'];
+                          if (label === 'Waiting for Payment') return ['Waiting', 'for Payment'];
+                          if (label === 'Payment Completed') return ['Payment', 'Completed'];
+                          return [label];
+                        };
+                        const agency = booking.agency;
+                        const bloodRequest = booking.bloodRequest || {};
+                        const formattedDate = booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A';
+                        const customerName = booking.customerName || booking.user?.name || 'Anonymous';
+                        const bloodTypes = Array.isArray(bloodRequest.bloodType) ? bloodRequest.bloodType.join(', ') : (bloodRequest.bloodType || 'N/A');
+                        const units = bloodRequest.units || 'N/A';
+                        const isCompleted = status === 'COMPLETED';
+                        const isWaitingForPayment = status === 'WaitingForPayment';
+                        const isPaymentCompleted = status === 'PaymentCompleted' || booking.paymentStatus === 'PAID';
+                        const hasPaymentInfo = booking.totalAmount != null;
+                        const paymentStatus = booking.paymentStatus;
+                        return (
+                          <div key={booking.bookingId} className="order-card bloodbank-booking-card">
+                            <div className="order-header">
+                              <h3>Blood Bank Booking #{booking.bookingId?.slice(-8)}</h3>
+                              <span className="order-date">{formattedDate}</span>
+                              <span className="order-status">{status}</span>
+                            </div>
+                            <div className="timeline-container trackorder-timeline-container">
+                              <div className="timeline trackorder-timeline">
+                                {STEPS.map((step, idx) => {
+                                  let label = DISPLAY_NAMES[step];
+                                  let isActive = idx === currentStepIndex;
+                                  let isCompleted = idx < currentStepIndex;
+                                  let isFilled = isCompleted || isActive;
+                                  if (step === 'PAYMENT') {
+                                    if (status === 'PaymentCompleted' || status === 'WaitingForPickup' || status === 'COMPLETED') {
+                                      label = 'Payment Completed';
+                                      isCompleted = true;
+                                      isFilled = true;
+                                    } else if (status === 'WaitingForPayment') {
+                                      label = 'Waiting for Payment';
+                                      isActive = true;
+                                      isFilled = true;
+                                    }
+                                  }
+                                  const isLast = idx === STEPS.length - 1;
+                                  const labelLines = getLabelLines(label);
+                                  return (
+                                    <div className="timeline-item" key={step}>
+                                      {idx > 0 && (
+                                        <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
+                                      )}
+                                      <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
+                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
+                                      </div>
+                                      <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{labelLines.map((line, i) => <div key={i}>{line}</div>)}</div>
+                                      {!isLast && (
+                                        <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <div className="order-items">
+                              <h4>Blood Bank: {agency?.agencyName || 'N/A'}</h4>
+                              <div className="item-row">
+                                <div className="item-info">
+                                  <span className="item-name">Customer Name: {customerName}</span>
+                                  <span className="item-name">Blood Types: {bloodTypes}</span>
+                                  <span className="item-name">Units: {units}</span>
+                                  <span className="item-name">Date: {formattedDate}</span>
+                                </div>
+                                <div className="item-details">
+                                  <span className="item-quantity">Status: {status}</span>
+                                  {hasPaymentInfo && (
+                                    <span className="item-price">Amount: ₹{(typeof booking.totalAmount === 'number' && !isNaN(booking.totalAmount))
+                                      ? booking.totalAmount.toFixed(2)
+                                      : (typeof booking.totalAmount === 'string' && !isNaN(parseFloat(booking.totalAmount)))
+                                        ? parseFloat(booking.totalAmount).toFixed(2)
+                                        : '--'}</span>
+                                  )}
+                                  {isPaymentCompleted && <span className="item-status paid">PAID</span>}
+                                  {isWaitingForPayment && <span className="item-status pending">PENDING</span>}
+                                  {isWaitingForPayment && (
+                                    <button className="pay-now-btn" onClick={() => handleBloodBankPayNow(booking)}>
+                                      Pay Now
+                                    </button>
+                                  )}
+                                  {paymentStatusMsg && (
+                                    <div className={`payment-status-msg ${paymentStatusMsg.startsWith('Payment successful') ? 'success' : 'error'}`}>{paymentStatusMsg}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Product Orders Timeline */}
             <div className="orders-grid">
                 {orders.map((order) => (
                     <div key={order.orderId} className="order-card">
                         {/* Order Header */}
                         <div className="order-header">
-                            <h3>Order #{order.orderId.slice(-8)}</h3>
+                            <h3>Product Order #{order.orderId.slice(-8)}</h3>
                             <span className="order-date">{order.placedAt}</span>
                         </div>
 
                         {/* Timeline */}
-                        <div className="timeline-container">
-                            <div className="timeline">
+                        <div className="timeline-container trackorder-timeline-container">
+                            <div className="timeline trackorder-timeline">
                                 {order.timelineSteps.map((step, index, steps) => (
                                     <div 
                                         key={step.id} 
@@ -244,9 +539,13 @@ const TrackOrder = () => {
                                             <div className={`timeline-line before ${steps[index - 1].completed ? 'completed' : ''}`}></div>
                                         )}
                                         
-                                        <div className={`timeline-circle ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}>
+                                        <div className={`timeline-circle ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}> 
                                             {step.completed ? (
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            ) : step.active ? (
+                                                <svg className="tick-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             ) : (

@@ -1,5 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
-import { getUserId } from '../User/Auth/auth.utils';
+import { getUserId, getToken } from '../../services/User/Auth/auth.utils';
 
 class OrderHistoryService {
     constructor() {
@@ -120,6 +120,90 @@ class OrderHistoryService {
             });
         });
         return categories;
+    }
+
+    /**
+     * Get completed ambulance bookings for a user
+     * @param {string} userId - User ID (optional, will use current user if not provided)
+     * @returns {Promise<Object>} - Response with bookings data
+     */
+    async getCompletedAmbulanceBookings(userId = null) {
+        try {
+            const targetUserId = userId || getUserId();
+            if (!targetUserId) {
+                throw new Error('User ID is required');
+            }
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.AMBULANCE.GET_COMPLETED_BOOKINGS,
+                { userId: targetUserId }
+            );
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return {
+                success: true,
+                data: data.data || [],
+                message: 'Completed ambulance bookings fetched successfully'
+            };
+        } catch (error) {
+            console.error('Error fetching completed ambulance bookings:', error);
+            return {
+                success: false,
+                data: [],
+                message: error.message || 'Failed to fetch completed ambulance bookings'
+            };
+        }
+    }
+
+    /**
+     * Format ambulance booking data for display
+     * @param {Object} booking - Raw booking data from API
+     * @returns {Object} - Formatted booking data
+     */
+    formatAmbulanceBookingData(booking) {
+        return {
+            id: booking.requestId,
+            bookingNumber: booking.requestId,
+            date: booking.timestamp || booking.createdAt,
+            status: booking.status,
+            total: booking.totalAmount,
+            pickupLocation: booking.pickupLocation,
+            dropLocation: booking.dropLocation,
+            vehicleType: booking.vehicleType,
+            agency: booking.agencyProfile?.agencyName || 'Unknown Agency',
+            agencyContact: booking.agencyProfile?.contactNumber || '',
+            agencyProfile: booking.agencyProfile,
+            user: booking.user,
+            isPaymentBypassed: booking.isPaymentBypassed,
+            baseCharge: booking.baseCharge,
+            totalDistance: booking.totalDistance,
+            costPerKm: booking.costPerKm,
+            actualDelivery: booking.status === 'Completed' ? (booking.updatedAt || booking.timestamp) : null
+        };
+    }
+
+    async getCompletedBloodBankBookings() {
+        const userId = getUserId && getUserId();
+        if (!userId) throw new Error('User not authenticated');
+        const endpoint = API_CONFIG.ENDPOINTS.BLOOD_BANK.GET_COMPLETED_BLOOD_BANK_BOOKINGS_BY_USER.replace(':userId', encodeURIComponent(userId));
+        const url = getApiUrl(endpoint);
+        const token = getToken && getToken();
+        if (!token) throw new Error('User not authenticated');
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch completed blood bank bookings');
+        return await response.json();
     }
 }
 

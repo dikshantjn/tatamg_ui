@@ -1,5 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
-import { getUserId } from '../Auth/auth.utils';
+import { getUserId, getToken } from '../Auth/auth.utils';
 
 class TrackOrderService {
     constructor() {
@@ -184,6 +184,95 @@ class TrackOrderService {
             'cancelled': 'Cancelled'
         };
         return statusTexts[status] || 'Unknown Status';
+    }
+
+    // Fetch active ambulance bookings for the current user
+    async getActiveAmbulanceBookings() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.AMBULANCE.GET_ACTIVE_BOOKINGS, { userId });
+            const url = getApiUrl(endpoint);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.data || [];
+        } catch (error) {
+            console.error('Error fetching active ambulance bookings:', error);
+            throw error;
+        }
+    }
+
+    // Ambulance status map and timeline steps
+    ambulanceStatusMap = {
+        "pending": 0,
+        "accepted": 1,
+        "WaitingForPayment": 2,
+        "paymentCompleted": 2,
+        "PaymentWaived": 2,
+        "OnTheWay": 3,
+        "PickedUp": 4,
+        "Completed": 5,
+    };
+
+    ambulanceTimelineSteps = [
+        { id: 0, title: "Pending" },
+        { id: 1, title: "Accepted" },
+        { id: 2, title: "Payment" },
+        { id: 3, title: "On The Way" },
+        { id: 4, title: "Picked Up" },
+        { id: 5, title: "Completed" },
+    ];
+
+    // Format ambulance booking for timeline display
+    formatAmbulanceBooking(booking) {
+        const currentStep = this.ambulanceStatusMap[booking.status] ?? 0;
+        const steps = this.ambulanceTimelineSteps.map((step, idx) => ({
+            ...step,
+            completed: idx < currentStep,
+            active: idx === currentStep,
+        }));
+        return {
+            ...booking,
+            timelineSteps: steps,
+            placedAt: booking.createdAt ? new Date(booking.createdAt).toLocaleString() : "",
+        };
+    }
+
+    // Fetch active blood bank bookings for the current user
+    async getActiveBloodBankBookings() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+            const endpoint = API_CONFIG.ENDPOINTS.BLOOD_BANK.GET_BLOOD_BANK_BOOKINGS_BY_USER.replace(':userId', encodeURIComponent(userId));
+            const url = getApiUrl(endpoint);
+            const token = getToken && getToken();
+            if (!token) throw new Error('User not authenticated');
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) throw new Error('Failed to fetch blood bank bookings');
+            const data = await response.json();
+            if (!data.success || !Array.isArray(data.data) || !data.data.length) return [];
+            return data.data;
+        } catch (error) {
+            console.error('Error fetching active blood bank bookings:', error);
+            throw error;
+        }
     }
 }
 

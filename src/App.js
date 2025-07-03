@@ -16,7 +16,7 @@ import Membership from './components/Membership';
 import Home from './components/User/Home/Home';
 import ConsultDoctors from './components/ConsultDoctors';
 import LabTests from './components/LabTests';
-import BloodBank from './components/BloodBank';
+import BloodBank from './components/User/BloodBank/BloodBank';
 import FindDonor from './components/FindDonor';
 import RegisterDonor from './components/RegisterDonor';
 import MedicalLoans from './components/MedicalLoans';

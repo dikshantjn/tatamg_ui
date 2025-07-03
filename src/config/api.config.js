@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.45:5000/api',
-    SOCKET_URL: 'http://192.168.1.45:5000',
+    BASE_URL: 'http://192.168.1.44:5000/api',
+    SOCKET_URL: 'http://192.168.1.44:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -52,7 +52,15 @@ export const API_CONFIG = {
             GET_ALL: '/ambulance/ambulances',
             REQUEST: '/ambulanceBooking/request',
             GET_ACTIVE_BOOKINGS: '/ambulanceBooking/active-requests/user/:userId',
-            UPDATE_PAYMENT_COMPLETED: '/ambulanceBooking/update-payment-completed/:requestId'
+            UPDATE_PAYMENT_COMPLETED: '/ambulanceBooking/update-payment-completed/:requestId',
+            GET_COMPLETED_BOOKINGS: '/ambulanceBooking/completed-requests/:userId'
+        },
+        BLOOD_BANK: {
+            GET_ACTIVE_BLOOD_BANKS: '/blood-bank/blood-bank-agencies',
+            CREATE_BLOOD_BANK_REQUEST: '/blood-bank/requests',
+            GET_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId',
+            UPDATE_BLOOD_BANK_PAYMENT: '/blood-bank-bookings/:bookingId/update-payment',
+            GET_COMPLETED_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId/completed'
         }
         // Add other endpoint categories as needed
     }

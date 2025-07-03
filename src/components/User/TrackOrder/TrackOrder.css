@@ -132,13 +132,14 @@
     min-width: max-content;
     padding: 16px;
     position: relative;
+    gap: 48px;
 }
 
 .timeline-item {
     display: flex;
     align-items: center;
     position: relative;
-    scroll-margin: 20px; /* Adds margin when scrolling into view */
+    scroll-margin: 20px;
 }
 
 .timeline-circle {
@@ -167,6 +168,11 @@
     border-color: #22C55E;
     color: #22C55E;
     animation: pulse 2s infinite;
+    background-color: #e6f9ef;
+}
+
+.timeline-circle.active svg {
+    display: block;
 }
 
 .timeline-circle svg {
@@ -202,6 +208,22 @@
 .timeline-circle.completed + .timeline-label,
 .timeline-circle.active + .timeline-label {
     color: #22C55E;
+}
+
+.timeline-circle.active .tick-svg {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 18px;
+    height: 18px;
+    stroke: #22C55E;
+    stroke-width: 3;
+    z-index: 3;
+}
+
+.timeline-circle:not(.active) .tick-svg {
+    display: none;
 }
 
 @keyframes pulse {
@@ -580,4 +602,73 @@
         text-align: center;
         line-height: 1.2;
     }
+}
+
+/* TrackOrder-specific timeline styles */
+.trackorder-timeline {
+    gap: 80px; /* Large gap for TrackOrder timeline only */
+    min-width: max-content;
+}
+
+.trackorder-timeline-container {
+    /* You can add container-specific styles here if needed */
+}
+
+@media screen and (max-width: 480px) {
+    .trackorder-timeline {
+        gap: 24px; /* Reasonable gap for mobile */
+        min-width: 450px;
+    }
+}
+
+.trackorder-timeline .timeline-line {
+    width: 60px;
+}
+
+@media screen and (max-width: 480px) {
+    .trackorder-timeline .timeline-line {
+        width: 24px;
+    }
+}
+
+.pay-now-btn {
+    background: linear-gradient(90deg, #38A3A5 0%, #4FB5B7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 2px 8px rgba(56, 163, 165, 0.08);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    outline: none;
+    display: inline-block;
+}
+.pay-now-btn:hover, .pay-now-btn:focus {
+    background: linear-gradient(90deg, #2d8a8c 0%, #38A3A5 100%);
+    box-shadow: 0 4px 16px rgba(56, 163, 165, 0.15);
+    transform: translateY(-2px) scale(1.03);
+}
+
+.payment-status-msg {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    width: fit-content;
+}
+.payment-status-msg.success {
+    background: #e6f9f0;
+    color: #1a7f5a;
+    border: 1px solid #22C55E;
+}
+.payment-status-msg.error {
+    background: #ffeaea;
+    color: #b91c1c;
+    border: 1px solid #ef4444;
 } 
