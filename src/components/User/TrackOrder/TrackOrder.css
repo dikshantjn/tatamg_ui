@@ -54,7 +54,7 @@
 .orders-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem;
 }
 
 /* Order Card */
@@ -64,6 +64,7 @@
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
 }
 
 /* Order Header */
@@ -671,4 +672,43 @@
     background: #ffeaea;
     color: #b91c1c;
     border: 1px solid #ef4444;
+}
+
+.order-status-badge {
+    display: inline-block;
+    padding: 0.35em 1em;
+    border-radius: 1.2em;
+    font-size: 0.95em;
+    font-weight: 600;
+    margin-left: 1em;
+    margin-top: 0.2em;
+    vertical-align: middle;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    transition: background 0.2s, color 0.2s;
+}
+.status-pending {
+    background: #fff7e6;
+    color: #b26a00;
+    border: 1px solid #ffe0b2;
+}
+.status-accepted {
+    background: #e6f7ff;
+    color: #005580;
+    border: 1px solid #b3e0ff;
+}
+.status-addeditemsincart {
+    background: #f0f5ff;
+    color: #2f54eb;
+    border: 1px solid #adc6ff;
+}
+.status-paymentconfirmed, .status-readyforpickup {
+    background: #e6fffb;
+    color: #08979c;
+    border: 1px solid #87e8de;
+}
+.status-outfordelivery {
+    background: #f6ffed;
+    color: #389e0d;
+    border: 1px solid #b7eb8f;
 } 

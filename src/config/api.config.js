@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.44:5000/api',
-    SOCKET_URL: 'http://192.168.1.44:5000',
+    BASE_URL: 'http://192.168.1.39:5000/api',
+    SOCKET_URL: 'http://192.168.1.39:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -61,7 +61,15 @@ export const API_CONFIG = {
             GET_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId',
             UPDATE_BLOOD_BANK_PAYMENT: '/blood-bank-bookings/:bookingId/update-payment',
             GET_COMPLETED_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId/completed'
-        }
+        },
+        MEDICINE_DELIVERY: {
+            UPLOAD_PRESCRIPTION: '/prescription/upload-prescription',
+            SEARCH_MORE_VENDORS: '/prescription/:prescriptionId/search-more-vendors',
+            TRACK_ORDERS: '/orders/track-orders/:userId',
+            GET_CART_ITEMS_BY_ORDER: '/cart/:orderId',
+            GET_USER_ORDERS_WITH_CART: '/user/orders/cart/:userId',
+            UPDATE_ORDER: '/orders/update-order/:orderId',
+        },
         // Add other endpoint categories as needed
     }
 };

@@ -6,11 +6,13 @@ import { useSocket } from '../../../hooks/useSocket';
 import { ToastContainer } from '../../ui/Toast';
 import './TrackOrder.css';
 import BloodBankPaymentService from '../../../services/payment/blood-bank-payment.service';
+import { getCartItemsByOrderId } from '../../../services/User/MedicineDelivery/medicine-delivery.service';
 
 const TrackOrder = () => {
     const [orders, setOrders] = useState([]);
     const [ambulanceBookings, setAmbulanceBookings] = useState([]);
     const [bloodBankBookings, setBloodBankBookings] = useState([]);
+    const [medicineOrders, setMedicineOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [expandedOrders, setExpandedOrders] = useState({});
@@ -19,6 +21,8 @@ const TrackOrder = () => {
     const navigate = useNavigate();
     const userId = getUserId();
     const timelineRefs = useRef({});
+    const [medicineOrderCartItems, setMedicineOrderCartItems] = useState({});
+    const [loadingCartOrderId, setLoadingCartOrderId] = useState(null);
 
     const { isConnected, error: socketError, subscribe, unsubscribe } = useSocket(userId);
 
@@ -67,6 +71,21 @@ const TrackOrder = () => {
         } catch (error) {
             console.error('Error fetching blood bank bookings:', error);
             setError('Failed to load blood bank bookings. Please try again.');
+        }
+    };
+
+    // Fetch medicine orders
+    const fetchMedicineOrders = async () => {
+        try {
+            const orders = await trackOrderService.getOngoingMedicineOrders();
+            setMedicineOrders(orders);
+        } catch (error) {
+            if (error && error.message && error.message.includes('404')) {
+                setMedicineOrders([]); // No medicine orders, but not an error
+            } else {
+                console.error('Error fetching medicine orders:', error);
+                setError('Failed to load medicine orders. Please try again.');
+            }
         }
     };
 
@@ -184,6 +203,50 @@ const TrackOrder = () => {
         }
     }, [addToast, scrollToActiveNode]);
 
+    // Handle medicine order status updates
+    const handleMedicineOrderUpdate = useCallback((data) => {
+        try {
+            const update = typeof data === 'string' ? JSON.parse(data) : data;
+            const { orderId, status, totalAmount, estimatedDeliveryDate } = update;
+            console.log('[MedicineOrderUpdate] Received:', update);
+            const before = JSON.stringify(medicineOrders);
+            let found = false;
+            setMedicineOrders(prevOrders => prevOrders.map(order => {
+                if (order.orderId === orderId) {
+                    found = true;
+                    return {
+                        ...order,
+                        orderStatus: status,
+                        totalAmount: totalAmount ?? order.totalAmount,
+                        estimatedDeliveryDate: estimatedDeliveryDate ?? order.estimatedDeliveryDate,
+                    };
+                }
+                return order;
+            }));
+            setTimeout(() => {
+                const after = JSON.stringify(medicineOrders);
+                console.log('[MedicineOrderUpdate] State before:', before);
+                console.log('[MedicineOrderUpdate] State after:', after);
+                if (!found) {
+                    console.warn('[MedicineOrderUpdate] No matching orderId found in medicineOrders:', orderId);
+                }
+            }, 100);
+            addToast({
+                type: 'success',
+                title: 'Medicine Order Updated',
+                message: `Order #${orderId?.slice(-8)} status changed to ${status}`,
+                duration: 3000
+            });
+        } catch (error) {
+            addToast({
+                type: 'error',
+                title: 'Update Failed',
+                message: 'Failed to update medicine order status.',
+                duration: 3000
+            });
+        }
+    }, [addToast, medicineOrders]);
+
     // Subscribe to socket events
     useEffect(() => {
         subscribe('orderStatusUpdated', handleOrderStatusUpdate);
@@ -214,11 +277,22 @@ const TrackOrder = () => {
         };
     }, [subscribe, unsubscribe]);
 
+    // Subscribe to medicine order socket events
+    useEffect(() => {
+        console.log('[MedicineOrderUpdate] Subscribing to MedicineOrderUpdate event');
+        subscribe('MedicineOrderUpdate', handleMedicineOrderUpdate);
+        return () => {
+            console.log('[MedicineOrderUpdate] Unsubscribing from MedicineOrderUpdate event');
+            unsubscribe('MedicineOrderUpdate', handleMedicineOrderUpdate);
+        };
+    }, [subscribe, unsubscribe, handleMedicineOrderUpdate]);
+
     // Initial orders fetch
     useEffect(() => {
         fetchOrders();
         fetchAmbulanceBookings();
         fetchBloodBankBookings();
+        fetchMedicineOrders();
     }, []);
 
     // Show socket connection error toast
@@ -268,6 +342,22 @@ const TrackOrder = () => {
         );
     };
 
+    useEffect(() => {
+        if (medicineOrders.length > 0) {
+            medicineOrders.forEach(async (order) => {
+                if (!medicineOrderCartItems[order.orderId]) {
+                    try {
+                        const items = await getCartItemsByOrderId(order.orderId);
+                        setMedicineOrderCartItems(prev => ({ ...prev, [order.orderId]: items }));
+                    } catch (e) {
+                        setMedicineOrderCartItems(prev => ({ ...prev, [order.orderId]: [] }));
+                    }
+                }
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [medicineOrders]);
+
     if (loading) {
         return (
             <div className="track-order-container">
@@ -286,7 +376,7 @@ const TrackOrder = () => {
                     <div className="error-icon">⚠️</div>
                     <h3>Error Loading Orders</h3>
                     <p>{error}</p>
-                    <button className="retry-button" onClick={() => { fetchOrders(); fetchAmbulanceBookings(); fetchBloodBankBookings(); }}>
+                    <button className="retry-button" onClick={() => { fetchOrders(); fetchAmbulanceBookings(); fetchBloodBankBookings(); fetchMedicineOrders(); }}>
                         Try Again
                     </button>
                 </div>
@@ -294,7 +384,7 @@ const TrackOrder = () => {
         );
     }
 
-    if (orders.length === 0 && ambulanceBookings.length === 0 && bloodBankBookings.length === 0) {
+    if (orders.length === 0 && ambulanceBookings.length === 0 && bloodBankBookings.length === 0 && medicineOrders.length === 0) {
         return (
             <div className="track-order-container">
                 <div className="empty-state">
@@ -510,6 +600,86 @@ const TrackOrder = () => {
                               </div>
                             </div>
                           </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Medicine Orders Timeline */}
+            {medicineOrders.length > 0 && (
+                <div className="orders-grid">
+                    {medicineOrders.map((order) => {
+                        // Timeline steps for medicine orders (use backend statuses directly)
+                        const steps = [
+                            'Pending',
+                            'Accepted',
+                            'AddedItemsInCart',
+                            'PaymentConfirmed',
+                            'OutForDelivery',
+                            'Delivered',
+                        ];
+                        const displayNames = {
+                            'Pending': ['Pending'],
+                            'Accepted': ['Accepted'],
+                            'AddedItemsInCart': ['Items', 'Added'],
+                            'PaymentConfirmed': ['Payment', 'Confirmed'],
+                            'OutForDelivery': ['Out for', 'Delivery'],
+                            'Delivered': ['Delivered'],
+                        };
+                        const currentStepIndex = steps.indexOf(order.orderStatus);
+                        return (
+                            <div key={order.orderId} className="order-card medicine-order-card">
+                                <div className="order-header">
+                                    <h3>Medicine Order #{order.orderId.slice(-8)}</h3>
+                                    <span className="order-date">{order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</span>
+                                    <span className={`order-status-badge status-${order.orderStatus.toLowerCase()}`}>{displayNames[order.orderStatus]?.join(' ') || order.orderStatus}</span>
+                                </div>
+                                <div className="timeline-container trackorder-timeline-container">
+                                    <div className="timeline trackorder-timeline">
+                                        {steps.map((step, idx, arr) => {
+                                            const isActive = idx === currentStepIndex;
+                                            const isCompleted = idx < currentStepIndex;
+                                            const isFilled = isCompleted || isActive;
+                                            const isLast = idx === arr.length - 1;
+                                            const lines = displayNames[step] || [step];
+                                            return (
+                                                <div className="timeline-item" key={step}>
+                                                    {idx > 0 && (
+                                                        <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
+                                                    )}
+                                                    <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
+                                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
+                                                    </div>
+                                                    <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{lines.map((line, i) => <div key={i}>{line}</div>)}</div>
+                                                    {!isLast && (
+                                                        <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="order-items">
+                                    {order.totalAmount && <span className="item-price">Total: ₹{order.totalAmount}</span>}
+                                    <div className="cart-items-list">
+                                        {medicineOrderCartItems[order.orderId]?.length > 0 ? (
+                                            medicineOrderCartItems[order.orderId].map(item => (
+                                                <div key={item.cartId} className="item-row">
+                                                    <div className="item-info">
+                                                        <span className="item-name">{item.MedicineProduct?.name || item.name}</span>
+                                                    </div>
+                                                    <div className="item-details">
+                                                        <span className="item-quantity">Qty: {item.quantity}</span>
+                                                        <span className="item-price">₹{item.price}</span>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="no-cart-items">No items found for this order.</div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                         );
                     })}
                 </div>

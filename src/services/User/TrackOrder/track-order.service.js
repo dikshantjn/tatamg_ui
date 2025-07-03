@@ -274,6 +274,32 @@ class TrackOrderService {
             throw error;
         }
     }
+
+    // Fetch ongoing medicine orders for the current user
+    async getOngoingMedicineOrders() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.TRACK_ORDERS, { userId });
+            const url = getApiUrl(endpoint);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.orders || [];
+        } catch (error) {
+            console.error('Error fetching ongoing medicine orders:', error);
+            throw error;
+        }
+    }
 }
 
 export const trackOrderService = new TrackOrderService(); 

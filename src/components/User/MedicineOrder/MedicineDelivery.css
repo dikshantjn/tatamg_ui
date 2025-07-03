@@ -247,92 +247,299 @@
   border-radius: 4px;
 }
 
+/* --- Divider --- */
 .divider {
   position: relative;
   text-align: center;
-  margin: 40px 0;
+  margin: 40px 0 24px 0;
 }
-
 .divider span {
-  background-color: white;
-  padding: 0 15px;
-  color: #666;
-  font-size: 14px;
+  background: #fff;
+  padding: 0 18px;
+  color: #888;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
   position: relative;
   z-index: 1;
 }
-
 .divider::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 0;
   right: 0;
-  height: 1px;
-  background-color: #E0E0E0;
+  height: 1.5px;
+  background: #ececec;
   z-index: 0;
 }
 
-.order-options {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 30px;
-}
-
-.order-option {
+/* --- Compact Order Options (row, only WhatsApp and Call) --- */
+.order-options.compact {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 20px;
-  border: 1px solid #E0E0E0;
-  border-radius: 8px;
+  gap: 18px;
+  margin-top: 0;
+  margin-bottom: 32px;
+}
+.order-options.compact .order-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-width: 260px;
+  height: 54px;
+  padding: 0 28px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s, border-color 0.2s, color 0.2s, background 0.2s;
+  font-size: 16px;
+  font-weight: 500;
+  gap: 12px;
+  outline: none;
   cursor: pointer;
-  transition: all 0.3s;
-  background-color: white;
 }
-
-.order-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.order-options.compact .order-option img {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 0;
+  display: block;
 }
-
-.order-option img {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 10px;
+.order-options.compact .order-option span {
+  font-size: 16px;
+  color: #222;
+  font-weight: 500;
+  display: block;
+  line-height: 1;
 }
-
-.order-option span {
-  font-size: 14px;
-  color: #333;
-}
-
-.whatsapp {
+.order-options.compact .whatsapp {
   border-color: #25D366;
 }
-
-.whatsapp:hover {
-  background-color: #25D366;
-  color: white;
+.order-options.compact .whatsapp:hover {
+  background: #25D366;
+  color: #fff;
 }
-
-.scan {
-  border-color: #00796B;
+.order-options.compact .whatsapp:hover span {
+  color: #fff;
 }
-
-.scan:hover {
-  background-color: #00796B;
-  color: white;
-}
-
-.call {
+.order-options.compact .call {
   border-color: #0288D1;
 }
+.order-options.compact .call:hover {
+  background: #0288D1;
+  color: #fff;
+}
+.order-options.compact .call:hover span {
+  color: #fff;
+}
 
-.call:hover {
-  background-color: #0288D1;
-  color: white;
+/* --- Coupon Section --- */
+.coupon-section {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 18px;
+  margin-bottom: 16px;
+}
+.coupon-card {
+  flex: 1 1 340px;
+  max-width: 420px;
+  min-width: 260px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1.5px solid #e0e0e0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  padding: 28px 24px 24px 24px;
+  position: relative;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: visible;
+}
+.coupon-card .coupon-header {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.coupon-card .coupon-discount {
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #222;
+}
+.coupon-card .coupon-desc {
+  color: #666;
+  font-size: 1.1em;
+  margin-bottom: 18px;
+}
+.coupon-card .install-app-btn {
+  background: #e3edfa;
+  color: #1976d2;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.2s;
+}
+.coupon-card .install-app-btn:hover {
+  background: #d0e2ff;
+}
+.coupon-card .store-icons {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+.coupon-card .playstore-icon {
+  font-size: 1.2em;
+}
+.coupon-card .apple-icon {
+  font-size: 1.2em;
+}
+.coupon-card .coupon-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.coupon-card .coupon-code-label {
+  font-weight: 600;
+  color: #d32f2f;
+  font-size: 1em;
+}
+.coupon-card .coupon-code-value {
+  background: #ffe6ea;
+  color: #d32f2f;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 1.1em;
+  letter-spacing: 1px;
+  margin-right: 2px;
+}
+.coupon-card .copy-btn {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #d32f2f;
+  margin-left: 2px;
+  transition: color 0.2s;
+}
+.coupon-card .copy-btn:hover {
+  color: #b71c1c;
+}
+
+/* App Offer (blue) */
+.coupon-card.app-offer {
+  border: 1.5px solid #90caf9;
+  background: #f7fbff;
+}
+.coupon-card.app-offer .coupon-header {
+  color: #1976d2;
+}
+.coupon-card.app-offer .coupon-discount {
+  color: #1976d2;
+}
+.coupon-card.app-offer .install-app-btn {
+  background: #e3edfa;
+  color: #1976d2;
+}
+
+/* Website Offer (pink) */
+.coupon-card.website-offer {
+  border: 1.5px solid #f8bbd0;
+  background: #fff7fa;
+}
+.coupon-card.website-offer .coupon-header {
+  color: #d32f2f;
+}
+.coupon-card.website-offer .coupon-discount {
+  color: #d32f2f;
+}
+.coupon-card.website-offer .coupon-code-value {
+  background: #ffe6ea;
+  color: #d32f2f;
+}
+
+/* --- Large faded percent icon background --- */
+.coupon-card::after {
+  content: '%';
+  position: absolute;
+  right: 32px;
+  top: 32px;
+  font-size: 64px;
+  color: #e3edfa;
+  opacity: 0.6;
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 0;
+}
+.coupon-card.website-offer::after {
+  color: #ffe6ea;
+}
+
+/* --- Puzzle piece notch effect --- */
+.coupon-card.app-offer::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #90caf9;
+  border-right: none;
+  z-index: 1;
+}
+.coupon-card.website-offer::before {
+  content: '';
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #f8bbd0;
+  border-left: none;
+  z-index: 1;
+}
+
+/* Responsive for coupon section */
+@media (max-width: 900px) {
+  .coupon-section {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  .coupon-card {
+    max-width: 100%;
+    width: 100%;
+  }
+  .coupon-card::after {
+    right: 18px;
+    top: 18px;
+    font-size: 44px;
+  }
+  .coupon-card.app-offer::before,
+  .coupon-card.website-offer::before {
+    display: none;
+  }
 }
 
 /* Responsive Design */
@@ -344,4 +551,119 @@
   .medicine-delivery-container {
     padding: 20px;
   }
+}
+
+.verify-dialog-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.verify-dialog {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 36px 32px 32px 32px;
+  max-width: 380px;
+  width: 90vw;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: popIn 0.3s cubic-bezier(.4,2,.6,1) 1;
+}
+@keyframes popIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.verify-lottie {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 18px;
+}
+.verify-dialog h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #1976d2;
+}
+.verify-dialog p {
+  color: #555;
+  font-size: 1.05em;
+  margin-bottom: 18px;
+}
+.countdown-timer {
+  font-size: 2.1em;
+  font-weight: 700;
+  color: #0288D1;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+.search-more-btn {
+  background: linear-gradient(90deg, #1976d2 0%, #0288d1 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 2px 8px rgba(2,136,209,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.search-more-btn:hover {
+  background: linear-gradient(90deg, #0288d1 0%, #1976d2 100%);
+  box-shadow: 0 4px 16px rgba(2,136,209,0.13);
+}
+@media (max-width: 600px) {
+  .verify-dialog {
+    padding: 18px 6vw 18px 6vw;
+    max-width: 98vw;
+  }
+  .verify-lottie {
+    width: 80px;
+    height: 80px;
+  }
+  .countdown-timer {
+    font-size: 1.3em;
+  }
+}
+
+.verify-dialog-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2.1em;
+  color: #bdbdbd;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s;
+}
+.verify-dialog-close:hover {
+  color: #1976d2;
+}
+.track-order-btn {
+  background: linear-gradient(90deg, #0288d1 0%, #1976d2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 32px;
+  font-size: 1.15em;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 18px;
+  box-shadow: 0 2px 8px rgba(2,136,209,0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.track-order-btn:hover {
+  background: linear-gradient(90deg, #1976d2 0%, #0288d1 100%);
+  box-shadow: 0 4px 16px rgba(2,136,209,0.18);
 }
