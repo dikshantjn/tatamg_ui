@@ -13,7 +13,7 @@ import Offers from './components/Offers';
 import Membership from './components/Membership';
 import Home from './components/Home';
 import ConsultDoctors from './components/ConsultDoctors';
-import LabTests from './components/LabTests';
+import LabTests from './components/User/LabTest/LabTests';
 import BloodBank from './components/BloodBank';
 import FindDonor from './components/FindDonor';
 import RegisterDonor from './components/RegisterDonor';
@@ -50,7 +50,7 @@ function DesktopLayout() {
                     <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
                     <Route path="/product/:id" element={<ProductProfilePage />} />
                     <Route path="/search" element={<SearchResults />} />
-                    <Route path="/doctors" element={<ConsultDoctors />} />
+                    <Route path="/doctor-consultation" element={<ConsultDoctors />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/checkout-product-medicine" element={<Checkout />} />
                     <Route path="/products" element={<Products />} />

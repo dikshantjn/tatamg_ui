@@ -442,12 +442,12 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                                         </svg>
                                     </div>
                                     <div className="address-details">
-                                        <p className="address-main">{safeOrderData.deliveryAddress.address}</p>
-                                        {safeOrderData.deliveryAddress.locality && (
-                                            <p className="address-line">{safeOrderData.deliveryAddress.locality}</p>
+                                        <p className="address-main">{selectedAddress?.address || 'No address selected'}</p>
+                                        {selectedAddress?.locality && (
+                                            <p className="address-line">{selectedAddress.locality}</p>
                                         )}
                                         <p className="address-location">
-                                            {safeOrderData.deliveryAddress.city}, {safeOrderData.deliveryAddress.state} - {safeOrderData.deliveryAddress.pincode}
+                                            {selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pincode}
                                         </p>
                                     </div>
                                 </div>

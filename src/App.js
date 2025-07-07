@@ -1,4 +1,4 @@
-  import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Header from './components/User/header/Header';
@@ -14,8 +14,8 @@ import Ambulance from './components/User/Ambulance/Ambulance';
 import Offers from './components/Offers';
 import Membership from './components/Membership';
 import Home from './components/User/Home/Home';
-import ConsultDoctors from './components/ConsultDoctors';
-import LabTests from './components/LabTests';
+import ConsultDoctors from './components/User/DoctorConsultation/ConsultDoctors';
+import LabTests from './components/User/LabTest/LabTests';
 import BloodBank from './components/User/BloodBank/BloodBank';
 import FindDonor from './components/FindDonor';
 import RegisterDonor from './components/RegisterDonor';
@@ -46,6 +46,9 @@ import BottomNavigation from './components/BottomNavigation';
 import ProductList from './components/User/Products/ProductList';
 import TrackOrder from './components/User/TrackOrder/TrackOrder';
 import OrderHistory from './components/User/OrderHistory/OrderHistory';
+import BookLabTestAppt from './components/User/LabTest/BookLabTestAppt';
+import OfflineDoctorConsultation from './components/User/DoctorConsultation/OfflineDoctorConsultation';
+import OnlineDoctorConsultation from './components/User/DoctorConsultation/OnlineDoctorConsultation';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 
@@ -63,7 +66,7 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
   // Check if current path is a protected route
   const isProtectedRoute = (path) => {
     const protectedPaths = [
-      '/doctor-profile', '/search', '/doctors', '/checkout', '/ambulance', 
+      '/doctor-profile', '/search', '/doctor-consultation', '/checkout', '/ambulance', 
       '/offers', '/membership', '/lab-tests', '/blood-bank', '/find-donor', 
       '/register-donor', '/medical-loans', '/loan-form', '/insurance', 
       '/vaccines', '/maternal-care', '/child-care', '/delivery', '/physiotherapy', 
@@ -143,8 +146,14 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           <Route path="/search" element={
             isAuthenticated ? <SearchResults /> : <Navigate to="/" replace />
           } />
-          <Route path="/doctors" element={
+          <Route path="/doctor-consultation" element={
             isAuthenticated ? <ConsultDoctors /> : <Navigate to="/" replace />
+          } />
+          <Route path="/doctor-consultation/offline" element={
+            isAuthenticated ? <OfflineDoctorConsultation /> : <Navigate to="/" replace />
+          } />
+          <Route path="/doctor-consultation/online" element={
+            isAuthenticated ? <OnlineDoctorConsultation /> : <Navigate to="/" replace />
           } />
           <Route path="/checkout" element={
             isAuthenticated ? <Checkout /> : <Navigate to="/" replace />
@@ -160,6 +169,9 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           } />
           <Route path="/lab-tests" element={
             isAuthenticated ? <LabTests /> : <Navigate to="/" replace />
+          } />
+          <Route path="/lab-tests/book/:labId" element={
+            isAuthenticated ? <BookLabTestAppt /> : <Navigate to="/" replace />
           } />
           <Route path="/blood-bank" element={
             isAuthenticated ? <BloodBank /> : <Navigate to="/" replace />

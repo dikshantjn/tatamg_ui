@@ -26,6 +26,37 @@ const TrackOrder = () => {
 
     const { isConnected, error: socketError, subscribe, unsubscribe } = useSocket(userId);
 
+    // Define medicine order status mapping at component level
+    const medicineOrderSteps = [
+        'Pending',
+        'PrescriptionVerified',
+        'Accepted',
+        'AddedItemsInCart',
+        'PaymentConfirmed',
+        'OutForDelivery',
+        'Delivered'
+    ];
+    
+    const medicineOrderStatusMapping = {
+        'PENDING': 'Pending',
+        'PRESCRIPTION_VERIFIED': 'PrescriptionVerified',
+        'ACCEPTED': 'Accepted',
+        'ADDED_ITEMS_IN_CART': 'AddedItemsInCart',
+        'PAYMENT_CONFIRMED': 'PaymentConfirmed',
+        'OUT_FOR_DELIVERY': 'OutForDelivery',
+        'DELIVERED': 'Delivered'
+    };
+
+    const medicineOrderDisplayNames = {
+        'Pending': ['Pending'],
+        'PrescriptionVerified': ['Prescription', 'Verified'],
+        'Accepted': ['Accepted'],
+        'AddedItemsInCart': ['Items', 'Added'],
+        'PaymentConfirmed': ['Payment', 'Confirmed'],
+        'OutForDelivery': ['Out for', 'Delivery'],
+        'Delivered': ['Delivered']
+    };
+
     const addToast = useCallback((toast) => {
         const id = Date.now();
         setToasts(prev => [...prev, { ...toast, id }]);
@@ -122,10 +153,45 @@ const TrackOrder = () => {
                 return;
             }
 
+            // Check if this is a medicine order
+            setMedicineOrders(prevOrders => {
+                const medicineOrder = prevOrders.find(order => order.orderId === finalOrderId);
+                if (medicineOrder) {
+                    console.log('[MedicineOrderUpdate] Updating medicine order:', {
+                        orderId: finalOrderId,
+                        oldStatus: medicineOrder.orderStatus,
+                        newStatus: finalStatus
+                    });
+                    
+                    const updatedOrders = prevOrders.map(order => {
+                        if (order.orderId === finalOrderId) {
+                            return {
+                                ...order,
+                                orderStatus: finalStatus
+                            };
+                        }
+                        return order;
+                    });
+
+                    // Show toast notification for medicine order
+                    addToast({
+                        type: 'success',
+                        title: 'Medicine Order Updated',
+                        message: `Order #${finalOrderId.slice(-8)} status changed to ${finalStatus}`,
+                        duration: 3000
+                    });
+
+                    return updatedOrders;
+                }
+                return prevOrders;
+            });
+
+            // If not a medicine order, update product orders
             setOrders(prevOrders => {
+                const productOrder = prevOrders.find(order => order.orderId === finalOrderId);
+                if (productOrder) {
                 const updatedOrders = prevOrders.map(order => {
                     if (order.orderId === finalOrderId) {
-                        // Update the order with new status
                         const updatedOrder = {
                             ...order,
                             status: finalStatus,
@@ -133,7 +199,6 @@ const TrackOrder = () => {
                         };
                         const formattedOrder = trackOrderService.formatOrderData(updatedOrder);
                         
-                        // Schedule scroll after the state update
                         setTimeout(() => {
                             scrollToActiveNode(finalOrderId, formattedOrder.timelineSteps);
                         }, 100);
@@ -143,21 +208,21 @@ const TrackOrder = () => {
                     return order;
                 });
 
-                return updatedOrders;
-            });
-
-            console.log(`✅ Order ${finalOrderId} status updated to: ${finalStatus}`);
-            
-            // Show toast notification
+                    // Show toast notification for product order
             addToast({
                 type: 'success',
-                title: 'Order Status Updated',
-                message: `Product Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
+                        title: 'Product Order Updated',
+                        message: `Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
                 duration: 3000
+                    });
+
+                    return updatedOrders;
+                }
+                return prevOrders;
             });
+
         } catch (error) {
             console.error('❌ Error handling order status update:', error);
-            // Show error toast
             addToast({
                 type: 'error',
                 title: 'Update Failed',
@@ -166,8 +231,9 @@ const TrackOrder = () => {
             });
             // Refresh orders in case of error
             fetchOrders();
+            fetchMedicineOrders();
         }
-    }, [addToast, scrollToActiveNode]);
+    }, [addToast, scrollToActiveNode, fetchOrders, fetchMedicineOrders]);
 
     // Handle ambulance booking status updates
     const handleAmbulanceStatusUpdate = useCallback((data) => {
@@ -208,12 +274,20 @@ const TrackOrder = () => {
         try {
             const update = typeof data === 'string' ? JSON.parse(data) : data;
             const { orderId, status, totalAmount, estimatedDeliveryDate } = update;
-            console.log('[MedicineOrderUpdate] Received:', update);
-            const before = JSON.stringify(medicineOrders);
-            let found = false;
-            setMedicineOrders(prevOrders => prevOrders.map(order => {
+            console.log('[MedicineOrderUpdate] Received update:', {
+                orderId,
+                status,
+                totalAmount,
+                estimatedDeliveryDate
+            });
+            
+            setMedicineOrders(prevOrders => {
+                const updatedOrders = prevOrders.map(order => {
                 if (order.orderId === orderId) {
-                    found = true;
+                        console.log('[MedicineOrderUpdate] Updating order:', {
+                            before: order.orderStatus,
+                            after: status
+                        });
                     return {
                         ...order,
                         orderStatus: status,
@@ -222,15 +296,10 @@ const TrackOrder = () => {
                     };
                 }
                 return order;
-            }));
-            setTimeout(() => {
-                const after = JSON.stringify(medicineOrders);
-                console.log('[MedicineOrderUpdate] State before:', before);
-                console.log('[MedicineOrderUpdate] State after:', after);
-                if (!found) {
-                    console.warn('[MedicineOrderUpdate] No matching orderId found in medicineOrders:', orderId);
-                }
-            }, 100);
+                });
+                return updatedOrders;
+            });
+
             addToast({
                 type: 'success',
                 title: 'Medicine Order Updated',
@@ -238,6 +307,7 @@ const TrackOrder = () => {
                 duration: 3000
             });
         } catch (error) {
+            console.error('[MedicineOrderUpdate] Error:', error);
             addToast({
                 type: 'error',
                 title: 'Update Failed',
@@ -245,7 +315,7 @@ const TrackOrder = () => {
                 duration: 3000
             });
         }
-    }, [addToast, medicineOrders]);
+    }, [addToast]);
 
     // Subscribe to socket events
     useEffect(() => {
@@ -557,7 +627,7 @@ const TrackOrder = () => {
                                         <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
                                       )}
                                       <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
-                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
+                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
                                       </div>
                                       <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{labelLines.map((line, i) => <div key={i}>{line}</div>)}</div>
                                       {!isLast && (
@@ -609,50 +679,66 @@ const TrackOrder = () => {
             {medicineOrders.length > 0 && (
                 <div className="orders-grid">
                     {medicineOrders.map((order) => {
-                        // Timeline steps for medicine orders (use backend statuses directly)
-                        const steps = [
-                            'Pending',
-                            'Accepted',
-                            'AddedItemsInCart',
-                            'PaymentConfirmed',
-                            'OutForDelivery',
-                            'Delivered',
-                        ];
-                        const displayNames = {
-                            'Pending': ['Pending'],
-                            'Accepted': ['Accepted'],
-                            'AddedItemsInCart': ['Items', 'Added'],
-                            'PaymentConfirmed': ['Payment', 'Confirmed'],
-                            'OutForDelivery': ['Out for', 'Delivery'],
-                            'Delivered': ['Delivered'],
-                        };
-                        const currentStepIndex = steps.indexOf(order.orderStatus);
+                        // Add debug logging for initial render
+                        const normalizedStatus = medicineOrderStatusMapping[order.orderStatus] || order.orderStatus;
+                        const currentStepIndex = medicineOrderSteps.indexOf(normalizedStatus);
+                        
+                        console.log('[MedicineOrder] Rendering order:', {
+                            orderId: order.orderId,
+                            status: order.orderStatus,
+                            normalizedStatus,
+                            timelineSteps: medicineOrderSteps,
+                            currentStepIndex
+                        });
+
                         return (
                             <div key={order.orderId} className="order-card medicine-order-card">
                                 <div className="order-header">
                                     <h3>Medicine Order #{order.orderId.slice(-8)}</h3>
                                     <span className="order-date">{order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</span>
-                                    <span className={`order-status-badge status-${order.orderStatus.toLowerCase()}`}>{displayNames[order.orderStatus]?.join(' ') || order.orderStatus}</span>
+                                    <span className={`order-status-badge status-${normalizedStatus.toLowerCase()}`}>
+                                        {medicineOrderDisplayNames[normalizedStatus]?.join(' ') || normalizedStatus}
+                                    </span>
                                 </div>
                                 <div className="timeline-container trackorder-timeline-container">
                                     <div className="timeline trackorder-timeline">
-                                        {steps.map((step, idx, arr) => {
+                                        {medicineOrderSteps.map((step, idx, arr) => {
                                             const isActive = idx === currentStepIndex;
                                             const isCompleted = idx < currentStepIndex;
-                                            const isFilled = isCompleted || isActive;
+                                            
+                                            console.log('Timeline Step Status:', {
+                                                step,
+                                                idx,
+                                                currentStepIndex,
+                                                isActive,
+                                                isCompleted,
+                                                orderStatus: order.orderStatus
+                                            });
+
                                             const isLast = idx === arr.length - 1;
-                                            const lines = displayNames[step] || [step];
+                                            const lines = medicineOrderDisplayNames[step] || [step];
+                                            
                                             return (
                                                 <div className="timeline-item" key={step}>
                                                     {idx > 0 && (
-                                                        <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
+                                                        <div className={`timeline-line before ${isCompleted ? 'completed' : ''}`}></div>
                                                     )}
-                                                    <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
-                                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
+                                                    <div className={`timeline-circle ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}> 
+                                                        <span className="timeline-number">
+                                                            {isCompleted ? (
+                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" style={{width:16,height:16}}>
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            ) : (
+                                                                idx + 1
+                                                            )}
+                                                        </span>
                                                     </div>
-                                                    <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{lines.map((line, i) => <div key={i}>{line}</div>)}</div>
+                                                    <div className={`timeline-label ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
+                                                        {lines.map((line, i) => <div key={i}>{line}</div>)}
+                                                    </div>
                                                     {!isLast && (
-                                                        <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
+                                                        <div className={`timeline-line after ${isCompleted ? 'completed' : ''}`}></div>
                                                     )}
                                                 </div>
                                             );

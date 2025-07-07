@@ -160,19 +160,19 @@
 }
 
 .content-header {
-    padding: 24px 24px 16px 24px;
+    padding: 16px 24px 12px 24px;
     border-bottom: 1px solid #f3f4f6;
 }
 
 .section-title {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
     color: #1f2937;
 }
 
 .section-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     margin: 0;
     color: #6b7280;
     font-weight: 500;

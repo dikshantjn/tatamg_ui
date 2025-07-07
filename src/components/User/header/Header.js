@@ -42,11 +42,12 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     const navigate = useNavigate();
 
     const locations = [
-        { name: 'Current Location', address: 'Using GPS', icon: 'gps' },
         { name: 'Mumbai', address: 'Maharashtra, India', icon: 'city' },
         { name: 'Delhi', address: 'Delhi, India', icon: 'city' },
         { name: 'Bangalore', address: 'Karnataka, India', icon: 'city' },
-        { name: 'Hyderabad', address: 'Telangana, India', icon: 'city' }
+        { name: 'Hyderabad', address: 'Telangana, India', icon: 'city' },
+        { name: 'Chennai', address: 'Tamil Nadu, India', icon: 'city' },
+        { name: 'Kolkata', address: 'West Bengal, India', icon: 'city' }
     ];
 
     const isMobile = useMediaQuery({ maxWidth: 768 });
@@ -229,7 +230,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     const mainNavLinks = [
         { path: '/products', text: 'PRODUCTS' },
         { path: '/lab-tests', text: 'LAB TESTS' },
-        { path: '/doctors', text: 'CONSULT DOCTORS' },
+        { path: '/doctor-consultation', text: 'CONSULT DOCTORS' },
         { path: '/blood-bank', text: 'BLOOD BANK' },
         { path: '/ambulance', text: 'AMBULANCE' },
         { path: '/medical-loans', text: 'MEDICAL LOANS' },
@@ -392,6 +393,135 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                         ) : null}
                     </div>
 
+                    {!isMobile && (
+                        <div className="search-location-container">
+                            <div className="unified-search-box">
+                                {/* Location Selector */}
+                                <div className="location-part" ref={locationRef}>
+                                    <button 
+                                        className="location-button"
+                                        onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="location-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="location-text">{selectedLocation}</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="chevron-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {showLocationDropdown && (
+                                        <div className="location-dropdown">
+                                            <div className="location-search">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="search-icon" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                                </svg>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Search location..."
+                                                    value={locationSearch}
+                                                    onChange={(e) => setLocationSearch(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="location-options">
+                                                <div className="current-location">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="gps-icon" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
+                                                        <path fillRule="evenodd" d="M10 12a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                                    </svg>
+                                                    <span>Use current location</span>
+                                                </div>
+                                                {locations.map((location, index) => (
+                                                    <div 
+                                                        key={index}
+                                                        className="location-option"
+                                                        onClick={() => handleLocationSelect(location)}
+                                                    >
+                                                        <div className="location-details">
+                                                            <span className="location-name">{location.name}</span>
+                                                            <span className="location-address">{location.address}</span>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                {/* Vertical Divider */}
+                                <div className="vertical-divider"></div>
+                                {/* Search Box */}
+                                <div className="search-part" ref={searchRef}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="search-icon" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search for doctors, hospitals, clinics..."
+                                        value={searchQuery}
+                                        onChange={handleSearchChange}
+                                        onFocus={() => setShowSearchSuggestions(true)}
+                                    />
+                                    {searchQuery && (
+                                        <button className="clear-search" onClick={() => setSearchQuery('')}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    )}
+                                    {/* Search Suggestions */}
+                                    {showSearchSuggestions && (
+                                        <div className="search-suggestions">
+                                            {searchQuery ? (
+                                                <div className="suggestion-results">
+                                                    {suggestions.services.map((service, index) => (
+                                                        <div key={index} className="suggestion-item">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" className="suggestion-icon" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                                                            </svg>
+                                                            <div className="suggestion-content">
+                                                                <div className="suggestion-title">{service.title}</div>
+                                                                <div className="suggestion-subtitle">{service.subtitle}</div>
+                                                            </div>
+                                                            <div className="suggestion-distance">{service.distance}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="suggestion-section">
+                                                        <h3>Recent Searches</h3>
+                                                        <div className="suggestion-tags">
+                                                            {['General Physician','Dentist','Cardiologist','Blood Test'].map((search, index) => (
+                                                                <button key={index} className="suggestion-tag">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="history-icon" viewBox="0 0 20 20" fill="currentColor">
+                                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                    {search}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <div className="suggestion-section">
+                                                        <h3>Popular Searches</h3>
+                                                        <div className="suggestion-tags">
+                                                            {['COVID-19 Test','Full Body Checkup','Diabetes Test','Thyroid Test'].map((search, index) => (
+                                                                <button key={index} className="suggestion-tag">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="trending-icon" viewBox="0 0 20 20" fill="currentColor">
+                                                                        <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
+                                                                    </svg>
+                                                                    {search}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     <div className="top-actions">
                         <Link to="/membership" className="action-link vedika-plus">
                             <div className="action-icon">

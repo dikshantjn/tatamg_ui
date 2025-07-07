@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.39:5000/api',
-    SOCKET_URL: 'http://192.168.1.39:5000',
+    BASE_URL: 'http://192.168.1.47:5000/api',
+    SOCKET_URL: 'http://192.168.1.47:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -69,6 +69,12 @@ export const API_CONFIG = {
             GET_CART_ITEMS_BY_ORDER: '/cart/:orderId',
             GET_USER_ORDERS_WITH_CART: '/user/orders/cart/:userId',
             UPDATE_ORDER: '/orders/update-order/:orderId',
+            GET_DELIVERED_ORDERS: '/orders/:userId'
+        },
+        LAB_TEST: {
+            GET_ALL_DIAGNOSTIC_CENTERS: '/lab-test/all-diagnostic-centers',
+            CREATE_BOOKING: '/labtest-booking/create',
+            GET_COMPLETED_BOOKINGS: '/labtest-booking/bookings/user/completed/:userId'
         },
         // Add other endpoint categories as needed
     }

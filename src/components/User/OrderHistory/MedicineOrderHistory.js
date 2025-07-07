@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './ProductOrderHistory.css';
+import './MedicineOrderHistory.css';
 
-const ProductOrderHistory = () => {
+const MedicineOrderHistory = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -18,11 +18,11 @@ const ProductOrderHistory = () => {
             setLoading(true);
             setError(null);
             
-            const response = await orderHistoryService.getDeliveredProductOrders();
+            const response = await orderHistoryService.getDeliveredMedicineOrders();
             
             if (response.success) {
                 const formattedOrders = response.data.map(order => 
-                    orderHistoryService.formatOrderData(order)
+                    orderHistoryService.formatMedicineOrderData(order)
                 );
                 setOrders(formattedOrders);
             } else {
@@ -63,37 +63,37 @@ const ProductOrderHistory = () => {
 
     const handleDownloadInvoice = () => {
         if (selectedOrder) {
-            // Generate and download invoice
-            const invoiceData = {
-                orderNumber: selectedOrder.orderNumber,
-                date: selectedOrder.date,
-                items: selectedOrder.items,
-                total: selectedOrder.total,
-                deliveryAddress: selectedOrder.deliveryAddress
-            };
-            
-            // Create a simple text invoice (you can enhance this to generate PDF)
             const invoiceText = `
 INVOICE
-Order #${selectedOrder.orderNumber.slice(-8)}
+Order #${selectedOrder.orderNumber}
 Date: ${formatDate(selectedOrder.date)}
 
 Items:
 ${selectedOrder.items.map(item => 
-    `${item.name} - ${item.quantity}x ${formatCurrency(item.price)}`
+    `${item.name} (${item.type}) - ${item.quantity}x ${formatCurrency(item.price)}`
 ).join('\n')}
 
+Subtotal: ${formatCurrency(selectedOrder.subtotal)}
+Delivery Charge: ${formatCurrency(selectedOrder.deliveryCharge)}
+Platform Fee: ${formatCurrency(selectedOrder.platformFee)}
+Discount: ${formatCurrency(selectedOrder.discountAmount)}
 Total: ${formatCurrency(selectedOrder.total)}
 
-Delivery Address:
-${selectedOrder.deliveryAddress}
+Payment Details:
+Method: ${selectedOrder.paymentMethod}
+Status: ${selectedOrder.paymentStatus}
+Transaction ID: ${selectedOrder.transactionId}
+
+Customer Details:
+Name: ${selectedOrder.user.name}
+Email: ${selectedOrder.user.email}
             `;
             
             const blob = new Blob([invoiceText], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `invoice-${selectedOrder.orderNumber.slice(-8)}.txt`;
+            a.download = `invoice-${selectedOrder.orderNumber}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -103,22 +103,22 @@ ${selectedOrder.deliveryAddress}
 
     const renderOrderCard = (order) => {
         return (
-            <div key={order.id} className="product-order-card">
+            <div key={order.id} className="medicine-order-card">
                 <div className="order-header">
                     <div className="order-info">
-                        <h3 className="order-number">Order #{order.orderNumber.slice(-8)}</h3>
+                        <h3 className="order-number">Order #{order.orderNumber}</h3>
                         <p className="order-date">Placed on {formatDate(order.date)}</p>
                     </div>
                     <div className="order-status">
                         <span className="status-badge delivered">
-                            Delivered
+                            {order.status}
                         </span>
                     </div>
                 </div>
 
                 <div className="order-content">
                     <div className="order-items">
-                        <h4>Products:</h4>
+                        <h4>Medicines:</h4>
                         <div className="items-list">
                             {order.items.map((item, index) => (
                                 <div key={index} className="item-card">
@@ -126,13 +126,13 @@ ${selectedOrder.deliveryAddress}
                                         {item.image ? (
                                             <img src={item.image} alt={item.name} />
                                         ) : (
-                                            <div className="no-image">📦</div>
+                                            <div className="no-image">💊</div>
                                         )}
                                     </div>
                                     <div className="item-details">
                                         <h5 className="item-name">{item.name}</h5>
-                                        <p className="item-category">{item.category} • {item.subCategory}</p>
-                                        <p className="item-vendor">Vendor: {item.vendor}</p>
+                                        <p className="item-category">{item.type} • {item.packSize}</p>
+                                        <p className="item-manufacturer">By: {item.manufacturer}</p>
                                         <div className="item-price-qty">
                                             <span className="item-price">{formatCurrency(item.price)}</span>
                                             <span className="item-quantity">Qty: {item.quantity}</span>
@@ -145,12 +145,12 @@ ${selectedOrder.deliveryAddress}
 
                     <div className="order-details">
                         <div className="detail-row">
-                            <span className="detail-label">Delivery Address:</span>
-                            <span className="detail-value">{order.deliveryAddress}</span>
+                            <span className="detail-label">Payment Method:</span>
+                            <span className="detail-value">{order.paymentMethod}</span>
                         </div>
                         <div className="detail-row">
-                            <span className="detail-label">Estimated Delivery:</span>
-                            <span className="detail-value">{formatDate(order.estimatedDelivery)}</span>
+                            <span className="detail-label">Payment Status:</span>
+                            <span className="detail-value">{order.paymentStatus}</span>
                         </div>
                         {order.actualDelivery && (
                             <div className="detail-row">
@@ -199,9 +199,9 @@ ${selectedOrder.deliveryAddress}
                     <div className="side-panel-content">
                         <div className="order-summary">
                             <div className="order-basic-info">
-                                <h3>Order #{selectedOrder.orderNumber.slice(-8)}</h3>
+                                <h3>Order #{selectedOrder.orderNumber}</h3>
                                 <p className="order-date">Placed on {formatDate(selectedOrder.date)}</p>
-                                <span className="status-badge delivered">Delivered</span>
+                                <span className="status-badge delivered">{selectedOrder.status}</span>
                             </div>
 
                             <div className="order-items-detail">
@@ -212,13 +212,14 @@ ${selectedOrder.deliveryAddress}
                                             {item.image ? (
                                                 <img src={item.image} alt={item.name} />
                                             ) : (
-                                                <div className="no-image">📦</div>
+                                                <div className="no-image">💊</div>
                                             )}
                                         </div>
                                         <div className="item-info">
                                             <h5>{item.name}</h5>
-                                            <p className="item-category">{item.category} • {item.subCategory}</p>
-                                            <p className="item-vendor">Vendor: {item.vendor}</p>
+                                            <p className="item-category">{item.type} • {item.packSize}</p>
+                                            <p className="item-manufacturer">By: {item.manufacturer}</p>
+                                            <p className="item-composition">Composition: {item.composition}</p>
                                             <div className="item-pricing">
                                                 <span className="price">{formatCurrency(item.price)}</span>
                                                 <span className="quantity">Qty: {item.quantity}</span>
@@ -229,28 +230,42 @@ ${selectedOrder.deliveryAddress}
                                 ))}
                             </div>
 
-                            <div className="delivery-info">
-                                <h4>Delivery Information</h4>
+                            <div className="payment-info">
+                                <h4>Payment Information</h4>
                                 <div className="info-row">
-                                    <span className="label">Delivery Address:</span>
-                                    <span className="value">{selectedOrder.deliveryAddress}</span>
+                                    <span className="label">Payment Method:</span>
+                                    <span className="value">{selectedOrder.paymentMethod}</span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="label">Estimated Delivery:</span>
-                                    <span className="value">{formatDate(selectedOrder.estimatedDelivery)}</span>
+                                    <span className="label">Payment Status:</span>
+                                    <span className="value">{selectedOrder.paymentStatus}</span>
                                 </div>
-                                {selectedOrder.actualDelivery && (
-                                    <div className="info-row">
-                                        <span className="label">Delivered On:</span>
-                                        <span className="value">{formatDate(selectedOrder.actualDelivery)}</span>
-                                    </div>
-                                )}
+                                <div className="info-row">
+                                    <span className="label">Transaction ID:</span>
+                                    <span className="value">{selectedOrder.transactionId}</span>
+                                </div>
                             </div>
 
                             <div className="order-total-section">
                                 <div className="total-row">
-                                    <span className="total-label">Total Amount:</span>
-                                    <span className="total-amount">{formatCurrency(selectedOrder.total)}</span>
+                                    <span>Subtotal:</span>
+                                    <span>{formatCurrency(selectedOrder.subtotal)}</span>
+                                </div>
+                                <div className="total-row">
+                                    <span>Delivery Charge:</span>
+                                    <span>{formatCurrency(selectedOrder.deliveryCharge)}</span>
+                                </div>
+                                <div className="total-row">
+                                    <span>Platform Fee:</span>
+                                    <span>{formatCurrency(selectedOrder.platformFee)}</span>
+                                </div>
+                                <div className="total-row">
+                                    <span>Discount:</span>
+                                    <span>-{formatCurrency(selectedOrder.discountAmount)}</span>
+                                </div>
+                                <div className="total-row grand-total">
+                                    <span>Total Amount:</span>
+                                    <span>{formatCurrency(selectedOrder.total)}</span>
                                 </div>
                             </div>
                         </div>
@@ -277,7 +292,7 @@ ${selectedOrder.deliveryAddress}
 
     if (loading) {
         return (
-            <div className="product-orders-container">
+            <div className="medicine-orders-container">
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
                     <p>Loading your delivered orders...</p>
@@ -288,7 +303,7 @@ ${selectedOrder.deliveryAddress}
 
     if (error) {
         return (
-            <div className="product-orders-container">
+            <div className="medicine-orders-container">
                 <div className="error-container">
                     <div className="error-icon">⚠️</div>
                     <h3>Error Loading Orders</h3>
@@ -302,7 +317,7 @@ ${selectedOrder.deliveryAddress}
     }
 
     return (
-        <div className="product-orders-container">
+        <div className="medicine-orders-container">
             <div className="orders-section">
                 {orders.length > 0 ? (
                     <div className="orders-grid">
@@ -310,10 +325,10 @@ ${selectedOrder.deliveryAddress}
                     </div>
                 ) : (
                     <div className="empty-state">
-                        <div className="empty-icon">📦</div>
+                        <div className="empty-icon">💊</div>
                         <h3>No Delivered Orders Found</h3>
-                        <p>You haven't received any product orders yet.</p>
-                        <button className="browse-btn">Browse Products</button>
+                        <p>You haven't received any medicine orders yet.</p>
+                        <button className="browse-btn">Order Medicines</button>
                     </div>
                 )}
             </div>
@@ -323,4 +338,4 @@ ${selectedOrder.deliveryAddress}
     );
 };
 
-export default ProductOrderHistory; 
+export default MedicineOrderHistory; 

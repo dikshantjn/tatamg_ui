@@ -223,21 +223,6 @@ const AmbulanceOrderHistory = () => {
 
     return (
         <div className="product-orders-container">
-            <div className="content-header">
-                <div className="header-content">
-                    <div className="header-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
-                    </div>
-                    <div className="header-text">
-                        <h2 className="section-title">Ambulance Bookings</h2>
-                        <p className="section-subtitle">
-                            {bookings.length} completed bookings • Track your ambulance service history
-                        </p>
-                    </div>
-                </div>
-            </div>
             <div className="orders-section">
                 {bookings.length > 0 ? (
                     <div className="orders-grid">

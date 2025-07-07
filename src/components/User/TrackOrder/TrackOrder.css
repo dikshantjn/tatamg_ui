@@ -102,7 +102,7 @@
     margin: 8px 0;
     min-height: 120px;
     scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Modern horizontal scrollbar for timeline */
@@ -165,6 +165,11 @@
     color: #fff;
 }
 
+.timeline-circle.completed svg {
+    stroke: #fff;
+    stroke-width: 2.5;
+}
+
 .timeline-circle.active {
     border-color: #22C55E;
     color: #22C55E;
@@ -173,7 +178,7 @@
 }
 
 .timeline-circle.active svg {
-    display: block;
+    stroke: #22C55E;
 }
 
 .timeline-circle svg {
@@ -202,8 +207,17 @@
     white-space: nowrap;
     font-size: 12px;
     color: #6B7280;
-    transition: color 0.3s ease;
-    min-width: max-content;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.timeline-label.active {
+    color: #22C55E;
+    font-weight: 600;
+}
+
+.timeline-label.completed {
+    color: #22C55E;
 }
 
 .timeline-circle.completed + .timeline-label,
@@ -674,41 +688,46 @@
     border: 1px solid #ef4444;
 }
 
+/* Status badge styles */
 .order-status-badge {
-    display: inline-block;
-    padding: 0.35em 1em;
-    border-radius: 1.2em;
-    font-size: 0.95em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
     font-weight: 600;
-    margin-left: 1em;
-    margin-top: 0.2em;
-    vertical-align: middle;
-    letter-spacing: 0.5px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    transition: background 0.2s, color 0.2s;
+    text-transform: uppercase;
 }
+
 .status-pending {
-    background: #fff7e6;
-    color: #b26a00;
-    border: 1px solid #ffe0b2;
+    background-color: #FEF3C7;
+    color: #92400E;
 }
+
+.status-prescriptionverified {
+    background-color: #E0F2FE;
+    color: #075985;
+}
+
 .status-accepted {
-    background: #e6f7ff;
-    color: #005580;
-    border: 1px solid #b3e0ff;
+    background-color: #E0F2FE;
+    color: #075985;
 }
+
 .status-addeditemsincart {
-    background: #f0f5ff;
-    color: #2f54eb;
-    border: 1px solid #adc6ff;
+    background-color: #F3E8FF;
+    color: #6B21A8;
 }
-.status-paymentconfirmed, .status-readyforpickup {
-    background: #e6fffb;
-    color: #08979c;
-    border: 1px solid #87e8de;
+
+.status-paymentconfirmed {
+    background-color: #DCFCE7;
+    color: #166534;
 }
+
 .status-outfordelivery {
-    background: #f6ffed;
-    color: #389e0d;
-    border: 1px solid #b7eb8f;
+    background-color: #FFE4E6;
+    color: #BE123C;
+}
+
+.status-delivered {
+    background-color: #DCFCE7;
+    color: #166534;
 } 

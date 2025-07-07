@@ -60,7 +60,7 @@ function MobileLayout() {
             <div className="horizontal-scroll-nav">
                 <Link to="/products">Products</Link>
                 <Link to="/lab-tests">Lab Tests</Link>
-                <Link to="/doctors">Consult Doctors</Link>
+                <Link to="/doctor-consultation">Consult Doctors</Link>
                 <Link to="/blood-bank">Blood Bank</Link>
                 <Link to="/ambulance">Ambulance</Link>
                 <Link to="/medical-loans">Medical Loans</Link>

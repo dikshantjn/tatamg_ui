@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ProductOrderHistory from './ProductOrderHistory';
 import AmbulanceOrderHistory from './AmbulanceOrderHistory';
 import BloodBankOrderHistory from './BloodBankOrderHistory';
+import MedicineOrderHistory from './MedicineOrderHistory';
+import LabTestOrderHistory from './LabTestOrderHistory';
 import './OrderHistory.css';
 
 const OrderHistory = () => {
@@ -18,12 +20,13 @@ const OrderHistory = () => {
     const [loading, setLoading] = useState(false);
     const [ambulanceCount, setAmbulanceCount] = useState(0);
     const [bloodBankCount, setBloodBankCount] = useState(0);
+    const [labTestCount, setLabTestCount] = useState(0);
 
     const tabs = [
         { id: 'medicine', label: 'Medicine Orders', icon: '💊', count: 12 },
         { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: ambulanceCount },
         { id: 'bed', label: 'Bed Bookings', icon: '🛏️', count: 5 },
-        { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: 8 },
+        { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: labTestCount },
         { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: bloodBankCount },
         { id: 'clinic', label: 'Clinic Bookings', icon: '🏥', count: 15 },
         { id: 'product', label: 'Product Orders', icon: '📦', count: 7 }
@@ -144,6 +147,11 @@ const OrderHistory = () => {
             if (mod && mod.default && mod.default.getCompletedBloodBankBookings) {
                 mod.default.getCompletedBloodBankBookings().then(res => {
                     if (res && res.success) setBloodBankCount(res.data.length);
+                });
+            }
+            if (mod && mod.default && mod.default.getCompletedLabTestBookings) {
+                mod.default.getCompletedLabTestBookings().then(res => {
+                    if (res && res.success) setLabTestCount(res.data.length);
                 });
             }
         });
@@ -312,130 +320,45 @@ const OrderHistory = () => {
         );
     };
 
-    // Render ProductOrderHistory component when product tab is active
-    if (activeTab === 'product') {
-        return (
-            <div className="order-history-container">
-                <div className="order-history-layout">
-                    <div className="sidebar">
-                        <div className="sidebar-header">
-                            <div className="geometric-shapes">
-                                <div className="shape shape-1"></div>
-                                <div className="shape shape-2"></div>
-                                <div className="shape shape-3"></div>
+    // Render specific components for different tabs
+    const renderMainContent = () => {
+        switch (activeTab) {
+            case 'medicine':
+                return <MedicineOrderHistory />;
+            case 'product':
+                return <ProductOrderHistory />;
+            case 'ambulance':
+                return <AmbulanceOrderHistory />;
+            case 'bloodBank':
+                return <BloodBankOrderHistory />;
+            case 'labTest':
+                return <LabTestOrderHistory />;
+            default:
+                return (
+                    <div className="orders-section">
+                        {loading ? (
+                            <div className="loading-container">
+                                <div className="loading-spinner"></div>
+                                <p>Loading your orders...</p>
                             </div>
-                            <h2 className="sidebar-title">My Orders</h2>
-                            <p className="sidebar-subtitle">Select category to view orders</p>
-                        </div>
-                        
-                        <div className="sidebar-buttons">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab.id)}
-                                >
-                                    <div className="button-content">
-                                        <span className="button-icon">{tab.icon}</span>
-                                        <div className="button-info">
-                                            <span className="button-label">{tab.label}</span>
-                                            <span className="button-count">{tab.count} orders</span>
-                                        </div>
+                        ) : (
+                            <div className="orders-grid">
+                                {orders[activeTab] && orders[activeTab].length > 0 ? (
+                                    orders[activeTab].map((order) => renderOrderCard(order, activeTab))
+                                ) : (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">📋</div>
+                                        <h3>No {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} found</h3>
+                                        <p>You haven't placed any {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} yet.</p>
+                                        <button className="browse-btn">Browse Services</button>
                                     </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="main-content">
-                        <ProductOrderHistory />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Render AmbulanceOrderHistory component when ambulance tab is active
-    if (activeTab === 'ambulance') {
-        return (
-            <div className="order-history-container">
-                <div className="order-history-layout">
-                    <div className="sidebar">
-                        <div className="sidebar-header">
-                            <div className="geometric-shapes">
-                                <div className="shape shape-1"></div>
-                                <div className="shape shape-2"></div>
-                                <div className="shape shape-3"></div>
+                                )}
                             </div>
-                            <h2 className="sidebar-title">My Orders</h2>
-                            <p className="sidebar-subtitle">Select category to view orders</p>
-                        </div>
-                        <div className="sidebar-buttons">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab.id)}
-                                >
-                                    <div className="button-content">
-                                        <span className="button-icon">{tab.icon}</span>
-                                        <div className="button-info">
-                                            <span className="button-label">{tab.label}</span>
-                                            <span className="button-count">{tab.count} orders</span>
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                        )}
                     </div>
-                    <div className="main-content">
-                        <AmbulanceOrderHistory />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // Render BloodBankOrderHistory component when bloodBank tab is active
-    if (activeTab === 'bloodBank') {
-        return (
-            <div className="order-history-container">
-                <div className="order-history-layout">
-                    <div className="sidebar">
-                        <div className="sidebar-header">
-                            <div className="geometric-shapes">
-                                <div className="shape shape-1"></div>
-                                <div className="shape shape-2"></div>
-                                <div className="shape shape-3"></div>
-                            </div>
-                            <h2 className="sidebar-title">My Orders</h2>
-                            <p className="sidebar-subtitle">Select category to view orders</p>
-                        </div>
-                        <div className="sidebar-buttons">
-                            {tabs.map((tab) => (
-                                <button
-                                    key={tab.id}
-                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab.id)}
-                                >
-                                    <div className="button-content">
-                                        <span className="button-icon">{tab.icon}</span>
-                                        <div className="button-info">
-                                            <span className="button-label">{tab.label}</span>
-                                            <span className="button-count">{tab.count} orders</span>
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="main-content">
-                        <BloodBankOrderHistory />
-                    </div>
-                </div>
-            </div>
-        );
-    }
+                );
+        }
+    };
 
     return (
         <div className="order-history-container">
@@ -471,36 +394,7 @@ const OrderHistory = () => {
                 </div>
 
                 <div className="main-content">
-                    <div className="content-header">
-                        <h2 className="section-title">
-                            {tabs.find(tab => tab.id === activeTab)?.label}
-                        </h2>
-                        <p className="section-subtitle">
-                            Showing {orders[activeTab]?.length || 0} of {tabs.find(tab => tab.id === activeTab)?.count || 0} orders
-                        </p>
-                    </div>
-
-                    <div className="orders-section">
-                        {loading ? (
-                            <div className="loading-container">
-                                <div className="loading-spinner"></div>
-                                <p>Loading your orders...</p>
-                            </div>
-                        ) : (
-                            <div className="orders-grid">
-                                {orders[activeTab] && orders[activeTab].length > 0 ? (
-                                    orders[activeTab].map((order) => renderOrderCard(order, activeTab))
-                                ) : (
-                                    <div className="empty-state">
-                                        <div className="empty-icon">📋</div>
-                                        <h3>No {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} found</h3>
-                                        <p>You haven't placed any {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} yet.</p>
-                                        <button className="browse-btn">Browse Services</button>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                    {renderMainContent()}
                 </div>
             </div>
         </div>

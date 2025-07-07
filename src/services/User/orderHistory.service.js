@@ -205,6 +205,186 @@ class OrderHistoryService {
         if (!response.ok) throw new Error('Failed to fetch completed blood bank bookings');
         return await response.json();
     }
+
+    /**
+     * Get delivered medicine orders for a user
+     * @param {string} userId - User ID (optional, will use current user if not provided)
+     * @returns {Promise<Object>} - Response with orders data
+     */
+    async getDeliveredMedicineOrders(userId = null) {
+        try {
+            const targetUserId = userId || getUserId();
+            
+            if (!targetUserId) {
+                throw new Error('User ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_DELIVERED_ORDERS,
+                { userId: targetUserId }
+            );
+
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return {
+                success: true,
+                data: data.orders || [],
+                message: data.message || 'Delivered orders fetched successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching delivered medicine orders:', error);
+            return {
+                success: false,
+                data: [],
+                message: error.message || 'Failed to fetch delivered medicine orders'
+            };
+        }
+    }
+
+    /**
+     * Format medicine order data for display
+     * @param {Object} order - Raw order data from API
+     * @returns {Object} - Formatted order data
+     */
+    formatMedicineOrderData(order) {
+        return {
+            id: order.orderId,
+            orderNumber: order.orderId,
+            date: order.createdAt,
+            status: order.orderStatus,
+            total: order.totalAmount,
+            subtotal: order.subtotal,
+            deliveryCharge: order.deliveryCharge,
+            platformFee: order.platformFee,
+            discountAmount: order.discountAmount,
+            prescriptionId: order.prescriptionId,
+            paymentMethod: order.paymentMethod,
+            paymentStatus: order.paymentStatus,
+            transactionId: order.transactionId,
+            items: order.Carts.map(item => ({
+                id: item.cartId,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                manufacturer: item.MedicineProduct?.manufacturer || 'Unknown',
+                type: item.MedicineProduct?.type || 'N/A',
+                packSize: item.MedicineProduct?.packSizeLabel || 'N/A',
+                composition: item.MedicineProduct?.shortComposition || 'N/A',
+                discount: item.MedicineProduct?.discount || 0,
+                image: item.MedicineProduct?.productURLs?.[0] || null
+            })),
+            user: {
+                name: order.User?.name || 'Unknown',
+                email: order.User?.emailId || 'N/A',
+                userId: order.User?.userId
+            },
+            estimatedDelivery: order.estimatedDeliveryDate || this.calculateEstimatedDelivery(order.createdAt),
+            actualDelivery: order.orderStatus === 'Delivered' ? order.updatedAt : null
+        };
+    }
+
+    /**
+     * Get completed lab test bookings for a user
+     * @param {string} userId - User ID (optional, will use current user if not provided)
+     * @returns {Promise<Object>} - Response with bookings data
+     */
+    async getCompletedLabTestBookings(userId = null) {
+        try {
+            const targetUserId = userId || getUserId();
+            
+            if (!targetUserId) {
+                throw new Error('User ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.LAB_TEST.GET_COMPLETED_BOOKINGS,
+                { userId: targetUserId }
+            );
+
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return {
+                success: true,
+                data: data.data || [],
+                message: data.message || 'Completed lab test bookings fetched successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching completed lab test bookings:', error);
+            return {
+                success: false,
+                data: [],
+                message: error.message || 'Failed to fetch completed lab test bookings'
+            };
+        }
+    }
+
+    /**
+     * Format lab test booking data for display
+     * @param {Object} booking - Raw booking data from API
+     * @returns {Object} - Formatted booking data
+     */
+    formatLabTestBookingData(booking) {
+        return {
+            id: booking.bookingDetails.bookingId,
+            bookingNumber: booking.bookingDetails.bookingId,
+            date: booking.bookingDetails.createdAt,
+            status: booking.bookingDetails.bookingStatus,
+            total: booking.bookingDetails.totalAmount,
+            testFees: booking.bookingDetails.testFees,
+            reportDeliveryFees: booking.bookingDetails.reportDeliveryFees,
+            discount: booking.bookingDetails.discount,
+            gst: booking.bookingDetails.gst,
+            selectedTests: booking.bookingDetails.selectedTests,
+            bookingDate: booking.bookingDetails.bookingDate,
+            bookingTime: booking.bookingDetails.bookingTime,
+            homeCollectionRequired: booking.bookingDetails.homeCollectionRequired,
+            reportDeliveryAtHome: booking.bookingDetails.reportDeliveryAtHome,
+            prescriptionUrl: booking.bookingDetails.prescriptionUrl,
+            paymentStatus: booking.bookingDetails.paymentStatus,
+            reportUrls: booking.bookingDetails.reportUrls,
+            diagnosticCenter: {
+                id: booking.diagnosticCenterDetails.diagnosticCenterId,
+                name: booking.diagnosticCenterDetails.name,
+                address: `${booking.diagnosticCenterDetails.address}, ${booking.diagnosticCenterDetails.city}, ${booking.diagnosticCenterDetails.state} - ${booking.diagnosticCenterDetails.pincode}`,
+                phone: booking.diagnosticCenterDetails.mainContactNumber,
+                email: booking.diagnosticCenterDetails.email,
+                website: booking.diagnosticCenterDetails.website,
+                locationUrl: booking.diagnosticCenterDetails.googleMapsLocationUrl
+            },
+            user: {
+                name: booking.userDetails.name,
+                email: booking.userDetails.emailId,
+                phone: booking.userDetails.phone_number,
+                userId: booking.userDetails.userId,
+                photo: booking.userDetails.photo
+            },
+            actualDelivery: booking.bookingDetails.bookingStatus === 'Completed' ? booking.bookingDetails.updatedAt : null
+        };
+    }
 }
 
 // Create and export a singleton instance
