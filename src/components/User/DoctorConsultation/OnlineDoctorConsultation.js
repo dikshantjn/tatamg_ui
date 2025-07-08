@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaFilter, FaStar, FaVideo, FaCalendarAlt, FaUserMd, FaStethoscope, FaNewspaper, FaQuestionCircle, FaHeart } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaStar, FaVideo, FaCalendarAlt, FaUserMd, FaStethoscope, FaNewspaper, FaQuestionCircle, FaHeart, FaUser } from 'react-icons/fa';
 import { colors } from '../../../styles/colors';
 import './OnlineDoctorConsultation.css';
+import { doctorConsultationService } from '../../../services/User/DoctorConsultation/doctor-consultation.service';
 
 const OnlineDoctorConsultation = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -9,128 +10,60 @@ const OnlineDoctorConsultation = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [selectedTimeSlot, setSelectedTimeSlot] = useState('');
   const [doctors, setDoctors] = useState([]);
-
-  // Mock doctor data
-  const mockDoctors = [
-    {
-      id: 1,
-      name: 'Dr. Sarah Johnson',
-      specialty: 'General Medicine',
-      experience: '8 years',
-      rating: 4.8,
-      reviews: 324,
-      languages: ['English', 'Spanish'],
-      fee: 299,
-      nextAvailable: '10:30 AM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: true,
-      about: 'Specialized in internal medicine and preventive care'
-    },
-    {
-      id: 2,
-      name: 'Dr. Michael Chen',
-      specialty: 'Dermatology',
-      experience: '12 years',
-      rating: 4.9,
-      reviews: 567,
-      languages: ['English', 'Mandarin'],
-      fee: 399,
-      nextAvailable: '11:15 AM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: true,
-      about: 'Expert in skin conditions and cosmetic dermatology'
-    },
-    {
-      id: 3,
-      name: 'Dr. Priya Sharma',
-      specialty: 'Pediatrics',
-      experience: '10 years',
-      rating: 4.7,
-      reviews: 289,
-      languages: ['English', 'Hindi'],
-      fee: 349,
-      nextAvailable: '2:00 PM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: false,
-      about: 'Child healthcare specialist with focus on development'
-    },
-    {
-      id: 4,
-      name: 'Dr. James Wilson',
-      specialty: 'Cardiology',
-      experience: '15 years',
-      rating: 4.9,
-      reviews: 412,
-      languages: ['English'],
-      fee: 499,
-      nextAvailable: '3:30 PM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: true,
-      about: 'Heart specialist with expertise in preventive cardiology'
-    },
-    {
-      id: 5,
-      name: 'Dr. Fatima Al-Zahra',
-      specialty: 'Gynecology',
-      experience: '11 years',
-      rating: 4.8,
-      reviews: 356,
-      languages: ['English', 'Arabic'],
-      fee: 399,
-      nextAvailable: '4:45 PM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: true,
-      about: 'Women\'s health specialist and fertility expert'
-    },
-    {
-      id: 6,
-      name: 'Dr. Robert Kim',
-      specialty: 'Orthopedics',
-      experience: '13 years',
-      rating: 4.6,
-      reviews: 278,
-      languages: ['English', 'Korean'],
-      fee: 449,
-      nextAvailable: '5:15 PM',
-      avatar: '/api/placeholder/80/80',
-      isOnline: false,
-      about: 'Bone and joint specialist with sports medicine focus'
-    }
-  ];
-
-  const specialties = [
-    'General Medicine', 'Dermatology', 'Pediatrics', 'Cardiology', 
-    'Gynecology', 'Orthopedics', 'Psychiatry', 'Ophthalmology'
-  ];
-
-  const languages = ['English', 'Hindi', 'Spanish', 'Mandarin', 'Arabic', 'Korean'];
-  const timeSlots = ['Morning (9AM-12PM)', 'Afternoon (12PM-5PM)', 'Evening (5PM-9PM)'];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [imageErrors, setImageErrors] = useState({});
 
   useEffect(() => {
-    // Filter doctors based on search and filters
-    let filtered = mockDoctors;
+    fetchOnlineDoctors();
+  }, []);
 
-    if (searchQuery) {
-      filtered = filtered.filter(doctor => 
-        doctor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        doctor.specialty.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const fetchOnlineDoctors = async () => {
+    try {
+      setLoading(true);
+      const fetchedDoctors = await doctorConsultationService.getOnlineDoctors();
+      setDoctors(fetchedDoctors);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch online doctors. Please try again later.');
+      console.error('Error fetching doctors:', err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    if (selectedSpecialty) {
-      filtered = filtered.filter(doctor => doctor.specialty === selectedSpecialty);
-    }
+  // Get unique specialties from actual doctor data
+  const specialties = [...new Set(doctors.flatMap(doctor => doctor.specializations || []))];
+  
+  // Get unique languages from actual doctor data
+  const languages = [...new Set(doctors.flatMap(doctor => doctor.languageProficiency || []))];
 
-    if (selectedLanguage) {
-      filtered = filtered.filter(doctor => doctor.languages.includes(selectedLanguage));
-    }
+  const timeSlots = ['Morning (9AM-12PM)', 'Afternoon (12PM-5PM)', 'Evening (5PM-9PM)'];
 
-    setDoctors(filtered);
-  }, [searchQuery, selectedSpecialty, selectedLanguage, selectedTimeSlot]);
+  const filteredDoctors = doctors.filter(doctor => {
+    const matchesSearch = searchQuery === '' || 
+      doctor.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doctor.specializations?.some(spec => spec.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesSpecialty = !selectedSpecialty || 
+      doctor.specializations?.includes(selectedSpecialty);
+
+    const matchesLanguage = !selectedLanguage || 
+      doctor.languageProficiency?.includes(selectedLanguage);
+
+    return matchesSearch && matchesSpecialty && matchesLanguage;
+  });
 
   const handleBookAppointment = (doctorId) => {
     console.log('Booking appointment with doctor:', doctorId);
     // Add booking logic here
+  };
+
+  const handleImageError = (doctorId) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [doctorId]: true
+    }));
   };
 
   const clearFilters = () => {
@@ -139,6 +72,19 @@ const OnlineDoctorConsultation = () => {
     setSelectedTimeSlot('');
     setSearchQuery('');
   };
+
+  if (loading) {
+    return <div className="loading-state">Loading doctors...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-state">
+        <p>{error}</p>
+        <button onClick={fetchOnlineDoctors}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="online-consultation-container">
@@ -182,19 +128,6 @@ const OnlineDoctorConsultation = () => {
             </select>
           </div>
 
-          <div className="online-filter-group">
-            <select 
-              value={selectedTimeSlot} 
-              onChange={(e) => setSelectedTimeSlot(e.target.value)}
-              className="online-filter-select"
-            >
-              <option value="">Any Time</option>
-              {timeSlots.map(slot => (
-                <option key={slot} value={slot}>{slot}</option>
-              ))}
-            </select>
-          </div>
-
           <button className="online-clear-filters-btn" onClick={clearFilters}>
             Clear
           </button>
@@ -206,77 +139,80 @@ const OnlineDoctorConsultation = () => {
         {/* Left Side - Doctors List */}
         <div className="doctors-section">
           <div className="results-header">
-            <h2>Available Doctors ({doctors.length})</h2>
+            <h2>Available Doctors ({filteredDoctors.length})</h2>
           </div>
 
           <div className="doctors-list">
-            {doctors.map(doctor => (
-                          <div key={doctor.id} className="doctor-card">
-              <div className="doctor-card-content">
-                {/* Left Side */}
-                <div className="doctor-left-side">
-                  <div className="doctor-avatar">
-                    <img src={doctor.avatar} alt={doctor.name} />
-                    <div className={`online-status ${doctor.isOnline ? 'online' : 'offline'}`}>
-                      <div className="status-dot"></div>
-                      {doctor.isOnline ? 'Online' : 'Offline'}
+            {filteredDoctors.map(doctor => (
+              <div key={doctor.id} className="doctor-card">
+                <div className="doctor-card-content">
+                  {/* Left Side */}
+                  <div className="doctor-left-side">
+                    <div className="doctor-avatar">
+                      {imageErrors[doctor.id] ? (
+                        <div className="default-avatar">
+                          <FaUser size={40} color="#666" />
+                        </div>
+                      ) : (
+                        <img 
+                          src={doctor.profilePicture} 
+                          alt={doctor.doctorName}
+                          onError={() => handleImageError(doctor.id)}
+                        />
+                      )}
+                      <div className="online-status online">
+                        <div className="status-dot"></div>
+                        Online
+                      </div>
+                    </div>
+                    <div className="doctor-info">
+                      <h3 className="doctor-name">{doctor.doctorName}</h3>
+                      <div className="doctor-meta">
+                        <p className="doctor-specialty">
+                          <FaUserMd className="specialty-icon" />
+                          {doctor.specializations?.join(', ')}
+                        </p>
+                        <p className="doctor-experience">{doctor.experienceYears} years experience</p>
+                      </div>
+                      <div className="doctor-actions">
+                        <button 
+                          className="book-appointment-btn"
+                          onClick={() => handleBookAppointment(doctor.id)}
+                        >
+                          Book Now
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <div className="doctor-info">
-                    <h3 className="doctor-name">{doctor.name}</h3>
-                    <div className="doctor-meta">
-                      <p className="doctor-specialty">
-                        <FaUserMd className="specialty-icon" />
-                        {doctor.specialty}
-                      </p>
-                      <p className="doctor-experience">{doctor.experience} experience</p>
-                      <div className="doctor-rating">
-                        <div className="rating-stars">
-                          <FaStar className="star filled" />
-                          <span className="rating-value">{doctor.rating}</span>
-                        </div>
-                        <span className="reviews-count">({doctor.reviews} reviews)</span>
+
+                  {/* Right Side */}
+                  <div className="doctor-right-side">
+                    <div className="consultation-fee">
+                      <span className="fee-label">Consultation Fee</span>
+                      <span className="fee-amount">₹{doctor.consultationFeesRange}</span>
+                    </div>
+                    
+                    <div className="doctor-details">
+                      <div className="doctor-languages">
+                        <strong>Languages: </strong>
+                        {doctor.languageProficiency?.join(', ')}
+                      </div>
+                      <div className="doctor-qualifications">
+                        <strong>Qualifications: </strong>
+                        {doctor.educationalQualifications?.join(', ')}
+                      </div>
+                      <div className="doctor-location">
+                        <strong>Location: </strong>
+                        {doctor.city}, {doctor.state}
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Right Side */}
-                <div className="doctor-right-side">
-                  <div className="consultation-fee">
-                    <span className="fee-label">Consultation Fee</span>
-                    <span className="fee-amount">₹{doctor.fee}</span>
-                  </div>
-                  
-                  <div className="doctor-details">
-                    <p className="doctor-about">{doctor.about}</p>
-                    <div className="doctor-languages">
-                      <strong>Languages: </strong>
-                      {doctor.languages.join(', ')}
-                    </div>
-                    <div className="next-available">
-                      <FaCalendarAlt className="calendar-icon" />
-                      <span>Next available: {doctor.nextAvailable}</span>
-                    </div>
-                  </div>
-
-                  <div className="doctor-actions">
-                    <button 
-                      className={`book-appointment-btn ${!doctor.isOnline ? 'disabled' : ''}`}
-                      onClick={() => handleBookAppointment(doctor.id)}
-                      disabled={!doctor.isOnline}
-                    >
-                      <FaVideo className="btn-icon" />
-                      {doctor.isOnline ? 'Book Video Consultation' : 'Currently Offline'}
-                    </button>
-                  </div>
-                </div>
               </div>
-            </div>
             ))}
           </div>
 
-          {doctors.length === 0 && (
+          {filteredDoctors.length === 0 && (
             <div className="no-results">
               <FaUserMd className="no-results-icon" />
               <h3>No doctors found</h3>

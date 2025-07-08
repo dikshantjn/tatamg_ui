@@ -385,6 +385,87 @@ class OrderHistoryService {
             actualDelivery: booking.bookingDetails.bookingStatus === 'Completed' ? booking.bookingDetails.updatedAt : null
         };
     }
+
+    /**
+     * Get clinic appointments for a user
+     * @param {string} userId - User ID (optional, will use current user if not provided)
+     * @returns {Promise<Object>} - Response with appointments data
+     */
+    async getClinicAppointments(userId = null) {
+        try {
+            const targetUserId = userId || getUserId();
+            
+            if (!targetUserId) {
+                throw new Error('User ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_USER_APPOINTMENTS,
+                { userId: targetUserId }
+            );
+
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return {
+                success: true,
+                data: data.appointments || [],
+                message: 'Appointments fetched successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching clinic appointments:', error);
+            return {
+                success: false,
+                data: [],
+                message: error.message || 'Failed to fetch clinic appointments'
+            };
+        }
+    }
+
+    /**
+     * Format clinic appointment data for display
+     * @param {Object} appointment - Raw appointment data from API
+     * @returns {Object} - Formatted appointment data
+     */
+    formatClinicAppointmentData(appointment) {
+        return {
+            id: appointment.clinicAppointmentId,
+            appointmentNumber: appointment.clinicAppointmentId,
+            date: appointment.date,
+            time: appointment.time,
+            status: appointment.status,
+            isOnline: appointment.isOnline,
+            paidAmount: appointment.paidAmount,
+            paymentStatus: appointment.paymentStatus,
+            userResponseStatus: appointment.userResponseStatus,
+            meetingUrl: appointment.meetingUrl,
+            reminderTime: appointment.reminderTime,
+            reminderSent: appointment.reminderSent,
+            createdAt: appointment.createdAt,
+            updatedAt: appointment.updatedAt,
+            user: {
+                name: appointment.user?.name || '',
+                email: appointment.user?.emailId || '',
+                phone: appointment.user?.phone_number || ''
+            },
+            doctor: {
+                name: appointment.doctor?.doctorName || '',
+                specializations: appointment.doctor?.specializations || [],
+                id: appointment.doctorId
+            }
+        };
+    }
 }
 
 // Create and export a singleton instance

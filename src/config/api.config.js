@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.47:5000/api',
-    SOCKET_URL: 'http://192.168.1.47:5000',
+    BASE_URL: 'http://192.168.1.39:5000/api',
+    SOCKET_URL: 'http://192.168.1.39:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -8,6 +8,12 @@ export const API_CONFIG = {
             LOGIN: '/auth/login',
             UPDATE_PLATFORM: '/auth/platform-update',
             // Add other auth endpoints as needed
+        },
+        DOCTOR_CONSULTATION: {
+            GET_OFFLINE_DOCTORS: '/clinic/active/offline',
+            GET_ONLINE_DOCTORS: '/clinic/active/online',
+            CREATE_APPOINTMENT: '/clinic-appointments',
+            GET_USER_APPOINTMENTS: '/clinic-appointments/user/:userId',
         },
         USER: {
             GET_USER: '/user/:userId',

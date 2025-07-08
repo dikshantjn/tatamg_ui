@@ -49,6 +49,7 @@ import OrderHistory from './components/User/OrderHistory/OrderHistory';
 import BookLabTestAppt from './components/User/LabTest/BookLabTestAppt';
 import OfflineDoctorConsultation from './components/User/DoctorConsultation/OfflineDoctorConsultation';
 import OnlineDoctorConsultation from './components/User/DoctorConsultation/OnlineDoctorConsultation';
+import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoctorAppointment';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 
@@ -154,6 +155,9 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           } />
           <Route path="/doctor-consultation/online" element={
             isAuthenticated ? <OnlineDoctorConsultation /> : <Navigate to="/" replace />
+          } />
+          <Route path="/doctor-consultation/offline/book/:vendorId" element={
+            isAuthenticated ? <BookOfflineAppointment /> : <Navigate to="/" replace />
           } />
           <Route path="/checkout" element={
             isAuthenticated ? <Checkout /> : <Navigate to="/" replace />

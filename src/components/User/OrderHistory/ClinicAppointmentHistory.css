@@ -1,0 +1,355 @@
+.clinic-appointments-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.appointments-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.clinic-appointment-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    transition: transform 0.2s;
+}
+
+.clinic-appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.appointment-info h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #1F2937;
+}
+
+.appointment-datetime {
+    margin: 4px 0 0;
+    color: #6B7280;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.doctor-info {
+    margin-bottom: 16px;
+}
+
+.doctor-info h4 {
+    margin: 0 0 8px;
+    color: #1F2937;
+}
+
+.specializations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.specialization-tag {
+    background: #E5E7EB;
+    color: #4B5563;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.appointment-details {
+    margin-bottom: 16px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.detail-label {
+    color: #6B7280;
+}
+
+.detail-value {
+    color: #1F2937;
+    font-weight: 500;
+}
+
+.meeting-link {
+    color: #2563EB;
+    text-decoration: none;
+}
+
+.meeting-link:hover {
+    text-decoration: underline;
+}
+
+.appointment-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #E5E7EB;
+}
+
+.appointment-amount {
+    display: flex;
+    flex-direction: column;
+}
+
+.amount-label {
+    font-size: 0.8rem;
+    color: #6B7280;
+}
+
+.amount-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.appointment-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.action-btn.primary {
+    background: #2563EB;
+    color: white;
+}
+
+.action-btn.primary:hover {
+    background: #1D4ED8;
+}
+
+.action-btn.secondary {
+    background: #E5E7EB;
+    color: #4B5563;
+}
+
+.action-btn.secondary:hover {
+    background: #D1D5DB;
+}
+
+/* Side Panel Styles */
+.side-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: flex-end;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s;
+}
+
+.side-panel-overlay.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+.side-panel {
+    background: white;
+    width: 100%;
+    max-width: 500px;
+    height: 100%;
+    padding: 24px;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+}
+
+.side-panel-overlay.active .side-panel {
+    transform: translateX(0);
+}
+
+.side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.side-panel-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #1F2937;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #6B7280;
+    cursor: pointer;
+}
+
+.side-panel-content {
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
+}
+
+.appointment-summary > div {
+    margin-bottom: 24px;
+}
+
+.appointment-summary h4 {
+    margin: 0 0 12px;
+    color: #1F2937;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.info-row .label {
+    color: #6B7280;
+}
+
+.info-row .value {
+    color: #1F2937;
+    font-weight: 500;
+}
+
+.side-panel-footer {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+}
+
+.reschedule-btn, .cancel-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.reschedule-btn {
+    background: #2563EB;
+    color: white;
+}
+
+.reschedule-btn:hover {
+    background: #1D4ED8;
+}
+
+.cancel-btn {
+    background: #EF4444;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background: #DC2626;
+}
+
+/* Loading and Error States */
+.loading-container, .error-container {
+    text-align: center;
+    padding: 40px;
+}
+
+.loading-spinner {
+    border: 4px solid #E5E7EB;
+    border-top: 4px solid #2563EB;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-icon {
+    font-size: 2rem;
+    margin-bottom: 16px;
+}
+
+.retry-btn {
+    margin-top: 16px;
+    padding: 8px 16px;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.retry-btn:hover {
+    background: #1D4ED8;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+}
+
+.browse-btn {
+    margin-top: 16px;
+    padding: 12px 24px;
+    background: #2563EB;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.browse-btn:hover {
+    background: #1D4ED8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .appointments-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .side-panel {
+        max-width: 100%;
+    }
+} 

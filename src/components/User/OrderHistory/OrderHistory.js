@@ -4,31 +4,62 @@ import AmbulanceOrderHistory from './AmbulanceOrderHistory';
 import BloodBankOrderHistory from './BloodBankOrderHistory';
 import MedicineOrderHistory from './MedicineOrderHistory';
 import LabTestOrderHistory from './LabTestOrderHistory';
+import ClinicAppointmentHistory from './ClinicAppointmentHistory';
+import orderHistoryService from '../../../services/User/orderHistory.service';
 import './OrderHistory.css';
 
 const OrderHistory = () => {
-    const [activeTab, setActiveTab] = useState('medicine');
-    const [orders, setOrders] = useState({
-        medicine: [],
-        ambulance: [],
-        bed: [],
-        labTest: [],
-        bloodBank: [],
-        clinic: [],
-        product: []
-    });
+    const [activeTab, setActiveTab] = useState('clinic');
     const [loading, setLoading] = useState(false);
     const [ambulanceCount, setAmbulanceCount] = useState(0);
     const [bloodBankCount, setBloodBankCount] = useState(0);
     const [labTestCount, setLabTestCount] = useState(0);
+    const [clinicCount, setClinicCount] = useState(0);
+
+    useEffect(() => {
+        setLoading(true);
+        // Fetch counts for different services
+        const fetchCounts = async () => {
+            try {
+                // Fetch clinic appointments count
+                const clinicResponse = await orderHistoryService.getClinicAppointments();
+                if (clinicResponse.success) {
+                    setClinicCount(clinicResponse.data.length);
+                }
+
+                // Fetch ambulance bookings count
+                const ambulanceResponse = await orderHistoryService.getCompletedAmbulanceBookings();
+                if (ambulanceResponse.success) {
+                    setAmbulanceCount(ambulanceResponse.data.length);
+                }
+
+                // Fetch blood bank bookings count
+                const bloodBankResponse = await orderHistoryService.getCompletedBloodBankBookings();
+                if (bloodBankResponse.success) {
+                    setBloodBankCount(bloodBankResponse.data.length);
+                }
+
+                // Fetch lab test bookings count
+                const labTestResponse = await orderHistoryService.getCompletedLabTestBookings();
+                if (labTestResponse.success) {
+                    setLabTestCount(labTestResponse.data.length);
+                }
+            } catch (error) {
+                console.error('Error fetching counts:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCounts();
+    }, []);
 
     const tabs = [
+        { id: 'clinic', label: 'Clinic Appointments', icon: '👨‍⚕️', count: clinicCount },
         { id: 'medicine', label: 'Medicine Orders', icon: '💊', count: 12 },
         { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: ambulanceCount },
-        { id: 'bed', label: 'Bed Bookings', icon: '🛏️', count: 5 },
         { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: labTestCount },
         { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: bloodBankCount },
-        { id: 'clinic', label: 'Clinic Bookings', icon: '🏥', count: 15 },
         { id: 'product', label: 'Product Orders', icon: '📦', count: 7 }
     ];
 
@@ -129,33 +160,6 @@ const OrderHistory = () => {
         ],
         product: []
     };
-
-    useEffect(() => {
-        setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setOrders(mockOrders);
-            setLoading(false);
-        }, 1000);
-        // Or, fetch count directly using the service
-        import('../../../services/User/orderHistory.service').then(mod => {
-            if (mod && mod.default && mod.default.getCompletedAmbulanceBookings) {
-                mod.default.getCompletedAmbulanceBookings().then(res => {
-                    if (res && res.success) setAmbulanceCount(res.data.length);
-                });
-            }
-            if (mod && mod.default && mod.default.getCompletedBloodBankBookings) {
-                mod.default.getCompletedBloodBankBookings().then(res => {
-                    if (res && res.success) setBloodBankCount(res.data.length);
-                });
-            }
-            if (mod && mod.default && mod.default.getCompletedLabTestBookings) {
-                mod.default.getCompletedLabTestBookings().then(res => {
-                    if (res && res.success) setLabTestCount(res.data.length);
-                });
-            }
-        });
-    }, []);
 
     const getStatusColor = (status) => {
         const statusColors = {
@@ -323,6 +327,8 @@ const OrderHistory = () => {
     // Render specific components for different tabs
     const renderMainContent = () => {
         switch (activeTab) {
+            case 'clinic':
+                return <ClinicAppointmentHistory />;
             case 'medicine':
                 return <MedicineOrderHistory />;
             case 'product':
@@ -343,8 +349,8 @@ const OrderHistory = () => {
                             </div>
                         ) : (
                             <div className="orders-grid">
-                                {orders[activeTab] && orders[activeTab].length > 0 ? (
-                                    orders[activeTab].map((order) => renderOrderCard(order, activeTab))
+                                {mockOrders[activeTab] && mockOrders[activeTab].length > 0 ? (
+                                    mockOrders[activeTab].map((order) => renderOrderCard(order, activeTab))
                                 ) : (
                                     <div className="empty-state">
                                         <div className="empty-icon">📋</div>
