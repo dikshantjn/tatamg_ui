@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './components/User/header/Header';
 import Footer from './components/Footer';
@@ -27,7 +29,8 @@ import MaternalCare from './components/MaternalCare';
 import ChildCare from './components/ChildCare';
 import MedicineDelivery from './components/User/MedicineOrder/MedicineDelivery';
 import Physiotherapy from './components/Physiotherapy';
-import HospitalDiscovery from './components/HospitalDiscovery';
+import HospitalBedBooking from './components/User/Hospital/HospitalBedBooking';
+import BookHospitalBed from './components/User/Hospital/BookHospitalBed';
 import HospitalResults from './components/HospitalResults';
 import CareAtHome from './components/CareAtHome';
 import MedicalTourism from './components/MedicalTourism';
@@ -50,6 +53,7 @@ import BookLabTestAppt from './components/User/LabTest/BookLabTestAppt';
 import OfflineDoctorConsultation from './components/User/DoctorConsultation/OfflineDoctorConsultation';
 import OnlineDoctorConsultation from './components/User/DoctorConsultation/OnlineDoctorConsultation';
 import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoctorAppointment';
+import HealthRecords from './components/User/HealthRecords/HealthRecords';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 
@@ -71,10 +75,11 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
       '/offers', '/membership', '/lab-tests', '/blood-bank', '/find-donor', 
       '/register-donor', '/medical-loans', '/loan-form', '/insurance', 
       '/vaccines', '/maternal-care', '/child-care', '/delivery', '/physiotherapy', 
-      '/hospital-discovery', '/hospital-results', '/care-at-home', '/medical-tourism', 
+      '/hospital-bed-booking', '/hospital-results', '/care-at-home', '/medical-tourism', 
       '/rehabilitation', '/early-detection', '/nutrition', '/pet-care', 
       '/organ-donation', '/ayurveda', '/checkout-2', '/checkout-3', '/checkout-4', 
-      '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/order-history', '/track-order'
+      '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/order-history', '/track-order',
+      '/health-records'
     ];
     const isProtected = protectedPaths.some(protectedPath => path.startsWith(protectedPath));
     console.log('🛡️ Route protection check:', { path, isProtected });
@@ -210,8 +215,11 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           <Route path="/physiotherapy" element={
             isAuthenticated ? <Physiotherapy /> : <Navigate to="/" replace />
           } />
-          <Route path="/hospital-discovery" element={
-            isAuthenticated ? <HospitalDiscovery /> : <Navigate to="/" replace />
+          <Route path="/hospital-bed-booking" element={
+            isAuthenticated ? <HospitalBedBooking /> : <Navigate to="/" replace />
+          } />
+          <Route path="/hospital-bed-booking/:vendorId" element={
+            isAuthenticated ? <BookHospitalBed /> : <Navigate to="/" replace />
           } />
           <Route path="/hospital-results" element={
             isAuthenticated ? <HospitalResults /> : <Navigate to="/" replace />
@@ -263,6 +271,9 @@ const AppContent = ({ isAuthenticated, onAuthChange }) => {
           } />
           <Route path="/track-order" element={
             isAuthenticated ? <TrackOrder /> : <Navigate to="/" replace />
+          } />
+          <Route path="/health-records" element={
+            isAuthenticated ? <HealthRecords /> : <Navigate to="/" replace />
           } />
 
           {/* Fallback */}
@@ -318,24 +329,34 @@ function App() {
   // Show loading while checking authentication
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '18px'
-      }}>
-        Loading...
+      <div className="loading-screen">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+        </div>
       </div>
     );
   }
 
   return (
     <Router>
-      <AppContent
-        isAuthenticated={isAuthenticated}
-        onAuthChange={handleAuthChange}
-      />
+      <div className="app">
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <AppContent
+          isAuthenticated={isAuthenticated}
+          onAuthChange={handleAuthChange}
+        />
+      </div>
     </Router>
   );
 }

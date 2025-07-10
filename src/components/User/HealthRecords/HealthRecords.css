@@ -1,0 +1,888 @@
+.health-records-container {
+    min-height: 100vh;
+    background: #f8fafc;
+    position: relative;
+}
+
+.records-header {
+    background: #19cac7;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.health-records-container .lock-button-top {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: none;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 15;
+}
+
+.health-records-container .lock-button-top:hover {
+    background: #f8fafc;
+    color: #475569;
+}
+
+.health-records-container .lock-button-top svg {
+    width: 16px;
+    height: 16px;
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.title-section {
+    flex: 1;
+}
+
+.title-section h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+.title-section .subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 2px 0 0 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.upload-header-button, .lock-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 32px;
+    white-space: nowrap;
+}
+
+.upload-header-button {
+    background-color: white;
+    color: #19cac7;
+}
+
+.upload-header-button:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+.upload-header-button svg, .lock-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.lock-button {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.lock-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Remove the floating upload button styles */
+.upload-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.upload-button:hover {
+    background-color: #2563eb;
+}
+
+.upload-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.health-records-container .header-left {
+    width: 100%;
+}
+
+.health-records-container .title-section {
+    margin-bottom: 1rem;
+}
+
+.health-records-container .title-section h1 {
+    font-size: 1.5rem;
+    color: white;
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+}
+
+.health-records-container .subtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.categories-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin: 0 -16px;
+    padding: 0 16px;
+}
+
+.categories-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.categories {
+    display: flex;
+    gap: 8px;
+    padding: 4px 0;
+    min-width: min-content;
+}
+
+.category-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.category-button svg {
+    width: 16px;
+    height: 16px;
+    color: white;
+}
+
+.category-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.category-button.active {
+    background-color: white;
+    color: #19cac7;
+    border-color: white;
+}
+
+.category-button.active svg {
+    color: #19cac7;
+}
+
+.health-records-container .records-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.health-records-container .no-records {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #64748b;
+}
+
+.health-records-container .no-records svg {
+    width: 64px;
+    height: 64px;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+}
+
+.health-records-container .no-records p {
+    font-size: 1.125rem;
+    margin-bottom: 1.5rem;
+}
+
+.health-records-container .upload-button {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #19cac7;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.health-records-container .upload-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.health-records-container .upload-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.health-records-container .upload-panel {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+.health-records-container .upload-panel.show {
+    left: 0;
+}
+
+.health-records-container .upload-panel-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+}
+
+.health-records-container .upload-panel-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #1a2138;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.health-records-container .upload-panel-header h2 svg {
+    width: 24px;
+    height: 24px;
+    color: #19cac7;
+}
+
+.health-records-container .close-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.health-records-container .close-button:hover {
+    background: #f1f5f9;
+    color: #475569;
+    transform: rotate(90deg);
+}
+
+.health-records-container .close-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.health-records-container .upload-form {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.health-records-container .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.health-records-container .form-group label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.health-records-container .form-group label svg {
+    width: 16px;
+    height: 16px;
+    color: #19cac7;
+}
+
+.health-records-container .form-group input[type="text"],
+.health-records-container .form-group select {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    color: #1a2138;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.health-records-container .form-group input[type="text"]:hover,
+.health-records-container .form-group select:hover {
+    border-color: #cbd5e1;
+}
+
+.health-records-container .form-group input[type="text"]:focus,
+.health-records-container .form-group select:focus {
+    outline: none;
+    border-color: #19cac7;
+    box-shadow: 0 0 0 3px rgba(25, 202, 199, 0.1);
+}
+
+.health-records-container .file-input-wrapper {
+    position: relative;
+    margin-top: 0.5rem;
+    height: 200px;
+}
+
+.health-records-container .file-input-wrapper input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.health-records-container .file-input-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #64748b;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+}
+
+.health-records-container .file-input-placeholder:hover {
+    border-color: #19cac7;
+    color: #19cac7;
+    background: #f0fdfd;
+}
+
+.health-records-container .file-input-placeholder svg {
+    width: 40px;
+    height: 40px;
+}
+
+.health-records-container .file-input-placeholder span {
+    font-size: 0.875rem;
+    text-align: center;
+    max-width: 200px;
+}
+
+.health-records-container .file-input-placeholder .file-name {
+    color: #19cac7;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.health-records-container .form-group:last-of-type {
+    margin-bottom: 80px; /* Add space for the sticky buttons */
+}
+
+.health-records-container .form-actions {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #e2e8f0;
+    flex-direction: row;
+    justify-content: flex-end;
+    z-index: 10; /* Ensure buttons are above the file input */
+}
+
+.health-records-container .cancel-button,
+.health-records-container .upload-submit-button {
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 140px;
+}
+
+.health-records-container .cancel-button {
+    background: #f1f5f9;
+    border: none;
+    color: #64748b;
+}
+
+.health-records-container .cancel-button:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.health-records-container .upload-submit-button {
+    background: #19cac7;
+    border: none;
+    color: white;
+}
+
+.health-records-container .upload-submit-button:hover {
+    background: #15b5b2;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(25, 202, 199, 0.2);
+}
+
+.health-records-container .upload-submit-button:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.health-records-container .upload-submit-button svg,
+.health-records-container .cancel-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Mobile responsiveness for buttons */
+@media (max-width: 480px) {
+    .health-records-container .form-actions {
+        padding: 0.75rem 1rem;
+        gap: 0.75rem;
+    }
+
+    .health-records-container .cancel-button,
+    .health-records-container .upload-submit-button {
+        padding: 0.75rem 1rem;
+        min-width: auto;
+        font-size: 0.875rem;
+    }
+}
+
+.health-records-container .records-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.health-records-container .record-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    border: 1px solid #eef0f5;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 60px; /* Add space for the action icons */
+}
+
+.health-records-container .record-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.health-records-container .record-card:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.health-records-container .record-card-header {
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: linear-gradient(to right, #f8f9fa, #ffffff);
+    border-bottom: 1px solid #eef0f5;
+    cursor: pointer;
+}
+
+.health-records-container .record-icon {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.health-records-container .record-icon svg {
+    width: 24px;
+    height: 24px;
+    color: #2563eb;
+}
+
+.health-records-container .record-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.health-records-container .record-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.health-records-container .record-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.health-records-container .record-details span {
+    font-size: 13px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.health-records-container .record-details .date::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background-color: #2563eb;
+    border-radius: 50%;
+}
+
+.health-records-container .record-details .type {
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.health-records-container .record-actions {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    display: flex;
+    gap: 12px;
+    z-index: 2;
+    background: transparent;
+}
+
+.health-records-container .action-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eef0f5;
+    position: relative;
+}
+
+.health-records-container .action-icon svg {
+    width: 18px;
+    height: 18px;
+    transition: all 0.2s ease;
+}
+
+.health-records-container .action-icon.share {
+    color: #10b981;
+}
+
+.health-records-container .action-icon.share:hover {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+
+.health-records-container .action-icon.download {
+    color: #2563eb;
+}
+
+.health-records-container .action-icon.download:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+
+.health-records-container .action-icon.delete {
+    color: #ef4444;
+}
+
+.health-records-container .action-icon.delete:hover {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+/* Tooltip styles */
+.health-records-container .action-icon::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    padding: 4px 8px;
+    background: #1f2937;
+    color: white;
+    font-size: 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+}
+
+.health-records-container .action-icon:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-4px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.health-records-container .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #666;
+}
+
+.health-records-container .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.health-records-container .error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+}
+
+.health-records-container .error-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    stroke: currentColor;
+}
+
+.health-records-container .error-state p {
+    margin-bottom: 16px;
+    font-size: 16px;
+}
+
+.health-records-container .retry-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.health-records-container .retry-button:hover {
+    background-color: #c82333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-content {
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .header-top {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .title-section {
+        text-align: left;
+    }
+
+    .header-actions {
+        justify-content: flex-end;
+    }
+
+    .title-section h1 {
+        font-size: 18px;
+    }
+
+    .title-section .subtitle {
+        font-size: 12px;
+    }
+
+    .categories-scroll {
+        margin: 0 -12px;
+        padding: 0 12px;
+    }
+
+    .categories {
+        padding: 0;
+    }
+
+    .category-button {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .category-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .records-grid {
+        gap: 16px;
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .header-top {
+        gap: 10px;
+    }
+
+    .upload-header-button, .lock-button {
+        padding: 6px 10px;
+        font-size: 12px;
+        height: 30px;
+    }
+
+    .upload-header-button svg, .lock-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .categories-scroll {
+        margin: 0 -10px;
+        padding: 0 10px;
+    }
+
+    .records-grid {
+        gap: 12px;
+        padding: 12px;
+    }
+} 

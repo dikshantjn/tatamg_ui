@@ -125,7 +125,7 @@ function MobileLayout() {
                     </button>
                     <nav className="side-menu">
                         <Link to="/physiotherapy">Physiotherapy</Link>
-                        <Link to="/hospital-discovery">Hospital Discovery</Link>
+                        <Link to="/hospital-bed-booking">Hospital Discovery</Link>
                         <Link to="/care-at-home">Care At Home</Link>
                         <Link to="/medical-tourism">Medical Tourism</Link>
                         <Link to="/nutrition">Nutrition</Link>

@@ -1,0 +1,122 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.logoIcon {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #38A3A5, #2C3E50);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(56, 163, 165, 0.2);
+  overflow: hidden;
+}
+
+.logoIcon::before {
+  content: 'VH';
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.5px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.logoIcon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+.logoText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.slogan {
+  font-size: 10px;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 2px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.mainLogo {
+  display: flex;
+  align-items: center;
+}
+
+.vedikaText {
+  font-weight: 600;
+  background: linear-gradient(135deg, #2C3E50, #3498DB);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-right: 2px;
+}
+
+.dotHealth {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #38A3A5;
+  font-weight: 500;
+}
+
+.dot {
+  width: 4px;
+  height: 4px;
+  background-color: #38A3A5;
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: pulse 2s infinite;
+}
+
+/* Size variants */
+.regular {
+  font-size: 20px;
+}
+
+.small {
+  font-size: 16px;
+}
+
+.small .slogan {
+  font-size: 8px;
+}
+
+.small .logoIcon {
+  width: 28px;
+  height: 28px;
+}
+
+.small .logoIcon::before {
+  font-size: 14px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+} 

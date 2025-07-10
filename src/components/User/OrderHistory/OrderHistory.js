@@ -5,6 +5,7 @@ import BloodBankOrderHistory from './BloodBankOrderHistory';
 import MedicineOrderHistory from './MedicineOrderHistory';
 import LabTestOrderHistory from './LabTestOrderHistory';
 import ClinicAppointmentHistory from './ClinicAppointmentHistory';
+import BedBookingHistory from './BedBookingHistory';
 import orderHistoryService from '../../../services/User/orderHistory.service';
 import './OrderHistory.css';
 
@@ -15,6 +16,7 @@ const OrderHistory = () => {
     const [bloodBankCount, setBloodBankCount] = useState(0);
     const [labTestCount, setLabTestCount] = useState(0);
     const [clinicCount, setClinicCount] = useState(0);
+    const [bedBookingCount, setBedBookingCount] = useState(0);
 
     useEffect(() => {
         setLoading(true);
@@ -44,6 +46,12 @@ const OrderHistory = () => {
                 if (labTestResponse.success) {
                     setLabTestCount(labTestResponse.data.length);
                 }
+
+                // Fetch bed bookings count
+                const bedBookingResponse = await orderHistoryService.getCompletedBedBookings();
+                if (bedBookingResponse.success) {
+                    setBedBookingCount(bedBookingResponse.data.length);
+                }
             } catch (error) {
                 console.error('Error fetching counts:', error);
             } finally {
@@ -60,6 +68,7 @@ const OrderHistory = () => {
         { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: ambulanceCount },
         { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: labTestCount },
         { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: bloodBankCount },
+        { id: 'bedBooking', label: 'Bed Bookings', icon: '🏥', count: bedBookingCount },
         { id: 'product', label: 'Product Orders', icon: '📦', count: 7 }
     ];
 
@@ -158,7 +167,8 @@ const OrderHistory = () => {
                 patientName: 'John Doe'
             }
         ],
-        product: []
+        product: [],
+        bedBooking: []
     };
 
     const getStatusColor = (status) => {
@@ -339,6 +349,8 @@ const OrderHistory = () => {
                 return <BloodBankOrderHistory />;
             case 'labTest':
                 return <LabTestOrderHistory />;
+            case 'bedBooking':
+                return <BedBookingHistory />;
             default:
                 return (
                     <div className="orders-section">

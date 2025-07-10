@@ -1,5 +1,10 @@
 .App {
   text-align: center;
+  width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .App-logo {
@@ -22,6 +27,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  width: 100%;
 }
 
 .App-link {
@@ -68,20 +74,28 @@
 
 /* Reset any potential conflicting styles */
 .app {
-  position: relative;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+  position: relative;
 }
 
 .main-content {
   flex: 1;
   width: 100%;
-  max-width: 100vw;
+  max-width: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  background-color: #ffffff;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 /* Ensure body doesn't scroll when panel is open */
@@ -89,33 +103,29 @@ body.panel-open {
   overflow: hidden !important;
 }
 
-/* Loading screen styles */
+/* Loading Screen */
 .loading-screen {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: white;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: rgba(255, 255, 255, 0.95);
   z-index: 9999;
 }
 
-/* Side Panel Styles - Removed conflicting styles to let SignIn.css handle them */
-
-/* Animations are handled by SignIn.css */
-
-/* Mobile styles are handled by SignIn.css */
-
-/* Adjust SignIn component styles when in side panel */
+/* Side Panel Styles */
 .side-panel .sign-in-container {
   height: 100%;
   padding: 20px;
   display: flex;
   flex-direction: column;
   background: white;
+  width: 100%;
+  max-width: 100%;
 }
 
 .side-panel .sign-in-left {
@@ -126,7 +136,8 @@ body.panel-open {
   width: 100%;
   padding: 60px 20px 20px;
   background: white;
-  overflow-y: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .side-panel .sign-in-box {
@@ -156,15 +167,9 @@ body.panel-open {
 
 /* Loading Screen Styles */
 .loading-spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
+  width: 50px;
+  height: 50px;
+  border: 3px solid #f1f1f1;
   border-top: 3px solid #38A3A5;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -175,8 +180,34 @@ body.panel-open {
   100% { transform: rotate(360deg); }
 }
 
+/* Smooth transitions for route changes */
+.route-transition {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.route-transition-enter {
+  opacity: 0;
+}
+
+.route-transition-enter-active {
+  opacity: 1;
+}
+
+.route-transition-exit {
+  opacity: 1;
+}
+
+.route-transition-exit-active {
+  opacity: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+  .app {
+    padding-bottom: 64px; /* Height of bottom navigation */
+  }
+
   .loading-container {
     padding: 20px;
   }
@@ -203,6 +234,12 @@ body.panel-open {
     width: 50px;
     height: 50px;
   }
+
+  .main-content {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 60px; /* Space for bottom navigation */
+  }
 }
 
 /* Mobile styles */
@@ -220,8 +257,23 @@ html, body {
   padding: 0;
 }
 
+/* Prevent horizontal scrolling on specific elements */
 .ambulance-map-wrapper {
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
-  width: 100vw;
-  max-width: 100vw;
+}
+
+/* Utility Classes */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

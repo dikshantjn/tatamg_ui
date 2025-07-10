@@ -85,12 +85,6 @@ const ClinicAppointmentHistory = () => {
         return (
             <div key={appointment.id} className="clinic-appointment-card">
                 <div className="appointment-header">
-                    <div className="appointment-info">
-                        <h3 className="appointment-number">Appointment #{appointment.appointmentNumber}</h3>
-                        <p className="appointment-datetime">
-                            {formatDate(appointment.date)} at {formatTime(appointment.time)}
-                        </p>
-                    </div>
                     <div className="appointment-status">
                         <span className="status-badge" style={{ backgroundColor: getStatusColor(appointment.status) }}>
                             {appointment.status}
@@ -101,6 +95,9 @@ const ClinicAppointmentHistory = () => {
                 <div className="appointment-content">
                     <div className="doctor-info">
                         <h4>{appointment.doctor.name}</h4>
+                        <p className="appointment-datetime">
+                            {formatDate(appointment.date)} at {formatTime(appointment.time)}
+                        </p>
                         <div className="specializations">
                             {appointment.doctor.specializations.map((spec, index) => (
                                 <span key={index} className="specialization-tag">{spec}</span>
@@ -163,10 +160,6 @@ const ClinicAppointmentHistory = () => {
                     <div className="side-panel-content">
                         <div className="appointment-summary">
                             <div className="appointment-basic-info">
-                                <h3>Appointment #{selectedAppointment.appointmentNumber}</h3>
-                                <p className="appointment-datetime">
-                                    {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
-                                </p>
                                 <span className="status-badge" style={{ backgroundColor: getStatusColor(selectedAppointment.status) }}>
                                     {selectedAppointment.status}
                                 </span>
@@ -176,6 +169,9 @@ const ClinicAppointmentHistory = () => {
                                 <h4>Doctor Information</h4>
                                 <div className="doctor-info-detail">
                                     <h5>{selectedAppointment.doctor.name}</h5>
+                                    <p className="appointment-datetime">
+                                        {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
+                                    </p>
                                     <div className="specializations">
                                         {selectedAppointment.doctor.specializations.map((spec, index) => (
                                             <span key={index} className="specialization-tag">{spec}</span>

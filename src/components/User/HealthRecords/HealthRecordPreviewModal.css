@@ -1,0 +1,257 @@
+.health-record-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.health-record-modal-content {
+    background-color: white;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: #333;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+    padding: 12px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    color: #64748b;
+    width: 40px;
+    height: 40px;
+}
+
+.action-icon:hover {
+    background-color: #f3f4f6;
+}
+
+.action-icon svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+}
+
+.action-icon span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.action-icon.share:hover {
+    color: #3b82f6;
+}
+
+.action-icon.download:hover {
+    color: #10b981;
+}
+
+.action-icon.delete:hover {
+    color: #ef4444;
+    background-color: #fee2e2;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.action-button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.action-button.share {
+    background-color: #28a745;
+    color: white;
+}
+
+.action-button.share:hover {
+    background-color: #218838;
+}
+
+.action-button.download {
+    background-color: #007bff;
+    color: white;
+}
+
+.action-button.download:hover {
+    background-color: #0056b3;
+}
+
+.action-button.delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.action-button.delete:hover {
+    background-color: #c82333;
+}
+
+.modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    min-height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preview-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #666;
+}
+
+.preview-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.preview-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    color: #dc3545;
+    text-align: center;
+}
+
+.preview-error svg {
+    width: 48px;
+    height: 48px;
+}
+
+.download-instead-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.download-instead-button:hover {
+    background-color: #0056b3;
+}
+
+.preview-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pdf-preview {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .health-record-modal-overlay {
+        padding: 10px;
+    }
+
+    .health-record-modal-content {
+        max-height: 95vh;
+    }
+
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .modal-actions {
+        flex-wrap: wrap;
+    }
+
+    .action-button {
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+} 

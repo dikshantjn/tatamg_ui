@@ -1,0 +1,257 @@
+.health-record-access {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+    padding: 1rem;
+}
+
+.access-container {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out;
+}
+
+.access-content {
+    padding: 2rem;
+}
+
+.access-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    background: #e8f5fe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-icon svg {
+    width: 32px;
+    height: 32px;
+    color: #2196f3;
+}
+
+.access-header h1 {
+    font-size: 1.75rem;
+    color: #1a2138;
+    margin: 0 0 1rem;
+    font-weight: 600;
+}
+
+.security-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f0faf0;
+    color: #22863a;
+    padding: 0.5rem 1rem;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.security-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
+.access-description {
+    margin-bottom: 2rem;
+}
+
+.access-message {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.security-info {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.info-item svg {
+    width: 20px;
+    height: 20px;
+    color: #94a3b8;
+}
+
+.access-form {
+    margin-top: 2rem;
+}
+
+.password-input-container {
+    margin-bottom: 1.5rem;
+}
+
+.password-input-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1a2138;
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.password-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    padding-right: 3rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: #1a2138;
+    transition: all 0.2s ease;
+}
+
+.password-input:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+    outline: none;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    color: #64748b;
+}
+
+.toggle-password svg {
+    width: 20px;
+    height: 20px;
+}
+
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.access-button {
+    width: 100%;
+    padding: 1rem;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.access-button:hover {
+    background: #1976d2;
+    transform: translateY(-1px);
+}
+
+.access-button:active {
+    transform: translateY(0);
+}
+
+.access-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.forgot-password-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    color: #2196f3;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-button:hover {
+    color: #1976d2;
+    text-decoration: underline;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+    .access-container {
+        border-radius: 16px;
+    }
+
+    .access-content {
+        padding: 1.5rem;
+    }
+
+    .header-icon {
+        width: 56px;
+        height: 56px;
+    }
+
+    .header-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .access-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .security-info {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+} 

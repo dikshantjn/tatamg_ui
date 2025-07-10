@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.39:5000/api',
-    SOCKET_URL: 'http://192.168.1.39:5000',
+    BASE_URL: 'http://192.168.1.37:5000/api',
+    SOCKET_URL: 'http://192.168.1.37:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -8,6 +8,15 @@ export const API_CONFIG = {
             LOGIN: '/auth/login',
             UPDATE_PLATFORM: '/auth/platform-update',
             // Add other auth endpoints as needed
+        },
+        HOSPITALS: {
+            GET_ALL_HOSPITALS: '/hospitals/getAllHospitals',
+            GET_WARDS: '/hospitals/wards/vendor/:vendorId',
+            CREATE_BED_BOOKING: '/hospitals/bed-booking',
+            GET_USER_BOOKINGS: '/hospitals/by-user/:userId',
+            UPDATE_BED_BOOKING_PAYMENT_STATUS: '/hospitals/appointment/payment-status/:bookingId',
+            GET_COMPLETED_BOOKINGS: '/hospitals/appointment/completed/user/:userId',
+            // Add other hospital endpoints as needed
         },
         DOCTOR_CONSULTATION: {
             GET_OFFLINE_DOCTORS: '/clinic/active/offline',
@@ -81,6 +90,14 @@ export const API_CONFIG = {
             GET_ALL_DIAGNOSTIC_CENTERS: '/lab-test/all-diagnostic-centers',
             CREATE_BOOKING: '/labtest-booking/create',
             GET_COMPLETED_BOOKINGS: '/labtest-booking/bookings/user/completed/:userId'
+        },
+        HEALTH_RECORDS: {
+            CHECK_PASSWORD: '/health-record/user/:userId/health-record-password/check',
+            SET_PASSWORD: '/health-record/user/:userId/health-record-password',
+            VERIFY_PASSWORD: '/health-record/user/:userId/verify-health-record-password',
+            GET_HEALTH_RECORDS: '/health-record/get-health-record/:userId',
+            ADD_HEALTH_RECORD: '/health-record/add-health-record',
+            DELETE_HEALTH_RECORD: '/health-record/delete-health-record/:healthRecordId'
         },
         // Add other endpoint categories as needed
     }

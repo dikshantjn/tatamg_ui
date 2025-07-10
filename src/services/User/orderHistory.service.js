@@ -466,6 +466,87 @@ class OrderHistoryService {
             }
         };
     }
+
+    /**
+     * Get completed bed bookings for a user
+     * @param {string} userId - User ID (optional, will use current user if not provided)
+     * @returns {Promise<Object>} - Response with bookings data
+     */
+    async getCompletedBedBookings(userId = null) {
+        try {
+            const targetUserId = userId || getUserId();
+            
+            if (!targetUserId) {
+                throw new Error('User ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.HOSPITALS.GET_COMPLETED_BOOKINGS,
+                { userId: targetUserId }
+            );
+
+            const response = await fetch(getApiUrl(endpoint), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return {
+                success: true,
+                data: data.bookings || [],
+                message: data.message || 'Completed bed bookings fetched successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching completed bed bookings:', error);
+            return {
+                success: false,
+                data: [],
+                message: error.message || 'Failed to fetch completed bed bookings'
+            };
+        }
+    }
+
+    /**
+     * Format bed booking data for display
+     * @param {Object} booking - Raw booking data from API
+     * @returns {Object} - Formatted booking data
+     */
+    formatBedBookingData(booking) {
+        return {
+            id: booking.bedBookingId,
+            bookingNumber: booking.bedBookingId,
+            date: booking.bookingDate,
+            timeSlot: booking.timeSlot,
+            status: booking.status,
+            bedType: booking.bedType,
+            paidAmount: booking.paidAmount,
+            paymentStatus: booking.paymentStatus,
+            createdAt: booking.createdAt,
+            updatedAt: booking.updatedAt,
+            hospital: {
+                name: booking.hospital?.name || '',
+                address: booking.hospital?.address || '',
+                city: booking.hospital?.city || '',
+                state: booking.hospital?.state || '',
+                contactNumber: booking.hospital?.contactNumber || '',
+                email: booking.hospital?.email || ''
+            },
+            user: {
+                name: booking.user?.name || '',
+                email: booking.user?.emailId || '',
+                phone: booking.user?.phone_number || '',
+                photo: booking.user?.photo || ''
+            }
+        };
+    }
 }
 
 // Create and export a singleton instance
