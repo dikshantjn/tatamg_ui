@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.37:5000/api',
-    SOCKET_URL: 'http://192.168.1.37:5000',
+    BASE_URL: 'http://192.168.1.35:5000/api',
+    SOCKET_URL: 'http://192.168.1.35:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -8,6 +8,10 @@ export const API_CONFIG = {
             LOGIN: '/auth/login',
             UPDATE_PLATFORM: '/auth/platform-update',
             // Add other auth endpoints as needed
+        },
+        VENDOR_AUTH: {
+            LOGIN: '/vendors/login',
+            LOGOUT: '/vendors/logout',
         },
         HOSPITALS: {
             GET_ALL_HOSPITALS: '/hospitals/getAllHospitals',

@@ -1,58 +1,180 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import {
+    Box,
+    Container,
+    Typography,
+    Button,
+    Grid,
+    Card,
+    CardContent,
+    CardMedia,
+    Skeleton,
+    IconButton,
+    Paper,
+    Chip,
+    Stack,
+    useTheme,
+    useMediaQuery,
+    Alert,
+    AlertTitle
+} from '@mui/material';
+import {
+    ArrowBack,
+    Search,
+    Visibility,
+    Error,
+    Info
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import { VendorProductService } from '../../../services/User/Products/vendor-product.service';
 import ProductItem from './ProductItem';
-import './ProductList.css';
-import { colors } from '../../../styles/colors';
+
+// Styled Components
+const StyledContainer = styled(Container)(({ theme }) => ({
+    padding: theme.spacing(3),
+    maxWidth: 1440,
+    margin: '0 auto',
+    [theme.breakpoints.down('md')]: {
+        padding: theme.spacing(2),
+    }
+}));
+
+const HeaderCard = styled(Paper)(({ theme, categorycolor }) => ({
+    background: categorycolor || 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    color: 'white',
+    padding: theme.spacing(4),
+    borderRadius: 20,
+    marginBottom: theme.spacing(3),
+    position: 'relative',
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: -50,
+        right: -50,
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        background: 'rgba(255, 255, 255, 0.1)',
+        zIndex: 0,
+    },
+    '&::after': {
+        content: '""',
+        position: 'absolute',
+        bottom: -30,
+        left: -30,
+        width: 80,
+        height: 80,
+        borderRadius: '50%',
+        background: 'rgba(255, 255, 255, 0.08)',
+        zIndex: 0,
+    },
+    [theme.breakpoints.down('md')]: {
+        padding: theme.spacing(3),
+        flexDirection: 'column',
+        gap: theme.spacing(2),
+        textAlign: 'center',
+    }
+}));
+
+// Enhanced Product Skeleton with consistent sizing
+const ProductSkeleton = () => (
+    <Card sx={{ 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        borderRadius: 2,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        overflow: 'hidden',
+        transition: 'all 0.3s ease',
+        '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+        }
+    }}>
+        {/* Image skeleton - fixed aspect ratio */}
+        <Box sx={{ position: 'relative', width: '100%', paddingTop: '75%' }}>
+            <Skeleton 
+                variant="rectangular" 
+                sx={{ 
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 0
+                }} 
+            />
+        </Box>
+        
+        <CardContent sx={{ 
+            flexGrow: 1, 
+            display: 'flex', 
+            flexDirection: 'column',
+            p: 2
+        }}>
+            {/* Product name skeleton */}
+            <Skeleton 
+                variant="text" 
+                width="90%" 
+                height={24} 
+                sx={{ mb: 1 }} 
+            />
+            
+            {/* Description skeleton - 2 lines */}
+            <Skeleton 
+                variant="text" 
+                width="100%" 
+                height={16} 
+                sx={{ mb: 0.5 }} 
+            />
+            <Skeleton 
+                variant="text" 
+                width="70%" 
+                height={16} 
+                sx={{ mb: 2 }} 
+            />
+            
+            {/* Price skeleton */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Skeleton variant="text" width={60} height={20} />
+                <Skeleton variant="text" width={40} height={16} />
+            </Box>
+            
+            {/* Button skeleton */}
+            <Skeleton 
+                variant="rectangular" 
+                height={40} 
+                sx={{ 
+                    borderRadius: 2,
+                    mt: 'auto'
+                }} 
+            />
+        </CardContent>
+    </Card>
+);
 
 // Category color mapping
 const categoryColors = {
-    'Healthcare Products': colors.primary,
-    'Medical Devices': colors.primary,
-    'Personal Care': colors.primary,
-    'Baby Care': colors.primary,
-    'Nutrition': colors.primary,
-    'Fitness': colors.primary,
-    'Wellness': colors.primary,
-    default: colors.primary
+    'Healthcare Products': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Medical Devices': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Personal Care': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Baby Care': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Nutrition': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Fitness': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    'Wellness': 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
+    default: 'linear-gradient(135deg, #38A3A5, #2C7A7B)'
 };
-
-// Image Fallback Icon Component
-const ImageIcon = () => (
-    <svg className="image-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="M21 15l-5-5L5 21"/>
-    </svg>
-);
-
-// Skeleton Loading Component
-const ProductCardSkeleton = () => (
-    <div className="skeleton">
-        <div className="skeleton-image">
-            <ImageIcon />
-            <div className="skeleton-badge"></div>
-        </div>
-        <div className="skeleton-content">
-            <div className="skeleton-title"></div>
-            <div className="skeleton-description"></div>
-            <div className="skeleton-description"></div>
-            <div className="skeleton-rating">
-                <div className="skeleton-star"></div>
-                <div className="skeleton-star"></div>
-                <div className="skeleton-star"></div>
-                <div className="skeleton-star"></div>
-                <div className="skeleton-star"></div>
-            </div>
-            <div className="skeleton-price"></div>
-            <div className="skeleton-button"></div>
-        </div>
-    </div>
-);
 
 const ProductList = () => {
     const { category } = useParams();
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [loading, setLoading] = useState(true);
     const [products, setProducts] = useState([]);
     const [error, setError] = useState(null);
@@ -99,81 +221,149 @@ const ProductList = () => {
 
     // Custom error message component
     const ErrorMessage = ({ error }) => (
-        <div className={`error-message ${error.type}`}>
-            {error.type === '404' ? (
-                <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 24, height: 24, marginRight: 8 }}>
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
-                    <div className="error-content">
-                        <h3>No Products Found</h3>
-                        <p>{error.message}</p>
-                    </div>
-                </>
-            ) : (
-                <>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 20, height: 20, marginRight: 8 }}>
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
+        <Alert 
+            severity={error.type === '404' ? 'info' : 'error'}
+            icon={error.type === '404' ? <Info /> : <Error />}
+            sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                '& .MuiAlert-message': {
+                    width: '100%'
+                }
+            }}
+        >
+            <AlertTitle sx={{ fontWeight: 600 }}>
+                {error.type === '404' ? 'No Products Found' : 'Error Loading Products'}
+            </AlertTitle>
                     {error.message}
-                </>
-            )}
-        </div>
+        </Alert>
     );
 
     return (
-        <div className="product-list-container" style={{ '--primary-color': colors.primary }}>
-            <div className="product-list-header" style={{'--category-color': categoryColor}}>
-                <div className="header-content">
-                    <button className="back-button" onClick={handleBack} title="Go back">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 12H5M12 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
-                    <h1 className="category-title" title={decodedCategory}>{decodedCategory}</h1>
-                </div>
+        <Box sx={{ 
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
+            py: 3
+        }}>
+            <StyledContainer maxWidth="xl">
+                {/* Header */}
+                <HeaderCard categorycolor={categoryColor} elevation={0}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2,
+                        position: 'relative',
+                        zIndex: 1
+                    }}>
+                        <IconButton
+                            onClick={handleBack}
+                            sx={{
+                                background: 'rgba(255, 255, 255, 0.2)',
+                                color: 'white',
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.3)'
+                                }
+                            }}
+                        >
+                            <ArrowBack />
+                        </IconButton>
+                        <Box>
+                            <Typography variant="h4" sx={{ 
+                                fontWeight: 700,
+                                mb: 0.5
+                            }}>
+                                {decodedCategory}
+                            </Typography>
+                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                                Explore our curated collection
+                            </Typography>
+                        </Box>
+                    </Box>
                 
                 {/* Interactive geometric shapes */}
-                <div className="header-shapes">
-                    <div className="shape shape-1"></div>
-                    <div className="shape shape-2"></div>
-                    <div className="shape shape-3"></div>
-                </div>
-
-                {/* Background decorative shapes */}
-                <div className="background-shapes">
-                    <div className="bg-shape bg-shape-1"></div>
-                    <div className="bg-shape bg-shape-2"></div>
-                    <div className="bg-shape bg-shape-3"></div>
-                </div>
-            </div>
+                    <Stack direction="row" spacing={2} sx={{ 
+                        position: 'relative',
+                        zIndex: 1
+                    }}>
+                        <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 2,
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(4px)',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': {
+                                transform: 'rotate(15deg) scale(1.1)'
+                            }
+                        }} />
+                        <Box sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(4px)',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': {
+                                transform: 'scale(1.1)'
+                            }
+                        }} />
+                        <Box sx={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 1,
+                            background: 'rgba(255, 255, 255, 0.15)',
+                            backdropFilter: 'blur(4px)',
+                            transition: 'transform 0.3s ease',
+                            '&:hover': {
+                                transform: 'rotate(-15deg) scale(1.1)'
+                            }
+                        }} />
+                    </Stack>
+                </HeaderCard>
 
             {error && <ErrorMessage error={error} />}
 
-            <div className="products-grid">
+                {/* Products Grid */}
+                <Grid container spacing={3}>
                 {loading ? (
                     Array.from({ length: 8 }).map((_, index) => (
-                        <ProductCardSkeleton key={index} />
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                                <ProductSkeleton />
+                            </Grid>
                     ))
                 ) : products.length > 0 ? (
-                    products.map(product => (
-                        <ProductItem 
-                            key={product.productId} 
-                            product={product}
-                        />
+                        products.map((product, index) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={product.productId}>
+                                <ProductItem product={product} />
+                            </Grid>
                     ))
                 ) : (
-                    <div className="no-products-message">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: 48, height: 48, marginBottom: 16, opacity: 0.5 }}>
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <p>No products found in {decodedCategory}.</p>
-                    </div>
-                )}
-            </div>
-        </div>
+                        <Grid item xs={12}>
+                            <Box sx={{ 
+                                textAlign: 'center', 
+                                py: 8,
+                                color: 'text.secondary'
+                            }}>
+                                <Search sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
+                                <Typography variant="h6" sx={{ mb: 1 }}>
+                                    No products found
+                                </Typography>
+                                <Typography variant="body1">
+                                    We couldn't find any products in {decodedCategory}. Try browsing other categories.
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleBack}
+                                    sx={{ mt: 3 }}
+                                >
+                                    Go Back
+                                </Button>
+                            </Box>
+                        </Grid>
+                    )}
+                </Grid>
+            </StyledContainer>
+        </Box>
     );
 };
 

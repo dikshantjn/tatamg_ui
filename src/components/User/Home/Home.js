@@ -1,40 +1,21 @@
 import React from 'react';
-import './Home.css';
-import { useNavigate } from 'react-router-dom';
 import HeroBanner from './HeroBanner';
-import SearchByCategory from './SearchByCategory';
 import SearchByHealthConcern from './SearchByHealthConcern';
+import SearchByCategory from './SearchByCategory';
 import SearchByBrand from './SearchByBrand';
+import ServicesAndOffers from './ServicesAndOffers';
 import Testimonials from './Testimonials';
+import './Home.css';
 
 function Home() {
-    const navigate = useNavigate();
-
-    const goToProfile = () => {
-        navigate('/profile');
-    };
-
     return (
-        <div className="home-page">
+        <div className="home">
             <HeroBanner />
-
-            <div className="search-section health-concern">
-                <SearchByHealthConcern />
-            </div>
-
-            <div className="search-section category">
-                <SearchByCategory />
-            </div>
-
-            <div className="search-section brand">
-                <SearchByBrand />
-            </div>
-
-           
-
-            <div className="testimonials-section">
-                <Testimonials />
-            </div>
+            <SearchByHealthConcern />
+            <SearchByCategory />
+            <SearchByBrand />
+            <ServicesAndOffers />
+            <Testimonials />
         </div>
     );
 }

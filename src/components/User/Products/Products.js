@@ -1,8 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Products.css';
+import {
+    Box,
+    Container,
+    Typography,
+    Grid,
+    Card,
+    CardMedia,
+    CardContent,
+    IconButton,
+    Button,
+    Chip,
+    Skeleton,
+    Stack,
+    Divider,
+    useTheme,
+    useMediaQuery
+} from '@mui/material';
+import {
+    ArrowBackIos,
+    ArrowForwardIos,
+    Category,
+    FavoriteBorder,
+    ShoppingCart,
+    LocalOffer,
+    Star
+} from '@mui/icons-material';
 import { productCategories } from './ProductCategories';
-import { colors } from '../../../styles/colors';
 import TopOfferStrip from '../../TopOfferStrip';
 import { VendorProductService } from '../../../services/User/Products/vendor-product.service';
 import ProductItem from './ProductItem';
@@ -11,100 +35,36 @@ import ProductItem from './ProductItem';
 import otc from '../../../assets/otc.jpg';
 import wearable from '../../../assets/wearable.jpg';
 import nonwearable from '../../../assets/nonwearable.jpg';
-import bloodTest from '../../../assets/blood test.jpg';
-import ambulance from '../../../assets/ambulance.jpg';
 import drops from '../../../assets/drops.jpg';
 import consult from '../../../assets/consult.jpg';
 import instant from '../../../assets/instant.jpg';
 import physio from '../../../assets/physio.jpg';
 import dentist from '../../../assets/dentist.jpg';
-import surgeon from '../../../assets/surgeon.jpg';
-import phsiotherapist from '../../../assets/phsiotherapist.jpg';
 
-// Enhanced Loading Components
-const CircularLoader = () => (
-    <div className="circular-loader">
-        <div className="spinner-ring"></div>
-        <div className="spinner-text">Loading...</div>
-    </div>
-);
-
-const ProductCardSkeleton = () => (
-    <div className="product-box skeleton-card">
-        <div className="skeleton-image"></div>
-        <div className="skeleton-content">
-            <div className="skeleton-title"></div>
-            <div className="skeleton-description"></div>
-            <div className="skeleton-price"></div>
-            <div className="skeleton-button"></div>
-        </div>
-    </div>
-);
-
-// Enhanced Category color mapping with gradients
+// Category color mapping with soft pastel colors
 const categoryColors = {
-    'Dental Care': { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' },
-    'Genetic Testing': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
-    'Heart Care': { bg: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', icon: '#D32F2F' },
-    'Baby Care': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
-    'Elder Care': { bg: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', icon: '#F57C00' },
-    'Women Care': { bg: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', icon: '#C2185B' },
-    'Digital Health Tracker': { bg: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', icon: '#0097A7' },
-    'Digital Health Ring': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
-    'Epilepsy Care': { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' },
-    'UTI Test Kit': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
-    'Wellness Care Kit': { bg: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', icon: '#F57C00' },
-    'Pregnancy Care': { bg: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', icon: '#C2185B' },
-    'Wound Care': { bg: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', icon: '#0097A7' },
-    'Portable ECG': { bg: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', icon: '#388E3C' },
-    'Period Care': { bg: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', icon: '#7B1FA2' },
-    default: { bg: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', icon: '#1976D2' }
+    'Dental Care': { bg: '#E3F2FD', icon: '#1976D2' },
+    'Genetic Testing': { bg: '#E8F5E9', icon: '#388E3C' },
+    'Heart Care': { bg: '#FFEBEE', icon: '#D32F2F' },
+    'Baby Care': { bg: '#F3E5F5', icon: '#7B1FA2' },
+    'Elder Care': { bg: '#FFF3E0', icon: '#F57C00' },
+    'Women Care': { bg: '#FCE4EC', icon: '#C2185B' },
+    'Digital Health Tracker': { bg: '#E0F7FA', icon: '#0097A7' },
+    'Digital Health Ring': { bg: '#E8F5E9', icon: '#388E3C' },
+    'Epilepsy Care': { bg: '#E3F2FD', icon: '#1976D2' },
+    'UTI Test Kit': { bg: '#F3E5F5', icon: '#7B1FA2' },
+    'Wellness Care Kit': { bg: '#FFF3E0', icon: '#F57C00' },
+    'Pregnancy Care': { bg: '#FCE4EC', icon: '#C2185B' },
+    'Wound Care': { bg: '#E0F7FA', icon: '#0097A7' },
+    'Portable ECG': { bg: '#E8F5E9', icon: '#388E3C' },
+    'Period Care': { bg: '#F3E5F5', icon: '#7B1FA2' },
+    default: { bg: '#E3F2FD', icon: '#1976D2' }
 };
 
-// Enhanced Geometric Shape Component with animations
-const GeometricShapes = ({ type }) => {
-    const shapes = {
-        popular: [
-            { className: 'shape-1 shape-circle', background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', animation: 'float 6s ease-in-out infinite' },
-            { className: 'shape-2 shape-square', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 2s' },
-            { className: 'shape-3 shape-triangle', background: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', animation: 'float 6s ease-in-out infinite 4s' }
-        ],
-        electronic: [
-            { className: 'shape-1 shape-square', background: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', animation: 'float 6s ease-in-out infinite' },
-            { className: 'shape-2 shape-triangle', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 2s' },
-            { className: 'shape-3 shape-circle', background: 'linear-gradient(135deg, #E3F2FD, #BBDEFB)', animation: 'float 6s ease-in-out infinite 4s' }
-        ],
-        featured: [
-            { className: 'shape-1 shape-triangle', background: 'linear-gradient(135deg, #F3E5F5, #E1BEE7)', animation: 'float 6s ease-in-out infinite' },
-            { className: 'shape-2 shape-circle', background: 'linear-gradient(135deg, #FFF3E0, #FFCC02)', animation: 'float 6s ease-in-out infinite 2s' },
-            { className: 'shape-3 shape-square', background: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', animation: 'float 6s ease-in-out infinite 4s' }
-        ],
-        personal: [
-            { className: 'shape-1 shape-square', background: 'linear-gradient(135deg, #FCE4EC, #F8BBD9)', animation: 'float 6s ease-in-out infinite' },
-            { className: 'shape-2 shape-circle', background: 'linear-gradient(135deg, #E0F7FA, #B2EBF2)', animation: 'float 6s ease-in-out infinite 2s' },
-            { className: 'shape-3 shape-triangle', background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', animation: 'float 6s ease-in-out infinite 4s' }
-        ]
-    };
-
-    return (
-        <>
-            {shapes[type].map((shape, index) => (
-                <div 
-                    key={index} 
-                    className={`section-shape ${shape.className}`}
-                    style={{ 
-                        background: shape.background,
-                        animation: shape.animation
-                    }}
-                />
-            ))}
-        </>
-    );
-};
-
-// Enhanced Category Box Component
-const CategoryBox = ({ category, onClick }) => {
+// Category Card Component
+const CategoryCard = ({ category }) => {
     const navigate = useNavigate();
+    const theme = useTheme();
     const categoryStyle = categoryColors[category.name] || categoryColors.default;
 
     const handleClick = () => {
@@ -112,33 +72,86 @@ const CategoryBox = ({ category, onClick }) => {
     };
 
     return (
-        <div 
-            className="category-box" 
+        <Card
             onClick={handleClick}
-            style={{ '--category-bg': categoryStyle.bg }}
+            sx={{
+                width: 200,
+                height: 200,
+                cursor: 'pointer',
+                borderRadius: 2,
+                background: categoryStyle.bg,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[8],
+                },
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                p: 2,
+                position: 'relative',
+                overflow: 'hidden'
+            }}
         >
-            <div className="category-icon-wrapper" style={{ background: categoryStyle.bg }}>
-                <category.icon size={28} style={{ color: categoryStyle.icon }} />
-            </div>
-            <div className="category-info">
-                <h3>{category.name}</h3>
-                <p>{category.subCategories.length} items available</p>
-                <div className="category-arrow">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M9 18l6-6-6-6" />
-                    </svg>
-                </div>
-            </div>
-            <div className="category-overlay"></div>
-        </div>
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    textAlign: 'center'
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2
+                    }}
+                >
+                    <category.icon 
+                        size={32} 
+                        style={{ color: categoryStyle.icon }} 
+                    />
+                </Box>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        mb: 1,
+                        fontSize: '1rem',
+                        lineHeight: 1.2
+                    }}
+                >
+                    {category.name}
+                </Typography>
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: '0.875rem'
+                    }}
+                >
+                    {category.subCategories.length} items
+                </Typography>
+            </Box>
+        </Card>
     );
 };
 
-// Enhanced Product Box Component
-const ProductBox = ({ product }) => {
+// Product Card Component
+const ProductCard = ({ product }) => {
+    const theme = useTheme();
     const [imageLoading, setImageLoading] = useState(true);
     const [imageError, setImageError] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
 
     const handleImageLoad = () => {
         setImageLoading(false);
@@ -150,162 +163,420 @@ const ProductBox = ({ product }) => {
     };
 
     return (
-        <div 
-            className="product-box" 
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+        <Card
+            sx={{
+                height: '100%',
+                borderRadius: 2,
+                boxShadow: theme.shadows[2],
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: theme.shadows[8],
+                },
+                position: 'relative',
+                overflow: 'hidden'
+            }}
         >
-            <div className="product-image-container">
-                {imageLoading && <CircularLoader />}
-                {imageError ? (
-                    <div className="image-placeholder">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                            <circle cx="8.5" cy="8.5" r="1.5"/>
-                            <path d="M21 15l-5-5L5 21"/>
-                        </svg>
-                        <span>Image not available</span>
-                    </div>
-                ) : (
-                    <img 
-                        src={product.image} 
+            <Box sx={{ position: 'relative' }}>
+                <CardMedia
+                    component="img"
+                    height="200"
+                    image={product.image}
                         alt={product.name}
                         onLoad={handleImageLoad}
                         onError={handleImageError}
-                        style={{ opacity: imageLoading ? 0 : 1 }}
+                    sx={{
+                        objectFit: 'cover',
+                        opacity: imageLoading ? 0 : 1,
+                        transition: 'opacity 0.3s ease'
+                    }}
+                />
+                {imageLoading && (
+                    <Skeleton
+                        variant="rectangular"
+                        height={200}
+                        sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
                     />
                 )}
-                <div className="product-overlay">
-                    <button className="quick-view-btn">Quick View</button>
-                    <button className="add-to-cart-overlay-btn">Add to Cart</button>
-                </div>
-                {product.prescription && (
-                    <span className="badge prescription">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14,2 14,8 20,8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10,9 9,9 8,9"/>
-                        </svg>
-                        Prescription Required
-                    </span>
+                {imageError && (
+                    <Box
+                        sx={{
+                            height: 200,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            background: theme.palette.grey[100],
+                            color: theme.palette.text.secondary
+                        }}
+                    >
+                        <Typography variant="body2">Image not available</Typography>
+                    </Box>
+                )}
+                
+                {/* Badges */}
+                <Box sx={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 1 }}>
+                    {product.discount > 0 && (
+                        <Chip
+                            label={`${product.discount}% OFF`}
+                            size="small"
+                            sx={{
+                                background: theme.palette.error.main,
+                                color: 'white',
+                                fontWeight: 600
+                            }}
+                        />
                 )}
                 {product.stock === 'low' && (
-                    <span className="badge stock-low">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                            <line x1="12" y1="9" x2="12" y2="13"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                        Low Stock
-                    </span>
+                        <Chip
+                            label="Low Stock"
+                            size="small"
+                            sx={{
+                                background: theme.palette.warning.main,
+                                color: 'white',
+                                fontWeight: 600
+                            }}
+                        />
                 )}
                 {product.stock === 'out' && (
-                    <span className="badge out-of-stock">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="15" y1="9" x2="9" y2="15"/>
-                            <line x1="9" y1="9" x2="15" y2="15"/>
-                        </svg>
-                        Out of Stock
-                    </span>
-                )}
-                {product.discount > 0 && (
-                    <span className="badge discount">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 14l6-6"/>
-                            <circle cx="6" cy="6" r="3"/>
-                            <circle cx="18" cy="18" r="3"/>
-                        </svg>
-                        {product.discount}% OFF
-                    </span>
-                )}
-            </div>
-            <div className="product-content">
-                <h3 className="product-name">{product.name}</h3>
-                <p className="product-description">{product.description}</p>
-                <div className="product-price-section">
-                    <div className="product-price">
-                        <span className="current-price">₹{product.currentPrice.toLocaleString()}</span>
-                        {product.originalPrice && (
-                            <span className="original-price">₹{product.originalPrice.toLocaleString()}</span>
-                        )}
-                    </div>
-                    {product.discount > 0 && (
-                        <span className="discount-percentage">Save {product.discount}%</span>
+                        <Chip
+                            label="Out of Stock"
+                            size="small"
+                            sx={{
+                                background: theme.palette.grey[500],
+                                color: 'white',
+                                fontWeight: 600
+                            }}
+                        />
                     )}
-                </div>
-                <button 
-                    className="add-to-cart-btn" 
-                    disabled={product.stock === 'out'}
+                </Box>
+
+                {/* Action buttons */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1
+                    }}
                 >
-                    {product.stock === 'out' ? (
-                        <>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="15" y1="9" x2="9" y2="15"/>
-                                <line x1="9" y1="9" x2="15" y2="15"/>
-                            </svg>
-                            Out of Stock
-                        </>
-                    ) : (
-                        <>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 12l2 2 4-4"/>
-                                <path d="M21 12c-1 0-2-1-2-2s1-2 2-2 2 1 2 2-1 2-2 2z"/>
-                                <path d="M3 12c1 0 2-1 2-2s-1-2-2-2-2 1-2 2 1 2 2 2z"/>
-                                <path d="M12 21c0-1-1-2-2-2s-2 1-2 2 1 2 2 2 2-1 2-2z"/>
-                                <path d="M12 3c0 1 1 2 2 2s2-1 2-2-1-2-2-2-2 1-2 2z"/>
-                            </svg>
-                            Add to Cart
-                        </>
+                    <IconButton
+                        size="small"
+                        sx={{
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            '&:hover': {
+                                background: 'rgba(255, 255, 255, 1)'
+                            }
+                        }}
+                    >
+                        <FavoriteBorder fontSize="small" />
+                    </IconButton>
+                </Box>
+            </Box>
+
+            <CardContent sx={{ p: 2 }}>
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontWeight: 600,
+                        mb: 1,
+                        fontSize: '1rem',
+                        lineHeight: 1.3,
+                        height: '2.6em',
+                        overflow: 'hidden',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                    }}
+                >
+                    {product.name}
+                </Typography>
+                
+                <Typography
+                    variant="body2"
+                    sx={{
+                        color: theme.palette.text.secondary,
+                        mb: 2,
+                        height: '2.4em',
+                        overflow: 'hidden',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                    }}
+                >
+                    {product.description}
+                </Typography>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                    <Box>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 700,
+                                color: theme.palette.primary.main,
+                                fontSize: '1.125rem'
+                            }}
+                        >
+                            ₹{product.currentPrice.toLocaleString()}
+                        </Typography>
+                        {product.originalPrice && (
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    textDecoration: 'line-through',
+                                    color: theme.palette.text.secondary,
+                                    fontSize: '0.875rem'
+                                }}
+                            >
+                                ₹{product.originalPrice.toLocaleString()}
+                            </Typography>
+                        )}
+                    </Box>
+                    {product.discount > 0 && (
+                        <Typography
+                            variant="body2"
+                            sx={{
+                                color: theme.palette.success.main,
+                                fontWeight: 600,
+                                fontSize: '0.875rem'
+                            }}
+                        >
+                            Save {product.discount}%
+                        </Typography>
                     )}
-                </button>
-            </div>
-        </div>
+                </Box>
+
+                <Button
+                    variant="contained"
+                    fullWidth
+                    disabled={product.stock === 'out'}
+                    startIcon={<ShoppingCart />}
+                    sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        py: 1
+                    }}
+                >
+                    {product.stock === 'out' ? 'Out of Stock' : 'Add to Cart'}
+                </Button>
+            </CardContent>
+        </Card>
     );
 };
 
-// Enhanced Offer Banner Component
-const OfferBanner = ({ title, subtitle, ctaText, bgColor, textColor, icon }) => (
-    <div className="offer-banner" style={{ 
-        background: bgColor || colors.primaryGradient,
-        color: textColor || colors.backgroundWhite
-    }}>
-        <div className="offer-content">
-            <div className="offer-text">
-                {icon && <div className="offer-icon">{icon}</div>}
-                <h2>{title}</h2>
-                <p>{subtitle}</p>
-            </div>
-            <button className="offer-cta">
-                {ctaText}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M5 12h14"/>
-                    <path d="M12 5l7 7-7 7"/>
-                </svg>
-            </button>
-        </div>
-        <div className="offer-shapes">
-            <div className="offer-shape circle"></div>
-            <div className="offer-shape square"></div>
-            <div className="offer-shape triangle"></div>
-        </div>
-    </div>
-);
+// Scrollable Categories Section
+const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const scrollRef = useRef(null);
+    const [showLeftArrow, setShowLeftArrow] = useState(false);
+    const [showRightArrow, setShowRightArrow] = useState(true);
+
+    const handleScroll = (direction) => {
+        if (scrollRef.current) {
+            const scrollAmount = direction === 'left' ? -300 : 300;
+            scrollRef.current.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
+    const checkScrollPosition = () => {
+        if (scrollRef.current) {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+            setShowLeftArrow(scrollLeft > 0);
+            setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+        }
+    };
+
+    useEffect(() => {
+        const scrollElement = scrollRef.current;
+        if (scrollElement) {
+            scrollElement.addEventListener('scroll', checkScrollPosition);
+            checkScrollPosition();
+            
+            return () => {
+                scrollElement.removeEventListener('scroll', checkScrollPosition);
+            };
+        }
+    }, []);
+
+    return (
+        <Box sx={{ mb: 6 }}>
+            <Container maxWidth="lg">
+                <Box sx={{ mb: 3 }}>
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 700,
+                            mb: 1,
+                            color: theme.palette.text.primary
+                        }}
+                    >
+                        {title}
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: theme.palette.text.secondary,
+                            mb: 3
+                        }}
+                    >
+                        {subtitle}
+                    </Typography>
+                </Box>
+
+                <Box sx={{ position: 'relative' }}>
+                    {showArrows && !isMobile && showLeftArrow && (
+                        <IconButton
+                            onClick={() => handleScroll('left')}
+                            sx={{
+                                position: 'absolute',
+                                left: -20,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                                background: theme.palette.background.paper,
+                                boxShadow: theme.shadows[4],
+                                '&:hover': {
+                                    background: theme.palette.background.paper
+                                }
+                            }}
+                            aria-label="Scroll left"
+                        >
+                            <ArrowBackIos fontSize="small" />
+                        </IconButton>
+                    )}
+
+                    <Box
+                        ref={scrollRef}
+                        sx={{
+                            display: 'flex',
+                            gap: 2,
+                            overflowX: 'auto',
+                            scrollbarWidth: 'none',
+                            msOverflowStyle: 'none',
+                            '&::-webkit-scrollbar': {
+                                display: 'none'
+                            },
+                            pb: 2
+                        }}
+                    >
+                        {categories.map((category, index) => (
+                            <Box key={index} sx={{ flexShrink: 0 }}>
+                                <CategoryCard category={category} />
+                            </Box>
+                        ))}
+                    </Box>
+
+                    {showArrows && !isMobile && showRightArrow && (
+                        <IconButton
+                            onClick={() => handleScroll('right')}
+                            sx={{
+                                position: 'absolute',
+                                right: -20,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 2,
+                                background: theme.palette.background.paper,
+                                boxShadow: theme.shadows[4],
+                                '&:hover': {
+                                    background: theme.palette.background.paper
+                                }
+                            }}
+                            aria-label="Scroll right"
+                        >
+                            <ArrowForwardIos fontSize="small" />
+                        </IconButton>
+                    )}
+                </Box>
+            </Container>
+        </Box>
+    );
+};
+
+// Products Grid Section
+const ProductsGrid = ({ title, subtitle, products, loading }) => {
+    const theme = useTheme();
+
+    return (
+        <Box sx={{ mb: 6 }}>
+            <Container maxWidth="lg">
+                <Box sx={{ mb: 4 }}>
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 700,
+                            mb: 1,
+                            color: theme.palette.text.primary
+                        }}
+                    >
+                        {title}
+                    </Typography>
+                    <Typography
+                        variant="body1"
+                        sx={{
+                            color: theme.palette.text.secondary,
+                            mb: 3
+                        }}
+                    >
+                        {subtitle}
+                    </Typography>
+                </Box>
+
+                {loading ? (
+                    <Grid container spacing={3}>
+                        {Array.from({ length: 8 }).map((_, index) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                                <Card sx={{ height: '100%', borderRadius: 2 }}>
+                                    <Skeleton variant="rectangular" height={200} />
+                                    <CardContent sx={{ p: 2 }}>
+                                        <Skeleton variant="text" height={24} sx={{ mb: 1 }} />
+                                        <Skeleton variant="text" height={20} sx={{ mb: 2 }} />
+                                        <Skeleton variant="text" height={20} sx={{ mb: 2 }} />
+                                        <Skeleton variant="rectangular" height={40} />
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : products.length > 0 ? (
+                    <Grid container spacing={3}>
+                        {products.map((product, index) => (
+                            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id || index}>
+                                <ProductCard product={product} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Box
+                        sx={{
+                            textAlign: 'center',
+                            py: 8,
+                            color: theme.palette.text.secondary
+                        }}
+                    >
+                        <Category sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
+                        <Typography variant="h6" sx={{ mb: 1 }}>
+                            No products found
+                        </Typography>
+                        <Typography variant="body1">
+                            We couldn't find any products in this category. Try browsing other categories.
+                        </Typography>
+                    </Box>
+                )}
+            </Container>
+        </Box>
+    );
+};
 
 function Products() {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeCategory, setActiveCategory] = useState('all');
-    const [showLeftScroll, setShowLeftScroll] = useState(false);
-    const [showRightScroll, setShowRightScroll] = useState(false);
-    const [showPersonalLeftScroll, setShowPersonalLeftScroll] = useState(false);
-    const [showPersonalRightScroll, setShowPersonalRightScroll] = useState(false);
-    
-    const popularCategoriesRef = useRef(null);
-    const personalCareRef = useRef(null);
+    const theme = useTheme();
 
     // Fetch products from API
     useEffect(() => {
@@ -327,90 +598,12 @@ function Products() {
         fetchProducts();
     }, []);
 
-    // Check scroll position for popular categories
-    const checkScroll = () => {
-        if (popularCategoriesRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = popularCategoriesRef.current;
-            setShowLeftScroll(scrollLeft > 0);
-            setShowRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-    };
-
-    // Check scroll position for personal care categories
-    const checkPersonalScroll = () => {
-        if (personalCareRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = personalCareRef.current;
-            setShowPersonalLeftScroll(scrollLeft > 0);
-            setShowPersonalRightScroll(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-    };
-
-    // Handle scroll for popular categories
-    const handleScroll = (direction) => {
-        if (popularCategoriesRef.current) {
-            const scrollAmount = direction === 'left' ? -200 : 200;
-            popularCategoriesRef.current.scrollBy({
-                left: scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    // Handle scroll for personal care categories
-    const handlePersonalScroll = (direction) => {
-        if (personalCareRef.current) {
-            const scrollAmount = direction === 'left' ? -200 : 200;
-            personalCareRef.current.scrollBy({
-                left: scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    // Add scroll event listeners
-    useEffect(() => {
-        const popularRef = popularCategoriesRef.current;
-        const personalRef = personalCareRef.current;
-        
-        if (popularRef) {
-            popularRef.addEventListener('scroll', checkScroll);
-            checkScroll();
-        }
-        
-        if (personalRef) {
-            personalRef.addEventListener('scroll', checkPersonalScroll);
-            checkPersonalScroll();
-        }
-        
-        window.addEventListener('resize', () => {
-            checkScroll();
-            checkPersonalScroll();
-        });
-        
-        return () => {
-            if (popularRef) {
-                popularRef.removeEventListener('scroll', checkScroll);
-            }
-            if (personalRef) {
-                personalRef.removeEventListener('scroll', checkPersonalScroll);
-            }
-            window.removeEventListener('resize', () => {
-                checkScroll();
-                checkPersonalScroll();
-            });
-        };
-    }, []);
-
-    const handleCategoryClick = (categoryName) => {
-        setActiveCategory(categoryName);
-    };
-
     // Sample product data with actual images
     const sampleProducts = [
         {
             id: 1,
             name: "Digital Blood Pressure Monitor",
-            description: "Accurate readings with memory function",
+            description: "Accurate readings with memory function for continuous health monitoring",
             image: wearable,
             currentPrice: 1299,
             originalPrice: 1999,
@@ -421,7 +614,7 @@ function Products() {
         {
             id: 2,
             name: "Smart Fitness Tracker",
-            description: "24/7 health monitoring with GPS",
+            description: "24/7 health monitoring with GPS and heart rate tracking",
             image: nonwearable,
             currentPrice: 2499,
             originalPrice: 3499,
@@ -432,7 +625,7 @@ function Products() {
         {
             id: 3,
             name: "OTC Pain Relief Medicine",
-            description: "For chronic condition management",
+            description: "Effective relief for chronic condition management",
             image: otc,
             currentPrice: 450,
             originalPrice: null,
@@ -443,7 +636,7 @@ function Products() {
         {
             id: 4,
             name: "Portable ECG Monitor",
-            description: "Professional grade heart monitoring",
+            description: "Professional grade heart monitoring device",
             image: drops,
             currentPrice: 8999,
             originalPrice: 12999,
@@ -465,7 +658,7 @@ function Products() {
         {
             id: 6,
             name: "Pulse Oximeter",
-            description: "Monitor oxygen saturation levels",
+            description: "Monitor oxygen saturation levels accurately",
             image: instant,
             currentPrice: 899,
             originalPrice: 1299,
@@ -476,7 +669,7 @@ function Products() {
         {
             id: 7,
             name: "Physiotherapy Equipment",
-            description: "Professional rehabilitation tools",
+            description: "Professional rehabilitation tools for recovery",
             image: physio,
             currentPrice: 1599,
             originalPrice: 2499,
@@ -487,7 +680,7 @@ function Products() {
         {
             id: 8,
             name: "Dental Care Kit",
-            description: "Complete oral hygiene solution",
+            description: "Complete oral hygiene solution for daily care",
             image: dentist,
             currentPrice: 799,
             originalPrice: 1199,
@@ -514,183 +707,42 @@ function Products() {
         !cat.name.toLowerCase().includes('ecg')
     );
 
+    // Use API products if available, otherwise use sample data
+    const displayProducts = products.length > 0 ? products : sampleProducts;
+
     return (
-        <div className="products-page">
+        <Box sx={{ minHeight: '100vh', background: theme.palette.background.default }}>
             <TopOfferStrip />
 
             {/* Popular Categories */}
-            <section className="categories-section popular">
-                <GeometricShapes type="popular" />
-                <div className="section-header">
-                    <div className="section-title">
-                        <h2>Popular Categories</h2>
-                        <p>Explore our most sought-after health categories</p>
-                    </div>
-                    <Link to="/categories" className="view-all-link">
-                        View All Categories
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M5 12h14"/>
-                            <path d="M12 5l7 7-7 7"/>
-                        </svg>
-                    </Link>
-                </div>
-                <div className="categories-container">
-                    {showLeftScroll && (
-                        <button 
-                            className="scroll-button left"
-                            onClick={() => handleScroll('left')}
-                            aria-label="Scroll left"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M15 18l-6-6 6-6" />
-                            </svg>
-                        </button>
-                    )}
-                    <div className="categories-grid" ref={popularCategoriesRef}>
-                        {popularCategories.map((category, index) => (
-                            <CategoryBox 
-                                key={index} 
-                                category={category}
-                            />
-                        ))}
-                    </div>
-                    {showRightScroll && (
-                        <button 
-                            className="scroll-button right"
-                            onClick={() => handleScroll('right')}
-                            aria-label="Scroll right"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 18l6-6-6-6" />
-                            </svg>
-                        </button>
-                    )}
-                </div>
-            </section>
-
-            {/* Offer Banner */}
-            <OfferBanner 
-                title="Flash Sale: Health Monitors"
-                subtitle="Get up to 40% off on premium health monitoring devices"
-                ctaText="Shop Now"
-                bgColor="linear-gradient(135deg, #FF6B6B, #FF8787)"
+            <ScrollableCategories
+                title="Popular Categories"
+                subtitle="Explore our most sought-after health categories"
+                categories={popularCategories}
             />
 
-            {/* Electronic Categories */}
-            <section className="categories-section electronic">
-                <GeometricShapes type="electronic" />
-                <div className="section-header">
-                    <div className="section-title">
-                        <h2>Electronic Health Devices</h2>
-                        <p>Smart devices for modern healthcare</p>
-                    </div>
-                    <Link to="/electronics" className="view-all-link">
-                        View All Electronics
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M5 12h14"/>
-                            <path d="M12 5l7 7-7 7"/>
-                        </svg>
-                    </Link>
-                </div>
-                <div className="categories-grid">
-                    {electronicCategories.map((category, index) => (
-                        <CategoryBox 
-                            key={index} 
-                            category={category}
-                        />
-                    ))}
-                </div>
-            </section>
+            {/* Featured Products */}
+            <ProductsGrid
+                title="Featured Products"
+                subtitle="Handpicked products for your health and wellness"
+                products={displayProducts}
+                loading={loading}
+            />
 
-            {/* Products Section */}
-            <section className="products-section">
-                <GeometricShapes type="featured" />
-                <div className="section-header">
-                    <div className="section-title">
-                        <h2>{activeCategory === 'all' ? 'Featured Products' : activeCategory}</h2>
-                        <p>Handpicked products for your health and wellness</p>
-                    </div>
-                </div>
-                <div className="products-grid">
-                    {loading ? (
-                        Array.from({ length: 8 }).map((_, index) => (
-                            <ProductCardSkeleton key={index} />
-                        ))
-                    ) : products.length > 0 ? (
-                        products.map(product => (
-                            <ProductItem key={product.productId} product={product} />
-                        ))
-                    ) : (
-                        <div className="no-products-message">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                                <circle cx="11" cy="11" r="8"/>
-                                <path d="M21 21l-4.35-4.35"/>
-                            </svg>
-                            <h3>No products found</h3>
-                            <p>We couldn't find any products in this category. Try browsing other categories.</p>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* Second Offer Banner */}
-            <OfferBanner 
-                title="Personal Care Essentials"
-                subtitle="Complete your daily health routine with our curated collection"
-                ctaText="Explore Now"
-                bgColor="linear-gradient(135deg, #4ECDC4, #2ECC71)"
+            {/* Electronic Health Devices */}
+            <ScrollableCategories
+                title="Electronic Health Devices"
+                subtitle="Smart devices for modern healthcare"
+                categories={electronicCategories}
             />
 
             {/* Personal Care Categories */}
-            <section className="categories-section personal">
-                <GeometricShapes type="personal" />
-                <div className="section-header">
-                    <div className="section-title">
-                        <h2>Personal Care</h2>
-                        <p>Essential products for daily wellness</p>
-                    </div>
-                    <Link to="/personal-care" className="view-all-link">
-                        View All Care Products
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M5 12h14"/>
-                            <path d="M12 5l7 7-7 7"/>
-                        </svg>
-                    </Link>
-                </div>
-                <div className="categories-container">
-                    {showPersonalLeftScroll && (
-                        <button 
-                            className="scroll-button left"
-                            onClick={() => handlePersonalScroll('left')}
-                            aria-label="Scroll left"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M15 18l-6-6 6-6" />
-                            </svg>
-                        </button>
-                    )}
-                    <div className="categories-grid" ref={personalCareRef}>
-                        {personalCareCategories.map((category, index) => (
-                            <CategoryBox 
-                                key={index} 
-                                category={category}
-                            />
-                        ))}
-                    </div>
-                    {showPersonalRightScroll && (
-                        <button 
-                            className="scroll-button right"
-                            onClick={() => handlePersonalScroll('right')}
-                            aria-label="Scroll right"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 18l6-6-6-6" />
-                            </svg>
-                        </button>
-                    )}
-                </div>
-            </section>
-        </div>
+            <ScrollableCategories
+                title="Personal Care"
+                subtitle="Essential products for daily wellness"
+                categories={personalCareCategories}
+            />
+        </Box>
     );
 }
 

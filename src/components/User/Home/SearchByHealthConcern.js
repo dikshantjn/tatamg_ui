@@ -1,6 +1,29 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SearchByHealthConcern.css';
+import {
+    Box,
+    Typography,
+    Card,
+    CardContent,
+    IconButton,
+    Chip,
+    useTheme,
+    useMediaQuery,
+    Container,
+    Grid,
+    Stack,
+    Button
+} from '@mui/material';
+import {
+    ArrowForward,
+    ArrowBack,
+    Favorite,
+    LocalHospital,
+    Spa,
+    MonitorHeart,
+    PregnantWoman,
+    Face
+} from '@mui/icons-material';
 import pregnancyImg from '../../../assets/pregnant.png';
 import acneImg from '../../../assets/acne.png';
 import coldImg from '../../../assets/cold.png';
@@ -12,6 +35,8 @@ function SearchByHealthConcern() {
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(true);
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleScroll = () => {
         if (scrollRef.current) {
@@ -40,7 +65,6 @@ function SearchByHealthConcern() {
         }
     };
 
-    // Simplified navigation without auth check
     const handleNavigation = (path, e) => {
         if (e) {
             e.preventDefault();
@@ -54,135 +78,240 @@ function SearchByHealthConcern() {
             description: 'Expert guidance and care throughout your pregnancy journey',
             image: pregnancyImg,
             link: '/search?concern=pregnancy',
-            color: '#EC4899'
+            color: '#EC4899',
+            icon: <PregnantWoman sx={{ fontSize: 32, color: '#EC4899' }} />
         },
         {
             title: 'Skin Care',
             description: 'Professional treatment for acne and skin conditions',
             image: acneImg,
             link: '/search?concern=skin',
-            color: '#8B5CF6'
+            color: '#8B5CF6',
+            icon: <Face sx={{ fontSize: 32, color: '#8B5CF6' }} />
         },
         {
             title: 'Cold & Flu',
             description: 'Relief from cold, cough, and flu symptoms',
             image: coldImg,
             link: '/search?concern=cold',
-            color: '#3B82F6'
+            color: '#3B82F6',
+            icon: <LocalHospital sx={{ fontSize: 32, color: '#3B82F6' }} />
         },
         {
             title: 'Diabetes Care',
             description: 'Comprehensive diabetes management and support',
             image: diabetesImg,
             link: '/search?concern=diabetes',
-            color: '#10B981'
+            color: '#10B981',
+            icon: <MonitorHeart sx={{ fontSize: 32, color: '#10B981' }} />
         },
         {
             title: 'Liver Health',
             description: 'Specialized care for liver conditions and wellness',
             image: liverImg,
             link: '/search?concern=liver',
-            color: '#F59E0B'
+            color: '#F59E0B',
+            icon: <Spa sx={{ fontSize: 32, color: '#F59E0B' }} />
         },
     ];
 
     return (
-        <section className="search-health-concern">
-            <div className="section-header">
-                <div className="header-content">
-                    <h4>Search by Health Concern</h4>
-                    <a href="/search" className="view-all-button" onClick={(e) => handleNavigation('/search', e)}>
-                        View All Concerns
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <div className="concerns-container">
-                {showLeftButton && (
-                    <button 
-                        className="scroll-button scroll-left" 
-                        onClick={() => scroll('left')}
-                        aria-label="Scroll left"
+        <Box
+            sx={{
+                py: { xs: 3, md: 4 },
+                backgroundColor: 'background.default',
+                position: 'relative'
+            }}
+        >
+            <Container maxWidth="xl">
+                {/* Section Header */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        mb: 3,
+                        px: { xs: 2, md: 0 }
+                    }}
+                >
+                    <Typography
+                        variant="h4"
+                        sx={{
+                            fontWeight: 600,
+                            color: 'primary.main',
+                            fontSize: { xs: '1.25rem', md: '1.5rem' }
+                        }}
                     >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
-                        >
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                    </button>
-                )}
+                        Search by Health Concern
+                    </Typography>
+                    <Button
+                        variant="outlined"
+                        endIcon={<ArrowForward />}
+                        onClick={(e) => handleNavigation('/search', e)}
+                        sx={{
+                            borderColor: 'primary.main',
+                            color: 'primary.main',
+                            '&:hover': {
+                                backgroundColor: 'primary.50',
+                                borderColor: 'primary.main'
+                            }
+                        }}
+                    >
+                        View All
+                    </Button>
+                </Box>
 
-                <div className="concerns-grid" ref={scrollRef}>
+                {/* Concerns Container */}
+                <Box sx={{ position: 'relative', px: { xs: 2, md: 0 } }}>
+                    {/* Left Scroll Button */}
+                    {showLeftButton && (
+                        <IconButton
+                            onClick={() => scroll('left')}
+                            sx={{
+                                position: 'absolute',
+                                left: -8,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 10,
+                                backgroundColor: 'white',
+                                boxShadow: 2,
+                                '&:hover': {
+                                    backgroundColor: 'grey.50'
+                                }
+                            }}
+                        >
+                            <ArrowBack />
+                        </IconButton>
+                    )}
+
+                    {/* Concerns Grid */}
+                    <Box
+                        ref={scrollRef}
+                        sx={{
+                            display: 'flex',
+                            gap: 3,
+                            overflowX: 'auto',
+                            scrollbarWidth: 'none',
+                            '&::-webkit-scrollbar': { display: 'none' },
+                            pb: 2
+                        }}
+                    >
                     {concerns.map((concern, index) => (
-                        <div 
-                            className="concern-card" 
+                            <Card
                             key={concern.title}
-                            style={{ '--card-color': concern.color }}
-                        >
-                            <div className="card-content">
-                                <div className="concern-icon-wrapper">
-                                    <img 
-                                        src={concern.image} 
-                                        alt={concern.title} 
-                                        className="concern-icon"
-                                    />
-                                </div>
-                                <div className="concern-details">
-                                    <h3>{concern.title}</h3>
-                                    <p>{concern.description}</p>
-                                </div>
-                                <a href={concern.link} className="concern-link" onClick={(e) => handleNavigation(concern.link, e)}>
-                                    Explore Solutions
-                                    <svg 
-                                        xmlns="http://www.w3.org/2000/svg" 
-                                        viewBox="0 0 24 24" 
-                                        fill="none" 
-                                        stroke="currentColor" 
-                                        strokeWidth="2" 
-                                        strokeLinecap="round" 
-                                        strokeLinejoin="round"
+                                sx={{
+                                    minWidth: { xs: 280, md: 320 },
+                                    maxWidth: { xs: 280, md: 320 },
+                                    borderRadius: 3,
+                                    border: `1px solid ${concern.color}20`,
+                                    transition: 'all 0.3s ease',
+                                    cursor: 'pointer',
+                                    position: 'relative',
+                                    overflow: 'visible',
+                                    '&:hover': {
+                                        transform: 'translateY(-8px)',
+                                        boxShadow: `0 8px 32px ${concern.color}20`,
+                                        borderColor: concern.color
+                                    }
+                                }}
+                                onClick={(e) => handleNavigation(concern.link, e)}
+                            >
+                                <CardContent sx={{ p: 3, position: 'relative', zIndex: 2 }}>
+                                    {/* Icon */}
+                                    <Box
+                                        sx={{
+                                            width: 64,
+                                            height: 64,
+                                            borderRadius: 2,
+                                            backgroundColor: `${concern.color}15`,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            mb: 2
+                                        }}
                                     >
-                                        <path d="M5 12h14m-7-7 7 7-7 7"/>
-                                    </svg>
-                                </a>
-                            </div>
-                            <div className="card-background">
-                                <div className="geometric-shape"></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                                        {concern.icon}
+                                    </Box>
 
+                                    {/* Content */}
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            fontWeight: 700,
+                                            mb: 1,
+                                            color: 'text.primary'
+                                        }}
+                                    >
+                                        {concern.title}
+                                    </Typography>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: 'text.secondary',
+                                            mb: 2,
+                                            lineHeight: 1.5
+                                        }}
+                                    >
+                                        {concern.description}
+                                    </Typography>
+
+                                    {/* CTA */}
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        spacing={1}
+                                        sx={{
+                                            color: concern.color,
+                                            fontWeight: 600,
+                                            fontSize: '0.875rem'
+                                        }}
+                                    >
+                                        <span>Explore Solutions</span>
+                                        <ArrowForward sx={{ fontSize: 16 }} />
+                                    </Stack>
+                                </CardContent>
+
+                                {/* Background Decoration */}
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        opacity: 0.03,
+                                        background: `radial-gradient(circle at 80% 20%, ${concern.color} 0%, transparent 50%)`,
+                                        borderRadius: 3,
+                                        pointerEvents: 'none'
+                                    }}
+                                />
+                            </Card>
+                        ))}
+                    </Box>
+
+                    {/* Right Scroll Button */}
                 {showRightButton && (
-                    <button 
-                        className="scroll-button scroll-right" 
+                        <IconButton
                         onClick={() => scroll('right')}
-                        aria-label="Scroll right"
-                    >
-                        <svg 
-                            xmlns="http://www.w3.org/2000/svg" 
-                            viewBox="0 0 24 24" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round"
+                            sx={{
+                                position: 'absolute',
+                                right: -8,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                zIndex: 10,
+                                backgroundColor: 'white',
+                                boxShadow: 2,
+                                '&:hover': {
+                                    backgroundColor: 'grey.50'
+                                }
+                            }}
                         >
-                            <path d="M9 18l6-6-6-6"/>
-                        </svg>
-                    </button>
-                )}
-            </div>
-        </section>
+                            <ArrowForward />
+                        </IconButton>
+                    )}
+                </Box>
+            </Container>
+        </Box>
     );
 }
 

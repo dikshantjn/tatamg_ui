@@ -8,6 +8,7 @@
     right: 0;
     z-index: 1000;
     transition: transform 0.3s ease;
+    overflow: visible;
 }
 
 /* Top Bar */
@@ -336,6 +337,7 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    overflow: visible;
 }
 
 .action-link,
@@ -556,6 +558,7 @@
 
 .profile-container {
     position: relative;
+    z-index: 10000;
 }
 
 .action-icon {
@@ -617,16 +620,28 @@
 
 /* Profile dropdown styles */
 .profile-dropdown {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
+    position: fixed;
+    top: 60px;
+    right: 20px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     min-width: 220px;
-    z-index: 1100;
+    z-index: 999999;
     overflow: hidden;
     border: 1px solid #E2E8F0;
+    animation: dropdownSlideIn 0.2s ease-out;
+}
+
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {

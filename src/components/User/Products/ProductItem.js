@@ -1,51 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import './ProductItem.css';
-import { colors } from '../../../styles/colors';
+import {
+    Card,
+    CardContent,
+    CardMedia,
+    Typography,
+    Button,
+    Chip,
+    Box,
+    Stack,
+    IconButton,
+    Skeleton,
+    Avatar,
+    Rating,
+    Snackbar,
+    Alert,
+    useTheme,
+    useMediaQuery,
+    Fade,
+    Zoom
+} from '@mui/material';
+import {
+    ShoppingCart,
+    Visibility,
+    Favorite,
+    Warning,
+    Cancel,
+    LocalOffer,
+    Star,
+    Add,
+    Remove,
+    CheckCircle
+} from '@mui/icons-material';
+import { styled } from '@mui/material/styles';
 import { VendorProductService } from '../../../services/User/Products/vendor-product.service';
 import { getUserId, isAuthenticated } from '../../../services/User/Auth/auth.utils';
 import { fetchCartItems } from '../../../store/slices/cartSlice';
 
+// Styled Components
+const StyledCard = styled(Card)(({ theme }) => ({
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    borderRadius: 16,
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: '1px solid rgba(0, 0, 0, 0.04)',
+    overflow: 'hidden',
+    '&:hover': {
+        transform: 'translateY(-8px)',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
+        borderColor: theme.palette.primary.main,
+    },
+    '& .MuiCardMedia-root': {
+        transition: 'transform 0.3s ease',
+    },
+    '&:hover .MuiCardMedia-root': {
+        transform: 'scale(1.05)',
+    }
+}));
+
+const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
+    '& .MuiSnackbarContent-root': {
+        borderRadius: 12,
+        background: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
+        color: 'white',
+        fontWeight: 600,
+    }
+}));
+
 // Image Fallback Icon Component
 const ImageIcon = () => (
-    <svg className="image-fallback" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="M21 15l-5-5L5 21"/>
-    </svg>
-);
-
-// Toast notification component
-const Toast = ({ message, onClose, showGoToCart, onGoToCart }) => {
-    console.log('Toast rendered with:', { message, showGoToCart });
-    return (
-        <div className="toast-notification">
-            <div className="toast-content">
-                <span>{message}</span>
-                {showGoToCart && (
-                    <button 
-                        onClick={(e) => {
-                            console.log('Go to Cart button clicked in Toast');
-                            onGoToCart(e);
-                        }} 
-                        className="go-to-cart-btn"
-                    >
-                        Go to Cart
-                    </button>
-                )}
-            </div>
-            <button onClick={onClose} className="close-toast">×</button>
-        </div>
+    <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        height: '100%',
+        color: 'text.disabled'
+    }}>
+        <Visibility sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+        <Typography variant="body2" color="text.secondary">
+            Image not available
+        </Typography>
+    </Box>
     );
-};
 
 const ProductItem = ({ product }) => {
     const dispatch = useDispatch();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [imageError, setImageError] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState(null);
+    const [snackbar, setSnackbar] = useState(null);
     const navigate = useNavigate();
 
     console.log('ProductItem rendered:', { 
@@ -117,14 +166,16 @@ const ProductItem = ({ product }) => {
             // Dispatch Redux action to refresh cart items in header
             dispatch(fetchCartItems());
             
-            setToast({
+            setSnackbar({
                 message: result.message || 'Product added to cart successfully!',
+                severity: 'success',
                 showGoToCart: true
             });
         } catch (error) {
             console.error('Add to cart error:', error);
-            setToast({
+            setSnackbar({
                 message: error.message || 'Failed to add item to cart. Please try again.',
+                severity: 'error',
                 showGoToCart: false
             });
         } finally {
@@ -142,106 +193,281 @@ const ProductItem = ({ product }) => {
     const mainImage = images && images.length > 0 ? images[0] : null;
 
     return (
-        <div className="product-item" style={{ '--primary-color': colors.primary }}>
-            {toast && (
-                <Toast 
-                    message={toast.message}
-                    showGoToCart={toast.showGoToCart}
-                    onClose={() => {
-                        console.log('Closing toast');
-                        setToast(null);
-                    }}
-                    onGoToCart={handleGoToCart}
-                />
-            )}
-            
-            <div className="product-image-container">
-                {!imageError && mainImage ? (
-                    <img 
-                        src={mainImage} 
+        <>
+            <StyledCard>
+                <Box sx={{ position: 'relative' }}>
+                    <CardMedia
+                        component="img"
+                        height="200"
+                        image={mainImage}
                         alt={name}
-                        className="product-image"
                         onError={() => {
                             console.log('Image load error');
                             setImageError(true);
                         }}
+                        sx={{ 
+                            objectFit: 'cover',
+                            ...(imageError && { display: 'none' })
+                        }}
                     />
-                ) : (
+                    
+                    {imageError && (
+                        <Box sx={{ 
+                            height: 200, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            background: 'rgba(0, 0, 0, 0.02)'
+                        }}>
                     <ImageIcon />
+                        </Box>
                 )}
+
+                    {/* Stock Badges */}
+                    <Stack direction="row" spacing={1} sx={{ 
+                        position: 'absolute', 
+                        top: 12, 
+                        left: 12,
+                        zIndex: 2
+                    }}>
                 {stock <= 5 && stock > 0 && (
-                    <span className="badge stock-low">
-                        Only {stock} left
-                    </span>
+                            <Chip
+                                icon={<Warning />}
+                                label={`Only ${stock} left`}
+                                size="small"
+                                sx={{ 
+                                    background: 'rgba(255, 193, 7, 0.9)',
+                                    color: 'white',
+                                    fontWeight: 600
+                                }}
+                            />
                 )}
                 {stock === 0 && (
-                    <span className="badge out-of-stock">
-                        Out of Stock
-                    </span>
+                            <Chip
+                                icon={<Cancel />}
+                                label="Out of Stock"
+                                size="small"
+                                sx={{ 
+                                    background: 'rgba(158, 158, 158, 0.9)',
+                                    color: 'white',
+                                    fontWeight: 600
+                                }}
+                            />
                 )}
-            </div>
+                    </Stack>
             
-            <div className="product-content">
-                <div className="product-info">
-                    <h3 className="product-name" title={name}>{name}</h3>
+                    {/* Quick Actions Overlay */}
+                    <Box sx={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1,
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        '&:hover': {
+                            opacity: 1
+                        }
+                    }}>
+                        <IconButton size="small" sx={{ 
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            '&:hover': { background: 'rgba(255, 255, 255, 1)' }
+                        }}>
+                            <Visibility fontSize="small" />
+                        </IconButton>
+                        <IconButton size="small" sx={{ 
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            '&:hover': { background: 'rgba(255, 255, 255, 1)' }
+                        }}>
+                            <Favorite fontSize="small" />
+                        </IconButton>
+                    </Box>
+                </Box>
+                
+                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" component="h3" sx={{ 
+                            fontWeight: 600,
+                            mb: 1,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            lineHeight: 1.3
+                        }}>
+                            {name}
+                        </Typography>
+                        
                     {rating > 0 && (
-                        <div className="product-rating">
-                            <div className="rating-stars">
-                                <span className="stars" style={{ '--rating': rating }}>★★★★★</span>
-                                <span className="rating-value">{rating.toFixed(1)}</span>
-                            </div>
-                            <span className="review-count">({reviewCount} reviews)</span>
-                        </div>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                                <Rating 
+                                    value={rating} 
+                                    precision={0.1} 
+                                    size="small" 
+                                    readOnly
+                                    sx={{ '& .MuiRating-iconFilled': { color: '#FFD700' } }}
+                                />
+                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                                    {rating.toFixed(1)}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    ({reviewCount} reviews)
+                                </Typography>
+                            </Box>
                     )}
-                    <p className="product-description" title={description}>
+                        
+                        <Typography variant="body2" color="text.secondary" sx={{ 
+                            mb: 2,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            lineHeight: 1.4
+                        }}>
                         {description}
-                    </p>
+                        </Typography>
                     
                     {highlights && highlights.length > 0 && (
-                        <ul className="product-highlights">
+                            <Box sx={{ mb: 2 }}>
                             {highlights.slice(0, 2).map((highlight, index) => (
-                                <li key={index} title={highlight}>
+                                    <Box key={index} sx={{ 
+                                        display: 'flex', 
+                                        alignItems: 'center', 
+                                        gap: 1, 
+                                        mb: 0.5 
+                                    }}>
+                                        <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                                        <Typography variant="body2" color="text.secondary" sx={{
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
+                                        }}>
                                     {highlight}
-                                </li>
+                                        </Typography>
+                                    </Box>
                             ))}
-                        </ul>
+                            </Box>
                     )}
-                </div>
+                    </Box>
 
-                <div className="product-action-section">
-                    <div className="product-price-section">
+                    <Box sx={{ mt: 'auto' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                            <Box>
                         {priceTiers && priceTiers.length > 0 ? (
-                            <div className="price-tiers">
+                                    <Box>
                                 {priceTiers.slice(0, 1).map((tier, index) => (
-                                    <div key={index} className="price-tier">
-                                        <span className="tier-price">₹{tier.price.toLocaleString()}</span>
-                                        <span className="tier-name">{tier.name}</span>
-                                    </div>
+                                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+                                                    ₹{tier.price.toLocaleString()}
+                                                </Typography>
+                                                <Chip 
+                                                    label={tier.name}
+                                                    size="small"
+                                                    variant="outlined"
+                                                    color="primary"
+                                                />
+                                            </Box>
                                 ))}
-                            </div>
+                                    </Box>
                         ) : (
-                            <div className="product-price">
-                                <span className="current-price">₹{price.toLocaleString()}</span>
-                            </div>
-                        )}
-                    </div>
+                                    <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+                                        ₹{price.toLocaleString()}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Box>
 
-                    <button 
-                        className={`cart-button ${isInCart ? 'in-cart' : ''}`}
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            disabled={stock === 0 || loading}
                         onClick={isInCart ? handleGoToCart : handleAddToCart}
-                        disabled={stock === 0 || loading}
-                    >
-                        {loading ? (
-                            <span className="loading-spinner"></span>
+                            startIcon={loading ? (
+                                <Box sx={{ 
+                                    width: 16, 
+                                    height: 16, 
+                                    border: '2px solid transparent',
+                                    borderTop: '2px solid currentColor',
+                                    borderRadius: '50%',
+                                    animation: 'spin 1s linear infinite'
+                                }} />
                         ) : isInCart ? (
-                            'Go to Cart'
-                        ) : (
-                            stock === 0 ? 'Out of Stock' : 'Add to Cart'
-                        )}
-                    </button>
-                </div>
-            </div>
-        </div>
+                                <CheckCircle />
+                            ) : (
+                                stock === 0 ? <Cancel /> : <ShoppingCart />
+                            )}
+                            sx={{
+                                borderRadius: 2,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                py: 1.5,
+                                ...(isInCart && {
+                                    background: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
+                                    '&:hover': {
+                                        background: 'linear-gradient(135deg, #43A047, #5CB85C)'
+                                    }
+                                })
+                            }}
+                        >
+                            {loading ? 'Adding...' : isInCart ? 'Go to Cart' : stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                        </Button>
+                    </Box>
+                </CardContent>
+            </StyledCard>
+
+            {/* Snackbar for notifications */}
+            <StyledSnackbar
+                open={!!snackbar}
+                autoHideDuration={4000}
+                onClose={() => setSnackbar(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert 
+                    onClose={() => setSnackbar(null)} 
+                    severity={snackbar?.severity || 'success'}
+                    sx={{ 
+                        width: '100%',
+                        borderRadius: 2,
+                        '& .MuiAlert-message': {
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            width: '100%'
+                        }
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {snackbar?.message}
+                    </Box>
+                    {snackbar?.showGoToCart && (
+                        <Button
+                            size="small"
+                            onClick={handleGoToCart}
+                            sx={{ 
+                                color: 'inherit',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }}
+                        >
+                            Go to Cart
+                        </Button>
+                    )}
+                </Alert>
+            </StyledSnackbar>
+
+            <style jsx>{`
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `}</style>
+        </>
     );
 };
 

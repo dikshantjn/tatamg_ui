@@ -450,7 +450,6 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
         { path: '/child-care', text: 'CHILD CARE' },
         { path: '/ayurveda', text: 'AYURVEDA' },
         { path: '/medical-loans', text: 'MEDICAL LOANS' },
-        { path: '/insurance', text: 'MEDICAL INSURANCE' },
     ];
 
     // Sub Navigation Links
@@ -463,8 +462,10 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
         { path: '/nutrition', text: 'Nutrition' },
         { path: '/pet-care', text: 'Pet Care' },
         { path: '/organ-donation', text: 'Organ/Hair Donation' },
-        { path: '/vaccines', text: 'VACCINES' },
-        { path: '/maternal-care', text: 'MATERNAL CARE' },
+        { path: '/vaccines', text: 'Vaccines' },
+        { path: '/maternal-care', text: 'Maternal Care' },
+        { path: '/insurance', text: 'Medical Insurance' },
+
     ];
 
     // Render the profile section based on auth status
