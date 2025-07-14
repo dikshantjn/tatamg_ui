@@ -20,7 +20,8 @@ import {
   Divider,
   Chip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Tooltip
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -37,15 +38,19 @@ import {
   Schedule,
   Payment,
   Store,
-  Visibility
+  Visibility,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
-import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
 import { useNavigate } from 'react-router-dom';
 
-const LabTestVendorDashboard = () => {
+const LabTestVendorDashboardContent = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
+  const { isDarkMode, toggleDarkMode } = useVendorTheme();
   
   // State management
   const [vendorData, setVendorData] = useState(null);
@@ -359,6 +364,14 @@ const LabTestVendorDashboard = () => {
         </MenuItem>
       </Menu>
     </Box>
+  );
+};
+
+const LabTestVendorDashboard = () => {
+  return (
+    <VendorThemeProvider>
+      <LabTestVendorDashboardContent />
+    </VendorThemeProvider>
   );
 };
 

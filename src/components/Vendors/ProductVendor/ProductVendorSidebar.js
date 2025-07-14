@@ -20,6 +20,7 @@ import {
   Person,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useVendorTheme } from '../../../contexts/VendorThemeContext';
 
 // Sidebar Component
 const ProductVendorSidebar = ({ 
@@ -30,6 +31,7 @@ const ProductVendorSidebar = ({
   setSidebarActive 
 }) => {
   const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,8 +55,8 @@ const ProductVendorSidebar = ({
       display: 'flex', 
       flexDirection: 'column',
       paddingTop: '16px',
-      background: '#fff',
-      borderRight: '1px solid #F0F1F3',
+      background: theme.palette.background.paper,
+      borderRight: `1px solid ${theme.palette.divider}`,
     }}>
       {/* Navigation Menu */}
       <List sx={{ flexGrow: 1, mt: 1 }}>
@@ -68,18 +70,27 @@ const ProductVendorSidebar = ({
               sx={{
                 mb: 1,
                 borderRadius: 2,
-                backgroundColor: isActive ? '#F3F0FF' : 'transparent',
-                color: isActive ? '#6C47FF' : '#222',
+                backgroundColor: isActive ? 
+                  (isDarkMode ? 'rgba(139, 104, 255, 0.2)' : '#F3F0FF') : 
+                  'transparent',
+                color: isActive ? 
+                  theme.palette.primary.main : 
+                  theme.palette.text.primary,
                 fontWeight: isActive ? 700 : 500,
                 '&:hover': {
-                  backgroundColor: '#F3F0FF',
-                  color: '#6C47FF'
+                  backgroundColor: isDarkMode ? 'rgba(139, 104, 255, 0.2)' : '#F3F0FF',
+                  color: theme.palette.primary.main
                 },
                 px: 2,
                 py: 1.2
               }}
             >
-              <ListItemIcon sx={{ color: isActive ? '#6C47FF' : '#B0B3B9', minWidth: 36 }}>
+              <ListItemIcon sx={{ 
+                color: isActive ? 
+                  theme.palette.primary.main : 
+                  theme.palette.text.secondary, 
+                minWidth: 36 
+              }}>
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} />
@@ -106,7 +117,7 @@ const ProductVendorSidebar = ({
           marginTop: '72px',
           height: 'calc(100vh - 72px)',
           top: 0,
-          background: '#fff',
+          background: theme.palette.background.paper,
           position: 'fixed',
           left: 0,
           zIndex: 1200,

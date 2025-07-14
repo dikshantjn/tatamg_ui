@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.41:5000/api',
-    SOCKET_URL: 'http://192.168.1.41:5000',
+    BASE_URL: 'http://192.168.1.43:5000/api',
+    SOCKET_URL: 'http://192.168.1.43:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -102,6 +102,18 @@ export const API_CONFIG = {
             GET_HEALTH_RECORDS: '/health-record/get-health-record/:userId',
             ADD_HEALTH_RECORD: '/health-record/add-health-record',
             DELETE_HEALTH_RECORD: '/health-record/delete-health-record/:healthRecordId'
+        },
+        PRODUCT_PARTNER: {
+            GET_VENDOR_PROFILE: '/productPartner/vendor/:vendorId',
+            UPDATE_VENDOR_PROFILE: '/productPartner/vendor/:vendorId',
+            GET_VENDOR_PRODUCTS: '/vendor-product/products/vendor/:vendorId',
+            ADD_PRODUCT: '/vendor-product/add',
+            DELETE_PRODUCT: '/vendor-product/products/:productId',
+            UPDATE_PRODUCT: '/vendor-product/products/:productId',
+            GET_PENDING_ORDERS: '/product-order/pending-orders/:vendorId',
+            GET_CONFIRMED_ORDERS: '/product-order/confirmed-orders/:vendorId',
+            GET_DELIVERED_ORDERS: '/product-order/delivered-orders/:vendorId',
+            UPDATE_ORDER_STATUS: '/product-order/order/:orderId/status',
         },
         // Add other endpoint categories as needed
     }

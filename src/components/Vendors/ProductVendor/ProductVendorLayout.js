@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Box, useTheme, useMediaQuery, LinearProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { useVendorTheme } from '../../../contexts/VendorThemeContext';
 import ProductPartnerVendorHeader from './ProductPartnerVendorHeader';
 import ProductVendorSidebar from './ProductVendorSidebar';
 
 // Layout wrapper for all Product Vendor components
-const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount = 0 }) => {
+const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount = 0, onStatusUpdate }) => {
   const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   
@@ -63,7 +65,7 @@ const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount 
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh', backgroundColor: theme.palette.background.default }}>
       {/* Sidebar */}
       <ProductVendorSidebar 
         open={drawerOpen}
@@ -79,7 +81,7 @@ const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount 
         display: 'flex', 
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: '#f8fafc',
+        backgroundColor: theme.palette.background.default,
         width: '100%', // Ensure content fills available space
         // Removed marginLeft
       }}>
@@ -90,6 +92,7 @@ const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount 
           vendorData={vendorData}
           onLogout={handleLogout}
           notificationCount={notificationCount}
+          onStatusUpdate={onStatusUpdate}
         />
 
         {/* Content Area */}
@@ -102,6 +105,7 @@ const ProductVendorLayout = ({ children, title = "Dashboard", notificationCount 
           justifyContent: 'center',
           height: 'calc(100vh - 64px)',
           overflowY: 'auto',
+          backgroundColor: theme.palette.background.default,
         }}>
           {children}
         </Box>

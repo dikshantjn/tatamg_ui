@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // Vendor Dashboard Component - Updated
 import {
   Box,
@@ -51,23 +51,27 @@ import {
   ShoppingCart
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
 import ProductVendorLayout from './ProductVendorLayout';
+import { getProductPartnerProfile, getVendorStatus } from '../../../services/Vendors/AllVendors.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
 
 
                                                 
 // Enhanced Welcome Card Component
-const WelcomeCard = () => {
+const WelcomeCard = ({ profileData, loading, vendorStatus }) => {
   const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   return (
     <Card sx={{ 
-      background: '#fff',
-      color: '#222',
+      background: theme.palette.background.paper,
+      color: theme.palette.text.primary,
       mb: 3,
       borderRadius: 3,
       boxShadow: 'none',
-      border: '1px solid #F0F1F3',
+      border: `1px solid ${theme.palette.divider}`,
       position: 'relative',
       overflow: 'hidden',
       px: { xs: 2, sm: 3 },
@@ -83,36 +87,45 @@ const WelcomeCard = () => {
         <Avatar sx={{ 
           width: { xs: 48, sm: 56 }, 
           height: { xs: 48, sm: 56 },
-          backgroundColor: '#F0F1F3',
-          color: '#6C47FF',
+          backgroundColor: isDarkMode ? 'rgba(139, 104, 255, 0.2)' : '#F0F1F3',
+          color: theme.palette.primary.main,
           fontWeight: 700,
           fontSize: 28
         }}>
-          <Store sx={{ fontSize: { xs: 24, sm: 30 } }} />
+          {loading ? (
+            <Store sx={{ fontSize: { xs: 24, sm: 30 } }} />
+          ) : (
+            profileData?.brandName?.[0] || <Store sx={{ fontSize: { xs: 24, sm: 30 } }} />
+          )}
         </Avatar>
         {/* Content */}
         <Box sx={{ flex: 1 }}>
-          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 700, color: '#222' }}>
-            Welcome back, Guidelign!
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
+            Welcome back, {loading ? 'Loading...' : (profileData?.brandName || 'Vendor')}!
           </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.8, mb: 2, color: '#666' }}>
-            xyz pvt ltd • <Box component="span" sx={{ fontWeight: 600, color: '#10B981', display: 'inline' }}>Active</Box> Status
+          <Typography variant="body1" sx={{ opacity: 0.8, mb: 2, color: theme.palette.text.secondary }}>
+            {loading ? 'Loading...' : (profileData?.companyLegalName || 'Company')} • <Box component="span" sx={{ fontWeight: 600, color: vendorStatus ? '#10B981' : '#EF4444', display: 'inline' }}>{vendorStatus ? 'Active' : 'Inactive'}</Box> Status
           </Typography>
+          {profileData?.email && (
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
+              {profileData.email}
+            </Typography>
+          )}
           {/* Quick Notice */}
           <Box sx={{ 
             display: 'flex', 
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'flex-start', sm: 'center' },
             gap: 2,
-            backgroundColor: '#F7F8FA',
+            backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#F7F8FA',
             borderRadius: 2,
             p: 2,
-            border: '1px solid #F0F1F3',
+            border: `1px solid ${theme.palette.divider}`,
             mt: 1
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <NotificationsNone sx={{ fontSize: 20, color: '#6C47FF' }} />
-              <Typography variant="body2" sx={{ color: '#222' }}>
+              <NotificationsNone sx={{ fontSize: 20, color: theme.palette.primary.main }} />
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
                 You have <strong>8 pending orders</strong> to process
               </Typography>
             </Box>
@@ -144,6 +157,8 @@ const WelcomeCard = () => {
 
 // Enhanced Statistic Cards Component
 const StatisticCards = () => {
+  const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const stats = [
     { 
       title: 'Total Products', 
@@ -184,14 +199,15 @@ const StatisticCards = () => {
   ];
 
   return (
-    <Grid container spacing={3} sx={{ mb: 4 }}>
+    <Grid container spacing={3} sx={{ mb: 4, justifyContent: 'center' }}>
       {stats.map((stat, index) => (
-        <Grid item xs={12} sm={6} md={3} key={index}>
+        <Grid item xs={12} sm={6} md={3} lg={2.5} key={index}>
           <Card sx={{ 
             height: '100%', 
             borderRadius: 3,
             boxShadow: 'none',
-            border: '1px solid #F0F1F3',
+            border: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.paper,
             transition: 'all 0.3s ease',
             '&:hover': { 
               transform: 'translateY(-2px)',
@@ -222,10 +238,10 @@ const StatisticCards = () => {
                   </Typography>
                 </Box>
               </Box>
-              <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, color: '#222' }}>
+              <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, color: theme.palette.text.primary }}>
                 {stat.value}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#666' }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
                 {stat.title}
               </Typography>
             </CardContent>
@@ -238,6 +254,8 @@ const StatisticCards = () => {
 
 // Enhanced Quick Actions Component
 const QuickActions = () => {
+  const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const actions = [
     { title: 'Add Product', icon: <Add />, color: '#6C47FF', bgColor: '#F3F0FF' },
     { title: 'Manage Inventory', icon: <Inventory />, color: '#10B981', bgColor: '#E6FAF5' },
@@ -246,14 +264,14 @@ const QuickActions = () => {
   ];
 
   return (
-    <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3' }}>
+    <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 'none', border: `1px solid ${theme.palette.divider}`, backgroundColor: theme.palette.background.paper }}>
       <CardContent sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3, color: '#222' }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3, color: theme.palette.text.primary }}>
           Quick Actions
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ justifyContent: 'center' }}>
           {actions.map((action, index) => (
-            <Grid item xs={6} sm={3} key={index}>
+            <Grid item xs={6} sm={3} md={2.5} key={index}>
               <Button
                 fullWidth
                 variant="outlined"
@@ -289,6 +307,8 @@ const QuickActions = () => {
 
 // Enhanced Performance Chart Component
 const PerformanceChart = () => {
+  const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const [period, setPeriod] = useState('weekly');
   
   const weeklyData = [
@@ -303,10 +323,10 @@ const PerformanceChart = () => {
 
   return (
     <Grid item xs={12}>
-      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3', mb: 4 }}>
+      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: `1px solid ${theme.palette.divider}`, backgroundColor: theme.palette.background.paper, mb: 4 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#222' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
               Sales Performance
             </Typography>
             <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -370,6 +390,8 @@ const PerformanceChart = () => {
 
 // Enhanced Recent Orders Component
 const RecentOrders = () => {
+  const theme = useTheme();
+  const { isDarkMode } = useVendorTheme();
   const orders = [
     { id: '#12344', customer: 'John Doe', status: 'Shipped', time: '2 hours ago', amount: '$89.50', statusColor: 'success' },
     { id: '#12345', customer: 'Sarah Wilson', status: 'Pending', time: '4 hours ago', amount: '$156.75', statusColor: 'warning' },
@@ -390,10 +412,10 @@ const RecentOrders = () => {
 
   return (
     <Grid item xs={12}>
-      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3' }}>
+      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: `1px solid ${theme.palette.divider}`, backgroundColor: theme.palette.background.paper }}>
         <CardContent sx={{ p: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#222' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
               Recent Orders
             </Typography>
             <Button 
@@ -428,8 +450,8 @@ const RecentOrders = () => {
               <Box key={index} sx={{ 
                 p: 2, 
                 borderRadius: 2, 
-                border: '1px solid #F0F1F3',
-                background: '#F7F8FA',
+                border: `1px solid ${theme.palette.divider}`,
+                background: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#F7F8FA',
                 transition: 'all 0.2s ease',
                 display: 'flex',
                 flexDirection: 'column',
@@ -449,16 +471,16 @@ const RecentOrders = () => {
                                      order.statusColor === 'error' ? '#EF4444' : '#6C47FF' }}>
                       {getStatusIcon(order.status)}
                     </Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#222' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
                       {order.id}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#222' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
                     {order.amount}
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{ color: '#666' }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
                     {order.customer}
                   </Typography>
                   <Chip 
@@ -469,7 +491,7 @@ const RecentOrders = () => {
                     sx={{ fontSize: '0.75rem' }}
                   />
                 </Box>
-                <Typography variant="caption" sx={{ color: '#999' }}>
+                <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
                   {order.time}
                 </Typography>
               </Box>
@@ -483,27 +505,64 @@ const RecentOrders = () => {
 
 // Main Dashboard Component
 const ProductVendorDashboard = () => {
+  const [profileData, setProfileData] = useState(null);
+  const [vendorStatus, setVendorStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const authData = vendorAuthService.getVendorAuthData();
+      const vendorId = authData?.vendorData?.vendorId;
+      if (vendorId) {
+        // Fetch both profile and status data
+        const [profileResponse, statusResponse] = await Promise.all([
+          getProductPartnerProfile(vendorId),
+          getVendorStatus(vendorId)
+        ]);
+        
+        setProfileData(profileResponse);
+        setVendorStatus(statusResponse.isActive);
+      }
+    } catch (error) {
+      console.error('Error fetching vendor data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Callback to update status when changed in header
+  const handleStatusUpdate = (newStatus) => {
+    setVendorStatus(newStatus);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
-    <ProductVendorLayout title="Dashboard" notificationCount={3}>
-      <Box sx={{ width: '100%', p: { xs: 1, sm: 3 } }}>
-        {/* Enhanced Welcome Card */}
-        <WelcomeCard />
+    <VendorThemeProvider>
+      <ProductVendorLayout title="Dashboard" notificationCount={3} onStatusUpdate={handleStatusUpdate}>
+        <Box sx={{ width: '100%', p: { xs: 1, sm: 3 }, maxWidth: 1400, mx: 'auto' }}>
+          {/* Enhanced Welcome Card */}
+          <WelcomeCard profileData={profileData} loading={loading} vendorStatus={vendorStatus} />
 
-        {/* Enhanced Statistic Cards */}
-        <StatisticCards />
+          {/* Enhanced Statistic Cards */}
+          <StatisticCards />
 
-        {/* Enhanced Quick Actions */}
-        <QuickActions />
+          {/* Enhanced Quick Actions */}
+          <QuickActions />
 
-        {/* Performance Chart */}
-        <PerformanceChart />
+          {/* Performance Chart */}
+          <PerformanceChart />
 
-        {/* Recent Orders */}
-        <Box sx={{ mt: 4 }}>
-          <RecentOrders />
+          {/* Recent Orders */}
+          <Box sx={{ mt: 4 }}>
+            <RecentOrders />
+          </Box>
         </Box>
-      </Box>
-    </ProductVendorLayout>
+      </ProductVendorLayout>
+    </VendorThemeProvider>
   );
 };
 

@@ -67,9 +67,10 @@ import OnlineDoctorConsultation from './components/User/DoctorConsultation/Onlin
 import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoctorAppointment';
 import HealthRecords from './components/User/HealthRecords/HealthRecords';
 import ProductVendorOrders from './components/Vendors/ProductVendor/ProductVendorOrders';
+import ProductVendorReports from './components/Vendors/ProductVendor/ProductVendorReports';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
-import { vendorAuthService } from './services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from './services/Vendors/VendorAuth/vendor-auth.service';
 import Logo from './components/ui/Logo';
 import ProductPartnerVendorProfile from './components/Vendors/ProductVendor/ProductPartnerVendorProfile';
 
@@ -344,6 +345,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
           <Route path="/vendor/product-partner/products" element={<ProductVendorProducts />} />
           <Route path="/vendor/product-partner/profile" element={<ProductPartnerVendorProfile />} />
           <Route path="/vendor/product-partner/orders" element={<ProductVendorOrders />} />
+          <Route path="/vendor/product-partner/reports" element={<ProductVendorReports />} />
           <Route path="/vendor/hospital/dashboard" element={<HospitalVendorDashboard />} />
           <Route path="/vendor/clinic/dashboard" element={<DoctorConsultationVendorDashboard />} />
           <Route path="/vendor/pharmacy/dashboard" element={<MedicalStoreVendorDashboard />} />

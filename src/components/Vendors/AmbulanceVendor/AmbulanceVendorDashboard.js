@@ -20,7 +20,8 @@ import {
   Divider,
   Chip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Tooltip
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -38,15 +39,19 @@ import {
   Payment,
   Store,
   Visibility,
-  Schedule
+  Schedule,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
-import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
 import { useNavigate } from 'react-router-dom';
 
-const AmbulanceVendorDashboard = () => {
+const AmbulanceVendorDashboardContent = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
+  const { isDarkMode, toggleDarkMode } = useVendorTheme();
   
   // State management
   const [vendorData, setVendorData] = useState(null);
@@ -132,9 +137,9 @@ const AmbulanceVendorDashboard = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: 'flex', height: '100vh', backgroundColor: theme.palette.background.default }}>
       {/* App Bar */}
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1, backgroundColor: theme.palette.background.header, color: theme.palette.text.primary }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -153,6 +158,13 @@ const AmbulanceVendorDashboard = () => {
             <IconButton color="inherit">
               <Notifications />
             </IconButton>
+            
+            {/* Dark Mode Toggle */}
+            <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+              <IconButton color="inherit" onClick={toggleDarkMode}>
+                {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+              </IconButton>
+            </Tooltip>
             
             <Button
               color="inherit"
@@ -178,7 +190,10 @@ const AmbulanceVendorDashboard = () => {
             width: 240,
             boxSizing: 'border-box',
             marginTop: '64px',
-            height: 'calc(100vh - 64px)'
+            height: 'calc(100vh - 64px)',
+            backgroundColor: theme.palette.background.sidebar,
+            color: theme.palette.text.primary,
+            borderRight: `1px solid ${theme.palette.divider}`,
           }
         }}
       >
@@ -213,8 +228,8 @@ const AmbulanceVendorDashboard = () => {
                   mb: 1,
                   borderRadius: 1,
                   '&:hover': {
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText'
+                    backgroundColor: isDarkMode ? 'rgba(139, 104, 255, 0.2)' : 'rgba(108, 71, 255, 0.08)',
+                    color: theme.palette.primary.main
                   }
                 }}
               >
@@ -229,12 +244,12 @@ const AmbulanceVendorDashboard = () => {
       </Drawer>
 
       {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}>
-        <Typography variant="h4" gutterBottom>
+      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px', backgroundColor: theme.palette.background.default }}>
+        <Typography variant="h4" gutterBottom color={theme.palette.text.primary}>
           Welcome back, {vendorData?.email?.split('@')[0] || 'Ambulance'}!
         </Typography>
         
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+        <Typography variant="body1" color={theme.palette.text.secondary} sx={{ mb: 4 }}>
           Here's what's happening with your ambulance service today.
         </Typography>
 
@@ -359,6 +374,14 @@ const AmbulanceVendorDashboard = () => {
         </MenuItem>
       </Menu>
     </Box>
+  );
+};
+
+const AmbulanceVendorDashboard = () => {
+  return (
+    <VendorThemeProvider>
+      <AmbulanceVendorDashboardContent />
+    </VendorThemeProvider>
   );
 };
 

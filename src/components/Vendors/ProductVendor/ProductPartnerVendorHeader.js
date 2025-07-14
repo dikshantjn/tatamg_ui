@@ -19,11 +19,16 @@ import {
   Menu as MenuIcon,
   NotificationsNone as NotificationsIcon,
   Settings as SettingsIcon,
-  AccountCircle
+  AccountCircle,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon
 } from '@mui/icons-material';
-import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { useVendorTheme } from '../../../contexts/VendorThemeContext';
 import Logo from '../../ui/Logo';
 import { useNavigate } from 'react-router-dom';
+import { getVendorStatus, toggleVendorStatus } from '../../../services/Vendors/AllVendors.service';
+import { toast } from 'react-toastify';
 
 const ProductPartnerVendorHeader = ({ 
   title = "Dashboard", 
@@ -34,11 +39,15 @@ const ProductPartnerVendorHeader = ({
   notificationCount = 0,
   sidebarActive = true,
   setSidebarActive = () => {},
+  onStatusUpdate,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [anchorEl, setAnchorEl] = useState(null);
+  const [vendorStatus, setVendorStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
   const navigate = useNavigate();
+  const { isDarkMode, toggleDarkMode } = useVendorTheme();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -67,20 +76,84 @@ const ProductPartnerVendorHeader = ({
     if (onProfileClick) onProfileClick();
   };
 
+  // Fetch vendor status
+  const fetchVendorStatus = async () => {
+    if (!vendorData?.vendorId) return;
+    
+    try {
+      const response = await getVendorStatus(vendorData.vendorId);
+      setVendorStatus(response.isActive);
+    } catch (error) {
+      console.error('Error fetching vendor status:', error);
+      // Set default to active if API fails
+      setVendorStatus(true);
+    }
+  };
+
+  // Toggle vendor status
+  const handleStatusToggle = async () => {
+    if (!vendorData?.vendorId || statusLoading) return;
+    
+    setStatusLoading(true);
+    try {
+      const response = await toggleVendorStatus(vendorData.vendorId);
+      setVendorStatus(response.isActive);
+      
+      // Show success toast
+      toast.success(response.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      // Update parent component if callback provided
+      if (setSidebarActive) {
+        setSidebarActive(response.isActive);
+      }
+      
+      // Notify parent component about status change
+      if (onStatusUpdate) {
+        onStatusUpdate(response.isActive);
+      }
+    } catch (error) {
+      console.error('Error toggling vendor status:', error);
+      
+      // Show error toast
+      toast.error('Failed to update status. Please try again.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  // Fetch status on component mount
+  React.useEffect(() => {
+    fetchVendorStatus();
+  }, [vendorData?.vendorId]);
+
   return (
     <AppBar 
       position="fixed" 
       elevation={0}
       sx={{ 
         zIndex: 1200, 
-        background: '#fff',
-        boxShadow: '0 1px 8px 0 rgba(16,30,54,0.04)',
-        borderBottom: '1px solid #F0F1F3',
+        background: theme.palette.background.header,
+        boxShadow: isDarkMode ? '0 1px 8px 0 rgba(0,0,0,0.3)' : '0 1px 8px 0 rgba(16,30,54,0.04)',
+        borderBottom: `1px solid ${theme.palette.divider}`,
         height: '72px',
         borderRadius: 0,
         left: 0,
         right: 0,
-        color: '#222',
+        color: theme.palette.text.primary,
         display: 'flex',
         justifyContent: 'center'
       }}
@@ -106,7 +179,7 @@ const ProductPartnerVendorHeader = ({
               mr: 1, 
               display: { md: 'none' },
               '&:hover': {
-                backgroundColor: 'rgba(16,30,54,0.06)'
+                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(16,30,54,0.06)'
               }
             }}
           >
@@ -123,7 +196,7 @@ const ProductPartnerVendorHeader = ({
           component="div" 
           sx={{ 
             fontWeight: 700,
-            color: '#222',
+            color: theme.palette.text.primary,
             fontSize: { xs: '1.1rem', sm: '1.35rem' },
             textAlign: 'left',
             flexGrow: 1,
@@ -145,10 +218,11 @@ const ProductPartnerVendorHeader = ({
           <Button
             size="small"
             variant="outlined"
-            onClick={() => setSidebarActive((prev) => !prev)}
+            onClick={handleStatusToggle}
+            disabled={statusLoading || vendorStatus === null}
             sx={{
-              borderColor: sidebarActive ? '#10B981' : '#EF4444',
-              color: sidebarActive ? '#10B981' : '#EF4444',
+              borderColor: vendorStatus ? '#10B981' : '#EF4444',
+              color: vendorStatus ? '#10B981' : '#EF4444',
               borderRadius: 99,
               textTransform: 'none',
               fontWeight: 600,
@@ -158,13 +232,17 @@ const ProductPartnerVendorHeader = ({
               minWidth: 0,
               backgroundColor: 'transparent',
               '&:hover': { 
-                backgroundColor: sidebarActive ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)',
-                borderColor: sidebarActive ? '#059669' : '#B91C1C',
-                color: sidebarActive ? '#059669' : '#B91C1C'
+                backgroundColor: vendorStatus ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                borderColor: vendorStatus ? '#059669' : '#B91C1C',
+                color: vendorStatus ? '#059669' : '#B91C1C'
+              },
+              '&:disabled': {
+                opacity: 0.6,
+                cursor: 'not-allowed'
               }
             }}
           >
-            {sidebarActive ? 'Active' : 'Inactive'}
+            {statusLoading ? 'Updating...' : (vendorStatus ? 'Active' : 'Inactive')}
           </Button>
           {/* Notifications */}
           <Tooltip title="Notifications" arrow>
@@ -172,7 +250,7 @@ const ProductPartnerVendorHeader = ({
               color="inherit"
               sx={{
                 '&:hover': {
-                  backgroundColor: 'rgba(16,30,54,0.06)'
+                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(16,30,54,0.06)'
                 }
               }}
             >
@@ -194,17 +272,18 @@ const ProductPartnerVendorHeader = ({
               </Badge>
             </IconButton>
           </Tooltip>
-          {/* Settings */}
-          <Tooltip title="Settings" arrow>
+          {/* Dark Mode Toggle */}
+          <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"} arrow>
             <IconButton 
               color="inherit"
+              onClick={toggleDarkMode}
               sx={{
                 '&:hover': {
-                  backgroundColor: 'rgba(16,30,54,0.06)'
+                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(16,30,54,0.06)'
                 }
               }}
             >
-              <SettingsIcon />
+              {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
           {/* User Profile */}
@@ -216,7 +295,7 @@ const ProductPartnerVendorHeader = ({
                 ml: 1,
                 p: 0.5,
                 '&:hover': {
-                  backgroundColor: 'rgba(16,30,54,0.06)'
+                  backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(16,30,54,0.06)'
                 }
               }}
             >

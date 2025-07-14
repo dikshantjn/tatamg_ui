@@ -35,7 +35,7 @@ import { auth } from '../firebase/config';
 import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { authService } from '../services/User/Auth/auth.service';
 import { storeAuthData } from '../services/User/Auth/auth.utils';
-import { vendorAuthService } from '../services/User/VendorAuth/vendor-auth.service';
+import { vendorAuthService } from '../services/Vendors/VendorAuth/vendor-auth.service';
 import { useNavigate } from 'react-router-dom';
 
 // TabPanel component for Material UI tabs
