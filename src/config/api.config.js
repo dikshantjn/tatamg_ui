@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.35:5000/api',
-    SOCKET_URL: 'http://192.168.1.35:5000',
+    BASE_URL: 'http://192.168.1.41:5000/api',
+    SOCKET_URL: 'http://192.168.1.41:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',

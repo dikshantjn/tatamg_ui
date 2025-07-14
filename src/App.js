@@ -12,6 +12,7 @@ import SearchResults from './components/SearchResults';
 import DoctorProfile from './components/DoctorProfile';
 import SignIn from './components/SignIn';
 import ProductVendorDashboard from './components/Vendors/ProductVendor/ProductVendorDashboard';
+import ProductVendorProducts from './components/Vendors/ProductVendor/ProductVendorProducts';
 import HospitalVendorDashboard from './components/Vendors/HospitalVendor/HospitalVendorDashboard';
 import DoctorConsultationVendorDashboard from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorDashboard';
 import MedicalStoreVendorDashboard from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorDashboard';
@@ -65,10 +66,12 @@ import OfflineDoctorConsultation from './components/User/DoctorConsultation/Offl
 import OnlineDoctorConsultation from './components/User/DoctorConsultation/OnlineDoctorConsultation';
 import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoctorAppointment';
 import HealthRecords from './components/User/HealthRecords/HealthRecords';
+import ProductVendorOrders from './components/Vendors/ProductVendor/ProductVendorOrders';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 import { vendorAuthService } from './services/User/VendorAuth/vendor-auth.service';
 import Logo from './components/ui/Logo';
+import ProductPartnerVendorProfile from './components/Vendors/ProductVendor/ProductPartnerVendorProfile';
 
 // Component to handle route-based SignIn display
 const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
@@ -338,6 +341,9 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
 
           {/* Vendor Routes */}
           <Route path="/vendor/product-partner/dashboard" element={<ProductVendorDashboard />} />
+          <Route path="/vendor/product-partner/products" element={<ProductVendorProducts />} />
+          <Route path="/vendor/product-partner/profile" element={<ProductPartnerVendorProfile />} />
+          <Route path="/vendor/product-partner/orders" element={<ProductVendorOrders />} />
           <Route path="/vendor/hospital/dashboard" element={<HospitalVendorDashboard />} />
           <Route path="/vendor/clinic/dashboard" element={<DoctorConsultationVendorDashboard />} />
           <Route path="/vendor/pharmacy/dashboard" element={<MedicalStoreVendorDashboard />} />

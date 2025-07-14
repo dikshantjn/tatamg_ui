@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+// Vendor Dashboard Component - Updated
 import {
   Box,
-  AppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Card,
   CardContent,
   Grid,
@@ -19,345 +11,499 @@ import {
   MenuItem,
   Divider,
   Chip,
+  Typography,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Container,
+  IconButton,
+  Paper,
+  Stack,
+  Select,
+  FormControl,
+  InputLabel,
+  Badge,
+  Tooltip
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Dashboard,
-  Inventory,
-  ShoppingCart,
-  People,
-  Assessment,
-  Settings,
   Logout,
   AccountCircle,
-  Notifications,
   TrendingUp,
-  LocalShipping,
-  Payment,
   Store,
-  Visibility
+  Add,
+  BarChart,
+  Person,
+  Warning,
+  CheckCircle,
+  Schedule,
+  Cancel,
+  LocalShipping,
+  Visibility,
+  TrendingDown,
+  AttachMoney,
+  ArrowUpward,
+  ArrowDownward,
+  NotificationsNone,
+  ShoppingBag,
+  Analytics,
+  Inventory2,
+  Assignment,
+  Inventory,
+  ShoppingCart
 } from '@mui/icons-material';
-import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
-import { useNavigate } from 'react-router-dom';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import ProductVendorLayout from './ProductVendorLayout';
 
-const ProductVendorDashboard = () => {
+
+                                                
+// Enhanced Welcome Card Component
+const WelcomeCard = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
   
-  // State management
-  const [vendorData, setVendorData] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Check authentication on component mount
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = () => {
-    const authData = vendorAuthService.getVendorAuthData();
-    if (!authData || authData.userType !== 'vendor') {
-      console.log('Vendor not authenticated, redirecting to login');
-      navigate('/');
-      return;
-    }
-
-    setVendorData(authData.vendorData);
-    setLoading(false);
-    console.log('Vendor authenticated:', authData.vendorData);
-  };
-
-  const handleLogout = async () => {
-    try {
-      // Get vendor data for logout API call
-      const authData = vendorAuthService.getVendorAuthData();
-      if (authData && authData.vendorData && authData.vendorData.vendorId) {
-        // Call logout API to remove session from database
-        await vendorAuthService.vendorLogout(authData.vendorData.vendorId);
-        console.log('Vendor logged out successfully from server');
-      }
-    } catch (error) {
-      console.error('Error calling logout API:', error);
-      // Continue with local logout even if API call fails
-    } finally {
-      // Clear local auth data
-      vendorAuthService.clearVendorAuthData();
-      setAnchorEl(null);
-      // Navigate to home page after logout
-      window.location.href = '/';
-    }
-  };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
-  // Dashboard menu items
-  const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/vendor/product-partner/dashboard' },
-    { text: 'Products', icon: <Inventory />, path: '/vendor/product-partner/products' },
-    { text: 'Orders', icon: <ShoppingCart />, path: '/vendor/product-partner/orders' },
-    { text: 'Customers', icon: <People />, path: '/vendor/product-partner/customers' },
-    { text: 'Analytics', icon: <Assessment />, path: '/vendor/product-partner/analytics' },
-    { text: 'Settings', icon: <Settings />, path: '/vendor/product-partner/settings' },
-  ];
-
-  // Sample dashboard data
-  const dashboardStats = [
-    { title: 'Total Products', value: '156', icon: <Inventory />, color: 'primary' },
-    { title: 'Active Orders', value: '23', icon: <ShoppingCart />, color: 'secondary' },
-    { title: 'Revenue (₹)', value: '45,230', icon: <TrendingUp />, color: 'success' },
-    { title: 'Pending Deliveries', value: '8', icon: <LocalShipping />, color: 'warning' },
-  ];
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography>Loading dashboard...</Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* App Bar */}
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Product Partner Dashboard
+    <Card sx={{ 
+      background: '#fff',
+      color: '#222',
+      mb: 3,
+      borderRadius: 3,
+      boxShadow: 'none',
+      border: '1px solid #F0F1F3',
+      position: 'relative',
+      overflow: 'hidden',
+      px: { xs: 2, sm: 3 },
+      py: { xs: 2, sm: 3 }
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', sm: 'row' },
+        alignItems: { xs: 'flex-start', sm: 'center' },
+        gap: 2
+      }}>
+        {/* Avatar */}
+        <Avatar sx={{ 
+          width: { xs: 48, sm: 56 }, 
+          height: { xs: 48, sm: 56 },
+          backgroundColor: '#F0F1F3',
+          color: '#6C47FF',
+          fontWeight: 700,
+          fontSize: 28
+        }}>
+          <Store sx={{ fontSize: { xs: 24, sm: 30 } }} />
+        </Avatar>
+        {/* Content */}
+        <Box sx={{ flex: 1 }}>
+          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom sx={{ fontWeight: 700, color: '#222' }}>
+            Welcome back, Guidelign!
           </Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <Notifications />
-            </IconButton>
-            
-            <Button
-              color="inherit"
-              onClick={handleMenuOpen}
-              startIcon={<AccountCircle />}
-              endIcon={<AccountCircle />}
+          <Typography variant="body1" sx={{ opacity: 0.8, mb: 2, color: '#666' }}>
+            xyz pvt ltd • <Box component="span" sx={{ fontWeight: 600, color: '#10B981', display: 'inline' }}>Active</Box> Status
+          </Typography>
+          {/* Quick Notice */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: 2,
+            backgroundColor: '#F7F8FA',
+            borderRadius: 2,
+            p: 2,
+            border: '1px solid #F0F1F3',
+            mt: 1
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <NotificationsNone sx={{ fontSize: 20, color: '#6C47FF' }} />
+              <Typography variant="body2" sx={{ color: '#222' }}>
+                You have <strong>8 pending orders</strong> to process
+              </Typography>
+            </Box>
+            <Button 
+              variant="outlined" 
+              size="small"
+              sx={{ 
+                borderColor: '#6C47FF',
+                color: '#6C47FF',
+                fontWeight: 600,
+                borderRadius: 2,
+                textTransform: 'none',
+                px: 2,
+                '&:hover': { 
+                  backgroundColor: '#F3F0FF',
+                  borderColor: '#6C47FF',
+                  color: '#6C47FF'
+                }
+              }}
             >
-              {vendorData?.email?.split('@')[0] || 'Vendor'}
+              View Orders
             </Button>
           </Box>
-        </Toolbar>
-      </AppBar>
+        </Box>
+      </Box>
+    </Card>
+  );
+};
 
-      {/* Sidebar Drawer */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: 240,
-            boxSizing: 'border-box',
-            marginTop: '64px',
-            height: 'calc(100vh - 64px)'
-          }
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Card sx={{ mb: 2 }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Avatar sx={{ width: 56, height: 56, mx: 'auto', mb: 1 }}>
-                <Store />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>
-                {vendorData?.generatedId || 'Product Partner'}
+// Enhanced Statistic Cards Component
+const StatisticCards = () => {
+  const stats = [
+    { 
+      title: 'Total Products', 
+      value: '156', 
+      change: '+12%',
+      changeType: 'increase',
+      icon: <Inventory2 />, 
+      color: '#6C47FF', 
+      bgColor: '#F3F0FF' 
+    },
+    { 
+      title: "Today's Revenue", 
+      value: '$1,250.75', 
+      change: '+8.2%',
+      changeType: 'increase',
+      icon: <AttachMoney />, 
+      color: '#10B981', 
+      bgColor: '#E6FAF5' 
+    },
+    { 
+      title: 'Pending Orders', 
+      value: '8', 
+      change: '-2',
+      changeType: 'decrease',
+      icon: <Schedule />, 
+      color: '#F59E0B', 
+      bgColor: '#FFF7E6' 
+    },
+    { 
+      title: 'Low Stock Items', 
+      value: '12', 
+      change: '+3',
+      changeType: 'increase',
+      icon: <Warning />, 
+      color: '#EF4444', 
+      bgColor: '#FEECEC' 
+    },
+  ];
+
+  return (
+    <Grid container spacing={3} sx={{ mb: 4 }}>
+      {stats.map((stat, index) => (
+        <Grid item xs={12} sm={6} md={3} key={index}>
+          <Card sx={{ 
+            height: '100%', 
+            borderRadius: 3,
+            boxShadow: 'none',
+            border: '1px solid #F0F1F3',
+            transition: 'all 0.3s ease',
+            '&:hover': { 
+              transform: 'translateY(-2px)',
+              boxShadow: '0 2px 8px rgba(108,71,255,0.06)'
+            }
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
+                <Box sx={{ 
+                  p: 1.5, 
+                  borderRadius: 2, 
+                  backgroundColor: stat.bgColor,
+                  color: stat.color,
+                }}>
+                  {stat.icon}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  {stat.changeType === 'increase' ? (
+                    <ArrowUpward sx={{ fontSize: 16, color: '#10B981' }} />
+                  ) : (
+                    <ArrowDownward sx={{ fontSize: 16, color: '#EF4444' }} />
+                  )}
+                  <Typography variant="caption" sx={{ 
+                    color: stat.changeType === 'increase' ? '#10B981' : '#EF4444',
+                    fontWeight: 600
+                  }}>
+                    {stat.change}
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography variant="h4" component="div" sx={{ fontWeight: 'bold', mb: 1, color: '#222' }}>
+                {stat.value}
               </Typography>
-              <Chip 
-                label="Product Partner" 
-                color="primary" 
-                size="small" 
-                variant="outlined"
-              />
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                {stat.title}
+              </Typography>
             </CardContent>
           </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
 
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem 
-                button 
-                key={item.text}
-                onClick={() => {
-                  // Handle navigation here
-                  console.log('Navigate to:', item.path);
-                }}
+// Enhanced Quick Actions Component
+const QuickActions = () => {
+  const actions = [
+    { title: 'Add Product', icon: <Add />, color: '#6C47FF', bgColor: '#F3F0FF' },
+    { title: 'Manage Inventory', icon: <Inventory />, color: '#10B981', bgColor: '#E6FAF5' },
+    { title: 'View Orders', icon: <ShoppingCart />, color: '#F59E0B', bgColor: '#FFF7E6' },
+    { title: 'Generate Reports', icon: <Analytics />, color: '#8B5CF6', bgColor: '#F3F0FF' },
+  ];
+
+  return (
+    <Card sx={{ mb: 4, borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3' }}>
+      <CardContent sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3, color: '#222' }}>
+          Quick Actions
+        </Typography>
+        <Grid container spacing={2}>
+          {actions.map((action, index) => (
+            <Grid item xs={6} sm={3} key={index}>
+              <Button
+                fullWidth
+                variant="outlined"
+                startIcon={action.icon}
                 sx={{
-                  mb: 1,
-                  borderRadius: 1,
+                  p: 2,
+                  borderRadius: 2,
+                  borderColor: action.color,
+                  color: action.color,
+                  backgroundColor: action.bgColor,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  minHeight: 56,
+                  transition: 'all 0.3s ease',
                   '&:hover': {
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText'
+                    backgroundColor: action.color,
+                    color: 'white',
+                    borderColor: action.color,
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 6px 20px ${action.color}40`
                   }
                 }}
               >
-                <ListItemIcon sx={{ color: 'inherit' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome back, {vendorData?.email?.split('@')[0] || 'Product Partner'}!
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Here's what's happening with your product business today.
-        </Typography>
-
-        {/* Dashboard Stats */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {dashboardStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Box sx={{ 
-                      p: 1, 
-                      borderRadius: 1, 
-                      backgroundColor: `${stat.color}.light`,
-                      color: `${stat.color}.contrastText`,
-                      mr: 2
-                    }}>
-                      {stat.icon}
-                    </Box>
-                    <Typography variant="h4" component="div">
-                      {stat.value}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.title}
-                  </Typography>
-                </CardContent>
-              </Card>
+                {action.title}
+              </Button>
             </Grid>
           ))}
         </Grid>
+      </CardContent>
+    </Card>
+  );
+};
 
-        {/* Recent Activity */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Recent Orders
-                </Typography>
-                <List>
-                  {[1, 2, 3].map((item) => (
-                    <ListItem key={item} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <ShoppingCart color="primary" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`Order #${1000 + item}`}
-                        secondary={`₹${1200 + item * 100} • 2 items`}
-                      />
-                      <Chip label="Processing" size="small" color="warning" />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+// Enhanced Performance Chart Component
+const PerformanceChart = () => {
+  const [period, setPeriod] = useState('weekly');
+  
+  const weeklyData = [
+    { day: 'Mon', revenue: 1200, orders: 15 },
+    { day: 'Tue', revenue: 1890, orders: 22 },
+    { day: 'Wed', revenue: 1560, orders: 18 },
+    { day: 'Thu', revenue: 2100, orders: 28 },
+    { day: 'Fri', revenue: 1750, orders: 20 },
+    { day: 'Sat', revenue: 2400, orders: 35 },
+    { day: 'Sun', revenue: 1980, orders: 25 },
+  ];
 
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Top Products
+  return (
+    <Grid item xs={12}>
+      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3', mb: 4 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#222' }}>
+              Sales Performance
+            </Typography>
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <Select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="weekly">Weekly</MenuItem>
+                <MenuItem value="monthly">Monthly</MenuItem>
+                <MenuItem value="yearly">Yearly</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          <Box sx={{ height: 300, mt: 2 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={weeklyData}>
+                <defs>
+                  <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6C47FF" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#6C47FF" stopOpacity={0.05}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="day" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#666', fontSize: 12 }}
+                />
+                <YAxis 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#666', fontSize: 12 }}
+                />
+                <RechartsTooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#6C47FF"
+                  strokeWidth={3}
+                  fill="url(#colorRevenue)"
+                  dot={{ fill: '#6C47FF', strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, stroke: '#6C47FF', strokeWidth: 2, fill: '#fff' }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Box>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+};
+
+// Enhanced Recent Orders Component
+const RecentOrders = () => {
+  const orders = [
+    { id: '#12344', customer: 'John Doe', status: 'Shipped', time: '2 hours ago', amount: '$89.50', statusColor: 'success' },
+    { id: '#12345', customer: 'Sarah Wilson', status: 'Pending', time: '4 hours ago', amount: '$156.75', statusColor: 'warning' },
+    { id: '#12346', customer: 'Mike Johnson', status: 'Cancelled', time: '6 hours ago', amount: '$67.20', statusColor: 'error' },
+    { id: '#12347', customer: 'Emily Davis', status: 'Confirmed', time: '8 hours ago', amount: '$234.90', statusColor: 'info' },
+    { id: '#12348', customer: 'David Brown', status: 'Shipped', time: '1 day ago', amount: '$45.30', statusColor: 'success' },
+  ];
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Shipped': return <LocalShipping />;
+      case 'Confirmed': return <CheckCircle />;
+      case 'Pending': return <Schedule />;
+      case 'Cancelled': return <Cancel />;
+      default: return <Schedule />;
+    }
+  };
+
+  return (
+    <Grid item xs={12}>
+      <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 'none', border: '1px solid #F0F1F3' }}>
+        <CardContent sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#222' }}>
+              Recent Orders
+            </Typography>
+            <Button 
+              size="small" 
+              variant="outlined"
+              sx={{ 
+                color: '#6C47FF', 
+                fontWeight: 600,
+                borderColor: '#6C47FF',
+                borderRadius: 2,
+                textTransform: 'none',
+                px: 2,
+                '&:hover': {
+                  backgroundColor: '#F3F0FF',
+                  color: '#6C47FF',
+                  borderColor: '#6C47FF'
+                }
+              }}
+            >
+              View All
+            </Button>
+          </Box>
+          
+          {/* Grid Layout for Orders */}
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+            gap: 2,
+            maxWidth: '100%',
+          }}>
+            {orders.map((order, index) => (
+              <Box key={index} sx={{ 
+                p: 2, 
+                borderRadius: 2, 
+                border: '1px solid #F0F1F3',
+                background: '#F7F8FA',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+                minHeight: 120,
+                height: '100%',
+                justifyContent: 'space-between',
+                '&:hover': { 
+                  boxShadow: '0 2px 8px rgba(108,71,255,0.06)',
+                  transform: 'translateY(-2px)'
+                }
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Box sx={{ color: order.statusColor === 'success' ? '#10B981' : 
+                                     order.statusColor === 'warning' ? '#F59E0B' :
+                                     order.statusColor === 'error' ? '#EF4444' : '#6C47FF' }}>
+                      {getStatusIcon(order.status)}
+                    </Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#222' }}>
+                      {order.id}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: '#222' }}>
+                    {order.amount}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body2" sx={{ color: '#666' }}>
+                    {order.customer}
+                  </Typography>
+                  <Chip 
+                    label={order.status} 
+                    size="small" 
+                    color={order.statusColor}
+                    variant="outlined"
+                    sx={{ fontSize: '0.75rem' }}
+                  />
+                </Box>
+                <Typography variant="caption" sx={{ color: '#999' }}>
+                  {order.time}
                 </Typography>
-                <List>
-                  {['Paracetamol 500mg', 'Vitamin C Tablets', 'First Aid Kit'].map((product, index) => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <Inventory color="success" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={product}
-                        secondary={`${50 + index * 10} units sold`}
-                      />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Visibility fontSize="small" />
-                        <Typography variant="body2" color="text.secondary">
-                          {100 + index * 25}
-                        </Typography>
-                      </Box>
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              </Box>
+            ))}
+          </Box>
+        </CardContent>
+      </Card>
+    </Grid>
+  );
+};
+
+// Main Dashboard Component
+const ProductVendorDashboard = () => {
+  return (
+    <ProductVendorLayout title="Dashboard" notificationCount={3}>
+      <Box sx={{ width: '100%', p: { xs: 1, sm: 3 } }}>
+        {/* Enhanced Welcome Card */}
+        <WelcomeCard />
+
+        {/* Enhanced Statistic Cards */}
+        <StatisticCards />
+
+        {/* Enhanced Quick Actions */}
+        <QuickActions />
+
+        {/* Performance Chart */}
+        <PerformanceChart />
+
+        {/* Recent Orders */}
+        <Box sx={{ mt: 4 }}>
+          <RecentOrders />
+        </Box>
       </Box>
-
-      {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <AccountCircle fontSize="small" />
-          </ListItemIcon>
-          Profile
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
-    </Box>
+    </ProductVendorLayout>
   );
 };
 

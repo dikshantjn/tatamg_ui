@@ -1,0 +1,249 @@
+import React, { useState } from 'react';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  Badge,
+  Tooltip,
+  Menu,
+  MenuItem,
+  Divider,
+  Avatar,
+  useTheme,
+  useMediaQuery,
+  Button
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  NotificationsNone as NotificationsIcon,
+  Settings as SettingsIcon,
+  AccountCircle
+} from '@mui/icons-material';
+import { vendorAuthService } from '../../../services/User/VendorAuth/vendor-auth.service';
+import Logo from '../../ui/Logo';
+import { useNavigate } from 'react-router-dom';
+
+const ProductPartnerVendorHeader = ({ 
+  title = "Dashboard", 
+  onMenuClick,
+  vendorData,
+  onLogout,
+  onProfileClick,
+  notificationCount = 0,
+  sidebarActive = true,
+  setSidebarActive = () => {},
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigate = useNavigate();
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    handleMenuClose();
+    if (vendorData && vendorData.vendorId) {
+      try {
+        await vendorAuthService.vendorLogout(vendorData.vendorId);
+      } catch (e) {
+        // ignore error, still clear local data
+      }
+    }
+    vendorAuthService.clearVendorAuthData();
+    if (onLogout) onLogout();
+  };
+
+  const handleProfileClick = () => {
+    handleMenuClose();
+    navigate('/vendor/product-partner/profile');
+    if (onProfileClick) onProfileClick();
+  };
+
+  return (
+    <AppBar 
+      position="fixed" 
+      elevation={0}
+      sx={{ 
+        zIndex: 1200, 
+        background: '#fff',
+        boxShadow: '0 1px 8px 0 rgba(16,30,54,0.04)',
+        borderBottom: '1px solid #F0F1F3',
+        height: '72px',
+        borderRadius: 0,
+        left: 0,
+        right: 0,
+        color: '#222',
+        display: 'flex',
+        justifyContent: 'center'
+      }}
+    >
+      <Toolbar sx={{ 
+        height: '100%', 
+        px: { xs: 2, sm: 4 },
+        minHeight: '72px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        maxWidth: 1440,
+        mx: 'auto'
+      }}>
+        {/* Left: Hamburger Menu (mobile) + Logo */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton
+            color="inherit"
+            edge="start"
+            onClick={onMenuClick}
+            sx={{ 
+              mr: 1, 
+              display: { md: 'none' },
+              '&:hover': {
+                backgroundColor: 'rgba(16,30,54,0.06)'
+              }
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Box sx={{ display: { xs: 'none', md: 'block' }, mr: 2 }}>
+            <Logo size="small" />
+          </Box>
+        </Box>
+
+        {/* Center: Page Title */}
+        <Typography 
+          variant="h6" 
+          component="div" 
+          sx={{ 
+            fontWeight: 700,
+            color: '#222',
+            fontSize: { xs: '1.1rem', sm: '1.35rem' },
+            textAlign: 'left',
+            flexGrow: 1,
+            letterSpacing: 0.2,
+            ml: { xs: 0, md: 2 }
+          }}
+        >
+          {title}
+        </Typography>
+
+        {/* Right: Action Icons */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: { xs: 1, sm: 2 },
+          ml: 2
+        }}>
+          {/* Active/Inactive Button */}
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => setSidebarActive((prev) => !prev)}
+            sx={{
+              borderColor: sidebarActive ? '#10B981' : '#EF4444',
+              color: sidebarActive ? '#10B981' : '#EF4444',
+              borderRadius: 99,
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.8rem',
+              px: 2,
+              py: 0.2,
+              minWidth: 0,
+              backgroundColor: 'transparent',
+              '&:hover': { 
+                backgroundColor: sidebarActive ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                borderColor: sidebarActive ? '#059669' : '#B91C1C',
+                color: sidebarActive ? '#059669' : '#B91C1C'
+              }
+            }}
+          >
+            {sidebarActive ? 'Active' : 'Inactive'}
+          </Button>
+          {/* Notifications */}
+          <Tooltip title="Notifications" arrow>
+            <IconButton 
+              color="inherit"
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(16,30,54,0.06)'
+                }
+              }}
+            >
+              <Badge 
+                badgeContent={notificationCount} 
+                color="primary"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontSize: '0.75rem',
+                    height: '18px',
+                    minWidth: '18px',
+                    background: '#6C47FF',
+                    color: '#fff',
+                    boxShadow: '0 1px 4px 0 rgba(108,71,255,0.08)'
+                  }
+                }}
+              >
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+          </Tooltip>
+          {/* Settings */}
+          <Tooltip title="Settings" arrow>
+            <IconButton 
+              color="inherit"
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(16,30,54,0.06)'
+                }
+              }}
+            >
+              <SettingsIcon />
+            </IconButton>
+          </Tooltip>
+          {/* User Profile */}
+          <Tooltip title="Profile" arrow>
+            <IconButton
+              color="inherit"
+              onClick={handleMenuOpen}
+              sx={{
+                ml: 1,
+                p: 0.5,
+                '&:hover': {
+                  backgroundColor: 'rgba(16,30,54,0.06)'
+                }
+              }}
+            >
+              {vendorData?.profileImage ? (
+                <Avatar src={vendorData.profileImage} sx={{ width: 36, height: 36 }} />
+              ) : (
+                <Avatar sx={{ width: 36, height: 36, bgcolor: '#F0F1F3', color: '#6C47FF', fontWeight: 700 }}>
+                  {vendorData?.companyName?.[0]?.toUpperCase() || <AccountCircle />}
+                </Avatar>
+              )}
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem onClick={handleProfileClick}>My Profile</MenuItem>
+            <Divider />
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
+        </Box>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+export default ProductPartnerVendorHeader; 
