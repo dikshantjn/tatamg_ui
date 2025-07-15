@@ -68,6 +68,15 @@ import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoc
 import HealthRecords from './components/User/HealthRecords/HealthRecords';
 import ProductVendorOrders from './components/Vendors/ProductVendor/ProductVendorOrders';
 import ProductVendorReports from './components/Vendors/ProductVendor/ProductVendorReports';
+import MedicalStoreVendorReports from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorReports';
+import MedicalStoreVendorAnalysis from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorAnalysis';
+import MedicalStoreVendorOrders from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorOrders';
+import MedicalStoreVendorLayout from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorLayout';
+import MedicalStoreVendorProducts from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorProducts';
+import MedicalStoreVendorProfile from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorProfile';
+import MedicalStoreVendorReturns from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorReturns';
+import MedicalStoreVendorSettings from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorSettings';
+import { VendorThemeProvider } from './contexts/VendorThemeContext';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 import { vendorAuthService } from './services/Vendors/VendorAuth/vendor-auth.service';
@@ -349,6 +358,43 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
           <Route path="/vendor/hospital/dashboard" element={<HospitalVendorDashboard />} />
           <Route path="/vendor/clinic/dashboard" element={<DoctorConsultationVendorDashboard />} />
           <Route path="/vendor/pharmacy/dashboard" element={<MedicalStoreVendorDashboard />} />
+          <Route path="/vendor/pharmacy/reports" element={<MedicalStoreVendorReports />} />
+          <Route path="/vendor/pharmacy/analysis" element={<MedicalStoreVendorAnalysis />} />
+          <Route path="/vendor/pharmacy/orders" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Orders">
+                <MedicalStoreVendorOrders />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/pharmacy/products" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Products">
+                <MedicalStoreVendorProducts />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/pharmacy/profile" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Profile">
+                <MedicalStoreVendorProfile />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/pharmacy/returns" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Returns">
+                <MedicalStoreVendorReturns />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/pharmacy/settings" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Settings">
+                <MedicalStoreVendorSettings />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
           <Route path="/vendor/ambulance/dashboard" element={<AmbulanceVendorDashboard />} />
           <Route path="/vendor/blood-bank/dashboard" element={<BloodBankVendorDashboard />} />
           <Route path="/vendor/lab-test/dashboard" element={<LabTestVendorDashboard />} />

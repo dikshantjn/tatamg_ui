@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.43:5000/api',
-    SOCKET_URL: 'http://192.168.1.43:5000',
+    BASE_URL: 'http://192.168.1.42:5000/api',
+    SOCKET_URL: 'http://192.168.1.42:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -114,6 +114,9 @@ export const API_CONFIG = {
             GET_CONFIRMED_ORDERS: '/product-order/confirmed-orders/:vendorId',
             GET_DELIVERED_ORDERS: '/product-order/delivered-orders/:vendorId',
             UPDATE_ORDER_STATUS: '/product-order/order/:orderId/status',
+        },
+        MEDICAL_STORE_VENDOR: {
+            GET_PROFILE: '/vendor/:vendorId',
         },
         // Add other endpoint categories as needed
     }
