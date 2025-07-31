@@ -17,12 +17,13 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import MapIcon from '@mui/icons-material/Map';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import { getMedicalStoreVendorProfile } from '../../../services/Vendors/MedicalStoreVendor.service';
+import { getMedicalStoreVendorProfile, updateMedicalStoreVendorProfile } from '../../../services/Vendors/MedicalStoreVendor.service';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { Toast, ToastContainer } from '../../ui/Toast';
 
 const mockProfile = {
   storeId: '550e8400-e29b-41d4-a716-446655440000',
@@ -75,6 +76,8 @@ function MedicalStoreVendorProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [toasts, setToasts] = useState([]);
+  const [saving, setSaving] = useState(false);
   // TODO: Replace with actual vendorId from auth context or props
   const vendorId = 'c29e0298-b239-48df-9f11-4e21c8727f93';
 
@@ -120,9 +123,66 @@ function MedicalStoreVendorProfile() {
     setEditForm(profile);
   };
 
-  const handleSave = () => {
-    setProfile(editForm);
-    setIsEditing(false);
+  const addToast = (type, title, message) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, title, message }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Prepare the data for API call according to the API specification
+      const updateData = {
+        name: editForm.name,
+        address: editForm.address,
+        landmark: editForm.landmark,
+        state: editForm.state,
+        city: editForm.city,
+        pincode: editForm.pincode,
+        emailId: editForm.emailId,
+        contactNumber: editForm.contactNumber,
+        ownerName: editForm.ownerName,
+        licenseNumber: editForm.licenseNumber,
+        gstNumber: editForm.gstNumber,
+        panNumber: editForm.panNumber,
+        storeTiming: editForm.storeTiming,
+        storeDays: editForm.storeDays,
+        floor: editForm.floor,
+        medicineType: editForm.medicineType,
+        isRareMedicationsAvailable: editForm.isRareMedicationsAvailable,
+        isOnlinePayment: editForm.isOnlinePayment,
+        isLiftAccess: editForm.isLiftAccess,
+        isWheelchairAccess: editForm.isWheelchairAccess,
+        isParkingAvailable: editForm.isParkingAvailable,
+        location: editForm.location || '0,0', // Default location if not set
+        availableMedicines: Array.isArray(editForm.availableMedicines) 
+          ? editForm.availableMedicines 
+          : [],
+        registrationCertificates: Array.isArray(editForm.registrationCertificates) 
+          ? editForm.registrationCertificates 
+          : [],
+        complianceCertificates: Array.isArray(editForm.complianceCertificates) 
+          ? editForm.complianceCertificates 
+          : [],
+        photos: Array.isArray(editForm.photos) 
+          ? editForm.photos 
+          : [],
+      };
+
+      await updateMedicalStoreVendorProfile(vendorId, updateData);
+      setProfile(editForm);
+      setIsEditing(false);
+      addToast('success', 'Profile Updated', 'Your store profile has been successfully updated!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      addToast('error', 'Update Failed', 'Failed to update profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -181,7 +241,8 @@ function MedicalStoreVendorProfile() {
     );
   }
   return (
-    <Box sx={{ p: 2, maxWidth: '1200px', marginX: 'auto', width: '100%' }}>
+    <>
+      <Box sx={{ p: 2, maxWidth: '1200px', marginX: 'auto', width: '100%' }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Typography variant="h5">Store Profile</Typography>
         {!isEditing ? (
@@ -193,8 +254,13 @@ function MedicalStoreVendorProfile() {
             <Button variant="outlined" startIcon={<CancelIcon />} onClick={handleCancel}>
               Cancel
             </Button>
-            <Button variant="contained" startIcon={<SaveIcon />} onClick={handleSave}>
-              Save Changes
+            <Button 
+              variant="contained" 
+              startIcon={saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />} 
+              onClick={handleSave}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </Box>
         )}
@@ -558,7 +624,11 @@ function MedicalStoreVendorProfile() {
           </Accordion>
         </Box>
       )}
-    </Box>
+      </Box>
+      
+      {/* Toast Container - Rendered outside main container */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
+    </>
   );
 }
 

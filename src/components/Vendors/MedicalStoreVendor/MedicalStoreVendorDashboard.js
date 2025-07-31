@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,7 +16,8 @@ import {
   Avatar,
   Divider,
   IconButton,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import {
   ShoppingCart,
@@ -43,17 +44,53 @@ import { VendorThemeProvider } from '../../../contexts/VendorThemeContext';
 import MedicalStoreVendorLayout from './MedicalStoreVendorLayout';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { getMedicalStoreVendorProfile } from '../../../services/Vendors/MedicalStoreVendor.service';
+import { getVendorStatus, toggleVendorStatus } from '../../../services/Vendors/AllVendors.service';
 
 const MedicalStoreVendorDashboardContent = () => {
   const theme = useTheme();
-  const [isActive, setIsActive] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [vendorStatus, setVendorStatus] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(true);
+  // TODO: Replace with actual vendorId from auth context or props
+  const vendorId = 'c29e0298-b239-48df-9f11-4e21c8727f93';
 
-  // Sample medical store data
-  const medicalStoreName = "MedCare Pharmacy";
-  const vendorData = {
-    name: medicalStoreName,
-    email: "medcare@example.com"
-  };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const data = await getMedicalStoreVendorProfile(vendorId);
+        setProfile(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [vendorId]);
+
+  useEffect(() => {
+    const fetchVendorStatus = async () => {
+      setStatusLoading(true);
+      try {
+        const statusData = await getVendorStatus(vendorId);
+        setVendorStatus(statusData);
+      } catch (error) {
+        console.error('Error fetching vendor status:', error);
+        setVendorStatus(null);
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+    fetchVendorStatus();
+  }, [vendorId]);
+
+  // Get vendor data from profile
+  const medicalStoreName = profile?.name || 'Loading...';
+  const vendorEmail = profile?.emailId || 'Loading...';
 
   // Top KPIs Data (removed Service Status)
   const kpiData = [
@@ -194,12 +231,15 @@ const MedicalStoreVendorDashboardContent = () => {
     }
   };
 
-  const handleToggleActive = () => {
-    setIsActive((prev) => {
-      const newStatus = !prev;
-      toast.success(`Store is now ${newStatus ? 'Active' : 'Inactive'}`);
-      return newStatus;
-    });
+  const handleToggleActive = async () => {
+    try {
+      const response = await toggleVendorStatus(vendorId);
+      setVendorStatus(response);
+      toast.success(`Store is now ${response.isActive ? 'Active' : 'Inactive'}`);
+    } catch (error) {
+      console.error('Error toggling vendor status:', error);
+      toast.error('Failed to update store status. Please try again.');
+    }
   };
 
   return (
@@ -223,32 +263,52 @@ const MedicalStoreVendorDashboardContent = () => {
                   Welcome back,
                 </Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-                  {medicalStoreName}
+                  {loading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={20} />
+                      Loading...
+                    </Box>
+                  ) : (
+                    medicalStoreName
+                  )}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.7 }}>
-                  {vendorData.email}
+                  {loading ? 'Loading...' : vendorEmail}
                 </Typography>
               </Box>
               <Button
                 variant="outlined"
                 size="small"
                 onClick={handleToggleActive}
-                startIcon={<Circle sx={{ color: isActive ? 'success.main' : 'error.main', fontSize: '1.2rem' }} />}
+                disabled={statusLoading}
+                startIcon={
+                  statusLoading ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <Circle sx={{ 
+                      color: vendorStatus?.isActive ? 'success.main' : 'error.main', 
+                      fontSize: '1.2rem' 
+                    }} />
+                  )
+                }
                 sx={{
                   borderRadius: 20,
-                  borderColor: isActive ? 'success.main' : 'error.main',
-                  color: isActive ? 'success.main' : 'error.main',
+                  borderColor: vendorStatus?.isActive ? 'success.main' : 'error.main',
+                  color: vendorStatus?.isActive ? 'success.main' : 'error.main',
                   fontWeight: 500,
                   textTransform: 'none',
                   minWidth: 110,
                   px: 2,
                   '&:hover': {
-                    borderColor: isActive ? 'success.dark' : 'error.dark',
-                    backgroundColor: isActive ? 'success.lighter' : 'error.lighter',
+                    borderColor: vendorStatus?.isActive ? 'success.dark' : 'error.dark',
+                    backgroundColor: vendorStatus?.isActive ? 'success.lighter' : 'error.lighter',
+                  },
+                  '&:disabled': {
+                    opacity: 0.6,
                   },
                 }}
               >
-                {isActive ? 'Active' : 'Inactive'}
+                {statusLoading ? 'Loading...' : (vendorStatus?.isActive ? 'Active' : 'Inactive')}
               </Button>
             </Box>
             </CardContent>

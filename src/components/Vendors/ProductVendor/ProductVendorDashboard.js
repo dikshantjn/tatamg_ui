@@ -53,7 +53,8 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
 import ProductVendorLayout from './ProductVendorLayout';
-import { getProductPartnerProfile, getVendorStatus } from '../../../services/Vendors/AllVendors.service';
+import { getProductPartnerProfile } from '../../../services/Vendors/product-partner.service';
+import { getVendorStatus } from '../../../services/Vendors/AllVendors.service';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
 
 

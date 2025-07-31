@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, TextField, MenuItem, InputAdornment, IconButton, Avatar, Menu, ListItemIcon, ListItemText, Grid
+  Box, Typography, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, TextField, MenuItem, InputAdornment, IconButton, Avatar, Menu, ListItemIcon, ListItemText, Grid, CircularProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
@@ -8,41 +8,66 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-
-const mockProducts = [
-  { id: 1, name: 'Paracetamol 500mg', price: 50, discount: 10, manufacturer: 'ABC Pharma', type: 'Tablet', packSize: '10 tablets', composition: 'Paracetamol', quantity: 100, image: '' },
-  { id: 2, name: 'Cough Syrup', price: 120, discount: 5, manufacturer: 'XYZ Labs', type: 'Syrup', packSize: '100ml', composition: 'Dextromethorphan', quantity: 50, image: '' },
-];
+import { getVendorProducts, deleteProduct, addProduct, updateProduct } from '../../../services/Vendors/MedicalStoreVendor.service';
+import { Toast, ToastContainer } from '../../ui/Toast';
 
 const productTypes = ['Tablet', 'Syrup', 'Capsule', 'Injection', 'Ointment', 'Drops', 'Other'];
+const productCategories = ['Fever', 'Pain', 'Cough', 'Allergy', 'Diabetes', 'Heart', 'General', 'Other'];
 
 function MedicalStoreVendorProducts() {
-  const [products, setProducts] = useState(mockProducts);
+  // TODO: Replace with actual vendorId from auth context or props
+  const vendorId = 'c29e0298-b239-48df-9f11-4e21c8727f93';
+  
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
+  const [toasts, setToasts] = useState([]);
+  const [deletingProduct, setDeletingProduct] = useState(false);
+  const [addingProduct, setAddingProduct] = useState(false);
+  const [updatingProduct, setUpdatingProduct] = useState(false);
   const [form, setForm] = useState({
-    name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', image: null, imageUrl: ''
+    name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', category: '', image: null, imageUrl: ''
   });
+
+  // Fetch products on component mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const response = await getVendorProducts(vendorId);
+        setProducts(response || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [vendorId]);
 
   const handleOpenModal = () => {
     setModalOpen(true);
     setIsEditing(false);
-    setForm({ name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', image: null, imageUrl: '' });
+    setForm({ name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', category: '', image: null, imageUrl: '' });
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
     setIsEditing(false);
-    setForm({ name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', image: null, imageUrl: '' });
+    setForm({ name: '', price: '', discount: '', manufacturer: '', type: '', packSize: '', composition: '', quantity: '', category: '', image: null, imageUrl: '' });
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    // Handle number inputs properly
+    const finalValue = type === 'number' ? (value === '' ? '' : value) : value;
+    setForm((prev) => ({ ...prev, [name]: finalValue }));
   };
 
   const handleImageChange = (e) => {
@@ -52,26 +77,93 @@ function MedicalStoreVendorProducts() {
     }
   };
 
-  const handleAddProduct = () => {
-    setProducts((prev) => [
-      ...prev,
-      { ...form, id: prev.length + 1, image: form.imageUrl }
-    ]);
-    handleCloseModal();
+  const handleAddProduct = async () => {
+    if (!form.name || !form.price || !form.type || !form.quantity) {
+      addToast('error', 'Error', 'Please fill in all required fields.');
+      return;
+    }
+
+    setAddingProduct(true);
+    try {
+      const productData = {
+        name: form.name,
+        price: parseFloat(form.price),
+        discount: parseInt(form.discount) || 0,
+        manufacturer: form.manufacturer,
+        type: form.type,
+        packSizeLabel: form.packSize,
+        shortComposition: form.composition,
+        productURLs: form.imageUrl ? [form.imageUrl] : [],
+        category: form.category,
+        quantity: parseInt(form.quantity)
+      };
+
+      const response = await addProduct(vendorId, productData);
+      
+      // Add the new product to local state
+      setProducts(prev => [...prev, response.product]);
+      
+      // Show success toast
+      addToast('success', 'Success', `${form.name} added successfully!`);
+      
+      // Close modal and reset form
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error adding product:', error);
+      // Show error toast
+      addToast('error', 'Error', 'Failed to add product. Please try again.');
+    } finally {
+      setAddingProduct(false);
+    }
   };
 
-  const handleEditProduct = () => {
-    setProducts(prev => prev.map(prod => 
-      prod.id === selectedProduct.id ? { ...form, id: prod.id, image: form.imageUrl } : prod
-    ));
-    handleCloseModal();
+  const handleEditProduct = async () => {
+    if (!form.name || !form.price || !form.type || !form.quantity) {
+      addToast('error', 'Error', 'Please fill in all required fields.');
+      return;
+    }
+
+    setUpdatingProduct(true);
+    try {
+      const productData = {
+        name: form.name,
+        price: parseFloat(form.price),
+        discount: parseInt(form.discount) || 0,
+        manufacturer: form.manufacturer,
+        type: form.type,
+        packSizeLabel: form.packSize,
+        shortComposition: form.composition,
+        productURLs: form.imageUrl ? [form.imageUrl] : [],
+        category: form.category,
+        quantity: parseInt(form.quantity)
+      };
+
+      const response = await updateProduct(selectedProduct.productId, productData);
+      
+      // Update the product in local state
+      setProducts(prev => prev.map(prod => 
+        prod.productId === selectedProduct.productId ? response.product : prod
+      ));
+      
+      // Show success toast
+      addToast('success', 'Success', `${form.name} updated successfully!`);
+      
+      // Close modal and reset form
+      handleCloseModal();
+    } catch (error) {
+      console.error('Error updating product:', error);
+      // Show error toast
+      addToast('error', 'Error', 'Failed to update product. Please try again.');
+    } finally {
+      setUpdatingProduct(false);
+    }
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (isEditing) {
-      handleEditProduct();
+      await handleEditProduct();
     } else {
-      handleAddProduct();
+      await handleAddProduct();
     }
   };
 
@@ -96,11 +188,12 @@ function MedicalStoreVendorProducts() {
       discount: selectedProduct.discount,
       manufacturer: selectedProduct.manufacturer,
       type: selectedProduct.type,
-      packSize: selectedProduct.packSize,
-      composition: selectedProduct.composition,
-      quantity: selectedProduct.quantity,
+      packSize: selectedProduct.packSizeLabel,
+      composition: selectedProduct.shortComposition,
+      quantity: selectedProduct.inventory?.quantity || selectedProduct.quantity,
+      category: selectedProduct.inventory?.category || '',
       image: null,
-      imageUrl: selectedProduct.image
+      imageUrl: selectedProduct.productURLs && selectedProduct.productURLs.length > 0 ? selectedProduct.productURLs[0] : ''
     });
     setIsEditing(true);
     setModalOpen(true);
@@ -112,10 +205,38 @@ function MedicalStoreVendorProducts() {
     handleMenuClose();
   };
 
-  const confirmDelete = () => {
-    setProducts(prev => prev.filter(prod => prod.id !== selectedProduct.id));
-    setDeleteDialogOpen(false);
-    setSelectedProduct(null);
+  const addToast = (type, title, message) => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, type, title, message }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedProduct) return;
+    
+    setDeletingProduct(true);
+    try {
+      await deleteProduct(selectedProduct.productId);
+      
+      // Remove the product from local state
+      setProducts(prev => prev.filter(prod => prod.productId !== selectedProduct.productId));
+      
+      // Show success toast
+      addToast('success', 'Success', `${selectedProduct.name} deleted successfully!`);
+      
+      // Close dialog and reset
+      setDeleteDialogOpen(false);
+      setSelectedProduct(null);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      // Show error toast
+      addToast('error', 'Error', 'Failed to delete product. Please try again.');
+    } finally {
+      setDeletingProduct(false);
+    }
   };
 
   return (
@@ -126,46 +247,66 @@ function MedicalStoreVendorProducts() {
           Add Product
         </Button>
       </Box>
-      <TableContainer component={Paper}>
-        <Table size="small">
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'rgba(139,104,255,0.08)' }}>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Image</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Name</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Type</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Pack Size</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Manufacturer</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Price (₹)</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Discount (%)</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Quantity</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Short Composition</TableCell>
-              <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((prod) => (
-              <TableRow key={prod.id} hover>
-                <TableCell>
-                  {prod.image ? <Avatar src={prod.image} alt={prod.name} /> : <Avatar>{prod.name[0]}</Avatar>}
-                </TableCell>
-                <TableCell>{prod.name}</TableCell>
-                <TableCell>{prod.type}</TableCell>
-                <TableCell>{prod.packSize}</TableCell>
-                <TableCell>{prod.manufacturer}</TableCell>
-                <TableCell>{prod.price}</TableCell>
-                <TableCell>{prod.discount}</TableCell>
-                <TableCell>{prod.quantity}</TableCell>
-                <TableCell>{prod.composition}</TableCell>
-                <TableCell>
-                  <IconButton size="small" onClick={(e) => handleMenuClick(e, prod)}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </TableCell>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: 'rgba(139,104,255,0.08)' }}>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Image</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Pack Size</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Manufacturer</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Price (₹)</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Discount (%)</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Quantity</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Short Composition</TableCell>
+                <TableCell sx={{ fontWeight: 700, py: 2, borderBottom: '2px solid #e0e0e0' }}>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {products.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={10} sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography color="text.secondary">
+                      No products found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                products.map((prod) => (
+                  <TableRow key={prod.productId} hover>
+                    <TableCell>
+                      {prod.productURLs && prod.productURLs.length > 0 ? (
+                        <Avatar src={prod.productURLs[0]} alt={prod.name} />
+                      ) : (
+                        <Avatar>{prod.name[0]}</Avatar>
+                      )}
+                    </TableCell>
+                    <TableCell>{prod.name}</TableCell>
+                    <TableCell>{prod.type}</TableCell>
+                    <TableCell>{prod.packSizeLabel}</TableCell>
+                    <TableCell>{prod.manufacturer}</TableCell>
+                    <TableCell>{prod.price}</TableCell>
+                    <TableCell>{prod.discount}</TableCell>
+                    <TableCell>{prod.inventory?.quantity || prod.quantity}</TableCell>
+                    <TableCell>{prod.shortComposition}</TableCell>
+                    <TableCell>
+                      <IconButton size="small" onClick={(e) => handleMenuClick(e, prod)}>
+                        <MoreVertIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       {/* Action Menu */}
       <Menu
@@ -206,25 +347,32 @@ function MedicalStoreVendorProducts() {
               </Button>
             </Box>
             <TextField label="Medicine Name" name="name" value={form.name} onChange={handleChange} required fullWidth />
-            <TextField label="Price" name="price" value={form.price} onChange={handleChange} required fullWidth type="number" InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }} />
-            <TextField label="Discount (%)" name="discount" value={form.discount} onChange={handleChange} fullWidth type="number" />
+            <TextField label="Price" name="price" value={form.price} onChange={handleChange} required fullWidth type="number" inputProps={{ min: 0, step: 0.01 }} InputProps={{ startAdornment: <InputAdornment position="start">₹</InputAdornment> }} />
+            <TextField label="Discount (%)" name="discount" value={form.discount} onChange={handleChange} fullWidth type="number" inputProps={{ min: 0, max: 100 }} />
             <TextField label="Manufacturer" name="manufacturer" value={form.manufacturer} onChange={handleChange} fullWidth />
             <TextField select label="Type" name="type" value={form.type} onChange={handleChange} required fullWidth>
               {productTypes.map((type) => (
                 <MenuItem key={type} value={type}>{type}</MenuItem>
               ))}
             </TextField>
-            <TextField label="Pack Size Label" name="packSize" value={form.packSize} onChange={handleChange} fullWidth />
-            <TextField label="Short Composition" name="composition" value={form.composition} onChange={handleChange} fullWidth />
-            <TextField label="Quantity" name="quantity" value={form.quantity} onChange={handleChange} required fullWidth type="number" />
+                         <TextField label="Pack Size Label" name="packSize" value={form.packSize} onChange={handleChange} fullWidth />
+             <TextField label="Short Composition" name="composition" value={form.composition} onChange={handleChange} fullWidth />
+             <TextField select label="Category" name="category" value={form.category} onChange={handleChange} required fullWidth>
+               {productCategories.map((category) => (
+                 <MenuItem key={category} value={category}>{category}</MenuItem>
+               ))}
+             </TextField>
+             <TextField label="Quantity" name="quantity" value={form.quantity} onChange={handleChange} required fullWidth type="number" inputProps={{ min: 1 }} />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="secondary" variant="outlined">Cancel</Button>
-          <Button onClick={handleSaveProduct} color="primary" variant="contained">
-            {isEditing ? 'Update Product' : 'Add Product'}
-          </Button>
-        </DialogActions>
+                 <DialogActions>
+           <Button onClick={handleCloseModal} color="secondary" variant="outlined" disabled={addingProduct || updatingProduct}>
+             Cancel
+           </Button>
+           <Button onClick={handleSaveProduct} color="primary" variant="contained" disabled={addingProduct || updatingProduct}>
+             {addingProduct ? 'Adding...' : updatingProduct ? 'Updating...' : (isEditing ? 'Update Product' : 'Add Product')}
+           </Button>
+         </DialogActions>
       </Dialog>
 
       {/* View Product Modal */}
@@ -274,23 +422,36 @@ function MedicalStoreVendorProducts() {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Product</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Are you sure you want to delete "{selectedProduct?.name}"? This action cannot be undone.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)} color="secondary" variant="outlined">
-            Cancel
-          </Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+             {/* Delete Confirmation Dialog */}
+       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+         <DialogTitle>Delete Product</DialogTitle>
+         <DialogContent>
+           <DialogContentText>
+             Are you sure you want to delete "{selectedProduct?.name}"? This action cannot be undone.
+           </DialogContentText>
+         </DialogContent>
+         <DialogActions>
+           <Button 
+             onClick={() => setDeleteDialogOpen(false)} 
+             color="secondary" 
+             variant="outlined"
+             disabled={deletingProduct}
+           >
+             Cancel
+           </Button>
+           <Button 
+             onClick={confirmDelete} 
+             color="error" 
+             variant="contained"
+             disabled={deletingProduct}
+           >
+             {deletingProduct ? 'Deleting...' : 'Delete'}
+           </Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Toast Container */}
+       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </Box>
   );
 }

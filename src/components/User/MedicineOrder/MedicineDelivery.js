@@ -32,10 +32,54 @@ function MedicineDelivery() {
       setLocationAllowed(false);
       return;
     }
-    navigator.geolocation.getCurrentPosition(
-      () => setLocationAllowed(true),
-      () => setLocationAllowed(false)
-    );
+    
+    // Check if permission is already granted
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+        console.log('Permission status:', permissionStatus.state);
+        if (permissionStatus.state === 'granted') {
+          setLocationAllowed(true);
+        } else if (permissionStatus.state === 'denied') {
+          setLocationAllowed(false);
+        } else {
+          // Permission not determined yet, will be requested when needed
+          setLocationAllowed(null);
+        }
+      }).catch((error) => {
+        console.error('Error checking permission:', error);
+        // Fallback: assume permission not determined
+        setLocationAllowed(null);
+      });
+    } else {
+      // Fallback for browsers that don't support permissions API
+      // Try a quick position check to see if permission is already granted
+      navigator.geolocation.getCurrentPosition(
+        () => setLocationAllowed(true),
+        () => setLocationAllowed(null), // Not determined, will request when needed
+        { timeout: 1000, maximumAge: 0 }
+      );
+    }
+  }, []);
+
+  // Additional effect to handle permission changes
+  useEffect(() => {
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+        const handlePermissionChange = () => {
+          console.log('Permission changed to:', permissionStatus.state);
+          if (permissionStatus.state === 'granted') {
+            setLocationAllowed(true);
+          } else if (permissionStatus.state === 'denied') {
+            setLocationAllowed(false);
+          }
+        };
+        
+        permissionStatus.addEventListener('change', handlePermissionChange);
+        return () => {
+          permissionStatus.removeEventListener('change', handlePermissionChange);
+        };
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -164,6 +208,68 @@ function MedicineDelivery() {
     setPrescriptionId(null);
   };
 
+  const requestLocationPermission = () => {
+    if (!navigator.geolocation) {
+      setLocationAllowed(false);
+      return;
+    }
+    
+    console.log('Requesting location permission...');
+    
+    // Force the browser to show the permission prompt
+    // by calling getCurrentPosition with a simple success callback
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('Location permission granted:', position.coords);
+        setLocationAllowed(true);
+      },
+      (error) => {
+        console.error('Location permission denied:', error);
+        if (error.code === 1) {
+          // Permission denied
+          console.log('User denied location permission');
+          setLocationAllowed(false);
+        } else if (error.code === 2) {
+          // Position unavailable
+          console.log('Position unavailable');
+          setLocationAllowed(false);
+        } else if (error.code === 3) {
+          // Timeout
+          console.log('Location request timed out');
+          setLocationAllowed(false);
+        } else {
+          console.log('Unknown location error:', error);
+          setLocationAllowed(false);
+        }
+      },
+      {
+        enableHighAccuracy: false, // Start with low accuracy to ensure prompt shows
+        timeout: 30000, // 30 seconds timeout
+        maximumAge: 0 // Don't use cached position
+      }
+    );
+  };
+
+  const resetLocationPermission = () => {
+    console.log('Attempting to reset location permission...');
+    // Try to force a new permission request by clearing any cached state
+    setLocationAllowed(null);
+    
+    // Wait a moment then try to request permission again
+    setTimeout(() => {
+      requestLocationPermission();
+    }, 100);
+  };
+
+  const getBrowserInfo = () => {
+    const userAgent = navigator.userAgent;
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    return 'Unknown';
+  };
+
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');
     const s = (seconds % 60).toString().padStart(2, '0');
@@ -206,8 +312,80 @@ function MedicineDelivery() {
           <h2>Location Access Required</h2>
           <p>
             To upload your prescription and find the nearest medical shops, we need access to your location.<br/>
-            <b>Please enable location services in your browser or device settings.</b><br/>
-            Location helps us connect you with the closest and fastest service for your medicine delivery.
+            <b>Location permission has been denied. Please follow these steps to enable it:</b>
+          </p>
+          <div style={{ textAlign: 'left', margin: '20px 0', padding: '15px', background: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+            <h4 style={{ marginBottom: '10px' }}>How to Enable Location Access:</h4>
+            <ol style={{ margin: '0', paddingLeft: '20px' }}>
+              <li>Click the lock/info icon in your browser's address bar</li>
+              <li>Find "Location" or "Site settings"</li>
+              <li>Change from "Block" to "Allow"</li>
+              <li>Refresh this page</li>
+            </ol>
+            <div style={{ marginTop: '15px', fontSize: '0.9em', opacity: 0.8 }}>
+              <strong>Browser-specific instructions:</strong>
+              <ul style={{ margin: '10px 0', paddingLeft: '20px' }}>
+                <li><strong>Chrome:</strong> Click the lock icon → Site settings → Location → Allow</li>
+                <li><strong>Firefox:</strong> Click the shield icon → Site permissions → Location access → Allow</li>
+                <li><strong>Safari:</strong> Safari → Preferences → Websites → Location → Allow</li>
+                <li><strong>Edge:</strong> Click the lock icon → Site permissions → Location → Allow</li>
+              </ul>
+            </div>
+            <p style={{ marginTop: '15px', fontSize: '0.9em', opacity: 0.8 }}>
+              <strong>Alternative:</strong> You can also try the buttons below to request permission again.
+            </p>
+          </div>
+          <button 
+            className="request-location-btn" 
+            onClick={requestLocationPermission}
+            style={{ marginTop: '10px' }}
+          >
+            Try Requesting Permission Again
+          </button>
+          <button 
+            className="request-location-btn" 
+            onClick={resetLocationPermission}
+            style={{ 
+              marginTop: '10px', 
+              marginLeft: '10px',
+              background: 'linear-gradient(45deg, #ff9800, #f57c00)'
+            }}
+          >
+            Reset & Try Again
+          </button>
+        </div>
+      ) : locationAllowed === null ? (
+        <div className="location-permission-request">
+          <h2>Location Permission Required</h2>
+          <p>
+            To upload your prescription and find the nearest medical shops, we need access to your location.<br/>
+            Please click the button below to allow location access.
+          </p>
+          <button className="request-location-btn" onClick={requestLocationPermission}>
+            Allow Location Access
+          </button>
+          <button 
+            className="request-location-btn" 
+            onClick={() => {
+              console.log('Alternative permission request...');
+              // Try a different approach to trigger permission
+              navigator.geolocation.getCurrentPosition(
+                () => setLocationAllowed(true),
+                () => setLocationAllowed(false),
+                { timeout: 5000, maximumAge: 0 }
+              );
+            }}
+            style={{ 
+              marginTop: '10px', 
+              background: 'linear-gradient(45deg, #ff9800, #f57c00)',
+              fontSize: '0.9em',
+              padding: '10px 20px'
+            }}
+          >
+            Try Alternative Method
+          </button>
+          <p style={{ marginTop: '15px', fontSize: '0.9em', opacity: 0.8 }}>
+            💡 <strong>Tip:</strong> If the permission prompt doesn't appear, try the alternative method or refresh the page.
           </p>
         </div>
       ) : (

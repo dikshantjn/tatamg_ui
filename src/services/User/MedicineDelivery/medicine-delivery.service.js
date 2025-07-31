@@ -28,4 +28,6 @@ export const updateMedicineOrder = async (orderId, updateFields) => {
   const endpoint = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.UPDATE_ORDER, { orderId }));
   const response = await axios.put(endpoint, updateFields);
   return response.data;
-}; 
+};
+
+ 

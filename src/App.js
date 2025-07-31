@@ -76,12 +76,15 @@ import MedicalStoreVendorProducts from './components/Vendors/MedicalStoreVendor/
 import MedicalStoreVendorProfile from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorProfile';
 import MedicalStoreVendorReturns from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorReturns';
 import MedicalStoreVendorSettings from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorSettings';
+import MedicalStoreVendorProcessOrderPage from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorProcessOrderPage';
 import { VendorThemeProvider } from './contexts/VendorThemeContext';
 
 import { isAuthenticated as checkAuth } from './services/User/Auth/auth.utils';
 import { vendorAuthService } from './services/Vendors/VendorAuth/vendor-auth.service';
 import Logo from './components/ui/Logo';
 import ProductPartnerVendorProfile from './components/Vendors/ProductVendor/ProductPartnerVendorProfile';
+import HealthBlogs from './components/User/HealthBlogs/HealthBlogs';
+import BlogDetail from './components/User/HealthBlogs/BlogDetail';
 
 // Component to handle route-based SignIn display
 const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
@@ -106,7 +109,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
       '/rehabilitation', '/early-detection', '/nutrition', '/pet-care', 
       '/organ-donation', '/ayurveda', '/checkout-2', '/checkout-3', '/checkout-4', 
       '/checkout-product-medicine', '/gateway', '/profile', '/orders', '/order-history', '/track-order',
-      '/health-records'
+      '/health-records', '/health-blogs'
     ];
     const isProtected = protectedPaths.some(protectedPath => path.startsWith(protectedPath));
     console.log('🛡️ Route protection check:', { path, isProtected });
@@ -348,6 +351,12 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
           <Route path="/health-records" element={
             isAuthenticated ? <HealthRecords /> : <Navigate to="/" replace />
           } />
+          <Route path="/health-blogs" element={
+            isAuthenticated ? <HealthBlogs /> : <Navigate to="/" replace />
+          } />
+          <Route path="/health-blogs/:id" element={
+            isAuthenticated ? <BlogDetail /> : <Navigate to="/" replace />
+          } />
 
           {/* Vendor Routes */}
           <Route path="/vendor/product-partner/dashboard" element={<ProductVendorDashboard />} />
@@ -392,6 +401,13 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
             <VendorThemeProvider>
               <MedicalStoreVendorLayout title="Settings">
                 <MedicalStoreVendorSettings />
+              </MedicalStoreVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/pharmacy/process-order/:orderId" element={
+            <VendorThemeProvider>
+              <MedicalStoreVendorLayout title="Process Order">
+                <MedicalStoreVendorProcessOrderPage />
               </MedicalStoreVendorLayout>
             </VendorThemeProvider>
           } />

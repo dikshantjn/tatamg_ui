@@ -465,6 +465,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
         { path: '/vaccines', text: 'Vaccines' },
         { path: '/maternal-care', text: 'Maternal Care' },
         { path: '/insurance', text: 'Medical Insurance' },
+        { path: '/health-blogs', text: 'Health Blogs' },
 
     ];
 

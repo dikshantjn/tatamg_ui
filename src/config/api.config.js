@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.42:5000/api',
-    SOCKET_URL: 'http://192.168.1.42:5000',
+    BASE_URL: 'http://192.168.1.47:5000/api',
+    SOCKET_URL: 'http://192.168.1.47:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -117,6 +117,25 @@ export const API_CONFIG = {
         },
         MEDICAL_STORE_VENDOR: {
             GET_PROFILE: '/vendor/:vendorId',
+            UPDATE_PROFILE: '/vendors/update',
+            GET_PENDING_REQUESTS: '/prescription/requests/:vendorId',
+            ACCEPT_PRESCRIPTION: '/prescription/accept-status',
+            GET_ALL_ORDERS: '/orders/getOrders/:vendorId',
+            CONFIRM_ORDER: '/orders/:orderId/accept',
+            SEARCH_MEDICINES: '/orders/search',
+            ADD_TO_USER_CART: '/cart/add',
+            GET_CART_ITEMS: '/cart/:orderId',
+            DELETE_CART_ITEM: '/cart/delete/:cartId',
+            UPDATE_CART_QUANTITY: '/cart/update-quantity/:cartId',
+            UPDATE_ORDER_STATUS: '/orders/:orderId/status',
+            GET_VENDOR_PRODUCTS: '/medicineProduct/products/vendor/:vendorId',
+            DELETE_PRODUCT: '/medicineProduct/product/:productId',
+            ADD_PRODUCT: '/medicineProduct/add-product/:vendorId',
+            UPDATE_PRODUCT: '/medicineProduct/update-product/:productId',
+        },
+        BLOGS: {
+            GET_ALL: '/blogs/posts',
+            GET_ONE: '/blogs/posts/:blogPostId',
         },
         // Add other endpoint categories as needed
     }
