@@ -17,6 +17,11 @@ import HospitalVendorDashboard from './components/Vendors/HospitalVendor/Hospita
 import DoctorConsultationVendorDashboard from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorDashboard';
 import MedicalStoreVendorDashboard from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorDashboard';
 import AmbulanceVendorDashboard from './components/Vendors/AmbulanceVendor/AmbulanceVendorDashboard';
+import AmbulanceVendorRequests from './components/Vendors/AmbulanceVendor/AmbulanceVendorRequests';
+import AmbulanceVendorHistory from './components/Vendors/AmbulanceVendor/AmbulanceVendorHistory';
+import AmbulanceVendorProfile from './components/Vendors/AmbulanceVendor/AmbulanceVendorProfile';
+import AmbulanceVendorSettings from './components/Vendors/AmbulanceVendor/AmbulanceVendorSettings';
+import AmbulanceVendorProcessOrder from './components/Vendors/AmbulanceVendor/AmbulanceVendorProcessOrder';
 import BloodBankVendorDashboard from './components/Vendors/BloodBankVendor/BloodBankVendorDashboard';
 import LabTestVendorDashboard from './components/Vendors/LabTestVendor/LabTestVendorDashboard';
 import DeliveryPartnerVendorDashboard from './components/Vendors/DeliveryPartnerVendor/DeliveryPartnerVendorDashboard';
@@ -411,7 +416,36 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
               </MedicalStoreVendorLayout>
             </VendorThemeProvider>
           } />
-          <Route path="/vendor/ambulance/dashboard" element={<AmbulanceVendorDashboard />} />
+          <Route path="/vendor/ambulance/dashboard" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorDashboard />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/ambulance/requests" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorRequests />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/ambulance/history" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorHistory />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/ambulance/profile" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorProfile />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/ambulance/settings" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorSettings />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/ambulance/process-order/:requestId" element={
+            <VendorThemeProvider>
+              <AmbulanceVendorProcessOrder />
+            </VendorThemeProvider>
+          } />
           <Route path="/vendor/blood-bank/dashboard" element={<BloodBankVendorDashboard />} />
           <Route path="/vendor/lab-test/dashboard" element={<LabTestVendorDashboard />} />
           <Route path="/vendor/delivery-partner/dashboard" element={<DeliveryPartnerVendorDashboard />} />

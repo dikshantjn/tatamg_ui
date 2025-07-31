@@ -1,306 +1,421 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  AppBar,
-  Toolbar,
   Typography,
-  IconButton,
-  Drawer,
+  Card,
+  CardContent,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
   Chip,
   useTheme,
-  useMediaQuery,
-  Tooltip
+  LinearProgress,
+  Avatar,
+  IconButton,
+  Tooltip,
+  Button,
+  CircularProgress,
+  Switch,
+  FormControlLabel
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Dashboard,
-  LocalShipping,
   DirectionsCar,
-  People,
-  Assessment,
-  Settings,
-  Logout,
-  AccountCircle,
-  Notifications,
+  Schedule,
   TrendingUp,
   Emergency,
-  Payment,
-  Store,
   Visibility,
-  Schedule,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon
+  LocalShipping,
+  Assignment,
+  CheckCircle,
+  Warning,
+  Error,
+  Circle,
+  Refresh
 } from '@mui/icons-material';
+import AmbulanceVendorLayout from './AmbulanceVendorLayout';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
-import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
-import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const AmbulanceVendorDashboardContent = () => {
+const AmbulanceVendorDashboard = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useVendorTheme();
-  
-  // State management
   const [vendorData, setVendorData] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [vendorStatus, setVendorStatus] = useState({ isActive: true });
+  const [statusLoading, setStatusLoading] = useState(false);
 
-  // Check authentication on component mount
   useEffect(() => {
-    checkAuthentication();
+    const authData = vendorAuthService.getVendorAuthData();
+    if (authData && authData.vendorData) {
+      setVendorData(authData.vendorData);
+    }
+    setLoading(false);
   }, []);
 
-  const checkAuthentication = () => {
-    const authData = vendorAuthService.getVendorAuthData();
-    if (!authData || authData.userType !== 'vendor') {
-      console.log('Vendor not authenticated, redirecting to login');
-      navigate('/');
-      return;
-    }
-
-    setVendorData(authData.vendorData);
-    setLoading(false);
-    console.log('Ambulance vendor authenticated:', authData.vendorData);
-  };
-
-  const handleLogout = async () => {
+  const handleToggleActive = async () => {
     try {
-      // Get vendor data for logout API call
-      const authData = vendorAuthService.getVendorAuthData();
-      if (authData && authData.vendorData && authData.vendorData.vendorId) {
-        // Call logout API to remove session from database
-        await vendorAuthService.vendorLogout(authData.vendorData.vendorId);
-        console.log('Ambulance vendor logged out successfully from server');
-      }
+      setStatusLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setVendorStatus(prev => ({ isActive: !prev.isActive }));
+      toast.success(`Ambulance service is now ${!vendorStatus.isActive ? 'Active' : 'Inactive'}`);
     } catch (error) {
-      console.error('Error calling logout API:', error);
-      // Continue with local logout even if API call fails
+      console.error('Error toggling vendor status:', error);
+      toast.error('Failed to update service status. Please try again.');
     } finally {
-      // Clear local auth data
-      vendorAuthService.clearVendorAuthData();
-      setAnchorEl(null);
-      // Navigate to home page after logout
-      window.location.href = '/';
+      setStatusLoading(false);
     }
   };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
-  // Dashboard menu items
-  const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/vendor/ambulance/dashboard' },
-    { text: 'Fleet', icon: <DirectionsCar />, path: '/vendor/ambulance/fleet' },
-    { text: 'Bookings', icon: <Schedule />, path: '/vendor/ambulance/bookings' },
-    { text: 'Drivers', icon: <People />, path: '/vendor/ambulance/drivers' },
-    { text: 'Analytics', icon: <Assessment />, path: '/vendor/ambulance/analytics' },
-    { text: 'Settings', icon: <Settings />, path: '/vendor/ambulance/settings' },
-  ];
 
   // Sample dashboard data
   const dashboardStats = [
-    { title: 'Total Ambulances', value: '12', icon: <DirectionsCar />, color: 'primary' },
-    { title: 'Active Bookings', value: '8', icon: <Schedule />, color: 'secondary' },
-    { title: 'Revenue (₹)', value: '23,450', icon: <TrendingUp />, color: 'success' },
-    { title: 'Emergency Calls', value: '3', icon: <Emergency />, color: 'error' },
+    { 
+      title: 'Total Ambulances', 
+      value: '12', 
+      icon: <DirectionsCar />, 
+      color: 'primary',
+      progress: 85,
+      change: '+2 this month'
+    },
+    { 
+      title: 'Active Requests', 
+      value: '8', 
+      icon: <Assignment />, 
+      color: 'secondary',
+      progress: 65,
+      change: '+3 today'
+    },
+    { 
+      title: 'Revenue (₹)', 
+      value: '23,450', 
+      icon: <TrendingUp />, 
+      color: 'success',
+      progress: 92,
+      change: '+12% this week'
+    },
+    { 
+      title: 'Emergency Calls', 
+      value: '3', 
+      icon: <Emergency />, 
+      color: 'error',
+      progress: 45,
+      change: '-1 from yesterday'
+    },
   ];
+
+  const recentRequests = [
+    {
+      id: 'REQ001',
+      patient: 'John Doe',
+      type: 'Emergency',
+      status: 'In Progress',
+      time: '15 mins ago',
+      location: 'Mumbai Central',
+      ambulance: 'A1'
+    },
+    {
+      id: 'REQ002',
+      patient: 'Jane Smith',
+      type: 'Non-Emergency',
+      status: 'Completed',
+      time: '1 hour ago',
+      location: 'Andheri West',
+      ambulance: 'A3'
+    },
+    {
+      id: 'REQ003',
+      patient: 'Mike Johnson',
+      type: 'Emergency',
+      status: 'Pending',
+      time: '2 hours ago',
+      location: 'Bandra East',
+      ambulance: 'A2'
+    }
+  ];
+
+  const availableAmbulances = [
+    {
+      id: 'A1',
+      driver: 'Rajesh Kumar',
+      status: 'Available',
+      rating: 4.8,
+      location: 'Mumbai Central'
+    },
+    {
+      id: 'A2',
+      driver: 'Amit Patel',
+      status: 'Available',
+      rating: 4.6,
+      location: 'Andheri West'
+    },
+    {
+      id: 'A3',
+      driver: 'Suresh Singh',
+      status: 'On Call',
+      rating: 4.9,
+      location: 'Bandra East'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+        return 'success';
+      case 'In Progress':
+        return 'warning';
+      case 'Pending':
+        return 'info';
+      case 'Available':
+        return 'success';
+      case 'On Call':
+        return 'warning';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Completed':
+        return <CheckCircle fontSize="small" />;
+      case 'In Progress':
+        return <Warning fontSize="small" />;
+      case 'Pending':
+        return <Schedule fontSize="small" />;
+      case 'Available':
+        return <CheckCircle fontSize="small" />;
+      case 'On Call':
+        return <Emergency fontSize="small" />;
+      default:
+        return <Error fontSize="small" />;
+    }
+  };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography>Loading ambulance dashboard...</Typography>
-      </Box>
+      <AmbulanceVendorLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <Typography>Loading dashboard...</Typography>
+        </Box>
+      </AmbulanceVendorLayout>
     );
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh', backgroundColor: theme.palette.background.default }}>
-      {/* App Bar */}
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1, backgroundColor: theme.palette.background.header, color: theme.palette.text.primary }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Ambulance Dashboard
-          </Typography>
+    <AmbulanceVendorLayout>
+      <Box sx={{ 
+        width: '100%', 
+        px: { xs: 2, sm: 3 }
+      }}>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <Notifications />
-            </IconButton>
-            
-            {/* Dark Mode Toggle */}
-            <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
-              <IconButton color="inherit" onClick={toggleDarkMode}>
-                {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
-            </Tooltip>
-            
-            <Button
-              color="inherit"
-              onClick={handleMenuOpen}
-              startIcon={<AccountCircle />}
-              endIcon={<AccountCircle />}
-            >
-              {vendorData?.email?.split('@')[0] || 'Ambulance'}
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar Drawer */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: 240,
-            boxSizing: 'border-box',
-            marginTop: '64px',
-            height: 'calc(100vh - 64px)',
-            backgroundColor: theme.palette.background.sidebar,
+        {/* Welcome Card */}
+        <Card 
+          sx={{
+            mb: 4,
+            borderRadius: 3,
+            backgroundColor: theme.palette.mode === 'dark' ? 'grey.900' : 'grey.100',
             color: theme.palette.text.primary,
-            borderRight: `1px solid ${theme.palette.divider}`,
-          }
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Card sx={{ mb: 2 }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Avatar sx={{ width: 56, height: 56, mx: 'auto', mb: 1 }}>
-                <LocalShipping />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>
-                {vendorData?.generatedId || 'Ambulance'}
-              </Typography>
-              <Chip 
-                label="Ambulance Agency" 
-                color="primary" 
-                size="small" 
+            boxShadow: theme.shadows[8],
+            width: '100%',
+            maxWidth: '1200px',
+            mx: 'auto'
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+                  Welcome back,
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  {loading ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={20} />
+                      Loading...
+                    </Box>
+                  ) : (
+                    vendorData?.email?.split('@')[0] || 'Ambulance Service'
+                  )}
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.7 }}>
+                  {loading ? 'Loading...' : vendorData?.email || 'ambulance@example.com'}
+                </Typography>
+              </Box>
+              <Button
                 variant="outlined"
-              />
-            </CardContent>
-          </Card>
-
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem 
-                button 
-                key={item.text}
-                onClick={() => {
-                  // Handle navigation here
-                  console.log('Navigate to:', item.path);
-                }}
+                size="small"
+                onClick={handleToggleActive}
+                disabled={statusLoading}
+                startIcon={
+                  statusLoading ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <Circle sx={{ 
+                      color: vendorStatus?.isActive ? 'success.main' : 'error.main', 
+                      fontSize: '1.2rem' 
+                    }} />
+                  )
+                }
                 sx={{
-                  mb: 1,
-                  borderRadius: 1,
+                  borderRadius: 20,
+                  borderColor: vendorStatus?.isActive ? 'success.main' : 'error.main',
+                  color: vendorStatus?.isActive ? 'success.main' : 'error.main',
+                  fontWeight: 500,
+                  textTransform: 'none',
+                  minWidth: 110,
+                  px: 2,
                   '&:hover': {
-                    backgroundColor: isDarkMode ? 'rgba(139, 104, 255, 0.2)' : 'rgba(108, 71, 255, 0.08)',
-                    color: theme.palette.primary.main
-                  }
+                    borderColor: vendorStatus?.isActive ? 'success.dark' : 'error.dark',
+                    backgroundColor: vendorStatus?.isActive ? 'success.lighter' : 'error.lighter',
+                  },
+                  '&:disabled': {
+                    opacity: 0.6,
+                  },
                 }}
               >
-                <ListItemIcon sx={{ color: 'inherit' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px', backgroundColor: theme.palette.background.default }}>
-        <Typography variant="h4" gutterBottom color={theme.palette.text.primary}>
-          Welcome back, {vendorData?.email?.split('@')[0] || 'Ambulance'}!
-        </Typography>
-        
-        <Typography variant="body1" color={theme.palette.text.secondary} sx={{ mb: 4 }}>
-          Here's what's happening with your ambulance service today.
-        </Typography>
+                {statusLoading ? 'Loading...' : (vendorStatus?.isActive ? 'Active' : 'Inactive')}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
 
         {/* Dashboard Stats */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          Service Overview
+        </Typography>
+        <Box sx={{ 
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+          gap: 3,
+          justifyContent: 'center',
+          maxWidth: '1400px',
+          mx: 'auto',
+          mb: 4
+        }}>
           {dashboardStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Box sx={{ 
-                      p: 1, 
-                      borderRadius: 1, 
-                      backgroundColor: `${stat.color}.light`,
-                      color: `${stat.color}.contrastText`,
-                      mr: 2
-                    }}>
-                      {stat.icon}
-                    </Box>
-                    <Typography variant="h4" component="div">
-                      {stat.value}
-                    </Typography>
+            <Card 
+              key={index}
+              sx={{
+                height: '100%',
+                minHeight: { xs: 140, sm: 150, md: 160 },
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: theme.shadows[8]
+                }
+              }}
+            >
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  mb: { xs: 1.5, sm: 2, md: 2.5 },
+                  flex: 1
+                }}>
+                  <Box sx={{ 
+                    p: { xs: 1.5, sm: 1.8, md: 2 }, 
+                    borderRadius: 3, 
+                    backgroundColor: `${stat.color}.light`,
+                    color: `${stat.color}.contrastText`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: { xs: 48, sm: 56, md: 64 },
+                    minHeight: { xs: 48, sm: 56, md: 64 }
+                  }}>
+                    {stat.icon}
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                </Box>
+                <Box sx={{ textAlign: 'center', flex: 1 }}>
+                  <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
                     {stat.title}
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } }}>
+                    {stat.change}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
         {/* Recent Activity */}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          Recent Activity
+        </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
+          <Grid item xs={12} md={6} sx={{ width: '100%' }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                minHeight: { xs: 300, md: 400 },
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[6]
+                }
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Recent Bookings
-                </Typography>
-                <List>
-                  {[1, 2, 3].map((item) => (
-                    <ListItem key={item} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <Schedule color="primary" />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Recent Requests
+                  </Typography>
+                  <IconButton size="small">
+                    <Refresh />
+                  </IconButton>
+                </Box>
+                <List sx={{ p: 0 }}>
+                  {recentRequests.map((request) => (
+                    <ListItem key={request.id} sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Avatar sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: theme.palette[getStatusColor(request.status)].main 
+                        }}>
+                          {getStatusIcon(request.status)}
+                        </Avatar>
                       </ListItemIcon>
                       <ListItemText
-                        primary={`Booking #${1000 + item}`}
-                        secondary={`Emergency • 15 mins ago`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                              {request.patient}
+                            </Typography>
+                            <Chip 
+                              label={request.type} 
+                              size="small" 
+                              color={request.type === 'Emergency' ? 'error' : 'default'}
+                              variant="outlined"
+                              sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              {request.location} • {request.time}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              Ambulance: {request.ambulance}
+                            </Typography>
+                          </Box>
+                        }
                       />
-                      <Chip label="In Progress" size="small" color="warning" />
+                      <Chip 
+                        label={request.status} 
+                        size="small" 
+                        color={getStatusColor(request.status)}
+                        icon={getStatusIcon(request.status)}
+                        sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                      />
                     </ListItem>
                   ))}
                 </List>
@@ -308,27 +423,73 @@ const AmbulanceVendorDashboardContent = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Card>
+          <Grid item xs={12} md={6} sx={{ width: '100%' }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                minHeight: { xs: 300, md: 400 },
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: theme.shadows[6]
+                }
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Available Ambulances
-                </Typography>
-                <List>
-                  {['Ambulance A1', 'Ambulance A2', 'Ambulance A3'].map((ambulance, index) => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <DirectionsCar color="success" />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Available Ambulances
+                  </Typography>
+                  <IconButton size="small">
+                    <Refresh />
+                  </IconButton>
+                </Box>
+                <List sx={{ p: 0 }}>
+                  {availableAmbulances.map((ambulance) => (
+                    <ListItem key={ambulance.id} sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Avatar sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: theme.palette[getStatusColor(ambulance.status)].main 
+                        }}>
+                          <DirectionsCar />
+                        </Avatar>
                       </ListItemIcon>
                       <ListItemText
-                        primary={ambulance}
-                        secondary={`Driver: John Doe • Available`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                              Ambulance {ambulance.id}
+                            </Typography>
+                            <Chip 
+                              label={ambulance.status} 
+                              size="small" 
+                              color={getStatusColor(ambulance.status)}
+                              icon={getStatusIcon(ambulance.status)}
+                              sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              Driver: {ambulance.driver}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              Location: {ambulance.location}
+                            </Typography>
+                          </Box>
+                        }
                       />
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Visibility fontSize="small" />
-                        <Typography variant="body2" color="text.secondary">
-                          {5 + index * 2}
-                        </Typography>
+                        <Tooltip title="Rating">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
+                              ⭐ {ambulance.rating}
+                            </Typography>
+                          </Box>
+                        </Tooltip>
                       </Box>
                     </ListItem>
                   ))}
@@ -338,50 +499,16 @@ const AmbulanceVendorDashboardContent = () => {
           </Grid>
         </Grid>
       </Box>
-
-      {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <AccountCircle fontSize="small" />
-          </ListItemIcon>
-          Profile
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
-};
-
-const AmbulanceVendorDashboard = () => {
-  return (
-    <VendorThemeProvider>
-      <AmbulanceVendorDashboardContent />
-    </VendorThemeProvider>
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000} 
+        hideProgressBar={false}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+        theme="colored"
+      />
+    </AmbulanceVendorLayout>
   );
 };
 
