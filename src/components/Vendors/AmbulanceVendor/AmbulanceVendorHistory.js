@@ -21,6 +21,10 @@ import {
   AccessTime
 } from '@mui/icons-material';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
+import { getCompletedBookingsByVendor } from '../../../services/Vendors/AmbulanceVendor.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AmbulanceVendorHistory = () => {
   const theme = useTheme();
@@ -28,97 +32,78 @@ const AmbulanceVendorHistory = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading data
-    setTimeout(() => {
-      setHistory([
-        {
-          id: 'HIST001',
-          patient: 'John Doe',
-          phone: '+91 98765 43210',
-          type: 'Emergency',
-          status: 'Completed',
-          date: '2024-01-15',
-          time: '14:30',
-          duration: '45 mins',
-          location: 'Mumbai Central, Mumbai',
-          destination: 'Apollo Hospital, Andheri',
-          ambulance: 'A1',
-          driver: 'Rajesh Kumar',
-          revenue: 2500,
-          rating: 5
-        },
-        {
-          id: 'HIST002',
-          patient: 'Jane Smith',
-          phone: '+91 98765 43211',
-          type: 'Non-Emergency',
-          status: 'Completed',
-          date: '2024-01-14',
-          time: '10:15',
-          duration: '30 mins',
-          location: 'Andheri West, Mumbai',
-          destination: 'Kokilaben Hospital, Andheri',
-          ambulance: 'A3',
-          driver: 'Suresh Singh',
-          revenue: 1800,
-          rating: 4
-        },
-        {
-          id: 'HIST003',
-          patient: 'Mike Johnson',
-          phone: '+91 98765 43212',
-          type: 'Emergency',
-          status: 'Completed',
-          date: '2024-01-13',
-          time: '16:45',
-          duration: '60 mins',
-          location: 'Bandra East, Mumbai',
-          destination: 'Lilavati Hospital, Bandra',
-          ambulance: 'A2',
-          driver: 'Amit Patel',
-          revenue: 3200,
-          rating: 5
-        },
-        {
-          id: 'HIST004',
-          patient: 'Sarah Wilson',
-          phone: '+91 98765 43213',
-          type: 'Non-Emergency',
-          status: 'Completed',
-          date: '2024-01-12',
-          time: '09:30',
-          duration: '35 mins',
-          location: 'Juhu, Mumbai',
-          destination: 'Nanavati Hospital, Vile Parle',
-          ambulance: 'A1',
-          driver: 'Rajesh Kumar',
-          revenue: 2200,
-          rating: 4
-        },
-        {
-          id: 'HIST005',
-          patient: 'David Brown',
-          phone: '+91 98765 43214',
-          type: 'Emergency',
-          status: 'Completed',
-          date: '2024-01-11',
-          time: '22:15',
-          duration: '40 mins',
-          location: 'Powai, Mumbai',
-          destination: 'Hiranandani Hospital, Powai',
-          ambulance: 'A3',
-          driver: 'Suresh Singh',
-          revenue: 2800,
-          rating: 4
+    const fetchCompletedBookings = async () => {
+      try {
+        setLoading(true);
+        
+        // Get vendor ID from authentication service
+        const authData = vendorAuthService.getVendorAuthData();
+        if (!authData || !authData.vendorData) {
+          toast.error('Vendor authentication required. Please login again.', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          return;
         }
-      ]);
-      setLoading(false);
-    }, 1000);
-  }, []);
+        
+        const vendorId = authData.vendorData.vendorId || authData.vendorData.id;
+        if (!vendorId) {
+          console.error('Vendor ID not found in auth data:', authData);
+          toast.error('Vendor ID not found. Please login again.', {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+          });
+          return;
+        }
+        
+        console.log('Using vendor ID from auth service:', vendorId);
+        const completedBookings = await getCompletedBookingsByVendor(vendorId);
+        
+        // Transform the API response to match our component's expected format
+        const transformedHistory = completedBookings.map(booking => ({
+          id: booking.requestId,
+          patient: booking.user?.name || 'Unknown Patient',
+          phone: booking.user?.phone_number || 'N/A',
+          type: booking.vehicleType || 'Emergency',
+          status: booking.status,
+          date: new Date(booking.timestamp).toLocaleDateString(),
+          time: new Date(booking.timestamp).toLocaleTimeString(),
+          duration: 'N/A', // Not available in API response
+          location: booking.pickupLocation,
+          destination: booking.dropLocation,
+          ambulance: booking.agencyProfile?.agencyName || 'N/A',
+          driver: 'N/A', // Not available in API response
+          revenue: booking.totalAmount,
+          rating: 5, // Default rating since not available in API
+          originalBooking: booking // Keep the original booking data
+        }));
+        
+        setHistory(transformedHistory);
+      } catch (error) {
+        console.error('Error fetching completed bookings:', error);
+        toast.error('Failed to fetch completed bookings. Please try again.', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const getTypeColor = (type) => {
-    return type === 'Emergency' ? 'error' : 'default';
-  };
+    fetchCompletedBookings();
+  }, []);
 
   if (loading) {
     return (
@@ -152,176 +137,215 @@ const AmbulanceVendorHistory = () => {
 
         {/* History Table */}
         <Box sx={{ maxWidth: '1400px', mx: 'auto' }}>
-          <TableContainer 
-            component={Paper} 
-            sx={{ 
-              borderRadius: 3,
-              boxShadow: theme.shadows[4],
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.divider}`
-            }}
-          >
-            <Table sx={{ minWidth: 650 }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Patient
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Type
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Date & Time
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Duration
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Ambulance
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Revenue
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Rating
-                  </TableCell>
-                  <TableCell sx={{ 
-                    color: 'white', 
-                    fontWeight: 700, 
-                    fontSize: '1rem',
-                    borderBottom: 'none'
-                  }}>
-                    Status
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {history.map((record) => (
-                  <TableRow 
-                    key={record.id}
-                    sx={{ 
-                      '&:hover': {
-                        backgroundColor: theme.palette.mode === 'dark' 
-                          ? 'rgba(255,255,255,0.05)' 
-                          : 'rgba(0,0,0,0.02)',
-                        transition: 'background-color 0.3s ease'
-                      },
-                      '&:nth-of-type(even)': {
-                        backgroundColor: theme.palette.mode === 'dark' 
-                          ? 'rgba(255,255,255,0.02)' 
-                          : 'rgba(0,0,0,0.01)'
-                      }
-                    }}
-                  >
-                    <TableCell>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                          {record.patient}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {record.phone}
-                        </Typography>
-                      </Box>
+          {history.length > 0 ? (
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                borderRadius: 3,
+                boxShadow: theme.shadows[4],
+                backgroundColor: theme.palette.background.paper,
+                border: `1px solid ${theme.palette.divider}`
+              }}
+            >
+              <Table sx={{ minWidth: 650 }}>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Patient
                     </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={record.type} 
-                        size="small" 
-                        color={getTypeColor(record.type)}
-                        variant="outlined"
-                      />
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Date & Time
                     </TableCell>
-                    <TableCell>
-                      <Box>
-                        <Typography variant="body2">
-                          {new Date(record.date).toLocaleDateString()}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {record.time}
-                        </Typography>
-                      </Box>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Duration
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {record.duration}
-                      </Typography>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Ambulance
                     </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <DirectionsCar fontSize="small" />
-                        <Typography variant="body2">
-                          {record.ambulance}
-                        </Typography>
-                      </Box>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Revenue
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        ₹{record.revenue.toLocaleString()}
-                      </Typography>
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Rating
                     </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <Typography variant="body2">⭐</Typography>
-                        <Typography variant="body2">{record.rating}</Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={record.status} 
-                        size="small" 
-                        color="success"
-                        icon={<CheckCircle fontSize="small" />}
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: '0.75rem',
-                          height: 28,
-                          '& .MuiChip-icon': {
-                            fontSize: '1rem'
-                          }
-                        }}
-                      />
+                    <TableCell sx={{ 
+                      color: 'white', 
+                      fontWeight: 700, 
+                      fontSize: '1rem',
+                      borderBottom: 'none'
+                    }}>
+                      Status
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {history.map((record) => (
+                    <TableRow 
+                      key={record.id}
+                      sx={{ 
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === 'dark' 
+                            ? 'rgba(255,255,255,0.05)' 
+                            : 'rgba(0,0,0,0.02)',
+                          transition: 'background-color 0.3s ease'
+                        },
+                        '&:nth-of-type(even)': {
+                          backgroundColor: theme.palette.mode === 'dark' 
+                            ? 'rgba(255,255,255,0.02)' 
+                            : 'rgba(0,0,0,0.01)'
+                        }
+                      }}
+                    >
+                      <TableCell>
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                            {record.patient}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {record.phone}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2">
+                            {record.date}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {record.time}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {record.duration}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <DirectionsCar fontSize="small" />
+                          <Typography variant="body2">
+                            {record.ambulance}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          ₹{record.revenue.toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Typography variant="body2">⭐</Typography>
+                          <Typography variant="body2">{record.rating}</Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={record.status} 
+                          size="small" 
+                          color="success"
+                          icon={<CheckCircle fontSize="small" />}
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: '0.75rem',
+                            height: 28,
+                            '& .MuiChip-icon': {
+                              fontSize: '1rem'
+                            }
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              py: 8,
+              px: 3
+            }}>
+              <Box sx={{ 
+                width: 120, 
+                height: 120, 
+                borderRadius: '50%', 
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 3
+              }}>
+                <History sx={{ 
+                  fontSize: 60, 
+                  color: theme.palette.text.secondary 
+                }} />
+              </Box>
+              <Typography variant="h5" sx={{ 
+                fontWeight: 600, 
+                color: theme.palette.text.primary,
+                mb: 1,
+                textAlign: 'center'
+              }}>
+                No Service History Found
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                color: theme.palette.text.secondary,
+                textAlign: 'center',
+                maxWidth: 400
+              }}>
+                There are currently no completed ambulance services in your history. 
+                Completed services will appear here once you finish processing ambulance requests.
+              </Typography>
+            </Box>
+          )}
         </Box>
+        
+        <ToastContainer 
+          position="top-right" 
+          autoClose={3000} 
+          hideProgressBar={false}
+          closeOnClick={true}
+          pauseOnHover={true}
+          draggable={true}
+          theme="colored"
+          limit={3}
+          newestOnTop={true}
+        />
       </Box>
     </AmbulanceVendorLayout>
   );

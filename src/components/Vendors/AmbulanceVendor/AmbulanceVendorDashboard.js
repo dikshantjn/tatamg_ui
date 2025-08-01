@@ -36,6 +36,8 @@ import {
 } from '@mui/icons-material';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { getVendorStatus, toggleVendorStatus } from '../../../services/Vendors/AllVendors.service';
+import { getAmbulanceVendorProfile } from '../../../services/Vendors/AmbulanceVendor.service';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -43,24 +45,76 @@ const AmbulanceVendorDashboard = () => {
   const theme = useTheme();
   const [vendorData, setVendorData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [vendorStatus, setVendorStatus] = useState({ isActive: true });
+  const [vendorStatus, setVendorStatus] = useState({ isActive: false });
   const [statusLoading, setStatusLoading] = useState(false);
 
   useEffect(() => {
-    const authData = vendorAuthService.getVendorAuthData();
-    if (authData && authData.vendorData) {
-      setVendorData(authData.vendorData);
-    }
-    setLoading(false);
+    const fetchVendorData = async () => {
+      try {
+        const authData = vendorAuthService.getVendorAuthData();
+        if (authData && authData.vendorData) {
+          setVendorData(authData.vendorData);
+          
+          // Fetch current vendor status from API using vendorId from stored data
+          const vendorId = authData.vendorData.vendorId || authData.vendorData.id;
+          if (vendorId) {
+            console.log('Fetching status for vendor ID:', vendorId);
+            
+            // Fetch vendor status
+            const statusData = await getVendorStatus(vendorId);
+            setVendorStatus({ isActive: statusData.isActive || false });
+            
+            // Fetch ambulance vendor profile
+            try {
+              const profileData = await getAmbulanceVendorProfile(vendorId);
+              console.log('Ambulance vendor profile:', profileData);
+              
+              // Update vendor data with profile information
+              setVendorData(prev => ({
+                ...prev,
+                agencyName: profileData.agencyName,
+                email: profileData.email,
+                ownerName: profileData.ownerName,
+                contactNumber: profileData.contactNumber,
+                agencyProfile: profileData
+              }));
+            } catch (profileError) {
+              console.error('Error fetching ambulance vendor profile:', profileError);
+              // Don't show error toast for profile fetch failure, just log it
+            }
+          } else {
+            console.warn('Vendor ID not found in stored data:', authData.vendorData);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching vendor data:', error);
+        toast.error('Failed to load vendor data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVendorData();
   }, []);
 
   const handleToggleActive = async () => {
     try {
       setStatusLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setVendorStatus(prev => ({ isActive: !prev.isActive }));
-      toast.success(`Ambulance service is now ${!vendorStatus.isActive ? 'Active' : 'Inactive'}`);
+      
+      const vendorId = vendorData?.vendorId || vendorData?.id;
+      if (!vendorId) {
+        toast.error('Vendor ID not found. Please try again.');
+        return;
+      }
+
+      console.log('Toggling status for vendor ID:', vendorId);
+      // Call the actual API to toggle vendor status
+      const response = await toggleVendorStatus(vendorId);
+      
+      // Update local state with the response from API
+      setVendorStatus({ isActive: response.isActive });
+      
+      toast.success(`Ambulance service is now ${response.isActive ? 'Active' : 'Inactive'}`);
     } catch (error) {
       console.error('Error toggling vendor status:', error);
       toast.error('Failed to update service status. Please try again.');
@@ -193,6 +247,24 @@ const AmbulanceVendorDashboard = () => {
     }
   };
 
+  const refreshVendorStatus = async () => {
+    try {
+      const vendorId = vendorData?.vendorId || vendorData?.id;
+      if (!vendorId) {
+        toast.error('Vendor ID not found. Please try again.');
+        return;
+      }
+
+      console.log('Refreshing status for vendor ID:', vendorId);
+      const statusData = await getVendorStatus(vendorId);
+      setVendorStatus({ isActive: statusData.isActive || false });
+      toast.success('Status refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing vendor status:', error);
+      toast.error('Failed to refresh status. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <AmbulanceVendorLayout>
@@ -236,7 +308,7 @@ const AmbulanceVendorDashboard = () => {
                       Loading...
                     </Box>
                   ) : (
-                    vendorData?.email?.split('@')[0] || 'Ambulance Service'
+                    vendorData?.agencyName || vendorData?.ownerName || 'Ambulance Service'
                   )}
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.7 }}>
@@ -367,7 +439,7 @@ const AmbulanceVendorDashboard = () => {
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Recent Requests
                   </Typography>
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={refreshVendorStatus} title="Refresh Status">
                     <Refresh />
                   </IconButton>
                 </Box>
@@ -440,7 +512,7 @@ const AmbulanceVendorDashboard = () => {
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Available Ambulances
                   </Typography>
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={refreshVendorStatus} title="Refresh Status">
                     <Refresh />
                   </IconButton>
                 </Box>

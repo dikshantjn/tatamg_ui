@@ -49,6 +49,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
+import { updateAmbulanceServiceDetails, updateAmbulanceStatus } from '../../../services/Vendors/AmbulanceVendor.service';
 
 const AmbulanceVendorProcessOrder = () => {
   const theme = useTheme();
@@ -63,36 +64,66 @@ const AmbulanceVendorProcessOrder = () => {
    const [editingServiceId, setEditingServiceId] = useState(null);
    const [serviceStatus, setServiceStatus] = useState('pending');
    const [statusMenuAnchor, setStatusMenuAnchor] = useState(null);
-   const [newService, setNewService] = useState({
-     pickupLocation: '',
-     dropLocation: '',
-     vehicleType: '',
-     totalDistance: '',
-     costPerKm: '',
-     baseCharge: '',
-     waivePayment: false,
-     notifyUser: false
-   });
+     const [newService, setNewService] = useState({
+    pickupLocation: '',
+    dropLocation: '',
+    vehicleType: '',
+    totalDistance: '',
+    costPerKm: '',
+    baseCharge: '',
+    waivePayment: false,
+    notifyUser: false
+  });
+
+  // Debug log whenever newService changes
+  useEffect(() => {
+    console.log('=== NEW SERVICE STATE CHANGED ===');
+    console.log('Current newService:', newService);
+    console.log('waivePayment value:', newService.waivePayment);
+    console.log('Type of waivePayment:', typeof newService.waivePayment);
+  }, [newService]);
 
   useEffect(() => {
     if (!requestData) {
       navigate('/vendor/ambulance/requests');
       return;
     }
-    // Load existing services for this request (mock data)
-    setServices([
-      {
+    
+    // Check if service details are already available
+    const hasServiceDetails = requestData.pickupLocation && requestData.dropLocation && 
+                            requestData.totalDistance && requestData.costPerKm && 
+                            requestData.baseCharge && requestData.vehicleType;
+    
+    if (hasServiceDetails) {
+      // Create service from the request data
+      const serviceFromRequest = {
         id: 1,
-        vehicleType: 'Basic Ambulance',
-        pickupLocation: 'Mumbai Central Station',
-        dropLocation: 'Bombay Hospital',
-        totalDistance: 15,
-        costPerKm: 50,
-        baseCharge: 200,
-        totalCost: 950,
-        status: 'active'
-      }
-    ]);
+        vehicleType: requestData.vehicleType || 'Basic Ambulance',
+        pickupLocation: requestData.pickupLocation || '',
+        dropLocation: requestData.dropLocation || '',
+        totalDistance: requestData.totalDistance || 0,
+        costPerKm: requestData.costPerKm || 0,
+        baseCharge: requestData.baseCharge || 0,
+        totalCost: requestData.totalAmount || 0,
+        status: 'active',
+        waivePayment: false,
+        notifyUser: true
+      };
+      
+      setServices([serviceFromRequest]);
+      
+      // Pre-fill the form for editing
+      setNewService({
+        pickupLocation: requestData.pickupLocation || '',
+        dropLocation: requestData.dropLocation || '',
+        vehicleType: requestData.vehicleType || 'Basic Ambulance',
+        totalDistance: requestData.totalDistance || '',
+        costPerKm: requestData.costPerKm || '',
+        baseCharge: requestData.baseCharge || '',
+        waivePayment: false,
+        notifyUser: true
+      });
+    }
   }, [requestData, navigate]);
 
      const handleEditService = (service) => {
@@ -111,77 +142,137 @@ const AmbulanceVendorProcessOrder = () => {
      setShowAddServiceDrawer(true);
    };
 
-   const handleAddService = () => {
+   const handleAddService = async () => {
      if (!newService.pickupLocation || !newService.dropLocation || !newService.vehicleType || 
          !newService.totalDistance || !newService.costPerKm || !newService.baseCharge) {
-       toast.error('Please fill all required service details');
+       toast.error('Please fill all required service details', {
+         position: "top-right",
+         autoClose: 3000,
+         hideProgressBar: false,
+         closeOnClick: true,
+         pauseOnHover: true,
+         draggable: true,
+         toastId: 'service-details-error',
+       });
        return;
      }
 
      const totalCost = (parseFloat(newService.totalDistance) * parseFloat(newService.costPerKm)) + parseFloat(newService.baseCharge);
      
-     if (isEditing) {
-       // Update existing service
-       setServices(prev => prev.map(service => 
-         service.id === editingServiceId 
-           ? { ...service, ...newService, totalCost: totalCost }
-           : service
-       ));
-       toast.success('Service updated successfully!');
-     } else {
-       // Add new service (only if no service exists)
-       if (services.length > 0) {
-         toast.error('Only one service can be added per order');
-         return;
-       }
-       const service = {
+     try {
+       // Debug: Log the waivePayment value
+       console.log('Current waivePayment value:', newService.waivePayment);
+       console.log('Type of waivePayment:', typeof newService.waivePayment);
+       
+       // Prepare service data for API
+       const serviceData = {
+         pickupLocation: newService.pickupLocation,
+         dropLocation: newService.dropLocation,
+         vehicleType: newService.vehicleType,
+         totalDistance: parseFloat(newService.totalDistance),
+         costPerKm: parseFloat(newService.costPerKm),
+         baseCharge: parseFloat(newService.baseCharge),
+         totalAmount: totalCost,
+         isPaymentBypassed: Boolean(newService.waivePayment),
+         status: 'WaitingForPayment'
+       };
+       
+       console.log('Service data being sent to API:', serviceData);
+
+       // Call the API to update service details
+       const updatedService = await updateAmbulanceServiceDetails(requestId, serviceData);
+       
+       // Update local state
+       const updatedServiceLocal = {
          id: Date.now(),
          ...newService,
          totalCost: totalCost,
          status: 'active'
        };
-       setServices(prev => [...prev, service]);
-       toast.success('Service added successfully!');
-     }
+       
+       if (isEditing) {
+         // Update existing service
+         setServices(prev => prev.map(service => 
+           service.id === editingServiceId 
+             ? { ...service, ...newService, totalCost: totalCost }
+             : service
+         ));
+         toast.success('Service updated successfully!', {
+           position: "top-right",
+           autoClose: 3000,
+           hideProgressBar: false,
+           closeOnClick: true,
+           pauseOnHover: true,
+           draggable: true,
+           toastId: 'service-updated',
+         });
+       } else {
+         // Add new service (only if no service exists)
+         if (services.length > 0) {
+           toast.error('Only one service can be added per order', {
+             position: "top-right",
+             autoClose: 3000,
+             hideProgressBar: false,
+             closeOnClick: true,
+             pauseOnHover: true,
+             draggable: true,
+             toastId: 'service-limit-error',
+           });
+           return;
+         }
+         setServices(prev => [...prev, updatedServiceLocal]);
+         toast.success('Service added successfully!', {
+           position: "top-right",
+           autoClose: 3000,
+           hideProgressBar: false,
+           closeOnClick: true,
+           pauseOnHover: true,
+           draggable: true,
+           toastId: 'service-added',
+         });
+       }
 
-     setNewService({
-       pickupLocation: '',
-       dropLocation: '',
-       vehicleType: '',
-       totalDistance: '',
-       costPerKm: '',
-       baseCharge: '',
-       waivePayment: false,
-       notifyUser: false
-     });
-     setIsEditing(false);
-     setEditingServiceId(null);
-     setShowAddServiceDrawer(false);
+       setNewService({
+         pickupLocation: '',
+         dropLocation: '',
+         vehicleType: '',
+         totalDistance: '',
+         costPerKm: '',
+         baseCharge: '',
+         waivePayment: false,
+         notifyUser: false
+       });
+       setIsEditing(false);
+       setEditingServiceId(null);
+       setShowAddServiceDrawer(false);
+     } catch (error) {
+       console.error('Error updating service details:', error);
+       toast.error('Failed to update service details. Please try again.', {
+         position: "top-right",
+         autoClose: 3000,
+         hideProgressBar: false,
+         closeOnClick: true,
+         pauseOnHover: true,
+         draggable: true,
+         toastId: 'service-update-error',
+       });
+     }
    };
 
   const handleRemoveService = (serviceId) => {
     setServices(prev => prev.filter(service => service.id !== serviceId));
-    toast.success('Service removed successfully!');
+    toast.success('Service removed successfully!', {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      toastId: 'service-removed',
+    });
   };
 
-     const getServiceTypeIcon = (vehicleType) => {
-     if (!vehicleType) return <DirectionsCar />;
      
-     switch (vehicleType.toLowerCase()) {
-       case 'basic ambulance':
-         return <DirectionsCar />;
-       case 'advanced life support':
-         return <Emergency />;
-       case 'icu ambulance':
-         return <Emergency />;
-       case 'neonatal ambulance':
-         return <Emergency />;
-       case 'cardiac ambulance':
-         return <Emergency />;
-       default:
-         return <DirectionsCar />;
-     }
-   };
 
    const handleStatusMenuOpen = (event) => {
      setStatusMenuAnchor(event.currentTarget);
@@ -191,10 +282,36 @@ const AmbulanceVendorProcessOrder = () => {
      setStatusMenuAnchor(null);
    };
 
-   const handleStatusChange = (newStatus) => {
-     setServiceStatus(newStatus);
-     handleStatusMenuClose();
-     toast.success(`Service status updated to: ${newStatus}`);
+   const handleStatusChange = async (newStatus) => {
+     try {
+       // Call the API to update the status
+       await updateAmbulanceStatus(requestId, newStatus);
+       
+       // Update local state
+       setServiceStatus(newStatus);
+       handleStatusMenuClose();
+       
+       toast.success(`Service status updated to: ${newStatus.replace('_', ' ')}`, {
+         position: "top-right",
+         autoClose: 3000,
+         hideProgressBar: false,
+         closeOnClick: true,
+         pauseOnHover: true,
+         draggable: true,
+         toastId: 'status-updated',
+       });
+     } catch (error) {
+       console.error('Error updating service status:', error);
+       toast.error('Failed to update service status. Please try again.', {
+         position: "top-right",
+         autoClose: 3000,
+         hideProgressBar: false,
+         closeOnClick: true,
+         pauseOnHover: true,
+         draggable: true,
+         toastId: 'status-update-error',
+       });
+     }
    };
 
    const getStatusColor = (status) => {
@@ -292,11 +409,11 @@ const AmbulanceVendorProcessOrder = () => {
                       fontWeight: 700
                     }}
                   >
-                    {requestData.customerName.charAt(0)}
+                    {requestData.user?.name?.charAt(0) || requestData.customerName?.charAt(0) || 'U'}
                   </Avatar>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                      {requestData.customerName}
+                      {requestData.user?.name || requestData.customerName || 'Unknown Customer'}
                     </Typography>
                     <Chip 
                       label={requestData.status} 
@@ -318,10 +435,24 @@ const AmbulanceVendorProcessOrder = () => {
                       Contact Number
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      {requestData.mobileNo}
+                      {requestData.user?.phone_number || requestData.mobileNo || 'N/A'}
                     </Typography>
                   </Box>
                 </Box>
+
+                {requestData.user?.emailId && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Person sx={{ mr: 2, color: theme.palette.secondary.main }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                        Email
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {requestData.user.emailId}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
 
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <AccessTime sx={{ mr: 2, color: theme.palette.info.main }} />
@@ -330,10 +461,24 @@ const AmbulanceVendorProcessOrder = () => {
                       Request Time
                     </Typography>
                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      {requestData.time}
+                      {new Date(requestData.timestamp || requestData.time).toLocaleString()}
                     </Typography>
                   </Box>
                 </Box>
+
+                {requestData.user?.location && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <LocationOn sx={{ mr: 2, color: theme.palette.warning.main }} />
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                        Location
+                      </Typography>
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        {requestData.user.location}, {requestData.user.city}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -346,12 +491,12 @@ const AmbulanceVendorProcessOrder = () => {
            }}>
             <CardContent sx={{ p: 3 }}>
                                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.primary.main }}>
-                        <DirectionsCar />
-                        Service Details
-                      </Typography>
-                    </Box>
+                                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1, color: theme.palette.primary.main }}>
+                      <DirectionsCar />
+                      Service Details
+                    </Typography>
+                  </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                       {serviceStatus !== 'pending' && (
                         <Chip
@@ -366,7 +511,40 @@ const AmbulanceVendorProcessOrder = () => {
                         variant="contained"
                         size="small"
                         startIcon={services.length > 0 ? <Edit /> : <Add />}
-                        onClick={() => setShowAddServiceDrawer(true)}
+                        onClick={() => {
+                          if (services.length > 0) {
+                            // If service exists, set editing mode
+                            const existingService = services[0];
+                            console.log('Existing service waivePayment:', existingService.waivePayment);
+                            setNewService({
+                              pickupLocation: existingService.pickupLocation,
+                              dropLocation: existingService.dropLocation,
+                              vehicleType: existingService.vehicleType,
+                              totalDistance: existingService.totalDistance,
+                              costPerKm: existingService.costPerKm,
+                              baseCharge: existingService.baseCharge,
+                              waivePayment: existingService.waivePayment || false,
+                              notifyUser: existingService.notifyUser || true
+                            });
+                            setIsEditing(true);
+                            setEditingServiceId(existingService.id);
+                          } else {
+                            // If no service exists, set add mode
+                            setNewService({
+                              pickupLocation: '',
+                              dropLocation: '',
+                              vehicleType: '',
+                              totalDistance: '',
+                              costPerKm: '',
+                              baseCharge: '',
+                              waivePayment: false,
+                              notifyUser: true
+                            });
+                            setIsEditing(false);
+                            setEditingServiceId(null);
+                          }
+                          setShowAddServiceDrawer(true);
+                        }}
                         sx={{ textTransform: 'none' }}
                       >
                         {services.length > 0 ? 'Edit Service' : 'Add Service'}
@@ -378,35 +556,10 @@ const AmbulanceVendorProcessOrder = () => {
                    <Box>
                      {services.map((service) => (
                        <Box key={service.id} sx={{ p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, mb: 2 }}>
-                         {/* Service Header */}
-                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                             <Avatar sx={{ 
-                               bgcolor: theme.palette.primary.main,
-                               width: 48,
-                               height: 48
-                             }}>
-                               {getServiceTypeIcon(service.vehicleType)}
-                             </Avatar>
-                             <Box>
-                               <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                                 {service.vehicleType}
-                               </Typography>
-                               <Chip 
-                                 label={service.waivePayment ? "Payment Waived" : "Payment Required"}
-                                 size="small"
-                                 color={service.waivePayment ? "warning" : "success"}
-                                 sx={{ fontWeight: 600 }}
-                               />
-                             </Box>
-                           </Box>
-                         </Box>
+
 
                                                    {/* Service Details Box */}
-                          <Box sx={{ mb: 3 }}>
-                            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.primary.main }}>
-                              Service Details
-                            </Typography>
+                           <Box sx={{ mb: 3 }}>
                             <Box sx={{ 
                               p: 3, 
                               bgcolor: theme.palette.background.paper, 
@@ -418,23 +571,31 @@ const AmbulanceVendorProcessOrder = () => {
                                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2, color: theme.palette.primary.main }}>
                                   Service Receipt
                                 </Typography>
-                                <Grid container spacing={2}>
-                                  <Grid item xs={12} sm={6}>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
-                                      Pickup Location
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                      {service.pickupLocation}
-                                    </Typography>
-                                  </Grid>
-                                  <Grid item xs={12} sm={6}>
-                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
-                                      Drop Location
-                                    </Typography>
-                                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                      {service.dropLocation}
-                                    </Typography>
-                                  </Grid>
+                                                                 <Grid container spacing={2}>
+                                   <Grid item xs={12} sm={6}>
+                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
+                                       Vehicle Type
+                                     </Typography>
+                                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                       {service.vehicleType}
+                                     </Typography>
+                                   </Grid>
+                                   <Grid item xs={12} sm={6}>
+                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
+                                       Pickup Location
+                                     </Typography>
+                                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                       {service.pickupLocation}
+                                     </Typography>
+                                   </Grid>
+                                   <Grid item xs={12} sm={6}>
+                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
+                                       Drop Location
+                                     </Typography>
+                                     <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                                       {service.dropLocation}
+                                     </Typography>
+                                   </Grid>
                                   <Grid item xs={12} sm={4}>
                                     <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
                                       Total Distance
@@ -516,19 +677,13 @@ const AmbulanceVendorProcessOrder = () => {
                              Update Service Status
                            </Typography>
                            <FormControl fullWidth size="small">
-                             <InputLabel>Select Status</InputLabel>
+                             <InputLabel>Select Status to Change</InputLabel>
                              <Select
                                value={serviceStatus}
                                onChange={(e) => handleStatusChange(e.target.value)}
-                               label="Select Status"
+                               label="Select Status to Change"
                                sx={{ textTransform: 'none' }}
                              >
-                               <MenuItem value="pending">
-                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                   <Warning color="default" />
-                                   <Typography>Pending</Typography>
-                                 </Box>
-                               </MenuItem>
                                <MenuItem value="on_the_way">
                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                    <DirectionsCarFilled color="info" />
@@ -622,14 +777,9 @@ const AmbulanceVendorProcessOrder = () => {
                 label="Drop Location"
                 value={newService.dropLocation}
                 onChange={(e) => setNewService(prev => ({ ...prev, dropLocation: e.target.value }))}
-                sx={{ mb: 3 }}
+                sx={{ mb: 2 }}
               />
 
-              {/* Vehicle Type */}
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.text.primary }}>
-                Vehicle Details
-              </Typography>
-              
               <FormControl fullWidth sx={{ mb: 3 }}>
                 <InputLabel>Vehicle Type</InputLabel>
                 <Select
@@ -638,12 +788,15 @@ const AmbulanceVendorProcessOrder = () => {
                   label="Vehicle Type"
                 >
                   <MenuItem value="Basic Ambulance">Basic Ambulance</MenuItem>
-                  <MenuItem value="Advanced Life Support">Advanced Life Support</MenuItem>
-                  <MenuItem value="ICU Ambulance">ICU Ambulance</MenuItem>
+                  <MenuItem value="ALS">ALS (Advanced Life Support)</MenuItem>
+                  <MenuItem value="BLS">BLS (Basic Life Support)</MenuItem>
                   <MenuItem value="Neonatal Ambulance">Neonatal Ambulance</MenuItem>
                   <MenuItem value="Cardiac Ambulance">Cardiac Ambulance</MenuItem>
+                  <MenuItem value="ICU Ambulance">ICU Ambulance</MenuItem>
                 </Select>
               </FormControl>
+
+              
 
               {/* Fare Details */}
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: theme.palette.text.primary }}>
@@ -689,7 +842,18 @@ const AmbulanceVendorProcessOrder = () => {
                 control={
                   <Switch
                     checked={newService.waivePayment}
-                    onChange={(e) => setNewService(prev => ({ ...prev, waivePayment: e.target.checked }))}
+                    onChange={(e) => {
+                      console.log('=== SWITCH TOGGLE DEBUG ===');
+                      console.log('Previous waivePayment value:', newService.waivePayment);
+                      console.log('Switch toggled to:', e.target.checked);
+                      console.log('Type of new value:', typeof e.target.checked);
+                      setNewService(prev => {
+                        console.log('Previous state:', prev);
+                        const newState = { ...prev, waivePayment: e.target.checked };
+                        console.log('New state:', newState);
+                        return newState;
+                      });
+                    }}
                   />
                 }
                 label="Waive Payment (Optional)"
@@ -792,15 +956,17 @@ const AmbulanceVendorProcessOrder = () => {
            </MenuItem>
          </Menu>
        </Box>
-       <ToastContainer 
-         position="top-right" 
-         autoClose={3000} 
-         hideProgressBar={false}
-         closeOnClick={true}
-         pauseOnHover={true}
-         draggable={true}
-         theme="colored"
-       />
+               <ToastContainer 
+          position="top-right" 
+          autoClose={3000} 
+          hideProgressBar={false}
+          closeOnClick={true}
+          pauseOnHover={true}
+          draggable={true}
+          theme="colored"
+          limit={3}
+          newestOnTop={true}
+        />
     </AmbulanceVendorLayout>
   );
 };

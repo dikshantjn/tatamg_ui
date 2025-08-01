@@ -1,1142 +1,1577 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
   Card,
   CardContent,
   Grid,
-  Avatar,
-  Button,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
+  Button,
   Chip,
+  Avatar,
+  IconButton,
+  useTheme,
   Switch,
   FormControlLabel,
   Divider,
+  Paper,
+  CircularProgress,
+  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  List,
-  ListItem,
-  ListItemIcon,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Checkbox,
   ListItemText,
-  Paper,
-  IconButton,
-  Tooltip,
-  useTheme
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Rating,
+  Tooltip
 } from '@mui/material';
 import {
-  LocalShipping,
   Edit,
   Save,
   Cancel,
-  Business,
-  Person,
+  LocationOn,
   Phone,
   Email,
   Language,
-  LocationOn,
-  PhotoCamera,
-  Description,
-  Security,
-  Assessment,
+  Business,
+  Person,
+  DirectionsCar,
+  GpsFixed,
   Schedule,
   Payment,
-  GpsFixed,
-  Badge,
-  Map,
-  CreditCard,
+  PhotoCamera,
+  ExpandMore,
   CheckCircle,
-  Settings,
-  Add,
-  Close
+  Warning,
+  Info,
+  Star,
+  MyLocation
 } from '@mui/icons-material';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { getAmbulanceVendorProfile, updateAmbulanceVendorProfile } from '../../../services/Vendors/AmbulanceVendor.service';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// File Names Form Component
+const FileNamesForm = ({ files, onUpload, onCancel }) => {
+  const theme = useTheme();
+  const [fileNames, setFileNames] = useState({});
+  const [uploading, setUploading] = useState(false);
+
+  // Styled TextField component for consistent theming
+  const StyledTextField = ({ ...props }) => (
+    <TextField
+      {...props}
+      variant="outlined"
+      sx={{
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#484F58' : '#E2E8F0',
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#8B949E' : '#B1BAC4',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+          backgroundColor: theme.palette.mode === 'dark' ? '#21262D' : '#FFFFFF',
+          color: theme.palette.text.primary,
+        },
+        '& .MuiInputLabel-root': {
+          color: theme.palette.mode === 'dark' ? '#8B949E' : '#4A5568',
+          '&.Mui-focused': {
+            color: theme.palette.primary.main,
+          },
+        },
+        '& .MuiInputBase-input': {
+          color: theme.palette.text.primary,
+        },
+        '& .MuiInputBase-input.Mui-disabled': {
+          color: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+          WebkitTextFillColor: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+        },
+        '& .MuiInputBase-input.Mui-disabled.MuiInputBase-inputMultiline': {
+          color: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+          WebkitTextFillColor: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+        },
+      }}
+    />
+  );
+
+  useEffect(() => {
+    // Initialize file names with original file names
+    const initialNames = {};
+    files.forEach(file => {
+      initialNames[file.name] = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+    });
+    setFileNames(initialNames);
+  }, [files]);
+
+  const handleNameChange = (fileName, newName) => {
+    setFileNames(prev => ({
+      ...prev,
+      [fileName]: newName
+    }));
+  };
+
+  const handleSubmit = () => {
+    setUploading(true);
+    
+    const filesWithNames = files.map(file => ({
+      file: file,
+      name: fileNames[file.name] || file.name
+    }));
+    
+    onUpload(filesWithNames);
+  };
+
+  return (
+    <Box>
+      <Box sx={{ mb: 3 }}>
+        {files.map((file, index) => (
+          <Box key={index} sx={{ mb: 2, p: 2, border: `1px solid ${theme.palette.divider}`, borderRadius: 2 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              File: {file.name}
+            </Typography>
+            <StyledTextField
+              fullWidth
+              label="Enter custom name"
+              value={fileNames[file.name] || ''}
+              onChange={(e) => handleNameChange(file.name, e.target.value)}
+              placeholder={`Enter name for ${file.name}`}
+              size="small"
+            />
+          </Box>
+        ))}
+      </Box>
+      
+      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+        <Button
+          variant="outlined"
+          onClick={onCancel}
+          disabled={uploading}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={uploading}
+          startIcon={uploading ? <CircularProgress size={16} /> : null}
+        >
+          {uploading ? 'Uploading...' : 'Upload Files'}
+        </Button>
+      </Box>
+    </Box>
+  );
+};
 
 const AmbulanceVendorProfile = () => {
   const theme = useTheme();
-  const [loading, setLoading] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [ambulanceTypeInput, setAmbulanceTypeInput] = useState('');
-  const [equipmentInput, setEquipmentInput] = useState('');
-  const [languageInput, setLanguageInput] = useState('');
-  const [formData, setFormData] = useState({
-    agencyName: 'Urge care',
-    gstNumber: 'AAFCI5006A1Z7',
-    panNumber: 'AAFCI5006A',
-    ownerName: 'Praveen',
-    registrationNumber: '22345',
-    address: 'wanowrie',
-    landmark: 'dmart',
-    contactNumber: '9370320066',
-    email: 'xyz3@gmail.com',
-    website: 'https://www.urgecare.com',
-    numOfAmbulances: '300',
-    driverKYC: true,
-    driverTrained: true,
-    ambulanceTypes: ['Basic Life Support (BLS)', 'Advanced Life Support (ALS)', 'Neonatal Ambulance', 'Air Ambulance', 'Mortuary Van'],
-    gpsTrackingAvailable: true,
+  
+  // Empty profile structure for initialization
+  const emptyProfile = {
+    id: '',
+    vendorId: '',
+    agencyName: '',
+    gstNumber: '',
+    panNumber: '',
+    ownerName: '',
+    registrationNumber: '',
+    address: '',
+    landmark: '',
+    contactNumber: '',
+    email: '',
+    website: '',
+    numOfAmbulances: '',
+    driverKYC: false,
+    driverTrained: false,
+    ambulanceTypes: [],
+    gpsTrackingAvailable: false,
     ambulanceEquipment: [],
-    trainingCertifications: ['Emergency Medical Technician', 'First Aid Certified'],
-    languageProficiency: ['English', 'Hindi', 'Marathi'],
-    operationalAreas: ['Pune', 'Mumbai', 'Nashik'],
-    is24x7Available: true,
-    distanceLimit: '0',
-    isOnlinePaymentAvailable: true,
+    trainingCertifications: [],
+    languageProficiency: [],
+    operationalAreas: [],
+    is24x7Available: false,
+    distanceLimit: 0,
+    isOnlinePaymentAvailable: false,
     officePhotos: [],
-    preciseLocation: '18.488856, 73.8674729',
-    driverLicense: '12345',
-    state: 'Maharashtra',
-    city: 'Pune',
-    pinCode: '411044'
-  });
+    preciseLocation: '',
+    driverLicense: '',
+    state: '',
+    city: '',
+    pinCode: ''
+  };
+
+  const [profile, setProfile] = useState(emptyProfile);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState(emptyProfile);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [uploadingCert, setUploadingCert] = useState(false);
+  const [uploadingOfficePhotos, setUploadingOfficePhotos] = useState(false);
+  const [showNameDialog, setShowNameDialog] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadType, setUploadType] = useState('');
+  
+  // Use ref to track current editing state
+  const editingRef = useRef(editing);
+
+  // Styled TextField component for consistent theming
+  const StyledTextField = ({ ...props }) => (
+    <TextField
+      {...props}
+      variant="outlined"
+      sx={{
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#484F58' : '#E2E8F0',
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#8B949E' : '#B1BAC4',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+          backgroundColor: theme.palette.mode === 'dark' ? '#21262D' : '#FFFFFF',
+          color: theme.palette.text.primary,
+        },
+        '& .MuiInputLabel-root': {
+          color: theme.palette.mode === 'dark' ? '#8B949E' : '#4A5568',
+          '&.Mui-focused': {
+            color: theme.palette.primary.main,
+          },
+        },
+        '& .MuiInputBase-input': {
+          color: theme.palette.text.primary,
+        },
+        '& .MuiInputBase-input.Mui-disabled': {
+          color: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+          WebkitTextFillColor: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+        },
+        '& .MuiInputBase-input.Mui-disabled.MuiInputBase-inputMultiline': {
+          color: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+          WebkitTextFillColor: theme.palette.mode === 'dark' ? '#484F58' : '#A0AEC0',
+        },
+      }}
+    />
+  );
+
+  // Styled FormControl component for Select fields
+  const StyledFormControl = ({ children, ...props }) => (
+    <FormControl
+      {...props}
+      sx={{
+        mb: 2,
+        '& .MuiOutlinedInput-root': {
+          '& fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#484F58' : '#E2E8F0',
+          },
+          '&:hover fieldset': {
+            borderColor: theme.palette.mode === 'dark' ? '#8B949E' : '#B1BAC4',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: theme.palette.primary.main,
+          },
+          backgroundColor: theme.palette.mode === 'dark' ? '#21262D' : '#FFFFFF',
+          color: theme.palette.text.primary,
+        },
+        '& .MuiInputLabel-root': {
+          color: theme.palette.mode === 'dark' ? '#8B949E' : '#4A5568',
+          '&.Mui-focused': {
+            color: theme.palette.primary.main,
+          },
+        },
+        '& .MuiSelect-select': {
+          color: theme.palette.text.primary,
+        },
+        '& .MuiSelect-icon': {
+          color: theme.palette.mode === 'dark' ? '#8B949E' : '#4A5568',
+        },
+        '& .MuiChip-root': {
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+        },
+      }}
+    >
+      {children}
+    </FormControl>
+  );
 
   const ambulanceTypeOptions = [
     'Basic Life Support (BLS)',
     'Advanced Life Support (ALS)',
     'Neonatal Ambulance',
     'Air Ambulance',
-    'Patient Transport Vehicle',
     'Mortuary Van',
-    'Mobile Intensive Care Unit'
+    'Cardiac Ambulance',
+    'ICU Ambulance',
+    'Emergency Response Vehicle'
   ];
 
-  const equipmentOptions = [
-    'Defibrillator',
-    'Ventilator',
-    'Oxygen Cylinder',
-    'ECG Machine',
-    'Stretcher',
-    'First Aid Kit',
-    'Suction Unit',
-    'IV Fluids',
-    'Cardiac Monitor'
+  const stateOptions = [
+    'Maharashtra', 'Delhi', 'Karnataka', 'Tamil Nadu', 'Telangana', 'Gujarat', 'West Bengal', 'Uttar Pradesh'
   ];
 
-  const states = [
-    'Maharashtra', 'Karnataka', 'Tamil Nadu', 'Gujarat', 'Rajasthan',
-    'Uttar Pradesh', 'West Bengal', 'Madhya Pradesh', 'Bihar', 'Odisha'
-  ];
+    // Update ref when editing state changes
+  useEffect(() => {
+    editingRef.current = editing;
+  }, [editing]);
 
-  const languages = [
-    'English', 'Hindi', 'Marathi', 'Tamil', 'Telugu', 'Kannada',
-    'Gujarati', 'Bengali', 'Malayalam', 'Punjabi'
-  ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      console.log('fetchProfile called, editing state:', editingRef.current);
+      try {
+        const authData = vendorAuthService.getVendorAuthData();
+        console.log('Auth data:', authData);
+        
+        if (authData && authData.vendorData) {
+          console.log('Vendor data:', authData.vendorData);
+          let vendorId = authData.vendorData.vendorId || authData.vendorData.id;
+          
+          // Use the correct vendor ID for testing
+          if (!vendorId) {
+            vendorId = 'b5fcf2c7-429b-4db8-9854-2916cdda0a4c';
+            console.log('Vendor ID not found in auth data, using correct vendor ID:', vendorId);
+          }
+          
+          console.log('Using vendor ID:', vendorId);
+          
+          if (vendorId) {
+            console.log('Fetching profile for vendor ID:', vendorId);
+            const profileData = await getAmbulanceVendorProfile(vendorId);
+            console.log('Profile data received:', profileData);
+            setProfile(profileData);
+            // Don't update editedProfile if currently editing
+            console.log('About to check editing state for setEditedProfile:', editingRef.current);
+            if (!editingRef.current) {
+              console.log('Setting editedProfile with fetched data');
+              setEditedProfile(profileData);
+            } else {
+              console.log('Skipping setEditedProfile because currently editing');
+            }
+          } else {
+            console.warn('Vendor ID not found, using empty profile');
+            setProfile(emptyProfile);
+            if (!editingRef.current) {
+              setEditedProfile(emptyProfile);
+            }
+          }
+        } else {
+          console.warn('No vendor auth data found, using empty profile');
+          setProfile(emptyProfile);
+          if (!editingRef.current) {
+            setEditedProfile(emptyProfile);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        console.error('Error response:', error.response);
+        console.error('Error status:', error.response?.status);
+        console.error('Error data:', error.response?.data);
+        
+        // Check if it's a 404 error (profile doesn't exist yet)
+        if (error.response && error.response.status === 404) {
+          console.log('Profile not found (404), using empty profile');
+          setProfile(emptyProfile);
+          if (!editingRef.current) {
+            setEditedProfile(emptyProfile);
+          }
+        } else {
+          // Only show error toast for non-404 errors
+          setTimeout(() => {
+            toast.error('Failed to load profile data. Using empty profile.');
+          }, 100);
+          setProfile(emptyProfile);
+          if (!editingRef.current) {
+            setEditedProfile(emptyProfile);
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []); // Keep empty dependencies to prevent infinite loops
 
   const handleEdit = () => {
-    setEditMode(true);
-  };
-
-  const handleSave = () => {
-    setEditMode(false);
-    setDialogOpen(true);
+    setEditing(true);
+    setEditedProfile({ ...profile });
   };
 
   const handleCancel = () => {
-    setEditMode(false);
+    setEditing(false);
+    setEditedProfile(profile);
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      
+      const authData = vendorAuthService.getVendorAuthData();
+      let vendorId = authData?.vendorData?.vendorId || authData?.vendorData?.id;
+      
+      // Use the correct vendor ID for testing
+      if (!vendorId) {
+        vendorId = 'b5fcf2c7-429b-4db8-9854-2916cdda0a4c';
+        console.log('Vendor ID not found in auth data for update, using correct vendor ID:', vendorId);
+      }
+      
+      if (!vendorId) {
+        setTimeout(() => {
+          toast.dismiss(); // Dismiss any existing toasts
+          toast.error('Vendor ID not found. Please try again.');
+        }, 200);
+        return;
+      }
+
+      // Prepare profile data for update
+      const profileDataToUpdate = { ...editedProfile };
+      
+      // Handle file uploads if there are new files
+      if (editedProfile.trainingCertifications) {
+        const newCertFiles = editedProfile.trainingCertifications.filter(cert => cert.file);
+        if (newCertFiles.length > 0) {
+          // Upload new certification files
+          const certFormData = new FormData();
+          newCertFiles.forEach((cert, index) => {
+            certFormData.append('files', cert.file);
+            certFormData.append('names', cert.name);
+          });
+          
+          // Here you would call your file upload API
+          // For now, we'll simulate the upload and update URLs
+          const uploadedCerts = newCertFiles.map(cert => ({
+            url: `https://firebasestorage.googleapis.com/v0/b/vedikahealthcare-59980.firebasestorage.app/o/ambulance_agency%2Ftraining_certification%2F${cert.name}_${Date.now()}.jpg?alt=media&token=simulated`,
+            name: cert.name
+          }));
+          
+          // Replace temporary files with uploaded URLs
+          profileDataToUpdate.trainingCertifications = [
+            ...(editedProfile.trainingCertifications.filter(cert => !cert.file)), // Keep existing files
+            ...uploadedCerts // Add newly uploaded files
+          ];
+        }
+      }
+      
+      if (editedProfile.officePhotos) {
+        const newPhotoFiles = editedProfile.officePhotos.filter(photo => photo.file);
+        if (newPhotoFiles.length > 0) {
+          // Upload new office photo files
+          const photoFormData = new FormData();
+          newPhotoFiles.forEach((photo, index) => {
+            photoFormData.append('files', photo.file);
+            photoFormData.append('names', photo.name);
+          });
+          
+          // Here you would call your file upload API
+          // For now, we'll simulate the upload and update URLs
+          const uploadedPhotos = newPhotoFiles.map(photo => ({
+            url: `https://firebasestorage.googleapis.com/v0/b/vedikahealthcare-59980.firebasestorage.app/o/ambulance_agency%2F${vendorId}%2FofficePhotos%2F${photo.name}_${Date.now()}.jpg?alt=media&token=simulated`,
+            name: photo.name
+          }));
+          
+          // Replace temporary files with uploaded URLs
+          profileDataToUpdate.officePhotos = [
+            ...(editedProfile.officePhotos.filter(photo => !photo.file)), // Keep existing files
+            ...uploadedPhotos // Add newly uploaded files
+          ];
+        }
+      }
+
+      console.log('Updating profile for vendor ID:', vendorId);
+      const response = await updateAmbulanceVendorProfile(vendorId, profileDataToUpdate);
+      
+      setProfile(response);
+      setEditedProfile(response);
+      setEditing(false);
+      
+      setTimeout(() => {
+        toast.dismiss(); // Dismiss any existing toasts
+        toast.success('Profile updated successfully!');
+      }, 200);
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      
+      // Check if it's a 404 error (profile doesn't exist yet)
+      if (error.response && error.response.status === 404) {
+        setTimeout(() => {
+          toast.dismiss(); // Dismiss any existing toasts
+          toast.error('Profile not found. Please create a profile first.');
+        }, 200);
+      } else {
+        setTimeout(() => {
+          toast.dismiss(); // Dismiss any existing toasts
+          toast.error('Failed to update profile. Please try again.');
+        }, 200);
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleMultiSelectChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: typeof value === 'string' ? value.split(',') : value
-    }));
-  };
-
-  const handleSwitchChange = (field) => (event) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: event.target.checked
-    }));
-  };
-
-  const handleAddAmbulanceType = () => {
-    if (ambulanceTypeInput.trim()) {
-      setFormData(prev => ({
+    console.log('handleInputChange called:', field, value);
+    console.log('Current editing state:', editing);
+    setEditedProfile(prev => {
+      console.log('Previous editedProfile:', prev);
+      const newProfile = {
         ...prev,
-        ambulanceTypes: [...prev.ambulanceTypes, ambulanceTypeInput.trim()]
+        [field]: value
+      };
+      console.log('New editedProfile:', newProfile);
+      return newProfile;
+    });
+  };
+
+  const handleAmbulanceTypesChange = (event) => {
+    const value = event.target.value;
+    setEditedProfile(prev => ({
+      ...prev,
+      ambulanceTypes: typeof value === 'string' ? value.split(',') : value
+    }));
+  };
+
+  const getStatusColor = (value) => {
+    // Handle both boolean and string values
+    if (typeof value === 'boolean') {
+      return value ? 'success' : 'error';
+    }
+    return value === '1' || value === true ? 'success' : 'error';
+  };
+
+  const getStatusText = (value) => {
+    // Handle both boolean and string values
+    if (typeof value === 'boolean') {
+      return value ? 'Available' : 'Not Available';
+    }
+    return value === '1' || value === true ? 'Available' : 'Not Available';
+  };
+
+  // Location handling functions
+  const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by this browser.'));
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          resolve({ latitude, longitude });
+        },
+        (error) => {
+          reject(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 60000
+        }
+      );
+    });
+  };
+
+  const handleGetCurrentLocation = async () => {
+    try {
+      setLocationLoading(true);
+      const { latitude, longitude } = await getCurrentLocation();
+      const locationString = `${latitude}, ${longitude}`;
+      
+      setEditedProfile(prev => ({
+        ...prev,
+        preciseLocation: locationString
       }));
-      setAmbulanceTypeInput('');
+      
+      // Use setTimeout to avoid toast conflicts
+      setTimeout(() => {
+        toast.dismiss(); // Dismiss any existing toasts
+        toast.success('Current location updated successfully!');
+      }, 200);
+    } catch (error) {
+      console.error('Error getting location:', error);
+      
+      // Use setTimeout to avoid toast conflicts
+      setTimeout(() => {
+        toast.dismiss(); // Dismiss any existing toasts
+        if (error.code === 1) {
+          toast.error('Location permission denied. Please enable location access.');
+        } else if (error.code === 2) {
+          toast.error('Location unavailable. Please try again.');
+        } else if (error.code === 3) {
+          toast.error('Location request timed out. Please try again.');
+        } else {
+          toast.error('Failed to get current location. Please try again.');
+        }
+      }, 200);
+    } finally {
+      setLocationLoading(false);
     }
   };
 
-  const handleAddEquipment = () => {
-    if (equipmentInput.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        ambulanceEquipment: [...prev.ambulanceEquipment, equipmentInput.trim()]
-      }));
-      setEquipmentInput('');
-    }
+
+
+  // File upload handling
+  const handleFileSelect = (event, type) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    setSelectedFiles(files);
+    setUploadType(type);
+    setShowNameDialog(true);
   };
 
-  const handleAddLanguage = () => {
-    if (languageInput.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        languageProficiency: [...prev.languageProficiency, languageInput.trim()]
-      }));
-      setLanguageInput('');
-    }
-  };
-
-  const handleRemoveItem = (field, index) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
-    }));
-  };
-
-  const renderLocationMap = () => {
-    const [lat, lng] = formData.preciseLocation.split(',').map(coord => parseFloat(coord.trim()));
+  const handleFileUpload = (filesWithNames) => {
+    setUploadingCert(true);
     
-    return (
-      <Box sx={{ 
-        height: 200, 
-        bgcolor: theme.palette.grey[100], 
-        borderRadius: 1, 
-        position: 'relative', 
-        overflow: 'hidden' 
-      }}>
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 2
-          }}
-        >
-          <LocationOn color="error" sx={{ fontSize: 40 }} />
-        </Box>
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: 8,
-            left: 8,
-            bgcolor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            px: 1,
-            py: 0.5,
-            borderRadius: 1,
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            border: `1px solid ${theme.palette.divider}`
-          }}
-        >
-          {lat.toFixed(4)}, {lng.toFixed(4)}
-        </Box>
-        <svg width="100%" height="100%" style={{ position: 'absolute' }}>
-          <defs>
-            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-              <path d="M 20 0 L 0 0 0 20" fill="none" stroke={theme.palette.divider} strokeWidth="1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-      </Box>
-    );
+    // Create local file objects with temporary URLs and custom names
+    const uploadedFiles = filesWithNames.map(fileData => ({
+      url: URL.createObjectURL(fileData.file), // Temporary URL for preview
+      name: fileData.name, // Custom name entered by user
+      file: fileData.file // Keep the actual file for later upload
+    }));
+
+    if (uploadType === 'trainingCertifications') {
+      setEditedProfile(prev => ({
+        ...prev,
+        trainingCertifications: [...(prev.trainingCertifications || []), ...uploadedFiles]
+      }));
+    } else if (uploadType === 'officePhotos') {
+      setEditedProfile(prev => ({
+        ...prev,
+        officePhotos: [...(prev.officePhotos || []), ...uploadedFiles]
+      }));
+    }
+
+    setUploadingCert(false);
+    setShowNameDialog(false);
+    setSelectedFiles([]);
+    setUploadType('');
+    
+    // Use setTimeout to avoid toast conflicts
+    setTimeout(() => {
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success(`${filesWithNames.length} file(s) added successfully!`);
+    }, 200);
   };
+
+  const handleCancelUpload = () => {
+    setShowNameDialog(false);
+    setSelectedFiles([]);
+    setUploadType('');
+  };
+
+  const handleRemoveCertification = (index) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      trainingCertifications: (prev.trainingCertifications || []).filter((_, i) => i !== index)
+    }));
+    
+    // Use setTimeout to avoid toast conflicts
+    setTimeout(() => {
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success('Certification removed successfully!');
+    }, 200);
+  };
+
+  const handleRemoveOfficePhoto = (index) => {
+    setEditedProfile(prev => ({
+      ...prev,
+      officePhotos: (prev.officePhotos || []).filter((_, i) => i !== index)
+    }));
+    
+    // Use setTimeout to avoid toast conflicts
+    setTimeout(() => {
+      toast.dismiss(); // Dismiss any existing toasts
+      toast.success('Office photo removed successfully!');
+    }, 200);
+  };
+
+  if (loading) {
+    return (
+      <AmbulanceVendorLayout>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+          <CircularProgress />
+        </Box>
+      </AmbulanceVendorLayout>
+    );
+  }
 
   return (
     <AmbulanceVendorLayout>
-      <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
+      <Box sx={{ width: '100%', px: { xs: 2, sm: 3 }, py: 3 }}>
         {/* Header */}
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-            Ambulance Service Profile 🚑
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
+            Agency Profile
           </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Manage your ambulance service information and operational details
-          </Typography>
+          {!editing ? (
+            <Button
+              variant="contained"
+              startIcon={<Edit />}
+              onClick={handleEdit}
+              sx={{ borderRadius: 2 }}
+            >
+              Edit Profile
+            </Button>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              <Button
+                variant="outlined"
+                startIcon={<Cancel />}
+                onClick={handleCancel}
+                sx={{ borderRadius: 2 }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={saving ? <CircularProgress size={20} /> : <Save />}
+                onClick={handleSave}
+                disabled={saving}
+                sx={{ borderRadius: 2 }}
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </Box>
+          )}
         </Box>
 
-      <Grid container spacing={3}>
-                 {/* Main Content */}
-         <Grid item xs={12}>
-          {/* Basic Information */}
+                 <Grid container spacing={3}>
+           {/* Basic Information */}
+           <Grid item xs={12}>
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <Business color="primary" />
+                   Basic Information
+                 </Typography>
+                 
+                 <Grid container spacing={3}>
+                   <Grid item xs={12} sm={6}>
+                                          <StyledTextField
+                        fullWidth
+                        label="Agency Name"
+                        value={editing ? editedProfile.agencyName : profile.agencyName}
+                        onChange={(e) => handleInputChange('agencyName', e.target.value)}
+                        disabled={!editing}
+                      />
+                   </Grid>
+                                      <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Owner Name"
+                        value={editing ? editedProfile.ownerName : profile.ownerName}
+                        onChange={(e) => handleInputChange('ownerName', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="GST Number"
+                        value={editing ? editedProfile.gstNumber : profile.gstNumber}
+                        onChange={(e) => handleInputChange('gstNumber', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="PAN Number"
+                        value={editing ? editedProfile.panNumber : profile.panNumber}
+                        onChange={(e) => handleInputChange('panNumber', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Registration Number"
+                        value={editing ? editedProfile.registrationNumber : profile.registrationNumber}
+                        onChange={(e) => handleInputChange('registrationNumber', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Driver License"
+                        value={editing ? editedProfile.driverLicense : profile.driverLicense}
+                        onChange={(e) => handleInputChange('driverLicense', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                 </Grid>
+               </CardContent>
+             </Card>
+
+             {/* Contact Information */}
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <Phone color="primary" />
+                   Contact Information
+                 </Typography>
+                 
+                                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Contact Number"
+                        value={editing ? editedProfile.contactNumber : profile.contactNumber}
+                        onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Email"
+                        value={editing ? editedProfile.email : profile.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Website"
+                        value={editing ? editedProfile.website : profile.website}
+                        onChange={(e) => handleInputChange('website', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Number of Ambulances"
+                        value={editing ? editedProfile.numOfAmbulances : profile.numOfAmbulances}
+                        onChange={(e) => handleInputChange('numOfAmbulances', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                  </Grid>
+               </CardContent>
+             </Card>
+
+             {/* Address Information */}
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <LocationOn color="primary" />
+                   Address Information
+                 </Typography>
+                 
+                                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <StyledTextField
+                        fullWidth
+                        label="Address"
+                        value={editing ? editedProfile.address : profile.address}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        disabled={!editing}
+                        multiline
+                        rows={2}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="Landmark"
+                        value={editing ? editedProfile.landmark : profile.landmark}
+                        onChange={(e) => handleInputChange('landmark', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="City"
+                        value={editing ? editedProfile.city : profile.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledFormControl fullWidth>
+                        <InputLabel>State</InputLabel>
+                        <Select
+                          value={editing ? editedProfile.state : profile.state}
+                          onChange={(e) => handleInputChange('state', e.target.value)}
+                          disabled={!editing}
+                          label="State"
+                        >
+                          {stateOptions.map((state) => (
+                            <MenuItem key={state} value={state}>{state}</MenuItem>
+                          ))}
+                        </Select>
+                      </StyledFormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <StyledTextField
+                        fullWidth
+                        label="PIN Code"
+                        value={editing ? editedProfile.pinCode : profile.pinCode}
+                        onChange={(e) => handleInputChange('pinCode', e.target.value)}
+                        disabled={!editing}
+                      />
+                    </Grid>
+                  </Grid>
+               </CardContent>
+             </Card>
+
+             {/* Ambulance Services */}
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <DirectionsCar color="primary" />
+                   Ambulance Services
+                 </Typography>
+                 
+                                  <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                      <StyledFormControl fullWidth>
+                        <InputLabel>Ambulance Types</InputLabel>
+                        <Select
+                          multiple
+                          value={editing ? (editedProfile.ambulanceTypes || []) : (profile.ambulanceTypes || [])}
+                          onChange={handleAmbulanceTypesChange}
+                          disabled={!editing}
+                          input={<OutlinedInput label="Ambulance Types" />}
+                          renderValue={(selected) => (
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {(selected || []).map((value) => (
+                                <Chip key={value} label={value} size="small" />
+                              ))}
+                            </Box>
+                          )}
+                        >
+                          {ambulanceTypeOptions.map((type) => (
+                            <MenuItem key={type} value={type}>
+                              <Checkbox checked={(editing ? (editedProfile.ambulanceTypes || []) : (profile.ambulanceTypes || [])).indexOf(type) > -1} />
+                              <ListItemText primary={type} />
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </StyledFormControl>
+                    </Grid>
+                  </Grid>
+               </CardContent>
+             </Card>
+
+             {/* Agency Status */}
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <CheckCircle color="primary" />
+                   Agency Status
+                 </Typography>
+                 
+                 <Grid container spacing={3}>
+                                       <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, gap: 2 }}>
+                        <Typography variant="body2" sx={{ flex: 1 }}>24x7 Available</Typography>
+                        {editing ? (
+                          <Switch
+                            checked={editedProfile.is24x7Available === true || editedProfile.is24x7Available === '1'}
+                            onChange={(e) => handleInputChange('is24x7Available', e.target.checked)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Chip 
+                            label={getStatusText(profile.is24x7Available)}
+                            color={getStatusColor(profile.is24x7Available)}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, gap: 2 }}>
+                        <Typography variant="body2" sx={{ flex: 1 }}>GPS Tracking</Typography>
+                        {editing ? (
+                          <Switch
+                            checked={editedProfile.gpsTrackingAvailable === true || editedProfile.gpsTrackingAvailable === '1'}
+                            onChange={(e) => handleInputChange('gpsTrackingAvailable', e.target.checked)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Chip 
+                            label={getStatusText(profile.gpsTrackingAvailable)}
+                            color={getStatusColor(profile.gpsTrackingAvailable)}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, gap: 2 }}>
+                        <Typography variant="body2" sx={{ flex: 1 }}>Online Payment</Typography>
+                        {editing ? (
+                          <Switch
+                            checked={editedProfile.isOnlinePaymentAvailable === true || editedProfile.isOnlinePaymentAvailable === '1'}
+                            onChange={(e) => handleInputChange('isOnlinePaymentAvailable', e.target.checked)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Chip 
+                            label={getStatusText(profile.isOnlinePaymentAvailable)}
+                            color={getStatusColor(profile.isOnlinePaymentAvailable)}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, gap: 2 }}>
+                        <Typography variant="body2" sx={{ flex: 1 }}>Driver KYC</Typography>
+                        {editing ? (
+                          <Switch
+                            checked={editedProfile.driverKYC === true || editedProfile.driverKYC === '1'}
+                            onChange={(e) => handleInputChange('driverKYC', e.target.checked)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Chip 
+                            label={getStatusText(profile.driverKYC)}
+                            color={getStatusColor(profile.driverKYC)}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, border: `1px solid ${theme.palette.divider}`, borderRadius: 2, gap: 2 }}>
+                        <Typography variant="body2" sx={{ flex: 1 }}>Driver Trained</Typography>
+                        {editing ? (
+                          <Switch
+                            checked={editedProfile.driverTrained === true || editedProfile.driverTrained === '1'}
+                            onChange={(e) => handleInputChange('driverTrained', e.target.checked)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Chip 
+                            label={getStatusText(profile.driverTrained)}
+                            color={getStatusColor(profile.driverTrained)}
+                            size="small"
+                          />
+                        )}
+                      </Box>
+                    </Grid>
+                 </Grid>
+               </CardContent>
+             </Card>
+
+             {/* Location Map */}
+             <Card sx={{ 
+               mb: 3, 
+               borderRadius: 3,
+               backgroundColor: theme.palette.background.card,
+               border: `1px solid ${theme.palette.divider}`,
+               boxShadow: theme.shadows[2]
+             }}>
+               <CardContent sx={{ p: 3 }}>
+                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                   <LocationOn color="primary" />
+                   Location
+                 </Typography>
+                 
+                 <Grid container spacing={3}>
+                   <Grid item xs={12} md={6}>
+                     <Box sx={{ mb: 2 }}>
+                       <StyledTextField
+                         fullWidth
+                         label="Precise Location (Lat, Lng)"
+                         value={editing ? editedProfile.preciseLocation : profile.preciseLocation}
+                         onChange={(e) => handleInputChange('preciseLocation', e.target.value)}
+                         disabled={!editing}
+                         placeholder="18.488856, 73.8674729"
+                       />
+                     </Box>
+                     
+                     {editing && (
+                       <Button
+                         variant="outlined"
+                         fullWidth
+                         startIcon={locationLoading ? <CircularProgress size={16} /> : <MyLocation />}
+                         onClick={handleGetCurrentLocation}
+                         disabled={locationLoading}
+                         sx={{ mb: 2, borderRadius: 2 }}
+                       >
+                         {locationLoading ? 'Getting Location...' : 'Get Current Location'}
+                       </Button>
+                     )}
+                   </Grid>
+                   
+                   <Grid item xs={12} md={6}>
+                     {/* Map Display */}
+                     <Box sx={{ 
+                       width: '100%', 
+                       height: 200, 
+                       backgroundColor: theme.palette.mode === 'dark' ? '#2d3748' : '#f7fafc',
+                       border: `1px solid ${theme.palette.divider}`,
+                       borderRadius: 2,
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       position: 'relative',
+                       overflow: 'hidden'
+                     }}>
+                       {profile.preciseLocation ? (
+                         <Box sx={{ 
+                           width: '100%', 
+                           height: '100%', 
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           flexDirection: 'column',
+                           gap: 1
+                         }}>
+                           <LocationOn sx={{ fontSize: 40, color: theme.palette.primary.main }} />
+                           <Typography variant="body2" color="text.secondary" textAlign="center">
+                             {profile.preciseLocation}
+                           </Typography>
+                           <Typography variant="caption" color="text.secondary" textAlign="center">
+                             Map integration would show here
+                           </Typography>
+                         </Box>
+                       ) : (
+                         <Box sx={{ 
+                           display: 'flex',
+                           alignItems: 'center',
+                           justifyContent: 'center',
+                           flexDirection: 'column',
+                           gap: 1
+                         }}>
+                           <LocationOn sx={{ fontSize: 40, color: theme.palette.text.disabled }} />
+                           <Typography variant="body2" color="text.secondary">
+                             No location set
+                           </Typography>
+                         </Box>
+                       )}
+                     </Box>
+                   </Grid>
+                 </Grid>
+               </CardContent>
+             </Card>
+           </Grid>
+         </Grid>
+
+                                   {/* Training Certifications */}
           <Card sx={{ 
-            mb: 3, 
+            mt: 3, 
+            borderRadius: 3,
             backgroundColor: theme.palette.background.card,
             border: `1px solid ${theme.palette.divider}`,
             boxShadow: theme.shadows[2]
           }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Business color="primary" />
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    Basic Information
-                  </Typography>
-                </Box>
-                {!editMode ? (
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PhotoCamera color="primary" />
+                  Training Certifications
+                </Typography>
+                
+                {editing && (
                   <Button
                     variant="outlined"
-                    startIcon={<Edit />}
-                    onClick={handleEdit}
+                    component="label"
+                    startIcon={uploadingCert ? <CircularProgress size={16} /> : <PhotoCamera />}
+                    disabled={uploadingCert}
                     sx={{ borderRadius: 2 }}
                   >
-                    Edit Profile
+                    {uploadingCert ? 'Uploading...' : 'Upload Certificates'}
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*,.pdf,.doc,.docx"
+                      onChange={(e) => handleFileSelect(e, 'trainingCertifications')}
+                    />
                   </Button>
-                ) : (
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      startIcon={<Save />}
-                      onClick={handleSave}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Cancel />}
-                      onClick={handleCancel}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Cancel
-                    </Button>
-                  </Box>
                 )}
               </Box>
 
-              <Grid container spacing={3}>
-                                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Agency Name"
-                     value={formData.agencyName}
-                     onChange={(e) => handleInputChange('agencyName', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Owner Name"
-                     value={formData.ownerName}
-                     onChange={(e) => handleInputChange('ownerName', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="GST Number"
-                     value={formData.gstNumber}
-                     onChange={(e) => handleInputChange('gstNumber', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="PAN Number"
-                     value={formData.panNumber}
-                     onChange={(e) => handleInputChange('panNumber', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Registration Number"
-                     value={formData.registrationNumber}
-                     onChange={(e) => handleInputChange('registrationNumber', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Driver License"
-                     value={formData.driverLicense}
-                     onChange={(e) => handleInputChange('driverLicense', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-              </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Contact Information */}
-          <Card sx={{ 
-            mb: 3, 
-            backgroundColor: theme.palette.background.card,
-            border: `1px solid ${theme.palette.divider}`,
-            boxShadow: theme.shadows[2]
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <Phone color="primary" />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Contact Information
-                </Typography>
-              </Box>
-
-                             <Grid container spacing={3}>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Contact Number"
-                     value={formData.contactNumber}
-                     onChange={(e) => handleInputChange('contactNumber', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Email"
-                     value={formData.email}
-                     onChange={(e) => handleInputChange('email', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12}>
-                   <TextField
-                     fullWidth
-                     label="Website"
-                     value={formData.website}
-                     onChange={(e) => handleInputChange('website', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-               </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Location Information */}
-          <Card sx={{ 
-            mb: 3, 
-            backgroundColor: theme.palette.background.card,
-            border: `1px solid ${theme.palette.divider}`,
-            boxShadow: theme.shadows[2]
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <LocationOn color="primary" />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Location Information
-                </Typography>
-              </Box>
-
-                             <Grid container spacing={3}>
-                 <Grid item xs={12}>
-                   <TextField
-                     fullWidth
-                     label="Address"
-                     value={formData.address}
-                     onChange={(e) => handleInputChange('address', e.target.value)}
-                     disabled={!editMode}
-                     multiline
-                     rows={2}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Landmark"
-                     value={formData.landmark}
-                     onChange={(e) => handleInputChange('landmark', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <FormControl fullWidth disabled={!editMode}>
-                     <InputLabel sx={{ color: theme.palette.text.secondary }}>State</InputLabel>
-                     <Select
-                       value={formData.state}
-                       label="State"
-                       onChange={(e) => handleInputChange('state', e.target.value)}
-                       sx={{ 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& .MuiOutlinedInput-notchedOutline': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover .MuiOutlinedInput-notchedOutline': {
-                           borderColor: theme.palette.primary.main
-                         },
-                         '& .MuiSelect-select': {
-                           color: theme.palette.text.primary
-                         }
-                       }}
-                     >
-                       {states.map((state) => (
-                         <MenuItem key={state} value={state}>{state}</MenuItem>
-                       ))}
-                     </Select>
-                   </FormControl>
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="City"
-                     value={formData.city}
-                     onChange={(e) => handleInputChange('city', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Pin Code"
-                     value={formData.pinCode}
-                     onChange={(e) => handleInputChange('pinCode', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12}>
-                   <Typography variant="subtitle2" gutterBottom sx={{ color: theme.palette.text.primary }}>
-                     Precise Location
-                   </Typography>
-                   {renderLocationMap()}
-                   <TextField
-                     fullWidth
-                     label="Coordinates (Latitude, Longitude)"
-                     value={formData.preciseLocation}
-                     onChange={(e) => handleInputChange('preciseLocation', e.target.value)}
-                     disabled={!editMode}
-                     sx={{ 
-                       mt: 2, 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                     placeholder="18.488856, 73.8674729"
-                   />
-                 </Grid>
-               </Grid>
-            </CardContent>
-          </Card>
-
-          {/* Service Information */}
-          <Card sx={{ 
-            mb: 3, 
-            backgroundColor: theme.palette.background.card,
-            border: `1px solid ${theme.palette.divider}`,
-            boxShadow: theme.shadows[2]
-          }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <LocalShipping color="primary" />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Service Information
-                </Typography>
-              </Box>
-
-                             <Grid container spacing={3}>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Number of Ambulances"
-                     value={formData.numOfAmbulances}
-                     onChange={(e) => handleInputChange('numOfAmbulances', e.target.value)}
-                     disabled={!editMode}
-                     type="number"
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <TextField
-                     fullWidth
-                     label="Distance Limit (km)"
-                     value={formData.distanceLimit}
-                     onChange={(e) => handleInputChange('distanceLimit', e.target.value)}
-                     disabled={!editMode}
-                     type="number"
-                     sx={{ 
-                       '& .MuiOutlinedInput-root': { 
-                         borderRadius: 2,
-                         backgroundColor: theme.palette.background.paper,
-                         '& fieldset': {
-                           borderColor: theme.palette.divider
-                         },
-                         '&:hover fieldset': {
-                           borderColor: theme.palette.primary.main
-                         }
-                       },
-                       '& .MuiInputLabel-root': {
-                         color: theme.palette.text.secondary
-                       },
-                       '& .MuiInputBase-input': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                                   <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight: 600 }}>
-                      Ambulance Types
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Enter ambulance type"
-                        value={ambulanceTypeInput}
-                        onChange={(e) => setAmbulanceTypeInput(e.target.value)}
-                        disabled={!editMode}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 2,
-                            backgroundColor: theme.palette.background.paper,
-                            '& fieldset': {
-                              borderColor: theme.palette.divider
-                            },
-                            '&:hover fieldset': {
-                              borderColor: theme.palette.primary.main
+              {editing ? (
+                // Edit mode - show current certificates with remove option
+                <Grid container spacing={2}>
+                  {editedProfile.trainingCertifications && editedProfile.trainingCertifications.map((cert, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper sx={{ p: 2, textAlign: 'center', position: 'relative' }}>
+                        <IconButton
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
                             }
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: theme.palette.text.secondary
-                          },
-                          '& .MuiInputBase-input': {
-                            color: theme.palette.text.primary
-                          }
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={handleAddAmbulanceType}
-                        disabled={!editMode || !ambulanceTypeInput.trim()}
-                        startIcon={<Add />}
-                        sx={{ borderRadius: 2, minWidth: 'auto', px: 2 }}
-                      >
-                        Add
-                      </Button>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {formData.ambulanceTypes.map((type, index) => (
-                        <Chip
-                          key={index}
-                          label={type}
-                          onDelete={editMode ? () => handleRemoveItem('ambulanceTypes', index) : undefined}
-                          deleteIcon={<Close />}
-                          color="primary"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight: 600 }}>
-                      Ambulance Equipment
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Enter equipment name"
-                        value={equipmentInput}
-                        onChange={(e) => setEquipmentInput(e.target.value)}
-                        disabled={!editMode}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 2,
-                            backgroundColor: theme.palette.background.paper,
-                            '& fieldset': {
-                              borderColor: theme.palette.divider
-                            },
-                            '&:hover fieldset': {
-                              borderColor: theme.palette.primary.main
-                            }
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: theme.palette.text.secondary
-                          },
-                          '& .MuiInputBase-input': {
-                            color: theme.palette.text.primary
-                          }
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={handleAddEquipment}
-                        disabled={!editMode || !equipmentInput.trim()}
-                        startIcon={<Add />}
-                        sx={{ borderRadius: 2, minWidth: 'auto', px: 2 }}
-                      >
-                        Add
-                      </Button>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {formData.ambulanceEquipment.map((equipment, index) => (
-                        <Chip
-                          key={index}
-                          label={equipment}
-                          onDelete={editMode ? () => handleRemoveItem('ambulanceEquipment', index) : undefined}
-                          deleteIcon={<Close />}
-                          color="secondary"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight: 600 }}>
-                      Language Proficiency
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                      <TextField
-                        fullWidth
-                        placeholder="Enter language"
-                        value={languageInput}
-                        onChange={(e) => setLanguageInput(e.target.value)}
-                        disabled={!editMode}
-                        sx={{ 
-                          '& .MuiOutlinedInput-root': { 
-                            borderRadius: 2,
-                            backgroundColor: theme.palette.background.paper,
-                            '& fieldset': {
-                              borderColor: theme.palette.divider
-                            },
-                            '&:hover fieldset': {
-                              borderColor: theme.palette.primary.main
-                            }
-                          },
-                          '& .MuiInputLabel-root': {
-                            color: theme.palette.text.secondary
-                          },
-                          '& .MuiInputBase-input': {
-                            color: theme.palette.text.primary
-                          }
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        onClick={handleAddLanguage}
-                        disabled={!editMode || !languageInput.trim()}
-                        startIcon={<Add />}
-                        sx={{ borderRadius: 2, minWidth: 'auto', px: 2 }}
-                      >
-                        Add
-                      </Button>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {formData.languageProficiency.map((language, index) => (
-                        <Chip
-                          key={index}
-                          label={language}
-                          onDelete={editMode ? () => handleRemoveItem('languageProficiency', index) : undefined}
-                          deleteIcon={<Close />}
-                          color="info"
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </Grid>
-               </Grid>
+                          }}
+                          onClick={() => handleRemoveCertification(index)}
+                          size="small"
+                        >
+                          <Cancel fontSize="small" />
+                        </IconButton>
+                        
+                        {cert.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                          <img 
+                            src={cert.url} 
+                            alt={cert.name}
+                            style={{ 
+                              width: '100%', 
+                              height: 150, 
+                              objectFit: 'cover',
+                              borderRadius: 8
+                            }}
+                          />
+                        ) : (
+                          <Box sx={{ 
+                            width: '100%', 
+                            height: 150, 
+                            backgroundColor: theme.palette.mode === 'dark' ? '#2d3748' : '#f7fafc',
+                            border: `1px solid ${theme.palette.divider}`,
+                            borderRadius: 8,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column',
+                            gap: 1
+                          }}>
+                            <PhotoCamera sx={{ fontSize: 40, color: theme.palette.text.disabled }} />
+                            <Typography variant="body2" color="text.secondary">
+                              {cert.name}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        <Typography variant="body2" sx={{ mt: 1, fontWeight: 500 }}>
+                          {cert.name}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  ))}
+                  
+                  {(!editedProfile.trainingCertifications || editedProfile.trainingCertifications.length === 0) && (
+                    <Grid item xs={12}>
+                      <Box sx={{ 
+                        p: 4, 
+                        textAlign: 'center',
+                        border: `2px dashed ${theme.palette.divider}`,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? '#1a202c' : '#f7fafc'
+                      }}>
+                        <PhotoCamera sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          No training certificates uploaded
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Upload certificates to showcase your training and qualifications
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              ) : (
+                // View mode - show certificates
+                <Grid container spacing={2}>
+                  {profile.trainingCertifications && profile.trainingCertifications.length > 0 ? (
+                    profile.trainingCertifications.map((cert, index) => (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Paper sx={{ p: 2, textAlign: 'center' }}>
+                          {cert.url.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                            <img 
+                              src={cert.url} 
+                              alt={cert.name}
+                              style={{ 
+                                width: '100%', 
+                                height: 150, 
+                                objectFit: 'cover',
+                                borderRadius: 8
+                              }}
+                            />
+                          ) : (
+                            <Box sx={{ 
+                              width: '100%', 
+                              height: 150, 
+                              backgroundColor: theme.palette.mode === 'dark' ? '#2d3748' : '#f7fafc',
+                              border: `1px solid ${theme.palette.divider}`,
+                              borderRadius: 8,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexDirection: 'column',
+                              gap: 1
+                            }}>
+                              <PhotoCamera sx={{ fontSize: 40, color: theme.palette.text.disabled }} />
+                              <Typography variant="body2" color="text.secondary">
+                                {cert.name}
+                              </Typography>
+                            </Box>
+                          )}
+                          
+                          <Typography variant="body2" sx={{ mt: 1, fontWeight: 500 }}>
+                            {cert.name}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))
+                  ) : (
+                    <Grid item xs={12}>
+                      <Box sx={{ 
+                        p: 4, 
+                        textAlign: 'center',
+                        border: `2px dashed ${theme.palette.divider}`,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? '#1a202c' : '#f7fafc'
+                      }}>
+                        <PhotoCamera sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          No training certificates available
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Training certificates will be displayed here
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              )}
             </CardContent>
           </Card>
 
-          {/* Operational Settings */}
+                                   {/* Office Photos */}
           <Card sx={{ 
+            mt: 3, 
+            borderRadius: 3,
             backgroundColor: theme.palette.background.card,
             border: `1px solid ${theme.palette.divider}`,
             boxShadow: theme.shadows[2]
           }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
-                <Settings color="primary" />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Operational Settings
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PhotoCamera color="primary" />
+                  Office Photos
                 </Typography>
+                
+                {editing && (
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    startIcon={uploadingOfficePhotos ? <CircularProgress size={16} /> : <PhotoCamera />}
+                    disabled={uploadingOfficePhotos}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    {uploadingOfficePhotos ? 'Uploading...' : 'Upload Photos'}
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleFileSelect(e, 'officePhotos')}
+                    />
+                  </Button>
+                )}
               </Box>
 
-                             <Grid container spacing={3}>
-                 <Grid item xs={12} sm={6}>
-                   <FormControlLabel
-                     control={
-                       <Switch
-                         checked={formData.driverKYC}
-                         onChange={handleSwitchChange('driverKYC')}
-                         disabled={!editMode}
-                       />
-                     }
-                     label="Driver KYC Completed"
-                     sx={{ 
-                       '& .MuiFormControlLabel-label': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <FormControlLabel
-                     control={
-                       <Switch
-                         checked={formData.driverTrained}
-                         onChange={handleSwitchChange('driverTrained')}
-                         disabled={!editMode}
-                       />
-                     }
-                     label="Driver Trained"
-                     sx={{ 
-                       '& .MuiFormControlLabel-label': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <FormControlLabel
-                     control={
-                       <Switch
-                         checked={formData.gpsTrackingAvailable}
-                         onChange={handleSwitchChange('gpsTrackingAvailable')}
-                         disabled={!editMode}
-                       />
-                     }
-                     label="GPS Tracking Available"
-                     sx={{ 
-                       '& .MuiFormControlLabel-label': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <FormControlLabel
-                     control={
-                       <Switch
-                         checked={formData.is24x7Available}
-                         onChange={handleSwitchChange('is24x7Available')}
-                         disabled={!editMode}
-                       />
-                     }
-                     label="24x7 Service Available"
-                     sx={{ 
-                       '& .MuiFormControlLabel-label': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-                 <Grid item xs={12} sm={6}>
-                   <FormControlLabel
-                     control={
-                       <Switch
-                         checked={formData.isOnlinePaymentAvailable}
-                         onChange={handleSwitchChange('isOnlinePaymentAvailable')}
-                         disabled={!editMode}
-                       />
-                     }
-                     label="Online Payment Available"
-                     sx={{ 
-                       '& .MuiFormControlLabel-label': {
-                         color: theme.palette.text.primary
-                       }
-                     }}
-                   />
-                 </Grid>
-               </Grid>
+              {editing ? (
+                // Edit mode - show current photos with remove option
+                <Grid container spacing={2}>
+                  {editedProfile.officePhotos && editedProfile.officePhotos.map((photo, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper sx={{ p: 2, textAlign: 'center', position: 'relative' }}>
+                        <IconButton
+                          sx={{
+                            position: 'absolute',
+                            top: 8,
+                            right: 8,
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            }
+                          }}
+                          onClick={() => handleRemoveOfficePhoto(index)}
+                          size="small"
+                        >
+                          <Cancel fontSize="small" />
+                        </IconButton>
+                        
+                        <img 
+                          src={photo.url} 
+                          alt={photo.name}
+                          style={{ 
+                            width: '100%', 
+                            height: 150, 
+                            objectFit: 'cover',
+                            borderRadius: 8
+                          }}
+                        />
+                        
+                        <Typography variant="body2" sx={{ mt: 1, fontWeight: 500 }}>
+                          {photo.name}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  ))}
+                  
+                  {(!editedProfile.officePhotos || editedProfile.officePhotos.length === 0) && (
+                    <Grid item xs={12}>
+                      <Box sx={{ 
+                        p: 4, 
+                        textAlign: 'center',
+                        border: `2px dashed ${theme.palette.divider}`,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? '#1a202c' : '#f7fafc'
+                      }}>
+                        <PhotoCamera sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          No office photos uploaded
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Upload photos to showcase your office and facilities
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              ) : (
+                // View mode - show photos
+                <Grid container spacing={2}>
+                  {profile.officePhotos && profile.officePhotos.length > 0 ? (
+                    profile.officePhotos.map((photo, index) => (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Paper sx={{ p: 2, textAlign: 'center' }}>
+                          <img 
+                            src={photo.url} 
+                            alt={photo.name}
+                            style={{ 
+                              width: '100%', 
+                              height: 150, 
+                              objectFit: 'cover',
+                              borderRadius: 8
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ mt: 1, fontWeight: 500 }}>
+                            {photo.name}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))
+                  ) : (
+                    <Grid item xs={12}>
+                      <Box sx={{ 
+                        p: 4, 
+                        textAlign: 'center',
+                        border: `2px dashed ${theme.palette.divider}`,
+                        borderRadius: 2,
+                        backgroundColor: theme.palette.mode === 'dark' ? '#1a202c' : '#f7fafc'
+                      }}>
+                        <PhotoCamera sx={{ fontSize: 48, color: theme.palette.text.disabled, mb: 2 }} />
+                        <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                          No office photos available
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Office photos will be displayed here
+                        </Typography>
+                      </Box>
+                    </Grid>
+                  )}
+                </Grid>
+              )}
             </CardContent>
           </Card>
-        </Grid>
-
-        
-      </Grid>
-
-      {/* Success Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle sx={{ textAlign: 'center' }}>
-          <CheckCircle color="success" sx={{ fontSize: 48, mb: 1 }} />
-          <Typography variant="h6">Profile Updated Successfully!</Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Typography align="center">
-            Your ambulance service profile has been updated with the latest information.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-          <Button 
-            variant="contained" 
-            onClick={() => setDialogOpen(false)}
-            sx={{ borderRadius: 2, px: 4 }}
-          >
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
       </Box>
+      
+             {/* File Name Dialog */}
+       <Dialog 
+         open={showNameDialog} 
+         onClose={handleCancelUpload}
+         maxWidth="sm"
+         fullWidth
+       >
+         <DialogTitle>
+           <Typography variant="h6" sx={{ fontWeight: 600 }}>
+             Enter File Names
+           </Typography>
+         </DialogTitle>
+         <DialogContent>
+           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+             Please enter custom names for your uploaded files:
+           </Typography>
+           <FileNamesForm 
+             files={selectedFiles}
+             onUpload={handleFileUpload}
+             onCancel={handleCancelUpload}
+           />
+         </DialogContent>
+       </Dialog>
+
+               <ToastContainer 
+          position="top-right" 
+          autoClose={5000} 
+          hideProgressBar={false}
+          closeOnClick={true}
+          pauseOnHover={true}
+          draggable={true}
+          theme="colored"
+          limit={1}
+          newestOnTop={true}
+          rtl={false}
+          enableMultiContainer={false}
+        />
     </AmbulanceVendorLayout>
   );
 };
 
-export default AmbulanceVendorProfile;
+export default AmbulanceVendorProfile; 

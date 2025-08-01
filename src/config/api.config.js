@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.44:5000/api',
-    SOCKET_URL: 'http://192.168.1.44:5000',
+    BASE_URL: 'http://localhost:5000/api',
+    SOCKET_URL: 'http://localhost:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -71,8 +71,19 @@ export const API_CONFIG = {
             GET_ALL: '/ambulance/ambulances',
             REQUEST: '/ambulanceBooking/request',
             GET_ACTIVE_BOOKINGS: '/ambulanceBooking/active-requests/user/:userId',
+            GET_PENDING_REQUESTS_BY_VENDOR: '/ambulanceBooking/pending/:vendorId',
+            GET_COMPLETED_BOOKINGS_BY_VENDOR: '/ambulanceBooking/completed/vendor/:vendorId',
+            ACCEPT_BOOKING: '/ambulanceBooking/accept-booking/:requestId',
+            UPDATE_SERVICE_DETAILS: '/ambulanceBooking/update-service-details/:requestId',
+            UPDATE_ON_THE_WAY_STATUS: '/ambulanceBooking/update-status/on-the-way/:requestId',
+            UPDATE_PICKED_UP_STATUS: '/ambulanceBooking/update-status/picked-up/:requestId',
+            UPDATE_COMPLETED_STATUS: '/ambulanceBooking/update-status/completed/:requestId',
             UPDATE_PAYMENT_COMPLETED: '/ambulanceBooking/update-payment-completed/:requestId',
-            GET_COMPLETED_BOOKINGS: '/ambulanceBooking/completed-requests/:userId'
+            GET_COMPLETED_BOOKINGS: '/ambulanceBooking/completed-requests/:userId',
+            GET_PROFILE: '/ambulance/profile/:vendorId',
+            UPDATE_PROFILE: '/ambulance/ambulance-agency/:vendorId/updateProfile',
+            UPLOAD_PHOTOS: '/ambulance/profile/:vendorId/photos',
+            DELETE_PHOTO: '/ambulance/profile/:vendorId/photos/:photoId'
         },
         BLOOD_BANK: {
             GET_ACTIVE_BLOOD_BANKS: '/blood-bank/blood-bank-agencies',
@@ -151,7 +162,9 @@ export const getApiUrl = (endpoint) => `${API_CONFIG.BASE_URL}${endpoint}`;
 export const replaceUrlParams = (url, params) => {
     let finalUrl = url;
     Object.keys(params).forEach(key => {
-        finalUrl = finalUrl.replace(`:${key}`, encodeURIComponent(params[key]));
+        if (params[key] !== undefined && params[key] !== null) {
+            finalUrl = finalUrl.replace(`:${key}`, encodeURIComponent(params[key]));
+        }
     });
     return finalUrl;
 }; 

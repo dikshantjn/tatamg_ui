@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
+import { getApiUrl } from '../../config/api.config';
 
 // Vendor Status Services
 export const getVendorStatus = async (vendorId) => {
@@ -31,6 +31,8 @@ export const toggleVendorStatus = async (vendorId) => {
     throw error;
   }
 };
+
+
 
 // Export all services for easy importing
 export const AllVendorsService = {
