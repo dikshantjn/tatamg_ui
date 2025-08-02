@@ -23,6 +23,13 @@ import AmbulanceVendorProfile from './components/Vendors/AmbulanceVendor/Ambulan
 import AmbulanceVendorSettings from './components/Vendors/AmbulanceVendor/AmbulanceVendorSettings';
 import AmbulanceVendorProcessOrder from './components/Vendors/AmbulanceVendor/AmbulanceVendorProcessOrder';
 import BloodBankVendorDashboard from './components/Vendors/BloodBankVendor/BloodBankVendorDashboard';
+import BloodBankVendorAvailability from './components/Vendors/BloodBankVendor/BloodBankVendorAvailability';
+import BloodBankVendorRequests from './components/Vendors/BloodBankVendor/BloodBankVendorRequests';
+import BloodBankVendorHistory from './components/Vendors/BloodBankVendor/BloodBankVendorHistory';
+import BloodBankVendorProfile from './components/Vendors/BloodBankVendor/BloodBankVendorProfile';
+import BloodBankVendorEditProfile from './components/Vendors/BloodBankVendor/BloodBankVendorEditProfile';
+import BloodBankVendorAnalytics from './components/Vendors/BloodBankVendor/BloodBankVendorAnalytics';
+import BloodBankVendorProcessRequest from './components/Vendors/BloodBankVendor/BloodBankVendorProcessRequest';
 import LabTestVendorDashboard from './components/Vendors/LabTestVendor/LabTestVendorDashboard';
 import DeliveryPartnerVendorDashboard from './components/Vendors/DeliveryPartnerVendor/DeliveryPartnerVendorDashboard';
 import DummySidePanel from './components/DummySidePanel';
@@ -447,6 +454,13 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
             </VendorThemeProvider>
           } />
           <Route path="/vendor/blood-bank/dashboard" element={<BloodBankVendorDashboard />} />
+          <Route path="/vendor/blood-bank/availability" element={<BloodBankVendorAvailability />} />
+          <Route path="/vendor/blood-bank/requests" element={<BloodBankVendorRequests />} />
+          <Route path="/vendor/blood-bank/history" element={<BloodBankVendorHistory />} />
+          <Route path="/vendor/blood-bank/analytics" element={<BloodBankVendorAnalytics />} />
+          <Route path="/vendor/blood-bank/profile" element={<BloodBankVendorProfile />} />
+          <Route path="/vendor/blood-bank/edit-profile" element={<BloodBankVendorEditProfile />} />
+          <Route path="/vendor/blood-bank/process-request/:bookingId" element={<BloodBankVendorProcessRequest />} />
           <Route path="/vendor/lab-test/dashboard" element={<LabTestVendorDashboard />} />
           <Route path="/vendor/delivery-partner/dashboard" element={<DeliveryPartnerVendorDashboard />} />
 
@@ -493,7 +507,7 @@ function App() {
       // Check for vendor authentication first
       const vendorAuthData = vendorAuthService.getVendorAuthData();
       if (vendorAuthData && vendorAuthData.userType === 'vendor') {
-        console.log('🔍 Vendor authenticated:', vendorAuthData.vendorData);
+        console.log('🔍 Vendor authenticated:', vendorAuthData.token);
         setIsAuthenticated(true);
         setUserType('vendor');
         return;

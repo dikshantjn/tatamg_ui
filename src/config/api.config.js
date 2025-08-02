@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://localhost:5000/api',
-    SOCKET_URL: 'http://localhost:5000',
+    BASE_URL: 'http://192.168.1.40:5000/api',
+    SOCKET_URL: 'http://192.168.1.40:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -90,7 +90,16 @@ export const API_CONFIG = {
             CREATE_BLOOD_BANK_REQUEST: '/blood-bank/requests',
             GET_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId',
             UPDATE_BLOOD_BANK_PAYMENT: '/blood-bank-bookings/:bookingId/update-payment',
-            GET_COMPLETED_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId/completed'
+            GET_COMPLETED_BLOOD_BANK_BOOKINGS_BY_USER: '/blood-bank-bookings/user/:userId/completed',
+            GET_PROFILE: '/blood-bank/profile/:vendorId',
+            UPDATE_PROFILE: '/blood-bank/profile/:vendorId',
+            GET_INVENTORY: '/blood-bank/vendor/:vendorId',
+            UPSERT_INVENTORY: '/blood-bank/upsert/:vendorId',
+            DELETE_INVENTORY: '/blood-bank/blood-inventory/:inventoryId',
+            GET_VENDOR_REQUESTS: '/blood-bank/vendor/:vendorId/requests',
+            UPDATE_REQUEST_STATUS: '/blood-bank/requests/:requestId/status',
+            GET_VENDOR_BOOKINGS: '/blood-bank-bookings/vendor/:vendorId',
+            ADD_SERVICE_DETAILS: '/blood-bank-bookings/:bookingId/payment'
         },
         MEDICINE_DELIVERY: {
             UPLOAD_PRESCRIPTION: '/prescription/upload-prescription',
