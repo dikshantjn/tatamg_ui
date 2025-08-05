@@ -441,6 +441,112 @@ class BloodBankVendorService {
     }
 
     /**
+     * Update booking status to waiting for pickup
+     * @param {string} bookingId - The booking ID
+     * @returns {Promise<Object>} - Update response
+     */
+    async updateStatusToWaitingForPickup(bookingId) {
+        try {
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.UPDATE_STATUS_WAITING_FOR_PICKUP, { bookingId });
+            const url = getApiUrl(endpoint);
+            
+            // Get auth token
+            const authData = vendorAuthService.getVendorAuthData();
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (authData && authData.token) {
+                headers['Authorization'] = `Bearer ${authData.token}`;
+            }
+            
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers,
+            });
+
+            if (!response.ok) {
+                // Try to get error details from response
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    } else if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch (parseError) {
+                    // If we can't parse the error response, use the status code
+                    errorMessage = `HTTP error! status: ${response.status}`;
+                }
+                
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                throw error;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error updating status to waiting for pickup:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Complete booking
+     * @param {string} bookingId - The booking ID
+     * @returns {Promise<Object>} - Complete response
+     */
+    async completeBooking(bookingId) {
+        try {
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.COMPLETE_BOOKING, { bookingId });
+            const url = getApiUrl(endpoint);
+            
+            // Get auth token
+            const authData = vendorAuthService.getVendorAuthData();
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            
+            if (authData && authData.token) {
+                headers['Authorization'] = `Bearer ${authData.token}`;
+            }
+            
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers,
+            });
+
+            if (!response.ok) {
+                // Try to get error details from response
+                let errorMessage = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    } else if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch (parseError) {
+                    // If we can't parse the error response, use the status code
+                    errorMessage = `HTTP error! status: ${response.status}`;
+                }
+                
+                const error = new Error(errorMessage);
+                error.status = response.status;
+                throw error;
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error completing booking:', error);
+            throw error;
+        }
+    }
+
+    /**
      * Transform component data to API format
      * @param {Object} componentData - The component data
      * @returns {Object} - Transformed data for API

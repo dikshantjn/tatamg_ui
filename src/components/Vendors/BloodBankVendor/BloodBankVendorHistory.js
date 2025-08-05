@@ -631,21 +631,30 @@ const BloodBankVendorHistory = () => {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        <Button
-                          size="small"
-                          variant="contained"
-                          color="primary"
-                          onClick={() => navigate(`/vendor/blood-bank/process-request/${record.id}`)}
-                          sx={{ 
-                            borderRadius: 2,
-                            textTransform: 'none',
-                            fontSize: '0.75rem',
-                            px: 2,
-                            py: 0.5
-                          }}
-                        >
-                          Process Request
-                        </Button>
+                        {record.status !== 'COMPLETED' && record.status !== 'Completed' ? (
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="primary"
+                            onClick={() => navigate(`/vendor/blood-bank/process-request/${record.id}`)}
+                            sx={{ 
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              fontSize: '0.75rem',
+                              px: 2,
+                              py: 0.5
+                            }}
+                          >
+                            Process Request
+                          </Button>
+                        ) : (
+                          <Chip
+                            label="Processed"
+                            color="success"
+                            size="small"
+                            sx={{ borderRadius: 2 }}
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.40:5000/api',
-    SOCKET_URL: 'http://192.168.1.40:5000',
+    BASE_URL: 'http://192.168.1.44:5000/api',
+    SOCKET_URL: 'http://192.168.1.44:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -99,7 +99,9 @@ export const API_CONFIG = {
             GET_VENDOR_REQUESTS: '/blood-bank/vendor/:vendorId/requests',
             UPDATE_REQUEST_STATUS: '/blood-bank/requests/:requestId/status',
             GET_VENDOR_BOOKINGS: '/blood-bank-bookings/vendor/:vendorId',
-            ADD_SERVICE_DETAILS: '/blood-bank-bookings/:bookingId/payment'
+            ADD_SERVICE_DETAILS: '/blood-bank-bookings/:bookingId/payment',
+            UPDATE_STATUS_WAITING_FOR_PICKUP: '/blood-bank-bookings/:bookingId/status/waiting-for-pickup',
+            COMPLETE_BOOKING: '/blood-bank-bookings/:bookingId/complete'
         },
         MEDICINE_DELIVERY: {
             UPLOAD_PRESCRIPTION: '/prescription/upload-prescription',

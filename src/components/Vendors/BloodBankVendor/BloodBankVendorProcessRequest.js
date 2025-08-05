@@ -188,6 +188,26 @@ const BloodBankVendorProcessRequest = () => {
   };
 
   const handleAddServiceDetails = () => {
+    // Pre-populate fields if service details already exist
+    if (booking.totalAmount || booking.pricePerUnit) {
+      setServiceDetails({
+        units: booking.units?.toString() || '',
+        pricePerUnit: booking.pricePerUnit?.toString() || '',
+        discount: booking.discount?.toString() || '',
+        totalAmount: booking.totalAmount?.toString() || '',
+        deliveryType: booking.deliveryType || '',
+        note: booking.notes || ''
+      });
+    } else {
+      setServiceDetails({
+        units: '',
+        pricePerUnit: '',
+        discount: '',
+        totalAmount: '',
+        deliveryType: '',
+        note: ''
+      });
+    }
     setServiceDetailsDialogOpen(true);
   };
 
@@ -243,6 +263,46 @@ const BloodBankVendorProcessRequest = () => {
     } catch (error) {
       console.error('Error adding service details:', error);
       toast.error(error.message || 'Failed to add service details');
+    }
+  };
+
+  const handleUpdateStatusToWaitingForPickup = async () => {
+    try {
+      const response = await bloodBankVendorService.updateStatusToWaitingForPickup(booking.bookingId);
+      
+      if (response.success) {
+        toast.success('Status updated to waiting for pickup successfully');
+        // Refresh booking data or update local state
+        const vendorId = vendorData?.vendorId || vendorData?.id;
+        if (vendorId) {
+          await loadBookingDetails(vendorId, booking.bookingId);
+        }
+      } else {
+        toast.error('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating status to waiting for pickup:', error);
+      toast.error(error.message || 'Failed to update status');
+    }
+  };
+
+  const handleCompleteBooking = async () => {
+    try {
+      const response = await bloodBankVendorService.completeBooking(booking.bookingId);
+      
+      if (response.success) {
+        toast.success('Booking completed successfully');
+        // Refresh booking data or update local state
+        const vendorId = vendorData?.vendorId || vendorData?.id;
+        if (vendorId) {
+          await loadBookingDetails(vendorId, booking.bookingId);
+        }
+      } else {
+        toast.error('Failed to complete booking');
+      }
+    } catch (error) {
+      console.error('Error completing booking:', error);
+      toast.error(error.message || 'Failed to complete booking');
     }
   };
 
@@ -316,271 +376,390 @@ const BloodBankVendorProcessRequest = () => {
           </Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          {/* Booking Details Card */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              transition: 'transform 0.2s ease-in-out',
-              height: '100%',
-              '&:hover': {
-                transform: 'translateY(-2px)'
-              }
+        {/* Main Booking Card */}
+        <Card sx={{ 
+          width: '100%',
+          transition: 'transform 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)'
+          },
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          borderRadius: 3
+        }}>
+          <CardContent sx={{ p: 4 }}>
+            {/* Header */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              mb: 4,
+              pb: 2,
+              borderBottom: `2px solid ${theme.palette.divider}`
             }}>
-              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-                  Booking Details
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  Blood Request Details
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Booking ID: {booking.bookingId}
+                </Typography>
+              </Box>
+              <Chip
+                label={booking.status}
+                color={getStatusColor(booking.status)}
+                size="medium"
+                sx={{ borderRadius: 2, fontWeight: 600 }}
+              />
+            </Box>
+
+            <Grid container spacing={4}>
+              {/* Left Column - Patient & Booking Info */}
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'primary.main' }}>
+                  Patient Information
                 </Typography>
                 
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                      <Person sx={{ color: 'primary.main', fontSize: 30, mb: 1 }} />
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Patient Name
-                      </Typography>
-                      <Typography variant="body2" fontWeight="bold">
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {/* Patient Details */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'background.paper',
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Avatar sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
+                      <Person />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold">
                         {booking.bloodRequest?.customerName || 'Anonymous'}
                       </Typography>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                      <Phone sx={{ color: 'primary.main', fontSize: 30, mb: 1 }} />
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Contact
-                      </Typography>
-                      <Typography variant="body2">
+                      <Typography variant="body2" color="text.secondary">
                         {booking.bloodRequest?.user?.phone_number || 'N/A'}
                       </Typography>
-                    </Box>
-                  </Grid>
-
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                      <Bloodtype sx={{ color: 'error.main', fontSize: 30, mb: 1 }} />
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Blood Type
-                      </Typography>
-                      <Typography variant="body2" fontWeight="bold">
-                        {booking.bloodType} ({booking.units} units)
+                      <Typography variant="body2" color="text.secondary">
+                        {booking.bloodRequest?.user?.emailId || 'N/A'}
                       </Typography>
                     </Box>
+                  </Box>
+
+                  {/* Blood Requirements */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'background.paper',
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Bloodtype sx={{ color: 'primary.main', fontSize: 32 }} />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {booking.bloodType} Blood Required
+                      </Typography>
+                      <Typography variant="body2">
+                        {booking.units} units needed
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Location */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 2,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'background.paper',
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <LocationOn sx={{ color: 'primary.main', fontSize: 32 }} />
+                    <Box>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Delivery Location
+                      </Typography>
+                      <Typography variant="body2">
+                        {booking.bloodRequest?.user?.location || 'N/A'}, {booking.bloodRequest?.user?.city || 'N/A'}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Prescriptions */}
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      Prescriptions
+                    </Typography>
+                    {booking.bloodRequest?.prescriptionUrls && booking.bloodRequest.prescriptionUrls.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {booking.bloodRequest.prescriptionUrls.map((prescription, index) => (
+                          <Chip
+                            key={index}
+                            icon={<Receipt />}
+                            label={`Prescription ${index + 1}`}
+                            onClick={() => handleViewPrescription(prescription)}
+                            clickable
+                            sx={{ borderRadius: 2 }}
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No prescriptions uploaded
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              </Grid>
+
+              {/* Right Column - Service Details & Actions */}
+              <Grid item xs={12} md={8}>
+                <Typography variant="h6" sx={{ fontWeight: 600, mb: 3, color: 'primary.main' }}>
+                  Service Details & Actions
+                </Typography>
+
+                <Grid container spacing={3}>
+                  {/* Service Details Receipt */}
+                  <Grid item xs={12} md={6}>
+                    {(booking.totalAmount || booking.pricePerUnit) ? (
+                      <Box sx={{ 
+                        p: 3,
+                        borderRadius: 3,
+                        backgroundColor: 'background.paper',
+                        border: `1px solid ${theme.palette.divider}`,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        height: '100%'
+                      }}>
+                        <Box sx={{ 
+                          position: 'absolute', 
+                          top: -10, 
+                          right: -10, 
+                          width: 40, 
+                          height: 40, 
+                          borderRadius: '50%', 
+                          backgroundColor: 'primary.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <CheckCircle sx={{ color: 'white' }} />
+                        </Box>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                          Service Details Added
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">Units:</Typography>
+                            <Typography variant="body2" fontWeight="bold">{booking.units}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">Price per Unit:</Typography>
+                            <Typography variant="body2" fontWeight="bold">₹{booking.pricePerUnit}</Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">Discount:</Typography>
+                            <Typography variant="body2" fontWeight="bold">₹{booking.discount || 0}</Typography>
+                          </Box>
+                          <Divider sx={{ my: 1 }} />
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="subtitle1" fontWeight="bold">Total Amount:</Typography>
+                            <Typography variant="subtitle1" fontWeight="bold">₹{booking.totalAmount}</Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ 
+                        p: 3,
+                        borderRadius: 3,
+                        backgroundColor: 'background.paper',
+                        border: `2px dashed ${theme.palette.divider}`,
+                        textAlign: 'center',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                          Service Details Not Added
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Add service details to proceed with the booking
+                        </Typography>
+                      </Box>
+                    )}
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
-                    <Box sx={{ textAlign: 'center', p: 1 }}>
-                      <Schedule sx={{ color: 'primary.main', fontSize: 30, mb: 1 }} />
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                        Status
-                      </Typography>
-                      <Chip
-                        label={booking.status}
-                        color={getStatusColor(booking.status)}
-                        size="small"
-                        sx={{ borderRadius: 2 }}
-                      />
+                  {/* Action Buttons */}
+                  <Grid item xs={12} md={6}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: 2,
+                      height: '100%',
+                      justifyContent: 'space-between'
+                    }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<Notifications />}
+                          onClick={handleAddServiceDetails}
+                          sx={{ 
+                            borderRadius: 2,
+                            py: 1.5,
+                            textTransform: 'none',
+                            fontWeight: 600
+                          }}
+                        >
+                          {booking.totalAmount ? 'Edit Service Details' : 'Add Service Details'}
+                        </Button>
+                        
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          startIcon={<Send />}
+                          sx={{ 
+                            borderRadius: 2,
+                            py: 1.5,
+                            textTransform: 'none'
+                          }}
+                        >
+                          Send Payment Reminder
+                        </Button>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Status Actions
+                        </Typography>
+                        
+                        {/* Dynamic Status Button based on current booking status */}
+                        {booking.status === 'PENDING' && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Schedule />}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            Mark as Confirmed
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'CONFIRMED' && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Payment />}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            Mark Waiting for Payment
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'WaitingForPayment' && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<Payment />}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none'
+                            }}
+                            disabled
+                          >
+                            Waiting for Payment 
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'PaymentCompleted' && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<Schedule />}
+                            onClick={handleUpdateStatusToWaitingForPickup}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            Mark Waiting for Pickup
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'WaitingForPickup' && (
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<CheckCircle />}
+                            onClick={handleCompleteBooking}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            Mark as Completed
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'COMPLETED' && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<CheckCircle />}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none'
+                            }}
+                            disabled
+                          >
+                            Completed
+                          </Button>
+                        )}
+                        
+                        {booking.status === 'CANCELLED' && (
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            startIcon={<Cancel />}
+                            sx={{ 
+                              borderRadius: 2,
+                              py: 1.5,
+                              textTransform: 'none'
+                            }}
+                            disabled
+                          >
+                            Request Cancelled
+                          </Button>
+                        )}
+                      </Box>
                     </Box>
                   </Grid>
                 </Grid>
-
-                {/* Prescriptions Section */}
-                <Divider sx={{ my: 1 }} />
-                <Box sx={{ mt: 1 }}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Prescriptions
-                  </Typography>
-                  {booking.bloodRequest?.prescriptionUrls && booking.bloodRequest.prescriptionUrls.length > 0 ? (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {booking.bloodRequest.prescriptionUrls.map((prescription, index) => (
-                        <Chip
-                          key={index}
-                          icon={<Receipt />}
-                          label={`Prescription ${index + 1}`}
-                          onClick={() => handleViewPrescription(prescription)}
-                          clickable
-                          sx={{ borderRadius: 2 }}
-                        />
-                      ))}
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      No prescriptions uploaded
-                    </Typography>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          {/* Service Details Card */}
-          <Grid item xs={12} md={6}>
-            <Card sx={{ 
-              transition: 'transform 0.2s ease-in-out',
-              height: '100%',
-              '&:hover': {
-                transform: 'translateY(-2px)'
-              }
-            }}>
-              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-                  Service Details
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {/* Buttons stacked vertically */}
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<Notifications />}
-                    onClick={handleAddServiceDetails}
-                    sx={{ 
-                      borderRadius: 2,
-                      py: 1.5,
-                      textTransform: 'none',
-                      fontWeight: 600
-                    }}
-                  >
-                    Add Service Details
-                  </Button>
-                  
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    startIcon={<Send />}
-                    sx={{ 
-                      borderRadius: 2,
-                      py: 1.5,
-                      textTransform: 'none'
-                    }}
-                  >
-                    Send Payment Reminder
-                  </Button>
-
-                  <Divider sx={{ my: 1 }} />
-                  
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Status Actions
-                  </Typography>
-                  
-                  {/* Dynamic Status Button based on current booking status */}
-                  {booking.status === 'PENDING' && (
-                    <Button
-                      variant="contained"
-                      color="info"
-                      startIcon={<Schedule />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      Mark as Confirmed
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'CONFIRMED' && (
-                    <Button
-                      variant="contained"
-                      color="warning"
-                      startIcon={<Payment />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      Mark Waiting for Payment
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'WaitingForPayment' && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      startIcon={<CheckCircle />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      Mark Payment Completed
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'PaymentCompleted' && (
-                    <Button
-                      variant="contained"
-                      color="info"
-                      startIcon={<Schedule />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      Mark Waiting for Pickup
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'WaitingForPickup' && (
-                    <Button
-                      variant="contained"
-                      color="success"
-                      startIcon={<CheckCircle />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600
-                      }}
-                    >
-                      Mark as Completed
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'COMPLETED' && (
-                    <Button
-                      variant="outlined"
-                      color="success"
-                      startIcon={<CheckCircle />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none'
-                      }}
-                      disabled
-                    >
-                      Already Completed
-                    </Button>
-                  )}
-                  
-                  {booking.status === 'CANCELLED' && (
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      startIcon={<Cancel />}
-                      sx={{ 
-                        borderRadius: 2,
-                        py: 1.5,
-                        textTransform: 'none'
-                      }}
-                      disabled
-                    >
-                      Request Cancelled
-                    </Button>
-                  )}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-
-        </Grid>
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
 
         {/* Prescription Preview Dialog */}
         <Dialog 
@@ -653,7 +832,7 @@ const BloodBankVendorProcessRequest = () => {
             pb: 1
           }}>
             <Notifications sx={{ color: 'primary.main' }} />
-            Add Service Details
+            {booking.totalAmount ? 'Edit Service Details' : 'Add Service Details'}
           </DialogTitle>
           <DialogContent sx={{ pt: 2 }}>
             <Grid container spacing={3}>
@@ -757,7 +936,7 @@ const BloodBankVendorProcessRequest = () => {
               onClick={handleSubmitServiceDetails}
               sx={{ borderRadius: 2, px: 3 }}
             >
-              Add Service
+              {booking.totalAmount ? 'Update Service' : 'Add Service'}
             </Button>
           </DialogActions>
         </Dialog>
