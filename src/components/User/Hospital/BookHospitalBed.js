@@ -266,9 +266,11 @@ const BookHospitalBed = () => {
                                     <p>₹{ward.pricePerDay}/day • {ward.availableBeds} available</p>
                                 </div>
                                 <div className="ward-facilities">
-                                    {ward.facilities.map((facility, index) => (
-                                        <span key={index} className="facility">{facility}</span>
-                                    ))}
+                                    {ward.facilities && Object.keys(ward.facilities)
+                                        .filter(facility => ward.facilities[facility])
+                                        .map((facility, index) => (
+                                            <span key={index} className="facility">{facility}</span>
+                                        ))}
                                     {ward.isAC && <span className="facility">AC</span>}
                                     {ward.hasAttachedBathroom && <span className="facility">Attached Bathroom</span>}
                                 </div>

@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.44:5000/api',
-    SOCKET_URL: 'http://192.168.1.44:5000',
+    BASE_URL: 'http://192.168.1.38:5000/api',
+    SOCKET_URL: 'http://192.168.1.38:5000',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
@@ -20,6 +20,16 @@ export const API_CONFIG = {
             GET_USER_BOOKINGS: '/hospitals/by-user/:userId',
             UPDATE_BED_BOOKING_PAYMENT_STATUS: '/hospitals/appointment/payment-status/:bookingId',
             GET_COMPLETED_BOOKINGS: '/hospitals/appointment/completed/user/:userId',
+            GET_PROFILE: '/hospitals/profile/:vendorId',
+            UPDATE_PROFILE: '/hospitals/profile/:vendorId',
+            GET_VENDOR_WARDS: '/hospitals/wards/vendor/:vendorId',
+            CREATE_WARD: '/hospitals/wards',
+            DELETE_WARD: '/hospitals/wards/:wardId',
+            UPDATE_WARD: '/hospitals/wards/:wardId',
+            GET_VENDOR_APPOINTMENTS: '/hospitals/by-vendor/:vendorId',
+            ACCEPT_APPOINTMENT: '/hospitals/appointment/accept/:bookingId',
+            NOTIFY_PAYMENT: '/hospitals/appointment/notify-payment/:bookingId',
+            GET_COMPLETED_APPOINTMENTS: '/hospitals/appointment/completed/vendor/:vendorId',
             // Add other hospital endpoints as needed
         },
         DOCTOR_CONSULTATION: {

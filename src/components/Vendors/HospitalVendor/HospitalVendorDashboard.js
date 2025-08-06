@@ -1,297 +1,496 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  AppBar,
-  Toolbar,
   Typography,
-  IconButton,
-  Drawer,
+  Card,
+  CardContent,
+  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
   Chip,
   useTheme,
-  useMediaQuery,
-  Tooltip
+  LinearProgress,
+  Avatar,
+  IconButton,
+  Tooltip,
+  Button,
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Skeleton
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Dashboard,
-  LocalHospital,
   Bed,
-  People,
-  Assessment,
-  Settings,
-  Logout,
-  AccountCircle,
-  Notifications,
-  TrendingUp,
-  LocalShipping,
-  Payment,
-  Store,
-  Visibility,
-  Emergency,
   Schedule,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon
+  TrendingUp,
+  Emergency,
+  Visibility,
+  LocalHospital,
+  Assignment,
+  CheckCircle,
+  Warning,
+  Error,
+  Circle,
+  Refresh,
+  People,
+  Payment
 } from '@mui/icons-material';
+import HospitalVendorLayout from './HospitalVendorLayout';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
-import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
-import { useNavigate } from 'react-router-dom';
+import { getVendorStatus, toggleVendorStatus } from '../../../services/Vendors/AllVendors.service';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { VendorThemeProvider } from '../../../contexts/VendorThemeContext';
 
-const HospitalVendorDashboardContent = () => {
+const HospitalVendorDashboard = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useVendorTheme();
-  
-  // State management
   const [vendorData, setVendorData] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [vendorStatus, setVendorStatus] = useState({ isActive: false });
+  const [statusLoading, setStatusLoading] = useState(false);
 
-  // Check authentication on component mount
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = () => {
-    const authData = vendorAuthService.getVendorAuthData();
-    if (!authData || authData.userType !== 'vendor') {
-      console.log('Vendor not authenticated, redirecting to login');
-      navigate('/');
-      return;
-    }
-
-    setVendorData(authData.vendorData);
-    setLoading(false);
-    console.log('Hospital vendor authenticated:', authData.vendorData);
-  };
-
-  const handleLogout = async () => {
+  // Fetch vendor status
+  const fetchVendorStatus = async () => {
     try {
-      // Get vendor data for logout API call
       const authData = vendorAuthService.getVendorAuthData();
-      if (authData && authData.vendorData && authData.vendorData.vendorId) {
-        // Call logout API to remove session from database
-        await vendorAuthService.vendorLogout(authData.vendorData.vendorId);
-        console.log('Hospital vendor logged out successfully from server');
+      const vendorId = authData?.vendorData?.vendorId || authData?.vendorData?.id;
+      
+      if (vendorId) {
+        console.log('Fetching status for hospital vendor ID:', vendorId);
+        const statusData = await getVendorStatus(vendorId);
+        setVendorStatus({ isActive: statusData.isActive || false });
       }
     } catch (error) {
-      console.error('Error calling logout API:', error);
-      // Continue with local logout even if API call fails
-    } finally {
-      // Clear local auth data
-      vendorAuthService.clearVendorAuthData();
-      setAnchorEl(null);
-      // Navigate to home page after logout
-      window.location.href = '/';
+      console.error('Error fetching vendor status:', error);
+      // Keep default status if API fails
     }
   };
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  // Toggle vendor status
+  const handleStatusToggle = async () => {
+    if (statusLoading) return;
+    
+    setStatusLoading(true);
+    try {
+      const authData = vendorAuthService.getVendorAuthData();
+      const vendorId = authData?.vendorData?.vendorId || authData?.vendorData?.id;
+      
+      if (!vendorId) {
+        toast.error('Vendor ID not found');
+        return;
+      }
+
+      const newStatus = !vendorStatus.isActive;
+      console.log('Toggling hospital vendor status:', vendorId, 'to:', newStatus);
+      await toggleVendorStatus(vendorId, newStatus);
+      setVendorStatus({ isActive: newStatus });
+      toast.success(`Hospital ${newStatus ? 'activated' : 'deactivated'} successfully`);
+    } catch (error) {
+      console.error('Error toggling vendor status:', error);
+      toast.error('Failed to update status');
+    } finally {
+      setStatusLoading(false);
+    }
   };
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  useEffect(() => {
+    const fetchVendorData = async () => {
+      try {
+        const authData = vendorAuthService.getVendorAuthData();
+        console.log('Hospital vendor auth data:', authData);
+        if (authData && authData.vendorData) {
+          setVendorData(authData.vendorData);
+        }
+      } catch (error) {
+        console.error('Error fetching vendor data:', error);
+        toast.error('Failed to load vendor data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
+    fetchVendorData();
+  }, []);
 
-  // Dashboard menu items
-  const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/vendor/hospital/dashboard' },
-    { text: 'Wards & Beds', icon: <Bed />, path: '/vendor/hospital/wards' },
-    { text: 'Bookings', icon: <Schedule />, path: '/vendor/hospital/bookings' },
-    { text: 'Patients', icon: <People />, path: '/vendor/hospital/patients' },
-    { text: 'Analytics', icon: <Assessment />, path: '/vendor/hospital/analytics' },
-    { text: 'Settings', icon: <Settings />, path: '/vendor/hospital/settings' },
-  ];
+  // Fetch vendor status when component mounts
+  useEffect(() => {
+    fetchVendorStatus();
+  }, []);
+
+  const refreshVendorStatus = async () => {
+    setStatusLoading(true);
+    try {
+      const authData = vendorAuthService.getVendorAuthData();
+      const vendorId = authData?.vendorData?.vendorId || authData?.vendorData?.id;
+      
+      if (vendorId) {
+        const statusData = await getVendorStatus(vendorId);
+        setVendorStatus({ isActive: statusData.isActive || false });
+        toast.success('Status refreshed successfully');
+      }
+    } catch (error) {
+      console.error('Error refreshing vendor status:', error);
+      toast.error('Failed to refresh status');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
 
   // Sample dashboard data
   const dashboardStats = [
-    { title: 'Total Beds', value: '245', icon: <Bed />, color: 'primary' },
-    { title: 'Available Beds', value: '67', icon: <LocalHospital />, color: 'success' },
-    { title: 'Revenue (₹)', value: '2,45,230', icon: <TrendingUp />, color: 'secondary' },
-    { title: 'Emergency Cases', value: '12', icon: <Emergency />, color: 'error' },
+    { title: 'Total Beds', value: '245', icon: <Bed />, color: 'primary', trend: '+5%' },
+    { title: 'Available Beds', value: '67', icon: <LocalHospital />, color: 'success', trend: '+12%' },
+    { title: 'Revenue (₹)', value: '2,45,230', icon: <Payment />, color: 'secondary', trend: '+8%' },
+    { title: 'Emergency Cases', value: '12', icon: <Emergency />, color: 'error', trend: '-3%' },
   ];
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography>Loading hospital dashboard...</Typography>
+  const recentBookings = [
+    { id: 'HOS001', patientName: 'John Doe', wardType: 'General Ward', status: 'Confirmed', priority: 'Normal' },
+    { id: 'HOS002', patientName: 'Jane Smith', wardType: 'ICU', status: 'Processing', priority: 'Emergency' },
+    { id: 'HOS003', patientName: 'Robert Johnson', wardType: 'Private Room', status: 'Pending', priority: 'Urgent' },
+  ];
+
+  const wardStatus = [
+    { name: 'General Ward', available: 15, total: 50, occupancy: 70 },
+    { name: 'ICU', available: 3, total: 20, occupancy: 85 },
+    { name: 'Emergency Ward', available: 8, total: 30, occupancy: 73 },
+    { name: 'Private Room', available: 12, total: 25, occupancy: 52 },
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Confirmed': return 'success';
+      case 'Processing': return 'warning';
+      case 'Pending': return 'info';
+      default: return 'default';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'Emergency': return 'error';
+      case 'Urgent': return 'warning';
+      case 'Normal': return 'info';
+      default: return 'default';
+    }
+  };
+
+  // Skeleton loading component
+  const DashboardSkeleton = () => (
+    <VendorThemeProvider>
+      <HospitalVendorLayout title="Dashboard">
+      <Box sx={{ 
+        width: '100%', 
+        px: { xs: 2, sm: 3 }
+      }}>
+        {/* Welcome Card Skeleton */}
+        <Card sx={{ mb: 4, borderRadius: 3, maxWidth: '1200px', mx: 'auto' }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ flex: 1 }}>
+                <Skeleton variant="text" width="60%" height={32} sx={{ mb: 1 }} />
+                <Skeleton variant="text" width="80%" height={40} sx={{ mb: 1 }} />
+                <Skeleton variant="text" width="50%" height={24} />
+              </Box>
+              <Skeleton variant="rectangular" width={110} height={36} sx={{ borderRadius: 20 }} />
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Stats Skeleton */}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          <Skeleton variant="text" width="200px" height={32} sx={{ mx: 'auto' }} />
+        </Typography>
+        <Box sx={{ 
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+          gap: 3,
+          maxWidth: '1400px',
+          mx: 'auto',
+          mb: 4
+        }}>
+          {[1, 2, 3, 4].map((index) => (
+            <Card key={index} sx={{ height: '100%', minHeight: { xs: 140, sm: 150, md: 160 } }}>
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                  <Skeleton variant="circular" width={64} height={64} />
+                </Box>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Skeleton variant="text" width="60%" height={32} sx={{ mb: 1 }} />
+                  <Skeleton variant="text" width="80%" height={20} sx={{ mb: 0.5 }} />
+                  <Skeleton variant="text" width="40%" height={16} />
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
+
+        {/* Activity Skeleton */}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          <Skeleton variant="text" width="150px" height={32} sx={{ mx: 'auto' }} />
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ height: '100%', minHeight: { xs: 300, md: 400 } }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                  <Skeleton variant="text" width="120px" height={24} />
+                  <Skeleton variant="circular" width={32} height={32} />
+                </Box>
+                {[1, 2, 3].map((index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Skeleton variant="circular" width={40} height={40} />
+                      <Box sx={{ flex: 1 }}>
+                        <Skeleton variant="text" width="70%" height={20} />
+                        <Skeleton variant="text" width="50%" height={16} />
+                      </Box>
+                      <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
+                    </Box>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ height: '100%', minHeight: { xs: 300, md: 400 } }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+                  <Skeleton variant="text" width="140px" height={24} />
+                  <Skeleton variant="circular" width={32} height={32} />
+                </Box>
+                {[1, 2, 3, 4].map((index) => (
+                  <Box key={index} sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Skeleton variant="circular" width={40} height={40} />
+                      <Box sx={{ flex: 1 }}>
+                        <Skeleton variant="text" width="60%" height={20} />
+                        <Skeleton variant="text" width="40%" height={16} />
+                      </Box>
+                      <Skeleton variant="text" width={40} height={20} />
+                    </Box>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       </Box>
-    );
+      </HospitalVendorLayout>
+    </VendorThemeProvider>
+  );
+
+  if (loading) {
+    return <DashboardSkeleton />;
   }
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* App Bar */}
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Hospital Dashboard
-          </Typography>
+    <VendorThemeProvider>
+      <HospitalVendorLayout title="Dashboard">
+      <Box sx={{ 
+        width: '100%', 
+        px: { xs: 2, sm: 3 }
+      }}>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <Notifications />
-            </IconButton>
-            
-            <Button
-              color="inherit"
-              onClick={handleMenuOpen}
-              startIcon={<AccountCircle />}
-              endIcon={<AccountCircle />}
-            >
-              {vendorData?.email?.split('@')[0] || 'Hospital'}
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar Drawer */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: 240,
-            boxSizing: 'border-box',
-            marginTop: '64px',
-            height: 'calc(100vh - 64px)'
-          }
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Card sx={{ mb: 2 }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Avatar sx={{ width: 56, height: 56, mx: 'auto', mb: 1 }}>
-                <LocalHospital />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>
-                {vendorData?.generatedId || 'Hospital'}
-              </Typography>
-              <Chip 
-                label="Hospital" 
-                color="primary" 
-                size="small" 
+        {/* Welcome Card */}
+        <Card 
+          sx={{
+            mb: 4,
+            borderRadius: 3,
+            backgroundColor: theme.palette.background.card,
+            color: theme.palette.text.primary,
+            boxShadow: 'none',
+            width: '100%',
+            maxWidth: '1200px',
+            mx: 'auto',
+            border: `1px solid ${theme.palette.divider}`
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+                  Welcome back,
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  {vendorData?.agencyName || vendorData?.email?.split('@')[0] || 'Hospital'}
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.7 }}>
+                  {vendorData?.email || 'hospital@example.com'}
+                </Typography>
+              </Box>
+              <Button
                 variant="outlined"
-              />
-            </CardContent>
-          </Card>
-
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem 
-                button 
-                key={item.text}
-                onClick={() => {
-                  // Handle navigation here
-                  console.log('Navigate to:', item.path);
-                }}
+                size="small"
+                onClick={handleStatusToggle}
+                disabled={statusLoading}
+                startIcon={
+                  statusLoading ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <Circle sx={{ 
+                      color: vendorStatus?.isActive ? 'success.main' : 'error.main', 
+                      fontSize: '1.2rem' 
+                    }} />
+                  )
+                }
                 sx={{
-                  mb: 1,
-                  borderRadius: 1,
+                  borderRadius: 20,
+                  borderColor: vendorStatus?.isActive ? 'success.main' : 'error.main',
+                  color: vendorStatus?.isActive ? 'success.main' : 'error.main',
+                  fontWeight: 500,
+                  textTransform: 'none',
+                  minWidth: 110,
+                  px: 2,
                   '&:hover': {
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText'
-                  }
+                    borderColor: vendorStatus?.isActive ? 'success.dark' : 'error.dark',
+                    backgroundColor: vendorStatus?.isActive ? 'success.lighter' : 'error.lighter',
+                  },
+                  '&:disabled': {
+                    opacity: 0.6,
+                  },
                 }}
               >
-                <ListItemIcon sx={{ color: 'inherit' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome back, {vendorData?.email?.split('@')[0] || 'Hospital'}!
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Here's what's happening with your hospital today.
-        </Typography>
+                {statusLoading ? 'Loading...' : (vendorStatus?.isActive ? 'Active' : 'Inactive')}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
 
         {/* Dashboard Stats */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          Hospital Overview
+        </Typography>
+        <Box sx={{ 
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+          gap: 3,
+          justifyContent: 'center',
+          maxWidth: '1400px',
+          mx: 'auto',
+          mb: 4
+        }}>
           {dashboardStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Box sx={{ 
-                      p: 1, 
-                      borderRadius: 1, 
-                      backgroundColor: `${stat.color}.light`,
-                      color: `${stat.color}.contrastText`,
-                      mr: 2
-                    }}>
-                      {stat.icon}
-                    </Box>
-                    <Typography variant="h4" component="div">
-                      {stat.value}
-                    </Typography>
+            <Card 
+              key={index}
+              sx={{
+                height: '100%',
+                minHeight: { xs: 140, sm: 150, md: 160 },
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px)'
+                }
+              }}
+            >
+              <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  mb: { xs: 1.5, sm: 2, md: 2.5 },
+                  flex: 1
+                }}>
+                  <Box sx={{ 
+                    p: { xs: 1.5, sm: 1.8, md: 2 }, 
+                    borderRadius: 3, 
+                    backgroundColor: `${stat.color}.light`,
+                    color: `${stat.color}.contrastText`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: { xs: 48, sm: 56, md: 64 },
+                    minHeight: { xs: 48, sm: 56, md: 64 }
+                  }}>
+                    {stat.icon}
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                </Box>
+                <Box sx={{ textAlign: 'center', flex: 1 }}>
+                  <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
                     {stat.title}
                   </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } }}>
+                    {stat.trend}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
           ))}
-        </Grid>
+        </Box>
 
         {/* Recent Activity */}
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+          Recent Activity
+        </Typography>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
+          <Grid item xs={12} md={6} sx={{ width: '100%' }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                minHeight: { xs: 300, md: 400 },
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Recent Bookings
-                </Typography>
-                <List>
-                  {[1, 2, 3].map((item) => (
-                    <ListItem key={item} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <Schedule color="primary" />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Recent Bookings
+                  </Typography>
+                  <IconButton size="small" onClick={refreshVendorStatus} title="Refresh Status">
+                    <Refresh />
+                  </IconButton>
+                </Box>
+                <List sx={{ p: 0 }}>
+                  {recentBookings.map((booking) => (
+                    <ListItem key={booking.id} sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Avatar sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: theme.palette[getStatusColor(booking.status)].main 
+                        }}>
+                          <Schedule />
+                        </Avatar>
                       </ListItemIcon>
                       <ListItemText
-                        primary={`Booking #${1000 + item}`}
-                        secondary={`Ward ${item} • Patient ${item}`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                              {booking.patientName}
+                            </Typography>
+                            <Chip 
+                              label={booking.priority} 
+                              size="small" 
+                              color={getPriorityColor(booking.priority)}
+                              variant="outlined"
+                              sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              {booking.wardType} • {booking.id}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              Status: {booking.status}
+                            </Typography>
+                          </Box>
+                        }
                       />
-                      <Chip label="Confirmed" size="small" color="success" />
+                      <Chip 
+                        label={booking.status} 
+                        size="small" 
+                        color={getStatusColor(booking.status)}
+                        sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                      />
                     </ListItem>
                   ))}
                 </List>
@@ -299,27 +498,72 @@ const HospitalVendorDashboardContent = () => {
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
-            <Card>
+          <Grid item xs={12} md={6} sx={{ width: '100%' }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                minHeight: { xs: 300, md: 400 },
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Available Wards
-                </Typography>
-                <List>
-                  {['General Ward', 'ICU', 'Emergency'].map((ward, index) => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <LocalHospital color="success" />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Ward Status
+                  </Typography>
+                  <IconButton size="small" onClick={refreshVendorStatus} title="Refresh Status">
+                    <Refresh />
+                  </IconButton>
+                </Box>
+                <List sx={{ p: 0 }}>
+                  {wardStatus.map((ward, index) => (
+                    <ListItem key={index} sx={{ px: 0, py: 1.5 }}>
+                      <ListItemIcon sx={{ minWidth: 40 }}>
+                        <Avatar sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: ward.occupancy >= 90 ? 'error.main' : ward.occupancy >= 75 ? 'warning.main' : 'success.main'
+                        }}>
+                          <Bed />
+                        </Avatar>
                       </ListItemIcon>
                       <ListItemText
-                        primary={ward}
-                        secondary={`${10 + index * 5} beds available`}
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600, fontSize: { xs: '0.875rem', md: '1rem' } }}>
+                              {ward.name}
+                            </Typography>
+                            <Chip 
+                              label={ward.occupancy >= 90 ? 'Critical' : ward.occupancy >= 75 ? 'High' : 'Available'} 
+                              size="small" 
+                              color={ward.occupancy >= 90 ? 'error' : ward.occupancy >= 75 ? 'warning' : 'success'}
+                              variant="outlined"
+                              sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              {ward.available} beds available
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', md: '0.875rem' } }}>
+                              {ward.occupancy}% occupancy
+                            </Typography>
+                          </Box>
+                        }
                       />
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Visibility fontSize="small" />
-                        <Typography variant="body2" color="text.secondary">
-                          {20 + index * 8}
-                        </Typography>
+                        <Tooltip title="Available Beds">
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', md: '0.75rem' } }}>
+                              {ward.available}/{ward.total}
+                            </Typography>
+                          </Box>
+                        </Tooltip>
                       </Box>
                     </ListItem>
                   ))}
@@ -328,50 +572,36 @@ const HospitalVendorDashboardContent = () => {
             </Card>
           </Grid>
         </Grid>
+
+        {/* Quick Actions */}
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+            Quick Actions
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button variant="contained" startIcon={<Bed />} sx={{ borderRadius: 2 }}>
+              Manage Wards
+            </Button>
+            <Button variant="outlined" startIcon={<Schedule />} sx={{ borderRadius: 2 }}>
+              View Bookings
+            </Button>
+            <Button variant="outlined" startIcon={<People />} sx={{ borderRadius: 2 }}>
+              Patient Records
+            </Button>
+          </Box>
+        </Box>
       </Box>
-
-      {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <AccountCircle fontSize="small" />
-          </ListItemIcon>
-          Profile
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
-};
-
-const HospitalVendorDashboard = () => {
-  return (
-    <VendorThemeProvider>
-      <HospitalVendorDashboardContent />
+      
+      <ToastContainer 
+        position="top-right" 
+        autoClose={3000} 
+        hideProgressBar={false}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+        theme="colored"
+      />
+      </HospitalVendorLayout>
     </VendorThemeProvider>
   );
 };

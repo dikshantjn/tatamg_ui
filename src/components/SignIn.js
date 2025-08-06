@@ -502,8 +502,12 @@ const SignIn = ({ isOpen, onClose, onAuthChange }) => {
           if (success) {
             setSuccessMessage('Vendor login successful! Redirecting to dashboard...');
             
+            // Notify parent component about authentication change
+            onAuthChange(true);
+            
             // Get dashboard route based on vendor role
             const dashboardRoute = vendorAuthService.getVendorDashboardRoute(response.vendor.vendorRole);
+            console.log('🔄 Vendor login - Role:', response.vendor.vendorRole, 'Route:', dashboardRoute);
             
             // Close the signin panel
             setTimeout(() => {

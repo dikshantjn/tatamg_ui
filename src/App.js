@@ -14,6 +14,12 @@ import SignIn from './components/SignIn';
 import ProductVendorDashboard from './components/Vendors/ProductVendor/ProductVendorDashboard';
 import ProductVendorProducts from './components/Vendors/ProductVendor/ProductVendorProducts';
 import HospitalVendorDashboard from './components/Vendors/HospitalVendor/HospitalVendorDashboard';
+import HospitalVendorWards from './components/Vendors/HospitalVendor/HospitalVendorWards';
+import HospitalVendorAppointments from './components/Vendors/HospitalVendor/HospitalVendorAppointments';
+import HospitalVendorHistory from './components/Vendors/HospitalVendor/HospitalVendorHistory';
+import HospitalVendorProfile from './components/Vendors/HospitalVendor/HospitalVendorProfile';
+import HospitalVendorEditProfile from './components/Vendors/HospitalVendor/HospitalVendorEditProfile';
+import HospitalVendorSettings from './components/Vendors/HospitalVendor/HospitalVendorSettings';
 import DoctorConsultationVendorDashboard from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorDashboard';
 import MedicalStoreVendorDashboard from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorDashboard';
 import AmbulanceVendorDashboard from './components/Vendors/AmbulanceVendor/AmbulanceVendorDashboard';
@@ -173,13 +179,9 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
       onAuthChange(true);
     }
     
-    // Mark authentication as verified after a brief delay
-    const timer = setTimeout(() => {
-      setIsAuthVerified(true);
-    }, 100);
-    
-    return () => clearTimeout(timer);
-  });
+    // Mark authentication as verified immediately for smooth transition
+    setIsAuthVerified(true);
+  }, [userType, onAuthChange]);
 
   const handleShowSignIn = () => {
     console.log('🎯 handleShowSignIn called');
@@ -216,7 +218,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
   return (
     <div className="app">
       {console.log('🎭 AppContent render - userType:', userType, 'isAuthenticated:', isAuthenticated, 'isAuthVerified:', isAuthVerified)}
-      {userType !== 'vendor' && isAuthVerified && (
+      {userType !== 'vendor' && (
         <Header 
           isAuthenticated={isAuthenticated} 
           onAuthChange={onAuthChange} 
@@ -227,7 +229,16 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={
-            userType === 'vendor' ? <Navigate to="/vendor/product-partner/dashboard" replace /> : <Home />
+            userType === 'vendor' ? (() => {
+              const vendorAuthData = vendorAuthService.getVendorAuthData();
+              if (vendorAuthData && vendorAuthData.vendorData) {
+                const dashboardRoute = vendorAuthService.getVendorDashboardRoute(vendorAuthData.vendorData.vendorRole);
+                console.log('🔄 Vendor redirect - Role:', vendorAuthData.vendorData.vendorRole, 'Route:', dashboardRoute);
+                return <Navigate to={dashboardRoute} replace />;
+              }
+              console.log('🔄 Vendor redirect - No vendor data, using fallback');
+              return <Navigate to="/vendor/product-partner/dashboard" replace />;
+            })() : <Home />
           } />
           <Route path="/products" element={<Products />} />
           <Route path="/product/:id" element={<ProductProfilePage />} />
@@ -377,6 +388,36 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
           <Route path="/vendor/product-partner/orders" element={<ProductVendorOrders />} />
           <Route path="/vendor/product-partner/reports" element={<ProductVendorReports />} />
           <Route path="/vendor/hospital/dashboard" element={<HospitalVendorDashboard />} />
+          <Route path="/vendor/hospital/wards" element={
+            <VendorThemeProvider>
+              <HospitalVendorWards />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/hospital/appointments" element={
+            <VendorThemeProvider>
+              <HospitalVendorAppointments />
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/hospital/history" element={
+            <VendorThemeProvider>
+              <HospitalVendorHistory />
+            </VendorThemeProvider>
+          } />
+                      <Route path="/vendor/hospital/profile" element={
+              <VendorThemeProvider>
+                <HospitalVendorProfile />
+              </VendorThemeProvider>
+            } />
+            <Route path="/vendor/hospital/edit-profile" element={
+              <VendorThemeProvider>
+                <HospitalVendorEditProfile />
+              </VendorThemeProvider>
+            } />
+            <Route path="/vendor/hospital/settings" element={
+              <VendorThemeProvider>
+                <HospitalVendorSettings />
+              </VendorThemeProvider>
+            } />
           <Route path="/vendor/clinic/dashboard" element={<DoctorConsultationVendorDashboard />} />
           <Route path="/vendor/pharmacy/dashboard" element={<MedicalStoreVendorDashboard />} />
           <Route path="/vendor/pharmacy/reports" element={<MedicalStoreVendorReports />} />
@@ -479,7 +520,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType }) => {
         isOpen: showSignInPanel || shouldShowSignInForProtectedRoute
       })}
       {console.log('🎭 About to render SignIn component with isOpen:', showSignInPanel || shouldShowSignInForProtectedRoute)}
-      {userType !== 'vendor' && isAuthVerified && (
+      {userType !== 'vendor' && (
         <>
           <BottomNavigation />
           <Footer />
@@ -550,46 +591,402 @@ function App() {
     return (
       <ThemeProvider theme={healthcareTheme}>
         <CssBaseline />
-        <div className="loading-screen">
+        <div className="loading-screen fade-in">
           <div className="loading-container">
-            {/* Logo */}
-            <div className="loading-logo">
-              <Logo size="regular" />
+            {/* Animated Background */}
+            <div className="loading-background">
+              <div className="gradient-circle circle-1"></div>
+              <div className="gradient-circle circle-2"></div>
+              <div className="gradient-circle circle-3"></div>
             </div>
-            {/* Loading Text */}
-            <div className="loading-content">
-              <h2 className="loading-title">Vedika.health</h2>
+            
+            {/* Main Content */}
+            <div className="loading-content-wrapper">
+              {/* Logo with Pulse Animation */}
+              <div className="loading-logo-container">
+                <div className="logo-pulse-ring"></div>
+                <div className="loading-logo">
+                  <Logo size="regular" />
+                </div>
+              </div>
+              
+              {/* Title with Typing Effect */}
+              <div className="loading-title-container">
+                <h2 className="loading-title">
+                  <span className="title-char">V</span>
+                  <span className="title-char">e</span>
+                  <span className="title-char">d</span>
+                  <span className="title-char">i</span>
+                  <span className="title-char">k</span>
+                  <span className="title-char">a</span>
+                  <span className="title-char">.</span>
+                  <span className="title-char">h</span>
+                  <span className="title-char">e</span>
+                  <span className="title-char">a</span>
+                  <span className="title-char">l</span>
+                  <span className="title-char">t</span>
+                  <span className="title-char">h</span>
+                </h2>
+              </div>
+              
+              {/* Subtitle with Fade In */}
               <p className="loading-subtitle">Your trusted healthcare partner</p>
-              {/* Animated Loading Dots */}
-              <div className="loading-dots">
-                <div className="dot"></div>
-                <div className="dot"></div>
-                <div className="dot"></div>
+              
+              {/* Modern Loading Bar */}
+              <div className="loading-bar-container">
+                <div className="loading-bar">
+                  <div className="loading-progress"></div>
+                </div>
+                <div className="loading-percentage">0%</div>
               </div>
-              <p className="loading-status">Initializing your healthcare experience...</p>
-            </div>
-            {/* Healthcare Icons Animation */}
-            <div className="healthcare-icons">
-              <div className="icon-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              
+              {/* Status Text with Rotating Messages */}
+              <div className="loading-status-container">
+                <p className="loading-status">Initializing your healthcare experience...</p>
               </div>
-              <div className="icon-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <div className="icon-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7l10 5 10-5-10-5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              
+              {/* Floating Healthcare Icons */}
+              <div className="healthcare-icons">
+                <div className="icon-item icon-heart">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="icon-item icon-activity">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="icon-item icon-layers">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7l10 5 10-5-10-5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="icon-item icon-plus">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        
+        <style jsx>{`
+          .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+          }
+          
+          .fade-in {
+            animation: fadeIn 0.5s ease-out;
+          }
+          
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          
+          .loading-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          
+          .loading-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          
+          .gradient-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            animation: float 6s ease-in-out infinite;
+          }
+          
+          .circle-1 {
+            width: 200px;
+            height: 200px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+          }
+          
+          .circle-2 {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 15%;
+            animation-delay: 2s;
+          }
+          
+          .circle-3 {
+            width: 100px;
+            height: 100px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+          }
+          
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+          }
+          
+          .loading-content-wrapper {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            padding: 2rem;
+          }
+          
+          .loading-logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+          }
+          
+          .logo-pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+          }
+          
+          @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+          }
+          
+          .loading-logo {
+            position: relative;
+            z-index: 2;
+          }
+          
+          .loading-title-container {
+            margin-bottom: 1rem;
+          }
+          
+          .loading-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 2px;
+          }
+          
+          .title-char {
+            display: inline-block;
+            opacity: 0;
+            animation: typeChar 0.1s ease-in-out forwards;
+          }
+          
+          .title-char:nth-child(1) { animation-delay: 0.1s; }
+          .title-char:nth-child(2) { animation-delay: 0.2s; }
+          .title-char:nth-child(3) { animation-delay: 0.3s; }
+          .title-char:nth-child(4) { animation-delay: 0.4s; }
+          .title-char:nth-child(5) { animation-delay: 0.5s; }
+          .title-char:nth-child(6) { animation-delay: 0.6s; }
+          .title-char:nth-child(7) { animation-delay: 0.7s; }
+          .title-char:nth-child(8) { animation-delay: 0.8s; }
+          .title-char:nth-child(9) { animation-delay: 0.9s; }
+          .title-char:nth-child(10) { animation-delay: 1.0s; }
+          .title-char:nth-child(11) { animation-delay: 1.1s; }
+          .title-char:nth-child(12) { animation-delay: 1.2s; }
+          .title-char:nth-child(13) { animation-delay: 1.3s; }
+          
+          @keyframes typeChar {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          
+          .loading-subtitle {
+            font-size: 1.2rem;
+            margin: 1rem 0 2rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 1.5s forwards;
+            font-weight: 300;
+          }
+          
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          
+          .loading-bar-container {
+            margin: 2rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 2s forwards;
+          }
+          
+          .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 0 auto 1rem auto;
+            position: relative;
+          }
+          
+          .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #fff, #e0e7ff);
+            border-radius: 3px;
+            width: 0%;
+            animation: progress 3s ease-in-out infinite;
+            position: relative;
+          }
+          
+          .loading-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s ease-in-out infinite;
+          }
+          
+          @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+          }
+          
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+          
+          .loading-percentage {
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.8;
+            animation: countUp 3s ease-in-out infinite;
+          }
+          
+          @keyframes countUp {
+            0% { content: "0%"; }
+            50% { content: "70%"; }
+            100% { content: "100%"; }
+          }
+          
+          .loading-status-container {
+            margin: 1.5rem 0;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 2.5s forwards;
+          }
+          
+          .loading-status {
+            font-size: 1rem;
+            margin: 0;
+            opacity: 0.9;
+            font-weight: 400;
+          }
+          
+          .healthcare-icons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 3s forwards;
+          }
+          
+          .icon-item {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            animation: floatIcon 3s ease-in-out infinite;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+          }
+          
+          .icon-item:nth-child(1) { animation-delay: 0s; }
+          .icon-item:nth-child(2) { animation-delay: 0.5s; }
+          .icon-item:nth-child(3) { animation-delay: 1s; }
+          .icon-item:nth-child(4) { animation-delay: 1.5s; }
+          
+          @keyframes floatIcon {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(5deg); }
+          }
+          
+          .icon-item:hover {
+            transform: scale(1.1);
+            transition: transform 0.3s ease;
+          }
+          
+          @media (max-width: 768px) {
+            .loading-title {
+              font-size: 2rem;
+              letter-spacing: 1px;
+            }
+            
+            .loading-subtitle {
+              font-size: 1rem;
+            }
+            
+            .loading-bar {
+              width: 250px;
+            }
+            
+            .healthcare-icons {
+              gap: 1rem;
+            }
+            
+            .icon-item {
+              width: 50px;
+              height: 50px;
+            }
+          }
+          
+          .fade-in-content {
+            animation: fadeInContent 0.8s ease-out;
+          }
+          
+          @keyframes fadeInContent {
+            from { 
+              opacity: 0; 
+              transform: translateY(20px);
+            }
+            to { 
+              opacity: 1; 
+              transform: translateY(0);
+            }
+          }
+        `}</style>
       </ThemeProvider>
     );
   }
@@ -598,7 +995,7 @@ function App() {
     <ThemeProvider theme={healthcareTheme}>
       <CssBaseline />
       <Router>
-        <div className="app">
+        <div className="app fade-in-content">
           {console.log('🎭 App render - userType:', userType, 'isAuthenticated:', isAuthenticated)}
           <ToastContainer
             position="top-right"
