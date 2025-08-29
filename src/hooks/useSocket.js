@@ -1,119 +1,130 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { io } from 'socket.io-client';
-import { API_CONFIG } from '../config/api.config';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { io } from "socket.io-client";
+import { API_CONFIG } from "../config/api.config";
 
-// Use the base URL without adding /socket since your backend likely has its own socket path
 const SOCKET_SERVER_URL = API_CONFIG.SOCKET_URL;
 
 export const useSocket = (userId) => {
-    const [isConnected, setIsConnected] = useState(false);
-    const [error, setError] = useState(null);
-    const socketRef = useRef(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [error, setError] = useState(null);
+  const socketRef = useRef(null);
 
-    const connect = useCallback(() => {
-        if (!userId) {
-            setError('User ID is required for socket connection');
-            return;
-        }
+  const connect = useCallback(() => {
+    if (!userId) {
+      setError("User ID is required for socket connection");
+      return;
+    }
 
-        try {
-            socketRef.current = io(SOCKET_SERVER_URL, {
-                transports: ['websocket', 'polling'],
-                autoConnect: true,
-                reconnection: true,
-                reconnectionAttempts: 10,
-                reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                timeout: 20000,
-                forceNew: true,
-                upgrade: true,
-                path: '/socket.io/', // Use default Socket.IO path
-                query: { userId }
-            });
+    try {
+      socketRef.current = io(SOCKET_SERVER_URL, {
+        transports: ["websocket", "polling"],
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        timeout: 20000,
+        forceNew: true,
+        upgrade: true,
+        path: "/socket.io/",
+        query: { userId },
+      });
 
-            // Socket event handlers
-            socketRef.current.on('connect', () => {
-                console.log('✅ Socket connected');
-                setIsConnected(true);
-                setError(null);
-                socketRef.current.emit('register', userId);
-            });
+      /** 🔹 Main events */
+      socketRef.current.on("connect", () => {
+        console.log("✅ Socket connected");
+        setIsConnected(true);
+        setError(null);
+        socketRef.current.emit("register", userId);
+      });
 
-            socketRef.current.on('connect_error', (err) => {
-                console.error('❌ Socket connection error:', err);
-                setIsConnected(false);
-                setError(err.message);
-                attemptReconnect();
-            });
+      socketRef.current.on("disconnect", (reason) => {
+        console.warn("⚠️ Socket disconnected:", reason);
+        setIsConnected(false);
+      });
 
-            socketRef.current.on('error', (err) => {
-                console.error('❌ Socket error:', err);
-                setError(err.message);
-            });
+      socketRef.current.on("connect_error", (err) => {
+        console.warn("⚠️ Socket connection error:", err.message);
+        setIsConnected(false);
+        setError(err.message);
+      });
 
-            socketRef.current.on('disconnect', () => {
-                console.log('❌ Socket disconnected');
-                setIsConnected(false);
-                attemptReconnect();
-            });
+      socketRef.current.on("error", (err) => {
+        console.warn("⚠️ Socket error:", err.message);
+        setError(err.message);
+      });
 
-        } catch (err) {
-            console.error('❌ Socket initialization error:', err);
-            setError(err.message);
-        }
-    }, [userId]);
+      /** 🔹 Engine.IO low-level errors */
+      socketRef.current.io.on("error", (err) => {
+        console.warn("⚠️ Transport error:", err.message);
+      });
 
-    const disconnect = useCallback(() => {
-        if (socketRef.current) {
-            socketRef.current.disconnect();
-            socketRef.current = null;
-            setIsConnected(false);
-        }
-    }, []);
+      /** 🔹 Reconnect lifecycle */
+      socketRef.current.io.on("reconnect_attempt", (attempt) => {
+        console.log(`🔄 Reconnect attempt #${attempt}`);
+      });
 
-    const attemptReconnect = useCallback(() => {
-        setTimeout(() => {
-            if (socketRef.current && !socketRef.current.connected) {
-                console.log('🔄 Attempting to reconnect...');
-                socketRef.current.connect();
-            }
-        }, 2000);
-    }, []);
+      socketRef.current.io.on("reconnect", (attempt) => {
+        console.log(`✅ Reconnected after ${attempt} tries`);
+        setIsConnected(true);
+        setError(null);
+      });
 
-    const subscribe = useCallback((event, handler) => {
-        if (socketRef.current) {
-            socketRef.current.on(event, handler);
-        }
-    }, []);
+      socketRef.current.io.on("reconnect_failed", () => {
+        console.error("❌ Reconnect failed, giving up");
+        setIsConnected(false);
+      });
+    } catch (err) {
+      console.error("❌ Socket initialization error:", err);
+      setError(err.message);
+    }
+  }, [userId]);
 
-    const unsubscribe = useCallback((event, handler) => {
-        if (socketRef.current) {
-            socketRef.current.off(event, handler);
-        }
-    }, []);
+  const disconnect = useCallback(() => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+      setIsConnected(false);
+    }
+  }, []);
 
-    const emit = useCallback((event, data) => {
-        if (socketRef.current && isConnected) {
-            socketRef.current.emit(event, data);
-        }
-    }, [isConnected]);
+  const subscribe = useCallback((event, handler) => {
+    if (socketRef.current) {
+      socketRef.current.on(event, handler);
+    }
+  }, []);
 
-    // Connect on mount, disconnect on unmount
-    useEffect(() => {
-        connect();
-        return () => {
-            disconnect();
-        };
-    }, [connect, disconnect]);
+  const unsubscribe = useCallback((event, handler) => {
+    if (socketRef.current) {
+      socketRef.current.off(event, handler);
+    }
+  }, []);
 
-    return {
-        socket: socketRef.current,
-        isConnected,
-        error,
-        connect,
-        disconnect,
-        subscribe,
-        unsubscribe,
-        emit
+  const emit = useCallback(
+    (event, data) => {
+      if (socketRef.current && isConnected) {
+        socketRef.current.emit(event, data);
+      }
+    },
+    [isConnected]
+  );
+
+  /** 🔹 Connect on mount, disconnect on unmount */
+  useEffect(() => {
+    connect();
+    return () => {
+      disconnect();
     };
-}; 
+  }, [connect, disconnect]);
+
+  return {
+    socket: socketRef.current,
+    isConnected,
+    error,
+    connect,
+    disconnect,
+    subscribe,
+    unsubscribe,
+    emit,
+  };
+};
