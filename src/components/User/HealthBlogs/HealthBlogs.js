@@ -19,7 +19,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { Link as RouterLink } from 'react-router-dom';
 import { blogService } from '../../../services/User/HealthBlogs/blog.service';
 import ImageIcon from '@mui/icons-material/Image';
-import dummyImage from '../../../assets/vitalii-pavlyshynets-kcRFW-Hje8Y-unsplash.jpg';
+import dummyImage from '../../../assets/dummyBlogImage.jpeg';
 
 // Utility to remove first <h1>...</h1> from HTML string
 function removeFirstH1(html) {
@@ -64,18 +64,18 @@ const HealthBlogs = () => {
   const recentArticles = blogs.slice(1);
 
   return (
-    <Box sx={{ background: '#fafafa', minHeight: '100vh', py: { xs: 3, md: 4 } }}>
+    <Box sx={{ background: '#fafafa', minHeight: '100vh', py: { xs: 2, md: 3 } }}>
       <Container maxWidth="lg">
         {/* Minimal Page Header */}
         <Box sx={{
           textAlign: 'center',
-          mb: { xs: 4, md: 6 },
-          py: { xs: 2, md: 3 },
+          mb: { xs: 2, md: 3 },
+          py: { xs: 1, md: 1.5 },
         }}>
-          <Typography variant="h4" fontWeight={600} color={theme.palette.primary.main} gutterBottom>
+          <Typography variant="h4" fontWeight={700} color={theme.palette.primary.main} sx={{ mb: 0.5 }}>
             Health Blog
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', fontSize: { xs: '0.95rem', md: '1rem' } }}>
             Expert tips, wellness guides, and the latest in health—curated for you.
           </Typography>
         </Box>
@@ -85,7 +85,7 @@ const HealthBlogs = () => {
           sx={{
             borderRadius: 3,
             p: { xs: 2, md: 3 },
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 3, md: 4 },
             background: '#fff',
             border: '1px solid #e0e0e0',
             maxWidth: 1100,
@@ -93,13 +93,12 @@ const HealthBlogs = () => {
           }}
         >
           <Grid container spacing={4} alignItems="center" direction="row" wrap="nowrap">
-            <Grid item xs={6} md={6} zeroMinWidth>
+            <Grid item xs={7} md={7} zeroMinWidth>
                 {imageError[featuredBlog.blogPostId] ? (
                   <Box sx={{
                     borderRadius: 3,
                     width: '100%',
-                    minHeight: { xs: 180, sm: 220, md: 240 },
-                    height: { xs: 180, sm: 220, md: 240 },
+                    aspectRatio: '16 / 9',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -116,14 +115,14 @@ const HealthBlogs = () => {
                 sx={{
                   borderRadius: 3,
                   width: '100%',
-                  height: { xs: 180, sm: 220, md: 240 },
+                  aspectRatio: '16 / 9',
                   objectFit: 'cover',
                   boxShadow: 2,
                 }}
               />
                 )}
             </Grid>
-            <Grid item xs={6} md={6} zeroMinWidth>
+            <Grid item xs={5} md={5} zeroMinWidth>
               <Stack direction="row" spacing={1} mb={2}>
                   {/* You can add a 'New' chip if needed */}
               </Stack>

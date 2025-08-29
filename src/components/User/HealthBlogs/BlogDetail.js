@@ -7,7 +7,7 @@ import {
   Avatar,
   Stack,
   Button,
-  Chip,
+  IconButton,
   CardMedia,
   Grid,
   Divider
@@ -16,7 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { teal } from '@mui/material/colors';
 import { blogService } from '../../../services/User/HealthBlogs/blog.service';
 import ImageIcon from '@mui/icons-material/Image';
-import dummyImage from '../../../assets/vitalii-pavlyshynets-kcRFW-Hje8Y-unsplash.jpg';
+import dummyImage from '../../../assets/dummyBlogImage.jpeg';
 import './BlogDetail.css';
 
 const BlogDetail = () => {
@@ -27,6 +27,12 @@ const BlogDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState({}); // { blogPostId: true/false }
+  
+  const getReadingTimeInMinutes = (htmlString) => {
+    const text = (htmlString || '').replace(/<[^>]+>/g, ' ');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.round(words / 200));
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -67,105 +73,133 @@ const BlogDetail = () => {
   }
 
   return (
-    <Box sx={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)', minHeight: '100vh', py: { xs: 2, md: 6 } }}>
-      <Container maxWidth="lg" sx={{ maxWidth: 1000 }}>
-        {/* Main Content */}
-        <Box sx={{ 
-          background: '#fff', 
-          borderRadius: 4, 
-          p: { xs: 3, md: 6 }, 
-          mb: 3, 
-          textAlign: 'center',
-          position: 'relative',
-        }}>
-          {/* Date in top-right corner */}
-          <span className="blog-date-corner">{new Date(blog.createdAt).toLocaleDateString()}</span>
-          {/* Back Button */}
-          <Box sx={{ textAlign: 'left', mb: 4 }}>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate(-1)}
-              sx={{ 
-                textTransform: 'none', 
-                fontWeight: 600,
-                color: teal[700],
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 150, 136, 0.08)'
-                }
-              }}
-        >
-          Back to Blogs
-        </Button>
+    <Box sx={{ background: '#f7f9fc', minHeight: '100vh' }}>
+      {/* HERO IMAGE - directly under header */}
+      <Box sx={{ position: 'relative', width: '100%' }}>
+        {imageError[blog.blogPostId] ? (
+          <Box sx={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            bgcolor: 'grey.100',
+            aspectRatio: '16 / 9',
+          }}>
+            <ImageIcon sx={{ fontSize: 60, color: 'grey.400' }} />
           </Box>
-          {/* Hero Image */}
-          <Box sx={{ mb: 5, position: 'relative' }}>
-            {imageError[blog.blogPostId] ? (
-              <Box sx={{
-                width: '100%',
-                maxHeight: 400,
-                minHeight: 220,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                bgcolor: 'grey.100',
-                borderRadius: 3,
-              }}>
-                <ImageIcon sx={{ fontSize: 60, color: 'grey.400' }} />
-              </Box>
-            ) : (
-              <CardMedia
-                component="img"
-              image={dummyImage}
+        ) : (
+          <CardMedia
+            component="img"
+            image={dummyImage}
             alt={blog.title}
             onError={() => handleImageError(blog.blogPostId)}
             sx={{
               width: '100%',
-                maxHeight: 400,
+              aspectRatio: '16 / 9',
               objectFit: 'cover',
-              borderRadius: 3,
-              }}
-            />
-          )}
-          </Box>
-
-          {/* Article Header */}
+            }}
+          />
+        )}
+        {/* subtle gradient overlay for readability */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.5) 100%)',
+          pointerEvents: 'none'
+        }} />
+        {/* Back icon on image */}
+        <IconButton
+          onClick={() => navigate(-1)}
+          sx={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            bgcolor: 'rgba(255,255,255,0.85)',
+            '&:hover': { bgcolor: 'rgba(255,255,255,0.95)' },
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+          }}
+        >
+          <ArrowBackIcon sx={{ color: teal[700] }} />
+        </IconButton>
+        {/* Title overlay on large screens */}
+        <Container maxWidth="lg" sx={{ position: 'absolute', bottom: { xs: 12, md: 24 }, left: 0, right: 0 }}>
           <Typography 
-            variant="h2" 
-            fontWeight={800} 
-            color={teal[800]} 
-            gutterBottom
-            sx={{ 
-              fontSize: { xs: '2rem', md: '3rem' },
-              lineHeight: 1.2,
-              mb: 3
+            variant="h2"
+            fontWeight={800}
+            sx={{
+              color: '#fff',
+              textShadow: '0 2px 8px rgba(0,0,0,0.35)',
+              fontSize: { xs: '1.8rem', md: '3rem' },
+              lineHeight: 1.2
             }}
           >
             {blog.title}
           </Typography>
+        </Container>
+      </Box>
 
-          {/* Author Info */}
+      {/* CONTENT */}
+      <Container maxWidth="lg" sx={{ maxWidth: 1000, pt: 0, pb: { xs: 4, md: 8 } }}>
 
-          <Divider sx={{ mb: 5, opacity: 0.3 }} />
+        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
+          <Avatar sx={{ bgcolor: teal[400] }}>B</Avatar>
+          <Typography variant="body2" color="text.secondary">
+            {new Date(blog.createdAt).toLocaleDateString()} • {getReadingTimeInMinutes(blog.message)} min read
+          </Typography>
+        </Stack>
 
-          {/* Article Content */}
-          <Box sx={{ 
-            textAlign: 'left',
-            maxWidth: 800,
-            mx: 'auto',
-            mb: 4
+        <Divider sx={{ mb: 3, opacity: 0.2 }} />
+
+        <Box sx={{
+          maxWidth: 900,
+          mx: 'auto',
+          px: { xs: 0, md: 0 },
+        }}>
+          <Box sx={{
+            '& .blog-content': {
+              color: 'rgba(0,0,0,0.85)',
+              fontSize: { xs: '1.05rem', md: '1.14rem' },
+              lineHeight: 1.9
+            },
+            '& .blog-content p': {
+              margin: '0 0 1.1em 0'
+            },
+            '& .blog-content h1, & .blog-content h2, & .blog-content h3': {
+              color: teal[800],
+              marginTop: '1.6em',
+              marginBottom: '0.6em'
+            },
+            '& .blog-content blockquote': {
+              margin: '1.5em 0',
+              paddingLeft: '1em',
+              borderLeft: '4px solid rgba(0,150,136,0.25)',
+              color: 'rgba(0,0,0,0.7)'
+            },
+            '& .blog-content img': {
+              maxWidth: '100%',
+              borderRadius: 2,
+              display: 'block',
+              margin: '16px auto'
+            },
+            '& .blog-content ul, & .blog-content ol': {
+              paddingLeft: '1.25em'
+            }
           }}>
             <div className="blog-content" dangerouslySetInnerHTML={{ __html: blog.message }} />
           </Box>
         </Box>
 
         {/* Related Articles Section */}
-        <Box sx={{ textAlign: 'center' }}>
+        <Box sx={{ textAlign: 'center', mt: 6 }}>
           <Typography 
             variant="h3" 
             fontWeight={800} 
             mb={4} 
             color={teal[800]}
-            sx={{ fontSize: { xs: '1.8rem', md: '2.5rem' } }}
+            sx={{ fontSize: { xs: '1.6rem', md: '2.2rem' } }}
           >
             You may also like
           </Typography>
@@ -177,25 +211,25 @@ const BlogDetail = () => {
                     background: '#fff',
                     borderRadius: 3,
                     overflow: 'hidden',
-                    maxWidth: 350,
+                    maxWidth: 360,
                     mx: 'auto',
                     cursor: 'pointer',
-                    transition: 'transform 0.3s ease',
+                    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.06)',
                     '&:hover': {
-                      transform: 'translateY(-4px)'
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 24px rgba(0,0,0,0.08)'
                     }
                   }}
                   onClick={() => navigate(`/health-blogs/${rel.blogPostId}`)}
                 >
                   {imageError[rel.blogPostId] ? (
                     <Box sx={{
-                      height: 180,
+                      aspectRatio: '16 / 9',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       bgcolor: 'grey.100',
-                      borderTopLeftRadius: 12,
-                      borderTopRightRadius: 12,
                     }}>
                       <ImageIcon sx={{ fontSize: 40, color: 'grey.400' }} />
                     </Box>
@@ -206,10 +240,9 @@ const BlogDetail = () => {
                       alt={rel.title}
                       onError={() => handleImageError(rel.blogPostId)}
                       sx={{ 
-                        height: 180,
+                        width: '100%',
+                        aspectRatio: '16 / 9',
                         objectFit: 'cover',
-                        borderTopLeftRadius: 12,
-                        borderTopRightRadius: 12,
                       }}
                     />
                   )}

@@ -112,7 +112,7 @@ class VendorAuthService {
     getVendorRoleMapping() {
         return {
             1: 'hospital',
-            2: 'clinic', 
+            2: 'doctor-consultation', 
             3: 'pharmacy',
             4: 'ambulance',
             5: 'blood-bank',

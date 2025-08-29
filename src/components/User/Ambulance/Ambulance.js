@@ -1,18 +1,11 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import { MAPS_API_KEY } from '../../../config/map.config';
 import { useNavigate } from 'react-router-dom';
 import { ambulanceService } from '../../../services/User/Ambulance/ambulance.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import './Ambulance.css';
 import OngoingAmbulanceBookingModal from './OngoingAmbulanceBookingModal';
 
-const containerStyle = {
-  width: '100vw',
-  height: '100vh',
-};
-
-const defaultCenter = { lat: 19.076, lng: 72.8777 };
+const defaultLocation = "19.076, 72.8777";
 
 // Helper to calculate distance between two lat/lng points (Haversine formula)
 function getDistanceKm(lat1, lng1, lat2, lng2) {
@@ -69,16 +62,11 @@ function Ambulance() {
   const [userLocation, setUserLocation] = useState(null);
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [locationError, setLocationError] = useState('');
-  const [mapZoom, setMapZoom] = useState(12);
   const [callLoading, setCallLoading] = useState(false);
   const [notification, setNotification] = useState(null);
   const [ongoingBooking, setOngoingBooking] = useState(null);
   const [ongoingModalOpen, setOngoingModalOpen] = useState(false);
-  const mapRef = useRef(null);
   const navigate = useNavigate();
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: MAPS_API_KEY,
-  });
 
   // Steps logic
   const steps = [
@@ -143,21 +131,9 @@ function Ambulance() {
     }
   }, []);
 
-  const handleMarkerClick = useCallback((amb) => {
+  const handleAmbulanceSelect = useCallback((amb) => {
     setSelectedAmbulance(amb);
   }, []);
-
-  // Remove location prompt trigger from map click
-  const handleMapClick = () => {};
-
-  // Update zoom when userLocation is set
-  useEffect(() => {
-    if (userLocation) {
-      setMapZoom(15);
-    } else {
-      setMapZoom(12);
-    }
-  }, [userLocation]);
 
   const handleClosePanel = () => setSelectedAmbulance(null);
 
@@ -256,123 +232,107 @@ function Ambulance() {
         </div>
       )}
       <div className="ambulance-map-wrapper">
-        {isLoaded && (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={userLocation || defaultCenter}
-            zoom={mapZoom}
-            options={{
-              disableDefaultUI: true,
-              zoomControl: true,
-              styles: [
-                { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
-                { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-                { elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
-                { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
-                {
-                  featureType: 'administrative.land_parcel',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#bdbdbd' }],
-                },
-                {
-                  featureType: 'poi',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#eeeeee' }],
-                },
-                {
-                  featureType: 'poi',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#757575' }],
-                },
-                {
-                  featureType: 'poi.park',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#e5e5e5' }],
-                },
-                {
-                  featureType: 'poi.park',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#9e9e9e' }],
-                },
-                {
-                  featureType: 'road',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#ffffff' }],
-                },
-                {
-                  featureType: 'road.arterial',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#757575' }],
-                },
-                {
-                  featureType: 'road.highway',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#dadada' }],
-                },
-                {
-                  featureType: 'road.highway',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#616161' }],
-                },
-                {
-                  featureType: 'road.local',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#9e9e9e' }],
-                },
-                {
-                  featureType: 'transit.line',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#e5e5e5' }],
-                },
-                {
-                  featureType: 'transit.station',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#eeeeee' }],
-                },
-                {
-                  featureType: 'water',
-                  elementType: 'geometry',
-                  stylers: [{ color: '#c9c9c9' }],
-                },
-                {
-                  featureType: 'water',
-                  elementType: 'labels.text.fill',
-                  stylers: [{ color: '#9e9e9e' }],
-                },
-              ],
-            }}
-            onClick={handleMapClick}
-            onLoad={map => (mapRef.current = map)}
-          >
-            {ambulances.map((amb) => {
-              const pos = parseLocation(amb.preciseLocation);
-              if (!pos) return null;
-              const markerPosition = { lat: pos.latitude, lng: pos.longitude };
-    return (
-                <Marker
-                  key={amb.vendorId}
-                  position={markerPosition}
-                  onClick={() => handleMarkerClick(amb)}
-                  icon={{
-                    url: amb.is24x7Available
-                      ? 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
-                      : 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                    scaledSize: { width: 40, height: 40 },
-                  }}
-                />
-              );
-            })}
-            {userLocation && (
-              <Marker
-                position={userLocation}
-                icon={{
-                  url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                  scaledSize: { width: 40, height: 40 },
-                }}
-              />
-            )}
-          </GoogleMap>
-        )}
+        {/* Simple Map Display */}
+        <div style={{ 
+          width: '100vw', 
+          height: '100vh',
+          position: 'relative'
+        }}>
+          {userLocation ? (
+            <iframe
+              src={`https://maps.google.com/maps?q=${userLocation.lat},${userLocation.lng}&z=15&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          ) : (
+            <iframe
+              src={`https://maps.google.com/maps?q=${defaultLocation}&z=12&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          )}
+          
+          {/* Ambulance List Side Panel */}
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '20px',
+            width: '350px',
+            maxHeight: 'calc(100vh - 40px)',
+            overflowY: 'auto',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '12px',
+            padding: '16px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+            zIndex: 1000
+          }}>
+            <h3 style={{ margin: '0 0 16px 0', color: '#333', fontSize: '18px', fontWeight: '600' }}>
+              Available Ambulances
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {ambulances.map((amb) => {
+                const pos = parseLocation(amb.preciseLocation);
+                if (!pos) return null;
+                
+                let distance = 'Unknown';
+                if (userLocation) {
+                  try {
+                    const userLocStr = `${userLocation.lat},${userLocation.lng}`;
+                    distance = `${calculateDistance(userLocStr, amb.preciseLocation).toFixed(1)} km`;
+                  } catch (error) {
+                    distance = 'Unknown';
+                  }
+                }
+                
+                return (
+                  <div 
+                    key={amb.vendorId}
+                    onClick={() => handleAmbulanceSelect(amb)}
+                    style={{
+                      padding: '12px',
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      backgroundColor: selectedAmbulance?.vendorId === amb.vendorId ? '#f0f8ff' : '#fff',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      borderLeft: `4px solid ${amb.is24x7Available ? '#4caf50' : '#f44336'}`
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = selectedAmbulance?.vendorId === amb.vendorId ? '#f0f8ff' : '#fff'}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <div style={{ fontWeight: '600', fontSize: '14px', color: '#333', marginBottom: '4px' }}>
+                          {amb.agencyName}
+                        </div>
+                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                          {amb.address}
+                        </div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>
+                          Distance: {distance} • {amb.is24x7Available ? '24x7 Available' : 'Limited Hours'}
+                        </div>
+                      </div>
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        backgroundColor: amb.is24x7Available ? '#4caf50' : '#f44336'
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
         {/* Floating Call Button - always visible */}
         <div className="floating-call-btn-wrapper">
           <button

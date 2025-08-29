@@ -1,378 +1,659 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  AppBar,
-  Toolbar,
   Typography,
-  IconButton,
-  Drawer,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Card,
-  CardContent,
-  Grid,
   Button,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
-  Chip,
+  LinearProgress,
+  IconButton,
+  Tooltip,
   useTheme,
-  useMediaQuery,
-  Tooltip
+  Switch,
+  FormControlLabel,
+  Divider,
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import {
-  Menu as MenuIcon,
-  Dashboard,
-  LocalHospital,
-  Person,
-  People,
-  Assessment,
-  Settings,
-  Logout,
-  AccountCircle,
-  Notifications,
   TrendingUp,
-  Schedule,
-  Payment,
-  Store,
-  Visibility,
+  TrendingDown,
   VideoCall,
   Event,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon
+  Person,
+  Schedule,
+  CheckCircle,
+  Cancel,
+  Pending,
+  Visibility,
+  Star,
+  Message,
+  CalendarToday,
+  AccessTime,
+  LocationOn,
+  Phone,
+  Email,
+  Notifications,
+  AccountCircle,
+  Videocam,
+  PhoneInTalk,
+  Chat,
+  People,
+  Assessment,
+  Timeline,
+  BarChart
 } from '@mui/icons-material';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { doctorConsultationVendorService } from '../../../services/Vendors/DoctorConsultationVendor.service';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
-import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
-import { useNavigate } from 'react-router-dom';
-
-const DoctorConsultationVendorDashboardContent = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate = useNavigate();
-  const { isDarkMode, toggleDarkMode } = useVendorTheme();
-  
-  // State management
-  const [vendorData, setVendorData] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Check authentication on component mount
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const checkAuthentication = () => {
-    const authData = vendorAuthService.getVendorAuthData();
-    if (!authData || authData.userType !== 'vendor') {
-      console.log('Vendor not authenticated, redirecting to login');
-      navigate('/');
-      return;
-    }
-
-    setVendorData(authData.vendorData);
-    setLoading(false);
-    console.log('Clinic vendor authenticated:', authData.vendorData);
-  };
-
-  const handleLogout = async () => {
-    try {
-      // Get vendor data for logout API call
-      const authData = vendorAuthService.getVendorAuthData();
-      if (authData && authData.vendorData && authData.vendorData.vendorId) {
-        // Call logout API to remove session from database
-        await vendorAuthService.vendorLogout(authData.vendorData.vendorId);
-        console.log('Clinic vendor logged out successfully from server');
-      }
-    } catch (error) {
-      console.error('Error calling logout API:', error);
-      // Continue with local logout even if API call fails
-    } finally {
-      // Clear local auth data
-      vendorAuthService.clearVendorAuthData();
-      setAnchorEl(null);
-      // Navigate to home page after logout
-      window.location.href = '/';
-    }
-  };
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen);
-  };
-
-  // Dashboard menu items
-  const menuItems = [
-    { text: 'Dashboard', icon: <Dashboard />, path: '/vendor/clinic/dashboard' },
-    { text: 'Doctors', icon: <Person />, path: '/vendor/clinic/doctors' },
-    { text: 'Appointments', icon: <Event />, path: '/vendor/clinic/appointments' },
-    { text: 'Patients', icon: <People />, path: '/vendor/clinic/patients' },
-    { text: 'Analytics', icon: <Assessment />, path: '/vendor/clinic/analytics' },
-    { text: 'Settings', icon: <Settings />, path: '/vendor/clinic/settings' },
-  ];
-
-  // Sample dashboard data
-  const dashboardStats = [
-    { title: 'Total Doctors', value: '15', icon: <Person />, color: 'primary' },
-    { title: 'Today Appointments', value: '23', icon: <Event />, color: 'secondary' },
-    { title: 'Revenue (₹)', value: '45,230', icon: <TrendingUp />, color: 'success' },
-    { title: 'Online Consultations', value: '8', icon: <VideoCall />, color: 'info' },
-  ];
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <Typography>Loading clinic dashboard...</Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* App Bar */}
-      <AppBar position="fixed" sx={{ zIndex: theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Clinic Dashboard
-          </Typography>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton color="inherit">
-              <Notifications />
-            </IconButton>
-            
-            <Button
-              color="inherit"
-              onClick={handleMenuOpen}
-              startIcon={<AccountCircle />}
-              endIcon={<AccountCircle />}
-            >
-              {vendorData?.email?.split('@')[0] || 'Clinic'}
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Sidebar Drawer */}
-      <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
-        open={drawerOpen}
-        onClose={handleDrawerToggle}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: 240,
-            boxSizing: 'border-box',
-            marginTop: '64px',
-            height: 'calc(100vh - 64px)'
-          }
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Card sx={{ mb: 2 }}>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Avatar sx={{ width: 56, height: 56, mx: 'auto', mb: 1 }}>
-                <LocalHospital />
-              </Avatar>
-              <Typography variant="h6" gutterBottom>
-                {vendorData?.generatedId || 'Clinic'}
-              </Typography>
-              <Chip 
-                label="Clinic" 
-                color="primary" 
-                size="small" 
-                variant="outlined"
-              />
-            </CardContent>
-          </Card>
-
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem 
-                button 
-                key={item.text}
-                onClick={() => {
-                  // Handle navigation here
-                  console.log('Navigate to:', item.path);
-                }}
-                sx={{
-                  mb: 1,
-                  borderRadius: 1,
-                  '&:hover': {
-                    backgroundColor: 'primary.light',
-                    color: 'primary.contrastText'
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ color: 'inherit' }}>
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, marginTop: '64px' }}>
-        <Typography variant="h4" gutterBottom>
-          Welcome back, {vendorData?.email?.split('@')[0] || 'Clinic'}!
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-          Here's what's happening with your clinic today.
-        </Typography>
-
-        {/* Dashboard Stats */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {dashboardStats.map((stat, index) => (
-            <Grid item xs={12} sm={6} md={3} key={index}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Box sx={{ 
-                      p: 1, 
-                      borderRadius: 1, 
-                      backgroundColor: `${stat.color}.light`,
-                      color: `${stat.color}.contrastText`,
-                      mr: 2
-                    }}>
-                      {stat.icon}
-                    </Box>
-                    <Typography variant="h4" component="div">
-                      {stat.value}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {stat.title}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Recent Activity */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Today's Appointments
-                </Typography>
-                <List>
-                  {[1, 2, 3].map((item) => (
-                    <ListItem key={item} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <Event color="primary" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={`Appointment #${1000 + item}`}
-                        secondary={`Dr. Smith • 2:30 PM`}
-                      />
-                      <Chip label="Confirmed" size="small" color="success" />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Available Doctors
-                </Typography>
-                <List>
-                  {['Dr. John Smith', 'Dr. Sarah Wilson', 'Dr. Mike Johnson'].map((doctor, index) => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        <Person color="success" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={doctor}
-                        secondary={`${5 + index * 2} appointments today`}
-                      />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Visibility fontSize="small" />
-                        <Typography variant="body2" color="text.secondary">
-                          {10 + index * 3}
-                        </Typography>
-                      </Box>
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Box>
-
-      {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-      >
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <AccountCircle fontSize="small" />
-          </ListItemIcon>
-          Profile
-        </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
-          <ListItemIcon>
-            <Settings fontSize="small" />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <Logout fontSize="small" />
-          </ListItemIcon>
-          Logout
-        </MenuItem>
-      </Menu>
-    </Box>
-  );
-};
 
 const DoctorConsultationVendorDashboard = () => {
+  const theme = useTheme();
+  const [loading, setLoading] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [vendorProfile, setVendorProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // Fetch vendor profile on component mount
+  useEffect(() => {
+    const fetchVendorProfile = async () => {
+      try {
+        setProfileLoading(true);
+        const authData = vendorAuthService.getVendorAuthData();
+        
+        if (!authData?.vendorData?.vendorId) {
+          console.error('No vendor ID found in auth data');
+          return;
+        }
+
+        const profileData = await doctorConsultationVendorService.getVendorProfile(authData.vendorData.vendorId);
+        setVendorProfile(profileData);
+      } catch (error) {
+        console.error('Error fetching vendor profile:', error);
+        // Set default data if API fails
+        setVendorProfile({
+          doctorName: 'Dr. Michael Smith',
+          email: 'michael.smith@healthcare.com',
+          profilePicture: ''
+        });
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchVendorProfile();
+  }, []);
+
+  // Sample vendor data (fallback)
+  const vendorData = {
+    name: vendorProfile?.doctorName || 'Dr. Michael Smith',
+    email: vendorProfile?.email || 'michael.smith@healthcare.com',
+    specialty: 'Cardiology',
+    avatar: vendorProfile?.doctorName ? vendorProfile.doctorName.split(' ').map(n => n[0]).join('') : 'MS',
+    profilePicture: vendorProfile?.profilePicture || ''
+  };
+
+  // Booking overview data
+  const bookingOverview = [
+    { title: 'Today', count: 8, color: 'primary', icon: <CalendarToday /> },
+    { title: 'Upcoming', count: 23, color: 'secondary', icon: <Schedule /> },
+    { title: 'Past', count: 156, color: 'info', icon: <Event /> }
+  ];
+
+  // Statistics data
+  const statistics = [
+    { title: 'Total Patients', value: '1,234', icon: <People />, color: 'primary' },
+    { title: 'Total Appointments', value: '2,456', icon: <Schedule />, color: 'secondary' },
+    { title: 'Average Rating', value: '4.8', icon: <Star />, color: 'warning' },
+    { title: 'Completion Rate', value: '94%', icon: <CheckCircle />, color: 'success' }
+  ];
+
+  // Visit trends data
+  const visitTrendsData = [
+    { month: 'Jan', highest: 45, average: 32, lowest: 18 },
+    { month: 'Feb', highest: 52, average: 38, lowest: 22 },
+    { month: 'Mar', highest: 48, average: 35, lowest: 20 },
+    { month: 'Apr', highest: 61, average: 42, lowest: 25 },
+    { month: 'May', highest: 58, average: 40, lowest: 23 },
+    { month: 'Jun', highest: 65, average: 45, lowest: 28 },
+  ];
+
+  // Analytics data
+  const analyticsData = [
+    { name: 'Video Call', value: 65, color: '#6C47FF' },
+    { name: 'Voice Call', value: 25, color: '#2196F3' },
+    { name: 'Chat', value: 10, color: '#10B981' },
+  ];
+
+  // Upcoming appointments
+  const upcomingAppointments = [
+    {
+      id: 1,
+      patientName: 'Sarah Johnson',
+      time: '2:30 PM',
+      date: 'Today',
+      type: 'Video Call',
+      status: 'confirmed',
+      specialty: 'Cardiology',
+      patientId: 'PAT001'
+    },
+    {
+      id: 2,
+      patientName: 'John Davis',
+      time: '4:15 PM',
+      date: 'Today',
+      type: 'Voice Call',
+      status: 'pending',
+      specialty: 'Dermatology',
+      patientId: 'PAT002'
+    },
+    {
+      id: 3,
+      patientName: 'Maria Garcia',
+      time: '10:00 AM',
+      date: 'Tomorrow',
+      type: 'Video Call',
+      status: 'confirmed',
+      specialty: 'Neurology',
+      patientId: 'PAT003'
+    },
+    {
+      id: 4,
+      patientName: 'David Wilson',
+      time: '11:30 AM',
+      date: 'Tomorrow',
+      type: 'Chat',
+      status: 'confirmed',
+      specialty: 'Pediatrics',
+      patientId: 'PAT004'
+    },
+    {
+      id: 5,
+      patientName: 'Emily Brown',
+      time: '3:45 PM',
+      date: 'Tomorrow',
+      type: 'Video Call',
+      status: 'pending',
+      specialty: 'Orthopedics',
+      patientId: 'PAT005'
+    },
+    {
+      id: 6,
+      patientName: 'Michael Chen',
+      time: '9:00 AM',
+      date: 'Day After',
+      type: 'Voice Call',
+      status: 'confirmed',
+      specialty: 'Cardiology',
+      patientId: 'PAT006'
+    }
+  ];
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'confirmed': return 'success';
+      case 'pending': return 'warning';
+      case 'cancelled': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'confirmed': return <CheckCircle />;
+      case 'pending': return <Pending />;
+      case 'cancelled': return <Cancel />;
+      default: return <Schedule />;
+    }
+  };
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'Video Call': return <Videocam />;
+      case 'Voice Call': return <PhoneInTalk />;
+      case 'Chat': return <Chat />;
+      default: return <VideoCall />;
+    }
+  };
+
   return (
-    <VendorThemeProvider>
-      <DoctorConsultationVendorDashboardContent />
-    </VendorThemeProvider>
+    <Box sx={{ 
+      width: '100%', 
+      px: { xs: 2, sm: 3 }
+    }}>
+      {/* Welcome Card */}
+      <Card 
+        sx={{
+          mb: 4,
+          borderRadius: 3,
+          backgroundColor: theme.palette.background.card,
+          color: theme.palette.text.primary,
+          boxShadow: 'none',
+          width: '100%',
+          maxWidth: '1200px',
+          mx: 'auto',
+          border: `1px solid ${theme.palette.divider}`
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+              {profileLoading ? (
+                <CircularProgress size={60} />
+              ) : (
+                <Avatar
+                  src={vendorData.profilePicture}
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText
+                  }}
+                >
+                  {vendorData.avatar}
+                </Avatar>
+              )}
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+                  Welcome back,
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                  {profileLoading ? 'Loading...' : vendorData.name}
+                </Typography>
+                <Typography variant="body1" sx={{ opacity: 0.7 }}>
+                  {profileLoading ? 'Loading...' : vendorData.email}
+                </Typography>
+              </Box>
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: 'success.main',
+                      '& + .MuiSwitch-track': {
+                        backgroundColor: 'success.main',
+                      },
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
+                  {isActive ? 'Active' : 'Inactive'}
+                </Typography>
+              }
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Booking Overview */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+        Booking Overview
+      </Typography>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+        gap: 3,
+        justifyContent: 'center',
+        maxWidth: '1400px',
+        mx: 'auto',
+        mb: 4
+      }}>
+        {bookingOverview.map((item, index) => (
+          <Card 
+            key={index}
+            sx={{
+              height: '100%',
+              minHeight: { xs: 140, sm: 150, md: 160 },
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                mb: { xs: 1.5, sm: 2, md: 2.5 },
+                flex: 1
+              }}>
+                <Box sx={{ 
+                  p: { xs: 1.5, sm: 1.8, md: 2 }, 
+                  borderRadius: 3, 
+                  backgroundColor: `${item.color}.light`,
+                  color: `${item.color}.contrastText`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: { xs: 48, sm: 56, md: 64 },
+                  minHeight: { xs: 48, sm: 56, md: 64 }
+                }}>
+                  {item.icon}
+                </Box>
+              </Box>
+              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
+                  {item.count}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
+                  {item.title}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Statistics */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+        Your Statistics
+      </Typography>
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gap: 3,
+        justifyContent: 'center',
+        maxWidth: '1400px',
+        mx: 'auto',
+        mb: 4
+      }}>
+        {statistics.map((stat, index) => (
+          <Card 
+            key={index}
+            sx={{
+              height: '100%',
+              minHeight: { xs: 140, sm: 150, md: 160 },
+              transition: 'transform 0.2s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-4px)'
+              }
+            }}
+          >
+            <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                mb: { xs: 1.5, sm: 2, md: 2.5 },
+                flex: 1
+              }}>
+                <Box sx={{ 
+                  p: { xs: 1.5, sm: 1.8, md: 2 }, 
+                  borderRadius: 3, 
+                  backgroundColor: `${stat.color}.light`,
+                  color: `${stat.color}.contrastText`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minWidth: { xs: 48, sm: 56, md: 64 },
+                  minHeight: { xs: 48, sm: 56, md: 64 }
+                }}>
+                  {stat.icon}
+                </Box>
+              </Box>
+              <Box sx={{ textAlign: 'center', flex: 1 }}>
+                <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
+                  {stat.title}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+
+      {/* Visit Trends and Analytics */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+        Visit Trends & Analytics
+      </Typography>
+      
+      {/* Visit Trends Chart - Full Width */}
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', mb: 4 }}>
+        <Card sx={{ 
+          height: '100%',
+          minHeight: 400,
+          transition: 'transform 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+              Visit Trends
+            </Typography>
+            <Box sx={{ width: '100%', height: 350 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={visitTrendsData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <RechartsTooltip />
+                  <Line 
+                    type="monotone" 
+                    dataKey="highest" 
+                    stroke={theme.palette.success.main} 
+                    strokeWidth={3}
+                    name="Highest"
+                    dot={{ fill: theme.palette.success.main, strokeWidth: 2, r: 4 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="average" 
+                    stroke={theme.palette.primary.main} 
+                    strokeWidth={3}
+                    name="Average"
+                    dot={{ fill: theme.palette.primary.main, strokeWidth: 2, r: 4 }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="lowest" 
+                    stroke={theme.palette.warning.main} 
+                    strokeWidth={3}
+                    name="Lowest"
+                    dot={{ fill: theme.palette.warning.main, strokeWidth: 2, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Analytics Chart - Full Width */}
+      <Box sx={{ maxWidth: '1400px', mx: 'auto', mb: 4 }}>
+        <Card sx={{ 
+          height: '100%',
+          minHeight: 400,
+          transition: 'transform 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+              Consultation Types
+            </Typography>
+            <Box sx={{ width: '100%', height: 350 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analyticsData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={80}
+                    outerRadius={120}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {analyticsData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+            <Box sx={{ mt: 3 }}>
+              {analyticsData.map((type, index) => (
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 16, 
+                    borderRadius: '50%', 
+                    backgroundColor: type.color,
+                    mr: 2
+                  }} />
+                  <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                    {type.name}
+                  </Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                    {type.value}%
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Upcoming Appointments - Table Format */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
+        Upcoming Appointments
+      </Typography>
+      <Box sx={{ maxWidth: '1400px', mx: 'auto' }}>
+        <Card sx={{ 
+          transition: 'transform 0.2s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-2px)'
+          }
+        }}>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Recent Bookings
+              </Typography>
+              <Button variant="outlined" size="small">
+                View All
+              </Button>
+            </Box>
+            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: `1px solid ${theme.palette.divider}` }}>
+              <Table sx={{ minWidth: 650 }}>
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: theme.palette.background.default }}>
+                    <TableCell sx={{ fontWeight: 600 }}>Patient</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Patient ID</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Specialty</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {upcomingAppointments.map((appointment) => (
+                    <TableRow 
+                      key={appointment.id}
+                      sx={{ 
+                        '&:hover': { 
+                          backgroundColor: theme.palette.action.hover 
+                        }
+                      }}
+                    >
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {appointment.patientName.split(' ').map(n => n[0]).join('')}
+                          </Avatar>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {appointment.patientName}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {appointment.patientId}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {appointment.date}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {appointment.time}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {getTypeIcon(appointment.type)}
+                          <Typography variant="body2">
+                            {appointment.type}
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={appointment.specialty} 
+                          size="small" 
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={appointment.status} 
+                          size="small" 
+                          color={getStatusColor(appointment.status)}
+                          icon={getStatusIcon(appointment.status)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Tooltip title="View Details">
+                            <IconButton size="small" color="primary">
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Start Consultation">
+                            <IconButton size="small" color="success">
+                              <VideoCall />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CardContent>
+        </Card>
+      </Box>
+    </Box>
   );
 };
 
