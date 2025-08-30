@@ -1,5 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
-import { getUserId, getToken } from '../../services/User/Auth/auth.utils';
+import { getUserId, getToken, getAuthHeader } from '../../services/User/Auth/auth.utils';
 
 class OrderHistoryService {
     constructor() {
@@ -27,7 +27,7 @@ class OrderHistoryService {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
             });
 
@@ -140,7 +140,7 @@ class OrderHistoryService {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
             });
             if (!response.ok) {
@@ -198,8 +198,7 @@ class OrderHistoryService {
         if (!token) throw new Error('User not authenticated');
         const response = await fetch(url, {
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                ...getAuthHeader(),
             }
         });
         if (!response.ok) throw new Error('Failed to fetch completed blood bank bookings');
@@ -316,8 +315,7 @@ class OrderHistoryService {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
+                    ...getAuthHeader(),
                 },
             });
 
@@ -407,8 +405,7 @@ class OrderHistoryService {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
+                    ...getAuthHeader(),
                 },
             });
 
@@ -488,8 +485,7 @@ class OrderHistoryService {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
+                    ...getAuthHeader(),
                 },
             });
 

@@ -1,6 +1,5 @@
-import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
-import { getToken, getUserId } from '../Auth/auth.utils';
+import { getToken, getUserId, getAuthHeader } from '../Auth/auth.utils';
 
 // Function to calculate distance between two points using Haversine formula
 const calculateDistance = (lat1, lon1, lat2, lon2) => {

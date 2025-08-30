@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
+import { getAuthHeader } from '../Auth/auth.utils';
 
 export const VendorProductService = {
     getProductsByCategory: async (category) => {
@@ -6,7 +7,11 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.VENDOR_PRODUCTS.GET_BY_CATEGORY, { category });
             console.log('Fetching products from endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint));
+            const response = await fetch(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                }
+            });
             console.log('Product fetch response status:', response.status);
             
             if (!response.ok) {
@@ -32,7 +37,7 @@ export const VendorProductService = {
             const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.CART.ADD_TO_CART), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
                 body: JSON.stringify({
                     userId,
@@ -70,7 +75,7 @@ export const VendorProductService = {
             const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.CART.CHECK_IN_CART), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
                 body: JSON.stringify({
                     userId,
@@ -105,7 +110,11 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.GET_CART_ITEMS, { userId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint));
+            const response = await fetch(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                }
+            });
             console.log('Get cart items response status:', response.status);
             
             if (!response.ok) {
@@ -136,7 +145,7 @@ export const VendorProductService = {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 }
             });
             console.log('Clear cart response status:', response.status);
@@ -169,7 +178,7 @@ export const VendorProductService = {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 }
             });
 
@@ -203,12 +212,12 @@ export const VendorProductService = {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
                 body: JSON.stringify({ quantity })
             });
 
-            console.log('Update cart quantity response status:', response.status);
+            console.log('Update cart item quantity response status:', response.status);
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);

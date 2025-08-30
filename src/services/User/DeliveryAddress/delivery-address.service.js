@@ -1,5 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
-import { getUserId } from '../Auth/auth.utils';
+import { getUserId, getAuthHeader } from '../Auth/auth.utils';
 
 export const DeliveryAddressService = {
     getAddresses: async () => {
@@ -13,7 +13,11 @@ export const DeliveryAddressService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.DELIVERY_ADDRESS.GET_ADDRESSES, { userId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint));
+            const response = await fetch(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                }
+            });
             console.log('Get addresses response status:', response.status);
             
             if (!response.ok) {
@@ -48,7 +52,7 @@ export const DeliveryAddressService = {
             const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.DELIVERY_ADDRESS.SAVE_ADDRESS), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 },
                 body: JSON.stringify({
                     userId,
@@ -86,7 +90,7 @@ export const DeliveryAddressService = {
             const response = await fetch(getApiUrl(endpoint), {
                 method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 }
             });
 

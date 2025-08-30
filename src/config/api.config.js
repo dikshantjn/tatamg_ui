@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-     BASE_URL: 'https://5bd0448d5978.ngrok-free.app/api',
-    SOCKET_URL: 'https://5bd0448d5978.ngrok-free.app',
+    BASE_URL: 'https://c95ca195a714.ngrok-free.app/api',
+SOCKET_URL: 'https://c95ca195a714.ngrok-free.app',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
