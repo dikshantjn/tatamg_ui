@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiClient';
 import { getApiUrl, replaceUrlParams } from '../../config/api.config';
 
 class HospitalVendorService {
@@ -12,7 +12,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/profile/:vendorId');
             const finalUrl = replaceUrlParams(url, { vendorId });
             
-            const response = await axios.get(finalUrl);
+            const response = await apiClient.get(finalUrl);
             console.log('Hospital Profile API Response:', response.data);
             
             return response.data;
@@ -138,7 +138,7 @@ class HospitalVendorService {
             // Transform component data back to API format
             const apiData = this.transformToApiFormat(profileData);
             
-            const response = await axios.put(finalUrl, { hospital: apiData });
+            const response = await apiClient.put(finalUrl, { hospital: apiData });
             console.log('Hospital Profile Update API Response:', response.data);
             
             return response.data;
@@ -154,7 +154,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/wards/vendor/:vendorId');
             const finalUrl = replaceUrlParams(url, { vendorId });
             
-            const response = await axios.get(finalUrl);
+            const response = await apiClient.get(finalUrl);
             console.log('Hospital Wards API Response:', response.data);
             
             return response.data;
@@ -169,7 +169,7 @@ class HospitalVendorService {
         try {
             const url = getApiUrl('/hospitals/wards');
             
-            const response = await axios.post(url, wardData);
+            const response = await apiClient.post(url, wardData);
             console.log('Create Hospital Ward API Response:', response.data);
             
             return response.data;
@@ -185,7 +185,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/wards/:wardId');
             const finalUrl = replaceUrlParams(url, { wardId });
             
-            const response = await axios.delete(finalUrl);
+            const response = await apiClient.delete(finalUrl);
             console.log('Delete Hospital Ward API Response:', response.data);
             
             return response.data;
@@ -201,7 +201,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/wards/:wardId');
             const finalUrl = replaceUrlParams(url, { wardId });
             
-            const response = await axios.put(finalUrl, wardData);
+            const response = await apiClient.put(finalUrl, wardData);
             console.log('Update Hospital Ward API Response:', response.data);
             
             return response.data;
@@ -217,7 +217,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/by-vendor/:vendorId');
             const finalUrl = replaceUrlParams(url, { vendorId });
             
-            const response = await axios.get(finalUrl);
+            const response = await apiClient.get(finalUrl);
             console.log('Hospital Appointments API Response:', response.data);
             
             return response.data;
@@ -233,7 +233,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/appointment/accept/:bookingId');
             const finalUrl = replaceUrlParams(url, { bookingId });
             
-            const response = await axios.put(finalUrl);
+            const response = await apiClient.put(finalUrl);
             console.log('Accept Hospital Appointment API Response:', response.data);
             
             return response.data;
@@ -249,7 +249,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/appointment/notify-payment/:bookingId');
             const finalUrl = replaceUrlParams(url, { bookingId });
             
-            const response = await axios.put(finalUrl);
+            const response = await apiClient.put(finalUrl);
             console.log('Notify Payment API Response:', response.data);
             
             return response.data;
@@ -265,7 +265,7 @@ class HospitalVendorService {
             const url = getApiUrl('/hospitals/appointment/completed/vendor/:vendorId');
             const finalUrl = replaceUrlParams(url, { vendorId });
             
-            const response = await axios.get(finalUrl);
+            const response = await apiClient.get(finalUrl);
             console.log('Completed Hospital Appointments API Response:', response.data);
             
             return response.data;

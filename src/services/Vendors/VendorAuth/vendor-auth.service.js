@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from '../../../config/apiClient';
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
 
 class VendorAuthService {
@@ -9,7 +9,7 @@ class VendorAuthService {
     // Vendor Login
     async vendorLogin(email, password, role, deviceId) {
         try {
-            const response = await axios.post(
+            const response = await apiClient.post(
                 getApiUrl(API_CONFIG.ENDPOINTS.VENDOR_AUTH.LOGIN),
                 {
                     email,
@@ -88,7 +88,7 @@ class VendorAuthService {
     // Vendor Logout
     async vendorLogout(vendorId) {
         try {
-            const response = await axios.post(
+            const response = await apiClient.post(
                 getApiUrl(API_CONFIG.ENDPOINTS.VENDOR_AUTH.LOGOUT),
                 {
                     vendorId

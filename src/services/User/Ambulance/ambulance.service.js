@@ -1,10 +1,10 @@
-import axios from 'axios';
+import { apiClient } from '../../../config/apiClient';
 import { API_CONFIG } from '../../../config/api.config';
 
 export const ambulanceService = {
   getAllAmbulances: async () => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AMBULANCE.GET_ALL}`;
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     if (response.data && response.data.success) {
       return response.data.data;
     }
@@ -15,7 +15,7 @@ export const ambulanceService = {
     try {
       const payload = { userId, vendorId };
       console.log('[AmbulanceService] Sending payload:', payload);
-      const response = await axios.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AMBULANCE.REQUEST}`, payload);
+      const response = await apiClient.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AMBULANCE.REQUEST}`, payload);
       console.log('[AmbulanceService] Response:', response.data);
       return response.data;
     } catch (error) {
@@ -28,7 +28,7 @@ export const ambulanceService = {
   },
   getActiveBookings: async (userId) => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AMBULANCE.GET_ACTIVE_BOOKINGS.replace(':userId', userId)}`;
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     if (response.data && response.data.success) {
       return response.data.data;
     }
@@ -36,7 +36,7 @@ export const ambulanceService = {
   },
   updatePaymentCompleted: async (requestId) => {
     const url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AMBULANCE.UPDATE_PAYMENT_COMPLETED.replace(':requestId', requestId)}`;
-    const response = await axios.put(url);
+    const response = await apiClient.put(url);
     if (response.data && response.data.success) {
       return response.data;
     }

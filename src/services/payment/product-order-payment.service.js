@@ -1,4 +1,5 @@
 import { API_CONFIG, replaceUrlParams } from '../../config/api.config';
+import { apiClient } from '../../config/apiClient';
 import { PAYMENT_CONFIG, PAYMENT_ERRORS, PAYMENT_SUCCESS, validateRazorpayKey } from '../../config/payment.config';
 import { getToken, getUserId, getUserData } from '../User/Auth/auth.utils';
 import { VendorProductService } from '../User/Products/vendor-product.service';
@@ -68,26 +69,23 @@ class PaymentService {
             const userId = this.getCurrentUserId();
             console.log('Creating backend order after successful payment');
 
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT_ORDER.CREATE_ORDER}`, {
-                method: 'POST',
+            const response = await apiClient.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT_ORDER.CREATE_ORDER}`, {
+                userId: userId,
+                razorpayOrderId: paymentResult.razorpay_order_id,
+                razorpayPaymentId: paymentResult.razorpay_payment_id,
+                totalAmount: orderData.total,
+                deliveryAddress: orderData.deliveryAddress,
+                items: orderData.items
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${this.getAuthToken()}`
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    razorpayOrderId: paymentResult.razorpay_order_id,
-                    razorpayPaymentId: paymentResult.razorpay_payment_id,
-                    totalAmount: orderData.total,
-                    deliveryAddress: orderData.deliveryAddress,
-                    items: orderData.items
-                })
+                }
             });
 
             console.log('Backend order creation response status:', response.status);
 
-            if (!response.ok) {
-                const errorText = await response.text();
+            if (response.status !== 200) {
+                const errorText = response.data;
                 console.error('Backend order creation failed:', errorText);
                 
                 // For mock payments, create a mock backend order response
@@ -107,7 +105,7 @@ class PaymentService {
                 throw new Error(`Backend order creation failed: ${response.status} ${errorText}`);
             }
 
-            const backendOrderResponse = await response.json();
+            const backendOrderResponse = response.data;
             console.log('Backend order creation response:', backendOrderResponse);
             
             return backendOrderResponse;
@@ -295,18 +293,17 @@ class PaymentService {
     // Get payment history
     async getPaymentHistory() {
         try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PAYMENTS.GET_PAYMENT_HISTORY}`, {
-                method: 'GET',
+            const response = await apiClient.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PAYMENTS.GET_PAYMENT_HISTORY}`, {
                 headers: {
                     'Authorization': `Bearer ${this.getAuthToken()}`
                 }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error('Failed to fetch payment history');
             }
 
-            return await response.json();
+            return response.data;
         } catch (error) {
             console.error('Error fetching payment history:', error);
             throw error;
@@ -318,18 +315,17 @@ class PaymentService {
         try {
             const url = replaceUrlParams(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PAYMENTS.GET_PAYMENT_DETAILS}`, { paymentId });
             
-            const response = await fetch(url, {
-                method: 'GET',
+            const response = await apiClient.get(url, {
                 headers: {
                     'Authorization': `Bearer ${this.getAuthToken()}`
                 }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error('Failed to fetch payment details');
             }
 
-            return await response.json();
+            return response.data;
         } catch (error) {
             console.error('Error fetching payment details:', error);
             throw error;

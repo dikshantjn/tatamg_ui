@@ -1,4 +1,5 @@
 import { API_CONFIG, replaceUrlParams } from '../../config/api.config';
+import { apiClient } from '../../config/apiClient';
 import { PAYMENT_CONFIG, PAYMENT_ERRORS, validateRazorpayKey } from '../../config/payment.config';
 import { getToken, getUserId, getUserData } from '../User/Auth/auth.utils';
 
@@ -60,18 +61,15 @@ class HospitalBedPaymentService {
 
                         console.log('Updating payment status at:', updatePaymentUrl);
 
-                        const updatePaymentResponse = await fetch(updatePaymentUrl, {
-                            method: 'PUT',
+                        const updatePaymentResponse = await apiClient.put(updatePaymentUrl, {
+                            paidAmount: totalAmount
+                        }, {
                             headers: {
-                                'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${getToken()}`
-                            },
-                            body: JSON.stringify({
-                                paidAmount: totalAmount
-                            })
+                            }
                         });
 
-                        const result = await updatePaymentResponse.json();
+                        const result = updatePaymentResponse.data;
                         console.log('Payment status update response:', result);
 
                         if (updatePaymentResponse.status === 200) {
@@ -86,7 +84,7 @@ class HospitalBedPaymentService {
                                 });
                             }
                         } else {
-                            const errorData = await updatePaymentResponse.json().catch(() => ({}));
+                            const errorData = updatePaymentResponse.data;
                             console.error('Error response from server:', {
                                 status: updatePaymentResponse.status,
                                 statusText: updatePaymentResponse.statusText,

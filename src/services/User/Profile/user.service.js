@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, API_BASE_URL } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getAuthHeader } from '../Auth/auth.utils';
 
 class UserService {
@@ -16,22 +17,20 @@ class UserService {
             
             console.log('Making API call to:', url);
             
-            const response = await fetch(url, {
-                method: 'GET',
+            const response = await apiClient.get(url, {
                 headers: {
                     ...getAuthHeader(),
-                    'Content-Type': 'application/json',
-                },
+                }
             });
 
             console.log('User details response status:', response.status);
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (response.status !== 200) {
+                const errorData = response.data;
                 throw new Error(errorData.message || `Failed to fetch user details: ${response.status}`);
             }
 
-            const userData = await response.json();
+            const userData = response.data;
             console.log('User details fetched successfully:', userData);
             
             return {
@@ -60,23 +59,20 @@ class UserService {
             
             console.log('Making API call to:', url);
             
-            const response = await fetch(url, {
-                method: 'PUT',
+            const response = await apiClient.put(url, userData, {
                 headers: {
                     ...getAuthHeader(),
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(userData),
+                }
             });
 
             console.log('Update user response status:', response.status);
 
-            if (!response.ok) {
-                const errorData = await response.json();
+            if (response.status !== 200) {
+                const errorData = response.data;
                 throw new Error(errorData.message || `Failed to update user details: ${response.status}`);
             }
 
-            const updatedUserData = await response.json();
+            const updatedUserData = response.data;
             console.log('User details updated successfully:', updatedUserData);
             
             return {
@@ -121,19 +117,13 @@ class UserService {
     // Medical Profile Methods
     async createMedicalProfile(medicalData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/medical-profile`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(medicalData),
-            });
+            const response = await apiClient.post(`${API_BASE_URL}/medical-profile`, medicalData);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            return response.data;
         } catch (error) {
             console.error('Error creating medical profile:', error);
             throw error;
@@ -142,21 +132,16 @@ class UserService {
 
     async getMedicalProfile(userId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/medical-profile/${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(`${API_BASE_URL}/medical-profile/${userId}`);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 if (response.status === 404) {
                     return null; // Medical profile doesn't exist yet
                 }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            return response.data;
         } catch (error) {
             console.error('Error fetching medical profile:', error);
             throw error;
@@ -165,19 +150,13 @@ class UserService {
 
     async updateMedicalProfile(userId, medicalData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/medical-profile/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(medicalData),
-            });
+            const response = await apiClient.put(`${API_BASE_URL}/medical-profile/${userId}`, medicalData);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            return await response.json();
+            return response.data;
         } catch (error) {
             console.error('Error updating medical profile:', error);
             throw error;

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiClient';
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config.js';
 
 // Ambulance Vendor Profile Services
@@ -16,13 +16,13 @@ export const getAmbulanceVendorProfile = async (vendorId) => {
         
         // First, let's test if the API server is reachable
         try {
-            const testResponse = await axios.get('http://localhost:5000/api/health', { timeout: 5000 });
+            const testResponse = await apiClient.get('http://localhost:5000/api/health', { timeout: 5000 });
             console.log('API server is reachable:', testResponse.data);
         } catch (testError) {
             console.log('API server health check failed:', testError.message);
         }
         
-        const response = await axios.get(fullUrl, { headers });
+        const response = await apiClient.get(fullUrl, { headers });
         console.log('API response:', response.data);
         // Check if response has success/data structure
         if (response.data && response.data.success && response.data.data) {
@@ -88,7 +88,7 @@ export const updateAmbulanceVendorProfile = async (vendorId, profileData) => {
         
         console.log('Request headers:', headers);
         console.log('Request body:', requestBody);
-        const response = await axios.put(fullUrl, requestBody, { headers });
+        const response = await apiClient.put(fullUrl, requestBody, { headers });
         console.log('Update API response:', response.data);
         // Check if response has success/data structure
         if (response.data && response.data.success && response.data.data) {
@@ -117,7 +117,7 @@ export const uploadAmbulanceVendorPhotos = async (vendorId, photos, type) => {
         });
         formData.append('type', type);
         
-        const response = await axios.post(getApiUrl(endpoint), formData, {
+        const response = await apiClient.post(getApiUrl(endpoint), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -132,7 +132,7 @@ export const uploadAmbulanceVendorPhotos = async (vendorId, photos, type) => {
 export const deleteAmbulanceVendorPhoto = async (vendorId, photoId) => {
     try {
         const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.AMBULANCE.DELETE_PHOTO, { vendorId, photoId });
-        const response = await axios.delete(getApiUrl(endpoint));
+        const response = await apiClient.delete(getApiUrl(endpoint));
         return response.data;
     } catch (error) {
         console.error('Error deleting ambulance vendor photo:', error);
@@ -154,7 +154,7 @@ export const getPendingRequestsByVendor = async (vendorId) => {
         
         const headers = {};
         
-        const response = await axios.get(fullUrl, { headers });
+        const response = await apiClient.get(fullUrl, { headers });
         console.log('Pending requests API response:', response.data);
         
         // Check if response has success/data structure
@@ -191,7 +191,7 @@ export const acceptAmbulanceBooking = async (requestId) => {
             'Content-Type': 'application/json'
         };
         
-        const response = await axios.patch(fullUrl, {}, { headers });
+        const response = await apiClient.patch(fullUrl, {}, { headers });
         console.log('Accept booking API response:', response.data);
         
         // Check if response has success/data structure
@@ -242,7 +242,7 @@ export const updateAmbulanceServiceDetails = async (requestId, serviceData) => {
             status: serviceData.status || 'WaitingForPayment'
         };
         
-        const response = await axios.patch(fullUrl, requestBody, { headers });
+        const response = await apiClient.patch(fullUrl, requestBody, { headers });
         console.log('Update service details API response:', response.data);
         
         // Check if response has success/data structure
@@ -293,7 +293,7 @@ export const updateAmbulanceStatus = async (requestId, status) => {
             'Content-Type': 'application/json'
         };
         
-        const response = await axios.put(fullUrl, {}, { headers });
+        const response = await apiClient.put(fullUrl, {}, { headers });
         console.log(`Update status to ${status} API response:`, response.data);
         
         // Check if response has success/data structure
@@ -343,7 +343,7 @@ export const getCompletedBookingsByVendor = async (vendorId) => {
         
         const headers = {};
         
-        const response = await axios.get(fullUrl, { headers });
+        const response = await apiClient.get(fullUrl, { headers });
         console.log('Completed bookings API response:', response.data);
         
         // Check if response has success/data structure

@@ -1,4 +1,5 @@
 import { API_CONFIG, replaceUrlParams } from '../../config/api.config';
+import { apiClient } from '../../config/apiClient';
 import { PAYMENT_CONFIG, PAYMENT_ERRORS, validateRazorpayKey } from '../../config/payment.config';
 import { getToken, getUserId, getUserData } from '../User/Auth/auth.utils';
 import labTestService from '../User/LabTest/lab-test.service';

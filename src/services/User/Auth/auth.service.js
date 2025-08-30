@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { storeAuthData, clearAuthData, getToken, isAuthenticated as checkAuth } from '../Auth/auth.utils';
 
 class AuthService {
@@ -19,20 +20,14 @@ class AuthService {
         try {
             console.log('Sending OTP verification request to backend');
             
-            const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.VERIFY_OTP), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ idToken }),
-            });
+            const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.VERIFY_OTP), { idToken });
 
             console.log('Backend response status:', response.status);
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Backend response data:', data);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(data.message || `Backend error: ${response.status}`);
             }
 
@@ -66,15 +61,11 @@ class AuthService {
                 headers['Authorization'] = `Bearer ${token}`;
             }
             
-            const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNUP), {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({ phone_number: phoneNumber }),
-            });
+            const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.SIGNUP), { phone_number: phoneNumber }, { headers });
 
             console.log('Register response status:', response.status);
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Register response data:', data);
 
             // Handle both 200 (user exists) and 201 (user created) as success
@@ -139,15 +130,11 @@ class AuthService {
             console.log('Sending platform update request to:', getApiUrl(API_CONFIG.ENDPOINTS.AUTH.UPDATE_PLATFORM));
             console.log('Request body:', requestBody);
             
-            const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.UPDATE_PLATFORM), {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify(requestBody),
-            });
+            const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.UPDATE_PLATFORM), requestBody, { headers });
 
             console.log('Update platform response status:', response.status);
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Update platform response data:', data);
 
             // Handle 404 (user not found) gracefully - don't throw error
@@ -162,7 +149,7 @@ class AuthService {
                 };
             }
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(data.message || `Update platform error: ${response.status}`);
             }
 

@@ -1,11 +1,11 @@
-import axios from 'axios';
+import { apiClient } from '../../../config/apiClient';
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
 import { getAuthHeader } from '../../../services/User/Auth/auth.utils';
 
 class HospitalService {
     async getAllHospitals() {
         try {
-            const response = await axios.get(getApiUrl(API_CONFIG.ENDPOINTS.HOSPITALS.GET_ALL_HOSPITALS));
+            const response = await apiClient.get(getApiUrl(API_CONFIG.ENDPOINTS.HOSPITALS.GET_ALL_HOSPITALS));
             if (response.data) {
                 return this.formatHospitalsData(response.data.hospitals);
             }
@@ -19,7 +19,7 @@ class HospitalService {
     async getHospitalWards(vendorId) {
         try {
             const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.HOSPITALS.GET_WARDS, { vendorId }));
-            const response = await axios.get(url);
+            const response = await apiClient.get(url);
             return response.data;
         } catch (error) {
             console.error('Error fetching hospital wards:', error);
@@ -37,7 +37,7 @@ class HospitalService {
                 'Content-Type': 'application/json'
             });
 
-            const response = await axios.post(url, bookingData, {
+            const response = await apiClient.post(url, bookingData, {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -82,7 +82,7 @@ class HospitalService {
             const headers = getAuthHeader();
             console.log('🔑 Using auth headers:', headers);
             
-            const response = await axios.get(url, { headers });
+            const response = await apiClient.get(url, { headers });
             console.log('📦 API Response:', response.data);
             
             if (response.data && response.data.success) {
