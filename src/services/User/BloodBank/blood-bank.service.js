@@ -1,13 +1,13 @@
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getToken } from '../Auth/auth.utils';
-import axios from 'axios';
 
 export async function getActiveBloodBanks() {
   const endpoint = API_CONFIG.ENDPOINTS.BLOOD_BANK.GET_ACTIVE_BLOOD_BANKS;
   const url = getApiUrl(endpoint);
-  const response = await fetch(url);
-  if (!response.ok) throw new Error('Failed to fetch blood banks');
-  return await response.json();
+  const response = await apiClient.get(url);
+  if (response.status !== 200) throw new Error('Failed to fetch blood banks');
+  return response.data;
 }
 
 export async function createBloodBankRequest({ userId, customerName, bloodType, units, prescriptionUrls, latitude, longitude, radius = 50 }) {
@@ -15,16 +15,13 @@ export async function createBloodBankRequest({ userId, customerName, bloodType, 
   const url = getApiUrl(endpoint);
   const token = getToken && getToken();
   if (!token) throw new Error('User not authenticated');
-  const response = await fetch(url, {
-    method: 'POST',
+  const response = await apiClient.post(url, { userId, customerName, bloodType, units, prescriptionUrls, latitude, longitude, radius }, {
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ userId, customerName, bloodType, units, prescriptionUrls, latitude, longitude, radius })
+    }
   });
-  if (!response.ok) throw new Error('Failed to create blood bank request');
-  return await response.json();
+  if (response.status !== 200) throw new Error('Failed to create blood bank request');
+  return response.data;
 }
 
 export async function getOngoingBloodBankBooking(userId) {
@@ -32,14 +29,13 @@ export async function getOngoingBloodBankBooking(userId) {
   const url = getApiUrl(endpoint.replace(':userId', encodeURIComponent(userId)));
   const token = getToken && getToken();
   if (!token) throw new Error('User not authenticated');
-  const response = await fetch(url, {
+  const response = await apiClient.get(url, {
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+      'Authorization': `Bearer ${token}`
     }
   });
-  if (!response.ok) throw new Error('Failed to fetch blood bank bookings');
-  const data = await response.json();
+  if (response.status !== 200) throw new Error('Failed to fetch blood bank bookings');
+  const data = response.data;
   if (!data.success || !Array.isArray(data.data) || !data.data.length) return null;
   // Debug: log the booking object
   console.log('[getOngoingBloodBankBooking] booking:', data.data[0]);
@@ -52,7 +48,7 @@ export async function updateBloodBankPaymentCompleted(bookingId) {
   const url = getApiUrl(endpoint.replace(':bookingId', encodeURIComponent(bookingId)));
   const token = getToken && getToken();
   if (!token) throw new Error('User not authenticated');
-  const response = await axios.put(url, {}, {
+          const response = await apiClient.put(url, {}, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
+import { apiClient } from '../../config/apiClient';
 import { vendorAuthService } from './VendorAuth/vendor-auth.service';
 
 class BloodBankVendorService {
@@ -16,18 +17,13 @@ class BloodBankVendorService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.GET_PROFILE, { vendorId });
             const url = getApiUrl(endpoint);
             
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(url);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching blood bank profile:', error);
@@ -46,19 +42,13 @@ class BloodBankVendorService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.UPDATE_PROFILE, { vendorId });
             const url = getApiUrl(endpoint);
             
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(profileData),
-            });
+            const response = await apiClient.put(url, profileData);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -74,7 +64,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error updating blood bank profile:', error);
@@ -145,18 +135,13 @@ class BloodBankVendorService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.GET_INVENTORY, { vendorId });
             const url = getApiUrl(endpoint);
             
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(url);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching blood inventory:', error);
@@ -175,19 +160,13 @@ class BloodBankVendorService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.UPSERT_INVENTORY, { vendorId });
             const url = getApiUrl(endpoint);
             
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(inventoryData),
-            });
+            const response = await apiClient.post(url, inventoryData);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -203,7 +182,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error upserting blood inventory:', error);
@@ -221,18 +200,13 @@ class BloodBankVendorService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.BLOOD_BANK.DELETE_INVENTORY, { inventoryId });
             const url = getApiUrl(endpoint);
             
-            const response = await fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.delete(url);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -248,7 +222,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error deleting blood inventory:', error);
@@ -276,16 +250,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'GET',
+            const response = await apiClient.get(url, {
                 headers,
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching vendor requests:', error);
@@ -314,17 +287,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'PATCH',
+            const response = await apiClient.patch(url, { status }, {
                 headers,
-                body: JSON.stringify({ status }),
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -340,7 +311,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error updating request status:', error);
@@ -368,16 +339,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'GET',
+            const response = await apiClient.get(url, {
                 headers,
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching vendor bookings:', error);
@@ -406,17 +376,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'POST',
+            const response = await apiClient.post(url, serviceData, {
                 headers,
-                body: JSON.stringify(serviceData),
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -432,7 +400,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error adding service details:', error);
@@ -460,16 +428,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'PUT',
+            const response = await apiClient.put(url, {}, {
                 headers,
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -485,7 +452,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error updating status to waiting for pickup:', error);
@@ -513,16 +480,15 @@ class BloodBankVendorService {
                 headers['Authorization'] = `Bearer ${authData.token}`;
             }
             
-            const response = await fetch(url, {
-                method: 'PATCH',
+            const response = await apiClient.patch(url, {}, {
                 headers,
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 // Try to get error details from response
                 let errorMessage = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                    const errorData = response.data;
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.error) {
@@ -538,7 +504,7 @@ class BloodBankVendorService {
                 throw error;
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error completing booking:', error);

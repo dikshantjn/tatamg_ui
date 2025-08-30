@@ -1,10 +1,10 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiClient';
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
 
 export const getProductPartnerProfile = async (vendorId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.GET_VENDOR_PROFILE, { vendorId }));
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Product Partner Profile API Response:', response.data);
@@ -19,7 +19,7 @@ export const getProductPartnerProfile = async (vendorId) => {
 export const updateProductPartnerProfile = async (vendorId, profileData) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.UPDATE_VENDOR_PROFILE, { vendorId }));
-    const response = await axios.put(url, profileData);
+    const response = await apiClient.put(url, profileData);
     
     // Debug log to see the actual API response
     console.log('Product Partner Profile Update API Response:', response.data);
@@ -34,7 +34,7 @@ export const updateProductPartnerProfile = async (vendorId, profileData) => {
 export const getVendorProducts = async (vendorId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.GET_VENDOR_PRODUCTS, { vendorId }));
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Vendor Products API Response:', response.data);
@@ -49,7 +49,7 @@ export const getVendorProducts = async (vendorId) => {
 export const addProduct = async (productData) => {
   try {
     const url = getApiUrl(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.ADD_PRODUCT);
-    const response = await axios.post(url, productData);
+    const response = await apiClient.post(url, productData);
     
     // Debug log to see the actual API response
     console.log('Add Product API Response:', response.data);
@@ -64,7 +64,7 @@ export const addProduct = async (productData) => {
 export const deleteProduct = async (productId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.DELETE_PRODUCT, { productId }));
-    const response = await axios.delete(url);
+    const response = await apiClient.delete(url);
     
     // Debug log to see the actual API response
     console.log('Delete Product API Response:', response.data);
@@ -79,7 +79,7 @@ export const deleteProduct = async (productId) => {
 export const updateProduct = async (productId, productData) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.UPDATE_PRODUCT, { productId }));
-    const response = await axios.put(url, productData);
+    const response = await apiClient.put(url, productData);
     
     // Debug log to see the actual API response
     console.log('Update Product API Response:', response.data);
@@ -94,7 +94,7 @@ export const updateProduct = async (productId, productData) => {
 export const getPendingOrders = async (vendorId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.GET_PENDING_ORDERS, { vendorId }));
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Pending Orders API Response:', response.data);
@@ -109,7 +109,7 @@ export const getPendingOrders = async (vendorId) => {
 export const updateOrderStatus = async (orderId, status) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.UPDATE_ORDER_STATUS, { orderId }));
-    const response = await axios.put(url, { status });
+    const response = await apiClient.put(url, { status });
     
     // Debug log to see the actual API response
     console.log('Update Order Status API Response:', response.data);
@@ -124,7 +124,7 @@ export const updateOrderStatus = async (orderId, status) => {
 export const getConfirmedOrders = async (vendorId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.GET_CONFIRMED_ORDERS, { vendorId }));
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Confirmed Orders API Response:', response.data);
@@ -139,7 +139,7 @@ export const getConfirmedOrders = async (vendorId) => {
 export const getDeliveredOrders = async (vendorId) => {
   try {
     const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_PARTNER.GET_DELIVERED_ORDERS, { vendorId }));
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Delivered Orders API Response:', response.data);

@@ -1,11 +1,11 @@
-import axios from 'axios';
+import { apiClient } from '../../config/apiClient';
 import { getApiUrl } from '../../config/api.config';
 
 // Vendor Status Services
 export const getVendorStatus = async (vendorId) => {
   try {
     const url = getApiUrl(`/vendors/status/${vendorId}`);
-    const response = await axios.get(url);
+    const response = await apiClient.get(url);
     
     // Debug log to see the actual API response
     console.log('Vendor Status API Response:', response.data);
@@ -20,7 +20,7 @@ export const getVendorStatus = async (vendorId) => {
 export const toggleVendorStatus = async (vendorId, newStatus) => {
   try {
     const url = getApiUrl(`/vendors/toggle-status/${vendorId}`);
-    const response = await axios.put(url, { isActive: newStatus });
+    const response = await apiClient.put(url, { isActive: newStatus });
     
     // Debug log to see the actual API response
     console.log('Vendor Status Toggle API Response:', response.data);

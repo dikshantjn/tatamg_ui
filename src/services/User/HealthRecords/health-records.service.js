@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, API_BASE_URL } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getAuthHeader } from '../Auth/auth.utils';
 
 export const checkHealthRecordPassword = async (userId) => {
@@ -10,20 +11,18 @@ export const checkHealthRecordPassword = async (userId) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await apiClient.get(url, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
-            },
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to check health record password: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = response.data;
         console.log('Health record password check response:', data);
         return data;
     } catch (error) {
@@ -41,21 +40,18 @@ export const setHealthRecordPassword = async (userId, password) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'POST',
+        const response = await apiClient.post(url, { newPassword: password }, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ newPassword: password }), // Changed to match API requirements
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to set health record password: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = response.data;
         console.log('Health record password set successfully:', data);
         return data;
     } catch (error) {
@@ -73,21 +69,18 @@ export const verifyHealthRecordPassword = async (userId, password) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'POST',
+        const response = await apiClient.post(url, { password }, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ password }), // Match API requirements
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to verify health record password: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = response.data;
         console.log('Health record password verification response:', data);
         return data;
     } catch (error) {
@@ -105,20 +98,18 @@ export const getHealthRecords = async (userId) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'GET',
+        const response = await apiClient.get(url, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
-            },
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to fetch health records: ${response.status}`);
         }
 
-        const { data } = await response.json();
+        const { data } = response.data;
         console.log('Health records fetched successfully:', data);
         return data;
     } catch (error) {
@@ -136,21 +127,18 @@ export const addHealthRecord = async (recordData) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'POST',
+        const response = await apiClient.post(url, recordData, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(recordData)
+            }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to add health record: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = response.data;
         console.log('Health record added successfully:', data);
         return data;
     } catch (error) {
@@ -168,20 +156,18 @@ export const deleteHealthRecord = async (healthRecordId) => {
         
         console.log('Making API call to:', url);
         
-        const response = await fetch(url, {
-            method: 'DELETE',
+        const response = await apiClient.delete(url, {
             headers: {
                 ...getAuthHeader(),
-                'Content-Type': 'application/json',
             }
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
+        if (response.status !== 200) {
+            const errorData = response.data;
             throw new Error(errorData.message || `Failed to delete health record: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = response.data;
         console.log('Health record deleted successfully:', data);
         return data;
     } catch (error) {

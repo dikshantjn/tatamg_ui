@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getToken, getUserId } from '../Auth/auth.utils';
 
 // Function to calculate distance between two points using Haversine formula
@@ -66,18 +66,16 @@ export const getAllDiagnosticCenters = async () => {
       throw new Error('Authentication token not found');
     }
 
-    const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.GET_ALL_DIAGNOSTIC_CENTERS), {
-      method: 'GET',
+    const response = await apiClient.get(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.GET_ALL_DIAGNOSTIC_CENTERS), {
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       }
     });
 
-    const data = await response.json();
+    const data = response.data;
     console.log('API Response:', data);
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(data.message || 'Failed to fetch diagnostic centers');
     }
 
@@ -183,35 +181,32 @@ class LabTestService {
         throw new Error('User ID not found');
       }
 
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.CREATE_BOOKING), {
-        method: 'POST',
+      const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.CREATE_BOOKING), {
+        vendorId: bookingData.vendorId,
+        userId: userId,
+        selectedTests: bookingData.selectedTests,
+        bookingDate: bookingData.bookingDate,
+        bookingTime: bookingData.bookingTime,
+        homeCollectionRequired: bookingData.homeCollectionRequired,
+        reportDeliveryAtHome: bookingData.reportDeliveryAtHome,
+        prescriptionUrl: bookingData.prescriptionUrl || null,
+        testFees: bookingData.testFees,
+        reportDeliveryFees: bookingData.reportDeliveryFees,
+        discount: bookingData.discount || 0,
+        gst: bookingData.gst || 0,
+        totalAmount: bookingData.totalAmount,
+        userAddress: bookingData.userAddress || '',
+        userLocation: bookingData.userLocation || '',
+        centerLocationUrl: bookingData.centerLocationUrl || ''
+      }, {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          vendorId: bookingData.vendorId,
-          userId: userId,
-          selectedTests: bookingData.selectedTests,
-          bookingDate: bookingData.bookingDate,
-          bookingTime: bookingData.bookingTime,
-          homeCollectionRequired: bookingData.homeCollectionRequired,
-          reportDeliveryAtHome: bookingData.reportDeliveryAtHome,
-          prescriptionUrl: bookingData.prescriptionUrl || null,
-          testFees: bookingData.testFees,
-          reportDeliveryFees: bookingData.reportDeliveryFees,
-          discount: bookingData.discount || 0,
-          gst: bookingData.gst || 0,
-          totalAmount: bookingData.totalAmount,
-          userAddress: bookingData.userAddress || '',
-          userLocation: bookingData.userLocation || '',
-          centerLocationUrl: bookingData.centerLocationUrl || ''
-        })
+        }
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.message || 'Failed to create lab test booking');
       }
 
@@ -239,17 +234,15 @@ class LabTestService {
         throw new Error('Authentication token not found');
       }
 
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.GET_ALL_DIAGNOSTIC_CENTERS), {
-        method: 'GET',
+      const response = await apiClient.get(getApiUrl(API_CONFIG.ENDPOINTS.LAB_TEST.GET_ALL_DIAGNOSTIC_CENTERS), {
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error(data.message || 'Failed to fetch diagnostic centers');
       }
 

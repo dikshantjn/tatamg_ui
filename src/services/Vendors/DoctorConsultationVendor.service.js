@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
+import { apiClient } from '../../config/apiClient';
 import { vendorAuthService } from './VendorAuth/vendor-auth.service';
 
 class DoctorConsultationVendorService {
@@ -16,19 +17,17 @@ class DoctorConsultationVendorService {
 
             const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_PROFILE, { vendorId }));
             
-            const response = await fetch(url, {
-                method: 'GET',
+            const response = await apiClient.get(url, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authData.token}`
                 }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data.clinic; // Return the clinic data from the response
         } catch (error) {
             console.error('Error fetching vendor profile:', error);
@@ -46,21 +45,18 @@ class DoctorConsultationVendorService {
 
             const url = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.UPDATE_PROFILE, { vendorId }));
             
-            const response = await fetch(url, {
-                method: 'PUT',
+            const response = await apiClient.put(url, profileData, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${authData.token}`
-                },
-                body: JSON.stringify(profileData)
+                }
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+            if (response.status !== 200) {
+                const errorData = response.data;
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error updating vendor profile:', error);

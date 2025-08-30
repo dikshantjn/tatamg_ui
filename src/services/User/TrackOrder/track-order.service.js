@@ -1,4 +1,5 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getUserId, getToken } from '../Auth/auth.utils';
 
 class TrackOrderService {
@@ -17,18 +18,13 @@ class TrackOrderService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_ORDER.GET_USER_ORDERS_TRACKING, { userId });
             const url = getApiUrl(endpoint);
 
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(url);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching user orders:', error);
@@ -42,18 +38,13 @@ class TrackOrderService {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.PRODUCT_ORDER.GET_ORDER, { orderId });
             const url = getApiUrl(endpoint);
 
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(url);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data;
         } catch (error) {
             console.error('Error fetching order details:', error);
@@ -195,16 +186,11 @@ class TrackOrderService {
             }
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.AMBULANCE.GET_ACTIVE_BOOKINGS, { userId });
             const url = getApiUrl(endpoint);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
+            const response = await apiClient.get(url);
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = response.data;
             return data.data || [];
         } catch (error) {
             console.error('Error fetching active ambulance bookings:', error);
@@ -259,14 +245,13 @@ class TrackOrderService {
             const url = getApiUrl(endpoint);
             const token = getToken && getToken();
             if (!token) throw new Error('User not authenticated');
-            const response = await fetch(url, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) throw new Error('Failed to fetch blood bank bookings');
-            const data = await response.json();
+                    const response = await apiClient.get(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (response.status !== 200) throw new Error('Failed to fetch blood bank bookings');
+        const data = response.data;
             if (!data.success || !Array.isArray(data.data) || !data.data.length) return [];
             return data.data;
         } catch (error) {
@@ -284,16 +269,11 @@ class TrackOrderService {
             }
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.TRACK_ORDERS, { userId });
             const url = getApiUrl(endpoint);
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
+            const response = await apiClient.get(url);
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = response.data;
             return data.orders || [];
         } catch (error) {
             console.error('Error fetching ongoing medicine orders:', error);

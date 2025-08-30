@@ -1,5 +1,6 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../config/api.config';
-import { getUserId, getToken } from '../../services/User/Auth/auth.utils';
+import { apiClient } from '../../config/apiClient';
+import { getUserId, getToken, getAuthHeader } from '../../services/User/Auth/auth.utils';
 
 class OrderHistoryService {
     constructor() {
@@ -24,18 +25,17 @@ class OrderHistoryService {
                 { userId: targetUserId }
             );
 
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    ...getAuthHeader(),
+                }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.orders || [],
@@ -137,16 +137,15 @@ class OrderHistoryService {
                 API_CONFIG.ENDPOINTS.AMBULANCE.GET_COMPLETED_BOOKINGS,
                 { userId: targetUserId }
             );
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
+                    ...getAuthHeader(),
+                }
             });
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.data || [],
@@ -196,14 +195,13 @@ class OrderHistoryService {
         const url = getApiUrl(endpoint);
         const token = getToken && getToken();
         if (!token) throw new Error('User not authenticated');
-        const response = await fetch(url, {
+        const response = await apiClient.get(url, {
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                ...getAuthHeader(),
             }
         });
-        if (!response.ok) throw new Error('Failed to fetch completed blood bank bookings');
-        return await response.json();
+        if (response.status !== 200) throw new Error('Failed to fetch completed blood bank bookings');
+        return response.data;
     }
 
     /**
@@ -224,19 +222,17 @@ class OrderHistoryService {
                 { userId: targetUserId }
             );
 
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
+                    ...getAuthHeader(),
+                }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.orders || [],
@@ -313,19 +309,17 @@ class OrderHistoryService {
                 { userId: targetUserId }
             );
 
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
+                    ...getAuthHeader(),
+                }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.data || [],
@@ -404,19 +398,17 @@ class OrderHistoryService {
                 { userId: targetUserId }
             );
 
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
+                    ...getAuthHeader(),
+                }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.appointments || [],
@@ -485,19 +477,17 @@ class OrderHistoryService {
                 { userId: targetUserId }
             );
 
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'GET',
+            const response = await apiClient.get(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${getToken()}`
-                },
+                    ...getAuthHeader(),
+                }
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = response.data;
             return {
                 success: true,
                 data: data.bookings || [],

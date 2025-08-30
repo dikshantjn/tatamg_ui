@@ -1,4 +1,6 @@
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
+import { getAuthHeader } from '../Auth/auth.utils';
 
 export const VendorProductService = {
     getProductsByCategory: async (category) => {
@@ -6,16 +8,20 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.VENDOR_PRODUCTS.GET_BY_CATEGORY, { category });
             console.log('Fetching products from endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint));
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                }
+            });
             console.log('Product fetch response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to fetch products');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Products fetched successfully:', data);
             return data.products;
         } catch (error) {
@@ -29,27 +35,25 @@ export const VendorProductService = {
             console.log('Adding to cart:', { userId, productId, quantity });
             console.log('Using endpoint:', getApiUrl(API_CONFIG.ENDPOINTS.CART.ADD_TO_CART));
             
-            const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.CART.ADD_TO_CART), {
-                method: 'POST',
+            const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.CART.ADD_TO_CART), {
+                userId,
+                productId,
+                quantity
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    productId,
-                    quantity
-                })
+                    ...getAuthHeader(),
+                }
             });
 
             console.log('Add to cart response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to add item to cart');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Add to cart successful:', data);
             return data;
         } catch (error) {
@@ -67,26 +71,24 @@ export const VendorProductService = {
             console.log('Checking cart status:', { userId, productId });
             console.log('Using endpoint:', getApiUrl(API_CONFIG.ENDPOINTS.CART.CHECK_IN_CART));
             
-            const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.CART.CHECK_IN_CART), {
-                method: 'POST',
+            const response = await apiClient.post(getApiUrl(API_CONFIG.ENDPOINTS.CART.CHECK_IN_CART), {
+                userId,
+                productId
+            }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId,
-                    productId
-                })
+                    ...getAuthHeader(),
+                }
             });
 
             console.log('Check cart response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to check cart status');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Check cart successful:', data);
             return data.isInCart;
         } catch (error) {
@@ -105,16 +107,20 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.GET_CART_ITEMS, { userId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint));
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                }
+            });
             console.log('Get cart items response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to fetch cart items');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Cart items fetched successfully:', data);
             return data.cartItems;
         } catch (error) {
@@ -133,21 +139,20 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.CLEAR_CART, { userId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'DELETE',
+            const response = await apiClient.delete(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 }
             });
             console.log('Clear cart response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to clear cart');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Cart cleared successfully:', data);
             return data;
         } catch (error) {
@@ -166,22 +171,21 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.DELETE_CART_ITEM, { cartId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'DELETE',
+            const response = await apiClient.delete(getApiUrl(endpoint), {
                 headers: {
-                    'Content-Type': 'application/json',
+                    ...getAuthHeader(),
                 }
             });
 
             console.log('Delete cart item response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to delete cart item');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Cart item deleted successfully:', data);
             return data;
         } catch (error) {
@@ -200,23 +204,21 @@ export const VendorProductService = {
             const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.CART.UPDATE_CART_QUANTITY, { cartId });
             console.log('Using endpoint:', getApiUrl(endpoint));
             
-            const response = await fetch(getApiUrl(endpoint), {
-                method: 'PUT',
+            const response = await apiClient.put(getApiUrl(endpoint), { quantity }, {
                 headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ quantity })
+                    ...getAuthHeader(),
+                }
             });
 
-            console.log('Update cart quantity response status:', response.status);
+            console.log('Update cart item quantity response status:', response.status);
             
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => null);
+            if (response.status !== 200) {
+                const errorData = response.data;
                 console.error('Error response data:', errorData);
                 throw new Error(errorData?.message || 'Failed to update cart item quantity');
             }
 
-            const data = await response.json();
+            const data = response.data;
             console.log('Cart item quantity updated successfully:', data);
             return data;
         } catch (error) {

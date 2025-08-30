@@ -1,21 +1,17 @@
 import { API_CONFIG } from '../../../config/api.config';
+import { apiClient } from '../../../config/apiClient';
 import { getToken } from '../Auth/auth.utils';
 
 export const doctorConsultationService = {
     getOnlineDoctors: async () => {
         try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_ONLINE_DOCTORS}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_ONLINE_DOCTORS}`);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error('Failed to fetch online doctors');
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data.clinics;
         } catch (error) {
             console.error('Error fetching online doctors:', error);
@@ -25,18 +21,13 @@ export const doctorConsultationService = {
 
     getOfflineDoctors: async () => {
         try {
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_OFFLINE_DOCTORS}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiClient.get(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_OFFLINE_DOCTORS}`);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error('Failed to fetch offline doctors');
             }
 
-            const data = await response.json();
+            const data = response.data;
             return data.clinics;
         } catch (error) {
             console.error('Error fetching offline doctors:', error);
@@ -50,19 +41,16 @@ export const doctorConsultationService = {
             console.log('Creating appointment with data:', appointmentData);
 
             const token = getToken();
-            const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.CREATE_APPOINTMENT}`, {
-                method: 'POST',
+            const response = await apiClient.post(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.CREATE_APPOINTMENT}`, appointmentData, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(appointmentData)
+                }
             });
 
-            const responseData = await response.json();
+            const responseData = response.data;
             console.log('Server response:', responseData);
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(responseData.message || `Server error: ${response.status}`);
             }
 
