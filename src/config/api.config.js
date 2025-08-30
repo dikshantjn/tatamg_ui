@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-    BASE_URL: 'http://192.168.1.40:5000/api',
-    SOCKET_URL: 'http://192.168.1.40:5000',
+     BASE_URL: 'https://5bd0448d5978.ngrok-free.app/api',
+    SOCKET_URL: 'https://5bd0448d5978.ngrok-free.app',
     ENDPOINTS: {
         AUTH: {
             VERIFY_OTP: '/otp/verify-otp',
