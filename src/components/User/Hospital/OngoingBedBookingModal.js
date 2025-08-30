@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Paper from '@mui/material/Paper';
-import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -92,7 +91,6 @@ function Timeline({ steps, currentStepIndex }) {
         {steps.map((step, idx) => {
           const isActive = idx === currentStepIndex;
           const isCompleted = idx < currentStepIndex;
-          const status = isCompleted ? 'completed' : isActive ? 'active' : 'pending';
           
           return (
             <Box

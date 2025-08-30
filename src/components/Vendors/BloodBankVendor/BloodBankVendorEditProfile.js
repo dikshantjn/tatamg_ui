@@ -10,14 +10,7 @@ import {
   Avatar,
   IconButton,
   Chip,
-  Divider,
-  Alert,
   LinearProgress,
-  useTheme,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Switch,
   FormControlLabel,
   Dialog,
@@ -27,7 +20,6 @@ import {
   Skeleton
 } from '@mui/material';
 import {
-  Person,
   Phone,
   Email,
   LocationOn,
@@ -35,9 +27,7 @@ import {
   Save,
   Cancel,
   LocalHospital,
-  Bloodtype,
   Business,
-  Verified,
   Warning,
   CheckCircle,
   Language,
@@ -46,7 +36,6 @@ import {
   Description,
   Map,
   ArrowBack,
-  Image,
   Description as DescriptionIcon,
   BrokenImage,
   Add,
@@ -60,7 +49,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const BloodBankVendorEditProfile = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
   const [vendorData, setVendorData] = useState(null);
   const [loading, setLoading] = useState(true);

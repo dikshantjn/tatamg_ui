@@ -261,14 +261,6 @@ function MedicineDelivery() {
     }, 100);
   };
 
-  const getBrowserInfo = () => {
-    const userAgent = navigator.userAgent;
-    if (userAgent.includes('Chrome')) return 'Chrome';
-    if (userAgent.includes('Firefox')) return 'Firefox';
-    if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) return 'Safari';
-    if (userAgent.includes('Edge')) return 'Edge';
-    return 'Unknown';
-  };
 
   const formatTime = (seconds) => {
     const m = Math.floor(seconds / 60).toString().padStart(2, '0');

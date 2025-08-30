@@ -106,23 +106,6 @@ const LabTests = () => {
     setActiveLab(lab.id);
   };
 
-  const handleMarkerClick = (lab) => {
-    setSelectedLab(lab);
-    setActiveLab(lab.id);
-    
-    // Center map on selected lab
-    if (mapInstance && lab.coordinates) {
-      mapInstance.panTo(lab.coordinates);
-      mapInstance.setZoom(15);
-    }
-    
-    // Scroll to the lab in sidebar
-    const labElement = document.getElementById(`lab-${lab.id}`);
-    if (labElement) {
-      labElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   const handleImageError = (labId) => {
     setImageErrors(prev => ({
       ...prev,

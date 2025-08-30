@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { FaFlask, FaUser, FaArrowLeft, FaCloudUploadAlt, FaFileImage } from 'react-icons/fa';
+import { FaUser, FaArrowLeft, FaCloudUploadAlt, FaFileImage } from 'react-icons/fa';
 import labTestPaymentService from '../../../services/payment/lab-test-payment.service';
 import PaymentSuccessDialog from './PaymentSuccessDialog';
 import { getUserId } from '../../../services/User/Auth/auth.utils';

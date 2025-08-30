@@ -8,31 +8,21 @@ import {
   TextField,
   Button,
   Chip,
-  Avatar,
   IconButton,
   useTheme,
   Switch,
-  FormControlLabel,
-  Divider,
   Paper,
   CircularProgress,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   OutlinedInput,
   Checkbox,
-  ListItemText,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Rating,
-  Tooltip
+  ListItemText
 } from '@mui/material';
 import {
   Edit,
@@ -40,20 +30,10 @@ import {
   Cancel,
   LocationOn,
   Phone,
-  Email,
-  Language,
   Business,
-  Person,
   DirectionsCar,
-  GpsFixed,
-  Schedule,
-  Payment,
   PhotoCamera,
-  ExpandMore,
   CheckCircle,
-  Warning,
-  Info,
-  Star,
   MyLocation
 } from '@mui/icons-material';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
@@ -221,7 +201,7 @@ const AmbulanceVendorProfile = () => {
   const [editedProfile, setEditedProfile] = useState(emptyProfile);
   const [locationLoading, setLocationLoading] = useState(false);
   const [uploadingCert, setUploadingCert] = useState(false);
-  const [uploadingOfficePhotos, setUploadingOfficePhotos] = useState(false);
+  const [uploadingOfficePhotos] = useState(false);
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadType, setUploadType] = useState('');
@@ -406,7 +386,7 @@ const AmbulanceVendorProfile = () => {
     };
 
     fetchProfile();
-  }, []); // Keep empty dependencies to prevent infinite loops
+  }, [emptyProfile]); // Include emptyProfile in dependencies
 
   const handleEdit = () => {
     setEditing(true);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './HealthRecordPreviewModal.css';
-import { toast } from 'react-toastify';
 import ShareMenu from './ShareMenu';
 
 const HealthRecordPreviewModal = ({ record, onClose, onShare, onDownload, onDelete }) => {

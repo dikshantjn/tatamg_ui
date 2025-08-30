@@ -45,7 +45,7 @@ import BloodBankVendorAnalytics from './components/Vendors/BloodBankVendor/Blood
 import BloodBankVendorProcessRequest from './components/Vendors/BloodBankVendor/BloodBankVendorProcessRequest';
 import LabTestVendorDashboard from './components/Vendors/LabTestVendor/LabTestVendorDashboard';
 import DeliveryPartnerVendorDashboard from './components/Vendors/DeliveryPartnerVendor/DeliveryPartnerVendorDashboard';
-import DummySidePanel from './components/DummySidePanel';
+
 import Checkout from './components/Checkout';
 import Products from './components/User/Products/Products';
 import ProductProfilePage from './components/ProductsProfile';
@@ -164,10 +164,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
 
 
 
-  const handleAuthChange = (authState) => {
-    console.log("🔄 Auth state changed:", authState);
-    onAuthChange(authState);
-  };
+
 
   // Show login screen if not authenticated
   if (!isAuthenticated && !isLoading) {

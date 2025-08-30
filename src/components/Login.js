@@ -56,7 +56,7 @@ function TabPanel({ children, value, index, ...other }) {
 
 const Login = ({ onAuthChange }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
   const navigate = useNavigate();
   
   // State management
@@ -282,7 +282,7 @@ const Login = ({ onAuthChange }) => {
             console.log('Backend verification response:', backendResponse);
             
             if (backendResponse && backendResponse.data) {
-                const { token, userId, user } = backendResponse.data;
+                const { token, userId } = backendResponse.data;
                 
                 const finalUserId = userId || result.user.uid;
         const finalToken = token || idToken;

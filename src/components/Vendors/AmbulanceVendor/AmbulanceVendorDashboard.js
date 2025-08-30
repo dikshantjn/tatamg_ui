@@ -11,23 +11,18 @@ import {
   ListItemText,
   Chip,
   useTheme,
-  LinearProgress,
   Avatar,
   IconButton,
   Tooltip,
   Button,
-  CircularProgress,
-  Switch,
-  FormControlLabel
+  CircularProgress
 } from '@mui/material';
 import {
   DirectionsCar,
   Schedule,
-  TrendingUp,
   Emergency,
-  Visibility,
-  LocalShipping,
   Assignment,
+  TrendingUp,
   CheckCircle,
   Warning,
   Error,

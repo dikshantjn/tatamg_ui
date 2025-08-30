@@ -11,15 +11,13 @@ import {
     Box,
     Stack,
     IconButton,
-    Skeleton,
-    Avatar,
+  
     Rating,
     Snackbar,
     Alert,
     useTheme,
     useMediaQuery,
-    Fade,
-    Zoom
+
 } from '@mui/material';
 import {
     ShoppingCart,
@@ -27,10 +25,6 @@ import {
     Favorite,
     Warning,
     Cancel,
-    LocalOffer,
-    Star,
-    Add,
-    Remove,
     CheckCircle
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
@@ -90,7 +84,6 @@ const ImageIcon = () => (
 const ProductItem = ({ product }) => {
     const dispatch = useDispatch();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [imageError, setImageError] = useState(false);
     const [isInCart, setIsInCart] = useState(false);
     const [loading, setLoading] = useState(false);

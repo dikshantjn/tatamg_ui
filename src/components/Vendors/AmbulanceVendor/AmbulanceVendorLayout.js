@@ -10,13 +10,9 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Card,
-  CardContent,
-  Avatar,
   Menu,
   MenuItem,
   Divider,
-  Chip,
   useTheme,
   useMediaQuery,
   Tooltip,
@@ -38,7 +34,7 @@ import {
   Assignment
 } from '@mui/icons-material';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
-import { VendorThemeProvider, useVendorTheme } from '../../../contexts/VendorThemeContext';
+import { useVendorTheme } from '../../../contexts/VendorThemeContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const AmbulanceVendorLayoutContent = ({ children }) => {

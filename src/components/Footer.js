@@ -23,7 +23,7 @@ import Logo from './ui/Logo';
 
 function Footer() {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
     const currentYear = new Date().getFullYear();
 
     const footerSections = [

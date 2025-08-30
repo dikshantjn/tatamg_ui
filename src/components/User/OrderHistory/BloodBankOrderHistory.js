@@ -6,8 +6,8 @@ const BloodBankOrderHistory = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedBooking, setSelectedBooking] = useState(null);
-    const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+    const [ setSelectedBooking] = useState(null);
+    const [setIsSidePanelOpen] = useState(false);
 
     useEffect(() => {
         fetchCompletedBookings();

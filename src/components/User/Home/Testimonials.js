@@ -9,7 +9,6 @@ import {
     useTheme,
     useMediaQuery,
     Container,
-    Stack,
     Chip,
     Rating
 } from '@mui/material';
@@ -17,7 +16,6 @@ import {
     ArrowBackIos,
     ArrowForwardIos,
     FormatQuote,
-    Star,
     Verified
 } from '@mui/icons-material';
 import female1 from '../../../assets/Testimonial female face 1.jpg';
@@ -27,7 +25,6 @@ import male2 from '../../../assets/Testimonial male face 3.jpg';
 
 function Testimonials() {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const testimonialsData = [
     {

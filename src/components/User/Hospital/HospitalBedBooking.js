@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleMap, useLoadScript, Marker } from '@react-google-maps/api';
 import './HospitalBedBooking.css';
-import { FiSearch, FiMapPin, FiPhone, FiStar, FiClock, FiCalendar, FiArrowRight, FiAward, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiMapPin, FiStar, FiClock, FiCalendar, FiArrowRight, FiAward, FiAlertCircle } from 'react-icons/fi';
 import { MAPS_API_KEY } from '../../../config/map.config';
 import { useNavigate } from 'react-router-dom';
 import { hospitalService } from '../../../services/User/Hospital/hospital.service';
@@ -45,7 +45,7 @@ function HospitalBedBooking() {
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ongoingBookings, setOngoingBookings] = useState([]);
+  const [setOngoingBookings] = useState([]);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
   

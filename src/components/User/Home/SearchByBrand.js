@@ -32,7 +32,6 @@ function SearchByBrand() {
     const [showRightButton, setShowRightButton] = useState(true);
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const brands = [
         {

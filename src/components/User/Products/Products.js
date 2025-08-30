@@ -12,8 +12,7 @@ import {
     Button,
     Chip,
     Skeleton,
-    Stack,
-    Divider,
+
     useTheme,
     useMediaQuery
 } from '@mui/material';
@@ -23,13 +22,11 @@ import {
     Category,
     FavoriteBorder,
     ShoppingCart,
-    LocalOffer,
-    Star
+
 } from '@mui/icons-material';
 import { productCategories } from './ProductCategories';
 import TopOfferStrip from '../../TopOfferStrip';
 import { VendorProductService } from '../../../services/User/Products/vendor-product.service';
-import ProductItem from './ProductItem';
 
 // Import actual images from assets
 import otc from '../../../assets/otc.jpg';

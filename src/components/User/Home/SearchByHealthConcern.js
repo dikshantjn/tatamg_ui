@@ -6,18 +6,15 @@ import {
     Card,
     CardContent,
     IconButton,
-    Chip,
     useTheme,
     useMediaQuery,
     Container,
-    Grid,
     Stack,
     Button
 } from '@mui/material';
 import {
     ArrowForward,
     ArrowBack,
-    Favorite,
     LocalHospital,
     Spa,
     MonitorHeart,
@@ -36,7 +33,6 @@ function SearchByHealthConcern() {
     const [showRightButton, setShowRightButton] = useState(true);
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleScroll = () => {
         if (scrollRef.current) {

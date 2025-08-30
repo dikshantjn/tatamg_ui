@@ -21,8 +21,7 @@ import {
   MenuItem,
   LinearProgress,
   useTheme,
-  Avatar,
-  Tooltip
+  Avatar
 } from '@mui/material';
 import {
   TrendingUp,
@@ -31,11 +30,8 @@ import {
   Schedule,
   Payment,
   People,
-  Assessment,
   Refresh,
   Download,
-  Visibility,
-  LocalHospital,
   Emergency,
   CheckCircle,
   Warning
@@ -47,7 +43,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const BloodBankVendorAnalytics = () => {
   const theme = useTheme();
-  const [vendorData, setVendorData] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('month');
   const [analyticsData, setAnalyticsData] = useState({});
@@ -57,7 +53,6 @@ const BloodBankVendorAnalytics = () => {
       try {
         const authData = vendorAuthService.getVendorAuthData();
         if (authData && authData.vendorData) {
-          setVendorData(authData.vendorData);
           // Load sample analytics data
           loadAnalyticsData();
         }

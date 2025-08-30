@@ -23,7 +23,6 @@ import {
     AccountBalanceWallet,
     HealthAndSafety,
     Discount,
-    Star,
     AccessTime
 } from '@mui/icons-material';
 

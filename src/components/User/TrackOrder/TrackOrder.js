@@ -22,9 +22,8 @@ const TrackOrder = () => {
     const userId = getUserId();
     const timelineRefs = useRef({});
     const [medicineOrderCartItems, setMedicineOrderCartItems] = useState({});
-    const [loadingCartOrderId, setLoadingCartOrderId] = useState(null);
 
-    const { isConnected, error: socketError, subscribe, unsubscribe } = useSocket(userId);
+    const { error: socketError, subscribe, unsubscribe } = useSocket(userId);
 
     // Define medicine order status mapping at component level
     const medicineOrderSteps = [
@@ -589,11 +588,9 @@ const TrackOrder = () => {
                         const customerName = booking.customerName || booking.user?.name || 'Anonymous';
                         const bloodTypes = Array.isArray(bloodRequest.bloodType) ? bloodRequest.bloodType.join(', ') : (bloodRequest.bloodType || 'N/A');
                         const units = bloodRequest.units || 'N/A';
-                        const isCompleted = status === 'COMPLETED';
                         const isWaitingForPayment = status === 'WaitingForPayment';
                         const isPaymentCompleted = status === 'PaymentCompleted' || booking.paymentStatus === 'PAID';
                         const hasPaymentInfo = booking.totalAmount != null;
-                        const paymentStatus = booking.paymentStatus;
                         return (
                           <div key={booking.bookingId} className="order-card bloodbank-booking-card">
                             <div className="order-header">

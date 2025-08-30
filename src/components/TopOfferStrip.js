@@ -9,7 +9,7 @@ import {
     Stack,
     useTheme,
     useMediaQuery,
-    Fade
+
 } from '@mui/material';
 import {
     LocalOffer,

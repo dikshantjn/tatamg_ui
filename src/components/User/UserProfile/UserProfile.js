@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { userService } from '../../../services/User/Profile/user.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import './UserProfile.css';
-import { colors } from '../../../styles/colors';
 
 const UserProfile = () => {
   const [activeTab, setActiveTab] = useState('personal');

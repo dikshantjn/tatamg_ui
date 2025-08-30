@@ -64,14 +64,6 @@ const ProductOrderHistory = () => {
     const handleDownloadInvoice = () => {
         if (selectedOrder) {
             // Generate and download invoice
-            const invoiceData = {
-                orderNumber: selectedOrder.orderNumber,
-                date: selectedOrder.date,
-                items: selectedOrder.items,
-                total: selectedOrder.total,
-                deliveryAddress: selectedOrder.deliveryAddress
-            };
-            
             // Create a simple text invoice (you can enhance this to generate PDF)
             const invoiceText = `
 INVOICE

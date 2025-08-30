@@ -11,7 +11,6 @@ import {
   Divider,
   useTheme,
   IconButton,
-  Tooltip,
   Drawer,
   TextField,
   FormControl,
@@ -19,7 +18,6 @@ import {
   Select,
   MenuItem,
   Alert,
-  Checkbox,
   FormControlLabel,
   Switch,
   Menu,
@@ -34,13 +32,9 @@ import {
   Person,
   Add,
   Edit,
-  Delete,
-  CheckCircle,
   Warning,
-  Emergency,
   DirectionsCar,
   Close,
-  MoreVert,
   DirectionsCarFilled,
   PersonAdd,
   CheckCircleOutline
@@ -126,21 +120,7 @@ const AmbulanceVendorProcessOrder = () => {
     }
   }, [requestData, navigate]);
 
-     const handleEditService = (service) => {
-     setNewService({
-       pickupLocation: service.pickupLocation,
-       dropLocation: service.dropLocation,
-       vehicleType: service.vehicleType,
-       totalDistance: service.totalDistance,
-       costPerKm: service.costPerKm,
-       baseCharge: service.baseCharge,
-       waivePayment: service.waivePayment,
-       notifyUser: service.notifyUser
-     });
-     setIsEditing(true);
-     setEditingServiceId(service.id);
-     setShowAddServiceDrawer(true);
-   };
+
 
    const handleAddService = async () => {
      if (!newService.pickupLocation || !newService.dropLocation || !newService.vehicleType || 
@@ -180,7 +160,7 @@ const AmbulanceVendorProcessOrder = () => {
        console.log('Service data being sent to API:', serviceData);
 
        // Call the API to update service details
-       const updatedService = await updateAmbulanceServiceDetails(requestId, serviceData);
+       await updateAmbulanceServiceDetails(requestId, serviceData);
        
        // Update local state
        const updatedServiceLocal = {
@@ -259,24 +239,10 @@ const AmbulanceVendorProcessOrder = () => {
      }
    };
 
-  const handleRemoveService = (serviceId) => {
-    setServices(prev => prev.filter(service => service.id !== serviceId));
-    toast.success('Service removed successfully!', {
-      position: "top-right",
-      autoClose: 3000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      toastId: 'service-removed',
-    });
-  };
 
-     
 
-   const handleStatusMenuOpen = (event) => {
-     setStatusMenuAnchor(event.currentTarget);
-   };
+
+
 
    const handleStatusMenuClose = () => {
      setStatusMenuAnchor(null);

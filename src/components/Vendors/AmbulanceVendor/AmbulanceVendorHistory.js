@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Chip,
   useTheme,
   Table,
@@ -18,7 +16,6 @@ import {
   History,
   CheckCircle,
   DirectionsCar,
-  AccessTime
 } from '@mui/icons-material';
 import AmbulanceVendorLayout from './AmbulanceVendorLayout';
 import { getCompletedBookingsByVendor } from '../../../services/Vendors/AmbulanceVendor.service';

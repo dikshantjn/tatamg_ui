@@ -27,9 +27,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Container,
-  Fade,
-  Slide
+
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -39,14 +37,10 @@ import {
   Person as PersonIcon,
   Menu as MenuIcon,
   ShoppingCart as ShoppingCartIcon,
-  Close as CloseIcon,
   GpsFixed as GpsFixedIcon,
-  Star as StarIcon,
-  Phone as PhoneIcon,
   Logout as LogoutIcon,
   AccountCircle as AccountCircleIcon,
   History as HistoryIcon,
-  Assignment as AssignmentIcon,
   LocalShipping as TrackingIcon,
   FolderSpecial as HealthRecordsIcon,
   Emergency as EmergencyIcon
@@ -83,7 +77,6 @@ if (typeof document !== 'undefined') {
 }
 
 const SearchBox = () => {
-  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('Mumbai');
   const [searchQuery, setSearchQuery] = useState('');
@@ -325,7 +318,6 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isNavVisible, setIsNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [showNav, setShowNav] = useState(true);
 

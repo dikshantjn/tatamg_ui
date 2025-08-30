@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Grid,
-  Paper,
   Card,
   CardMedia,
   CardContent,
   Typography,
   Button,
-  Chip,
   Avatar,
   Stack,
   useTheme,

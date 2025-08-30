@@ -237,9 +237,6 @@ const HealthRecords = () => {
         }
     };
 
-    const handleUpload = () => {
-        toast.info('Opening file upload...');
-    };
 
     const toggleLock = useCallback(() => {
         setIsLocked(true);

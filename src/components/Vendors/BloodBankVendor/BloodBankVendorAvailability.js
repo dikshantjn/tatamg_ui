@@ -20,8 +20,6 @@ import {
   DialogActions,
   IconButton,
   Chip,
-  Alert,
-  LinearProgress,
   useTheme,
   FormControl,
   InputLabel,
@@ -29,8 +27,7 @@ import {
   MenuItem,
   Avatar,
   Skeleton,
-  Switch,
-  FormControlLabel
+  Switch
 } from '@mui/material';
 import {
   Bloodtype,
@@ -63,6 +60,31 @@ const BloodBankVendorAvailability = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [stockToDelete, setStockToDelete] = useState(null);
 
+  const loadBloodStock = async (vendorId) => {
+    try {
+      const apiResponse = await bloodBankVendorService.getBloodInventory(vendorId);
+      if (apiResponse && apiResponse.inventory) {
+        // Transform API data to match component structure
+        const transformedStock = apiResponse.inventory.map(item => ({
+          id: item.bloodInventoryId,
+          bloodType: item.bloodType,
+          availableUnits: item.unitsAvailable,
+          isAvailable: item.isAvailable,
+          lastUpdated: new Date(item.lastUpdated).toLocaleDateString(),
+          createdAt: new Date(item.createdAt).toLocaleDateString()
+        }));
+        setBloodStock(transformedStock);
+      } else {
+        console.warn('No inventory data received from API');
+        loadSampleBloodStock();
+      }
+    } catch (error) {
+      console.error('Error fetching blood inventory:', error);
+      toast.error('Failed to load blood inventory');
+      loadSampleBloodStock();
+    }
+  };
+
   useEffect(() => {
     const fetchVendorData = async () => {
       try {
@@ -91,31 +113,6 @@ const BloodBankVendorAvailability = () => {
 
     fetchVendorData();
   }, []);
-
-  const loadBloodStock = async (vendorId) => {
-    try {
-      const apiResponse = await bloodBankVendorService.getBloodInventory(vendorId);
-      if (apiResponse && apiResponse.inventory) {
-        // Transform API data to match component structure
-        const transformedStock = apiResponse.inventory.map(item => ({
-          id: item.bloodInventoryId,
-          bloodType: item.bloodType,
-          availableUnits: item.unitsAvailable,
-          isAvailable: item.isAvailable,
-          lastUpdated: new Date(item.lastUpdated).toLocaleDateString(),
-          createdAt: new Date(item.createdAt).toLocaleDateString()
-        }));
-        setBloodStock(transformedStock);
-      } else {
-        console.warn('No inventory data received from API');
-        loadSampleBloodStock();
-      }
-    } catch (error) {
-      console.error('Error fetching blood inventory:', error);
-      toast.error('Failed to load blood inventory');
-      loadSampleBloodStock();
-    }
-  };
 
   const loadSampleBloodStock = () => {
     // Sample blood stock data as fallback
@@ -263,29 +260,7 @@ const BloodBankVendorAvailability = () => {
     setStockToDelete(null);
   };
 
-  const getStockStatus = (available, critical) => {
-    if (available <= critical) return 'critical';
-    if (available <= critical * 1.5) return 'low';
-    return 'good';
-  };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'critical': return 'error';
-      case 'low': return 'warning';
-      case 'good': return 'success';
-      default: return 'default';
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'critical': return <Error />;
-      case 'low': return <Warning />;
-      case 'good': return <CheckCircle />;
-      default: return <Bloodtype />;
-    }
-  };
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
 

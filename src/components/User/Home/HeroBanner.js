@@ -4,7 +4,6 @@ import {
     Box,
     Typography,
     Button,
-    IconButton,
     Container,
     useTheme,
     useMediaQuery,
@@ -27,7 +26,6 @@ import {
 const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [currentSlide, setCurrentSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 

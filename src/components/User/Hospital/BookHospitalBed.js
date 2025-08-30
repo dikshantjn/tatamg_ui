@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiPhone, FiClock, FiCalendar, FiCheck, FiInfo, FiAward, FiBriefcase, FiStar, FiHeart, FiX, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiClock, FiCalendar, FiInfo, FiAward, FiBriefcase, FiStar, FiHeart, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { hospitalService } from '../../../services/User/Hospital/hospital.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import './BookHospitalBed.css';
