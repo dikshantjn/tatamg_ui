@@ -564,7 +564,7 @@ const Login = ({ onAuthChange }) => {
             textAlign: 'center',
             position: 'relative'
           }}>
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Logo size="large" />
             </Box>
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>

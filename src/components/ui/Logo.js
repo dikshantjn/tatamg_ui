@@ -1,20 +1,18 @@
 import React from 'react';
 import styles from './Logo.module.css';
+import logoImg from '../../assets/logo/Logo.png';
 
 const Logo = ({ size = 'regular', onClick }) => {
+  const imageSize = size === 'large' ? 96 : size === 'small' ? 40 : 64;
+
   return (
     <div className={styles.logoContainer} onClick={onClick}>
-      <div className={styles.logoIcon} />
-      <div className={`${styles.logoText} ${styles[size]}`}>
-        <span className={styles.slogan}>Your Partner in Better Living</span>
-        <div className={styles.mainLogo}>
-          <span className={styles.vedikaText}>Vedika</span>
-          <span className={styles.dotHealth}>
-            <span className={styles.dot} />
-            Health
-          </span>
-        </div>
-      </div>
+      <img
+        src={logoImg}
+        alt="Vedika Health logo"
+        className={styles.logoImage}
+        style={{ width: imageSize, height: imageSize }}
+      />
     </div>
   );
 };
