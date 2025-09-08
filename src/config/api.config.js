@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "https://a79cf099b049.ngrok-free.app/api",
-  SOCKET_URL: "https://a79cf099b049.ngrok-free.app/",
+  BASE_URL: "https://947a075b3d46.ngrok-free.app/api",
+  SOCKET_URL: "https://947a075b3d46.ngrok-free.app/",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
   ENDPOINTS: {
