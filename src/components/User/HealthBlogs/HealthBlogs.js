@@ -10,7 +10,9 @@ import {
   Avatar,
   Stack,
   useTheme,
-  Container
+  Container,
+  Chip,
+  CircularProgress
 } from '@mui/material';
 import { teal } from '@mui/material/colors';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -30,18 +32,44 @@ const HealthBlogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageError, setImageError] = useState({}); // { blogPostId: true/false }
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // null => All Topics
+
+  const extractPosts = (res) => (res?.posts ?? res ?? []);
+
+  const getCategoryName = (blog) => {
+    const id = blog?.categoryId || blog?.category?.categoryId || blog?.category?.id || blog?.category_id;
+    const fromObj = blog?.category?.name;
+    const fromList = categories.find(c => c.categoryId === id)?.name;
+    return fromObj || fromList || 'Category';
+  };
+
+  const loadBlogs = async (categoryId = null) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = categoryId ? await blogService.getBlogsByCategory(categoryId) : await blogService.getAllBlogs();
+      setBlogs(extractPosts(res));
+    } catch (e) {
+      setError('Failed to load blogs');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setLoading(true);
-    blogService.getAllBlogs()
-      .then(res => {
-        setBlogs(res.posts || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load blogs');
-        setLoading(false);
-      });
+    // Load categories and initial blogs
+    let mounted = true;
+    (async () => {
+      try {
+        const cats = await blogService.getAllCategories();
+        if (mounted) setCategories(cats || []);
+      } catch (_) {
+        // ignore category load errors; UI will just show "All Topics"
+      }
+      await loadBlogs(null);
+    })();
+    return () => { mounted = false; };
   }, []);
 
   const handleImageError = (id) => {
@@ -49,15 +77,13 @@ const HealthBlogs = () => {
   };
 
   if (loading) {
-    return <Box sx={{ py: 8, textAlign: 'center' }}><Typography>Loading blogs...</Typography></Box>;
+    return (
+      <Box sx={{ py: 8, textAlign: 'center' }}>
+        <CircularProgress size={28} />
+        <Typography sx={{ mt: 1 }}>Loading blogs...</Typography>
+      </Box>
+    );
   }
-  if (error) {
-    return <Box sx={{ py: 8, textAlign: 'center' }}><Typography color="error">{error}</Typography></Box>;
-  }
-  if (!blogs.length) {
-    return <Box sx={{ py: 8, textAlign: 'center' }}><Typography>No blogs found.</Typography></Box>;
-  }
-
   const featuredBlog = blogs[0];
   const recentArticles = blogs.slice(1);
 
@@ -76,6 +102,64 @@ const HealthBlogs = () => {
           <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', fontSize: { xs: '0.95rem', md: '1rem' } }}>
             Expert tips, wellness guides, and the latest in health—curated for you.
           </Typography>
+        </Box>
+        {/* Categories Filter */}
+        <Box sx={{ mb: { xs: 2, md: 3 } }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              justifyContent: 'center',
+              flexWrap: 'wrap',
+              rowGap: 1,
+              columnGap: 1,
+              px: 1
+            }}
+          >
+            <Chip
+              label="All Topics"
+              color={selectedCategoryId === null ? 'primary' : 'default'}
+              variant={selectedCategoryId === null ? 'filled' : 'outlined'}
+              onClick={() => {
+                if (selectedCategoryId !== null) {
+                  setSelectedCategoryId(null);
+                  loadBlogs(null);
+                }
+              }}
+            />
+            {categories.map(cat => (
+              <Chip
+                key={cat.categoryId}
+                label={cat.name}
+                color={selectedCategoryId === cat.categoryId ? 'primary' : 'default'}
+                variant={selectedCategoryId === cat.categoryId ? 'filled' : 'outlined'}
+                onClick={() => {
+                  if (selectedCategoryId !== cat.categoryId) {
+                    setSelectedCategoryId(cat.categoryId);
+                    loadBlogs(cat.categoryId);
+                  }
+                }}
+              />
+            ))}
+          </Stack>
+        </Box>
+        {/* Selected Category Title */}
+        <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 3 } }}>
+          <Typography variant="h5" fontWeight={700} sx={{ color: theme.palette.primary.main }}>
+            {selectedCategoryId === null
+              ? 'All Topics'
+              : (categories.find(c => c.categoryId === selectedCategoryId)?.name || 'Topics')}
+          </Typography>
+          {error && (
+            <Typography color="error" sx={{ mt: 0.5 }}>
+              {error}
+            </Typography>
+          )}
+          {!loading && blogs.length === 0 && (
+            <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+              No blogs found in this category.
+            </Typography>
+          )}
         </Box>
         {/* Featured Blog Section */}
         {featuredBlog && (
@@ -122,7 +206,9 @@ const HealthBlogs = () => {
             </Grid>
             <Grid item xs={5} md={5} zeroMinWidth>
               <Stack direction="row" spacing={1} mb={2}>
-                  {/* You can add a 'New' chip if needed */}
+                {selectedCategoryId === null && (
+                  <Chip label={getCategoryName(featuredBlog)} size="small" color="default" variant="outlined" />
+                )}
               </Stack>
               <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: theme.palette.primary.main, mb: 2 }}>
                 {featuredBlog.title}
@@ -208,6 +294,11 @@ const HealthBlogs = () => {
                 />
                 )}
                 <CardContent sx={{ flexGrow: 1, p: 2.5, display: 'flex', flexDirection: 'column' }}>
+                  {selectedCategoryId === null && (
+                    <Box sx={{ mb: 1 }}>
+                      <Chip label={getCategoryName(blog)} size="small" color="default" variant="outlined" />
+                    </Box>
+                  )}
                   <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
                     <Avatar sx={{ bgcolor: teal[400], width: 20, height: 20, fontSize: 10 }}>B</Avatar>
                     <Typography variant="caption" fontWeight={500} color="text.secondary">

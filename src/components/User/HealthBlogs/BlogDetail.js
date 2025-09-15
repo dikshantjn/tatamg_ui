@@ -35,21 +35,73 @@ const BlogDetail = () => {
   };
 
   useEffect(() => {
+    let mounted = true;
     setLoading(true);
     setError(null);
-    // Fetch all blogs to get related, then fetch the current blog
-    blogService.getAllBlogs()
-      .then(res => {
-        const posts = res.posts || [];
-        const current = posts.find(b => b.blogPostId === id);
-        setBlog(current);
-        setRelated(posts.filter(b => b.blogPostId !== id).slice(0, 3));
-        setLoading(false);
-      })
-      .catch(() => {
+    (async () => {
+      try {
+        console.log('[BlogDetail] route id:', id);
+        const current = await blogService.getBlogById(id);
+        if (!mounted) return;
+        console.log('[BlogDetail] loaded current blog:', current);
+        setBlog(current || null);
+        // Fetch related from all posts and exclude current
+        try {
+          const currentCategoryId = (current && (current.categoryId || current.category?.categoryId || current.category_id)) || null;
+          console.log('[BlogDetail] current categoryId:', currentCategoryId);
+
+          let categoryPosts = [];
+          try {
+            if (currentCategoryId) {
+              const catRes = await blogService.getBlogsByCategory(currentCategoryId);
+              categoryPosts = (catRes?.posts || catRes || []).filter(b => b.blogPostId !== id);
+              console.log('[BlogDetail] category posts count:', categoryPosts.length);
+            }
+          } catch (catErr) {
+            console.warn('[BlogDetail] category fetch failed, will fallback to all posts', catErr);
+          }
+
+          let allPosts = [];
+          try {
+            const all = await blogService.getAllBlogs();
+            allPosts = all?.posts || all || [];
+          } catch (allErr) {
+            console.warn('[BlogDetail] all posts fetch failed', allErr);
+          }
+
+          // Prefer same-category; fallback to any
+          let selected = (categoryPosts.length ? categoryPosts : allPosts.filter(b => b.blogPostId !== id)).slice(0, 3);
+
+          // If fewer than 3, fill from remaining allPosts
+          if (selected.length < 3 && allPosts.length) {
+            const existingIds = new Set(selected.map(s => s.blogPostId));
+            const fill = allPosts.filter(b => b.blogPostId !== id && !existingIds.has(b.blogPostId));
+            selected = selected.concat(fill.slice(0, 3 - selected.length));
+          }
+
+          // Final guarantee: repeat if dataset tiny
+          if (selected.length < 3 && (categoryPosts.length || allPosts.length)) {
+            const pool = (categoryPosts.length ? categoryPosts : allPosts).filter(b => b.blogPostId !== id);
+            let i = 0;
+            while (selected.length < 3 && pool.length > 0) {
+              selected.push(pool[i % pool.length]);
+              i += 1;
+            }
+          }
+
+          console.log('[BlogDetail] related selected:', selected.map(p => p.blogPostId));
+          setRelated(selected);
+        } catch (_) {
+          setRelated([]);
+        }
+      } catch (e) {
+        if (!mounted) return;
         setError('Failed to load blog');
-        setLoading(false);
-      });
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, [id]);
 
   const handleImageError = (id) => {

@@ -170,6 +170,10 @@ export const API_CONFIG = {
     BLOGS: {
       GET_ALL: "/blogs/posts",
       GET_ONE: "/blogs/posts/:blogPostId",
+      GET_BY_CATEGORY: "/blogs/posts/:categoryId",
+    },
+    BLOG_CATEGORIES: {
+      GET_ALL: "/blog-categories/categories/",
     },
   },
 };
