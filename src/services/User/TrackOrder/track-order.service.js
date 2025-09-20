@@ -280,6 +280,27 @@ class TrackOrderService {
             throw error;
         }
     }
+
+    // Fetch active medicine orders for the current user
+    async getActiveMedicineOrders() {
+        try {
+            const userId = getUserId();
+            if (!userId) {
+                throw new Error('User not authenticated');
+            }
+            const endpoint = replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_ACTIVE_ORDERS, { userId });
+            const url = getApiUrl(endpoint);
+            const response = await apiClient.get(url);
+            if (response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = response.data;
+            return data.data || [];
+        } catch (error) {
+            console.error('Error fetching active medicine orders:', error);
+            throw error;
+        }
+    }
 }
 
 export const trackOrderService = new TrackOrderService(); 

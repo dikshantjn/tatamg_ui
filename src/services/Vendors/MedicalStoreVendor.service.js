@@ -42,6 +42,22 @@ export const acceptPrescriptionRequest = async (prescriptionId, vendorId, jsonPr
   }
 };
 
+export const acceptPrescriptionNew = async (prescriptionId, vendorId, userId) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.ACCEPT_PRESCRIPTION_NEW, { prescriptionId })
+    );
+    const requestBody = {
+      vendorId: vendorId,
+      userId: userId
+    };
+    const response = await apiClient.post(url, requestBody);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getPendingPrescriptionRequests = async (vendorId) => {
   try {
     const url = getApiUrl(
@@ -54,10 +70,34 @@ export const getPendingPrescriptionRequests = async (vendorId) => {
   }
 };
 
+export const getPendingPrescriptions = async (vendorId) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.GET_PENDING_PRESCRIPTIONS, { vendorId })
+    );
+    const response = await apiClient.get(url);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getAllOrders = async (vendorId) => {
   try {
     const url = getApiUrl(
       replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.GET_ALL_ORDERS, { vendorId })
+    );
+    const response = await apiClient.get(url);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getOrdersByVendor = async (vendorId) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.GET_ORDERS_BY_VENDOR, { vendorId })
     );
     const response = await apiClient.get(url);
     return response.data;
@@ -195,6 +235,51 @@ export const updateProduct = async (productId, productData) => {
       replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.UPDATE_PRODUCT, { productId })
     );
     const response = await apiClient.put(url, productData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateOrderPayment = async (orderId, totalAmount, note) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.UPDATE_ORDER_PAYMENT, { orderId })
+    );
+    const requestBody = {
+      totalAmount: totalAmount,
+      note: note
+    };
+    const response = await apiClient.patch(url, requestBody);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateOrderNote = async (orderId, note) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.UPDATE_ORDER_NOTE, { orderId })
+    );
+    const requestBody = {
+      note: note
+    };
+    const response = await apiClient.patch(url, requestBody);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateOrderStatusNew = async (orderId, status) => {
+  try {
+    const url = getApiUrl(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.UPDATE_ORDER_STATUS_NEW);
+    const requestBody = {
+      orderId: orderId,
+      status: status
+    };
+    const response = await apiClient.patch(url, requestBody);
     return response.data;
   } catch (error) {
     throw error;

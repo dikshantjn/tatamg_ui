@@ -8,6 +8,10 @@ const MedicineOrderHistory = () => {
     const [error, setError] = useState(null);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+    const [orderCount, setOrderCount] = useState(0);
+    const [invoiceData, setInvoiceData] = useState(null);
+    const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+    const [invoiceLoading, setInvoiceLoading] = useState(false);
 
     useEffect(() => {
         fetchDeliveredOrders();
@@ -61,45 +65,43 @@ const MedicineOrderHistory = () => {
         setSelectedOrder(null);
     };
 
-    const handleDownloadInvoice = () => {
+    const handleViewInvoice = async () => {
         if (selectedOrder) {
-            const invoiceText = `
-INVOICE
-Order #${selectedOrder.orderNumber}
-Date: ${formatDate(selectedOrder.date)}
+            setInvoiceLoading(true);
+            try {
+                const response = await orderHistoryService.getInvoice(selectedOrder.orderNumber);
+                if (response.success) {
+                    setInvoiceData(response.data);
+                    setIsInvoiceDialogOpen(true);
+                } else {
+                    console.error('Failed to fetch invoice:', response.message);
+                }
+            } catch (error) {
+                console.error('Error fetching invoice:', error);
+            } finally {
+                setInvoiceLoading(false);
+            }
+        }
+    };
 
-Items:
-${selectedOrder.items.map(item => 
-    `${item.name} (${item.type}) - ${item.quantity}x ${formatCurrency(item.price)}`
-).join('\n')}
+    const handleCloseInvoiceDialog = () => {
+        setIsInvoiceDialogOpen(false);
+        setInvoiceData(null);
+    };
 
-Subtotal: ${formatCurrency(selectedOrder.subtotal)}
-Delivery Charge: ${formatCurrency(selectedOrder.deliveryCharge)}
-Platform Fee: ${formatCurrency(selectedOrder.platformFee)}
-Discount: ${formatCurrency(selectedOrder.discountAmount)}
-Total: ${formatCurrency(selectedOrder.total)}
-
-Payment Details:
-Method: ${selectedOrder.paymentMethod}
-Status: ${selectedOrder.paymentStatus}
-Transaction ID: ${selectedOrder.transactionId}
-
-Customer Details:
-Name: ${selectedOrder.user.name}
-Email: ${selectedOrder.user.email}
-            `;
-            
-            const blob = new Blob([invoiceText], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
+    const handleDownloadInvoice = () => {
+        if (invoiceData) {
+            const url = window.URL.createObjectURL(invoiceData.blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `invoice-${selectedOrder.orderNumber}.txt`;
+            a.download = `invoice-${selectedOrder.orderNumber}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }
     };
+
 
     const renderOrderCard = (order) => {
         return (
@@ -117,32 +119,6 @@ Email: ${selectedOrder.user.email}
                 </div>
 
                 <div className="order-content">
-                    <div className="order-items">
-                        <h4>Medicines:</h4>
-                        <div className="items-list">
-                            {order.items.map((item, index) => (
-                                <div key={index} className="item-card">
-                                    <div className="item-image">
-                                        {item.image ? (
-                                            <img src={item.image} alt={item.name} />
-                                        ) : (
-                                            <div className="no-image">💊</div>
-                                        )}
-                                    </div>
-                                    <div className="item-details">
-                                        <h5 className="item-name">{item.name}</h5>
-                                        <p className="item-category">{item.type} • {item.packSize}</p>
-                                        <p className="item-manufacturer">By: {item.manufacturer}</p>
-                                        <div className="item-price-qty">
-                                            <span className="item-price">{formatCurrency(item.price)}</span>
-                                            <span className="item-quantity">Qty: {item.quantity}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
                     <div className="order-details">
                         <div className="detail-row">
                             <span className="detail-label">Payment Method:</span>
@@ -204,31 +180,31 @@ Email: ${selectedOrder.user.email}
                                 <span className="status-badge delivered">{selectedOrder.status}</span>
                             </div>
 
-                            <div className="order-items-detail">
-                                <h4>Order Items</h4>
-                                {selectedOrder.items.map((item, index) => (
-                                    <div key={index} className="detail-item">
-                                        <div className="item-image">
-                                            {item.image ? (
-                                                <img src={item.image} alt={item.name} />
-                                            ) : (
-                                                <div className="no-image">💊</div>
-                                            )}
+
+                            {selectedOrder.vendor && (
+                                <div className="vendor-info">
+                                    <h5>Vendor Information</h5>
+                                    <p><strong>Name:</strong> {selectedOrder.vendor.name}</p>
+                                </div>
+                            )}
+
+                            {selectedOrder.deliveryAddress && (
+                                <div className="address-info">
+                                    <h5>Delivery Address</h5>
+                                    <p><strong>Address:</strong> {selectedOrder.deliveryAddress.houseStreet}</p>
+                                    <p><strong>Area:</strong> {selectedOrder.deliveryAddress.addressLine1}</p>
+                                    <p><strong>City:</strong> {selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state}</p>
+                                    <p><strong>Pincode:</strong> {selectedOrder.deliveryAddress.zipCode}</p>
+                                    <p><strong>Type:</strong> {selectedOrder.deliveryAddress.addressType}</p>
                                         </div>
-                                        <div className="item-info">
-                                            <h5>{item.name}</h5>
-                                            <p className="item-category">{item.type} • {item.packSize}</p>
-                                            <p className="item-manufacturer">By: {item.manufacturer}</p>
-                                            <p className="item-composition">Composition: {item.composition}</p>
-                                            <div className="item-pricing">
-                                                <span className="price">{formatCurrency(item.price)}</span>
-                                                <span className="quantity">Qty: {item.quantity}</span>
-                                                <span className="subtotal">{formatCurrency(item.price * item.quantity)}</span>
+                            )}
+
+                            {selectedOrder.prescription && (
+                                <div className="vendor-info">
+                                    <h5>Prescription Details</h5>
+                                    <p><strong>Status:</strong> {selectedOrder.prescription.status}</p>
                                             </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            )}
 
                             <div className="payment-info">
                                 <h4>Payment Information</h4>
@@ -272,11 +248,12 @@ Email: ${selectedOrder.user.email}
                     </div>
 
                     <div className="side-panel-footer">
-                        <button className="download-invoice-btn" onClick={handleDownloadInvoice}>
+                        <button className="download-invoice-btn" onClick={handleViewInvoice} disabled={invoiceLoading}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            Download Invoice
+                            {invoiceLoading ? 'Loading...' : 'View Invoice'}
                         </button>
                         <button className="reorder-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -334,8 +311,58 @@ Email: ${selectedOrder.user.email}
             </div>
 
             {renderSidePanel()}
+            {renderInvoiceDialog()}
         </div>
     );
+
+    function renderInvoiceDialog() {
+        if (!isInvoiceDialogOpen) return null;
+
+        return (
+            <div className="invoice-dialog-overlay" onClick={handleCloseInvoiceDialog}>
+                <div className="invoice-dialog" onClick={(e) => e.stopPropagation()}>
+                    <div className="invoice-dialog-header">
+                        <h2>Invoice - Order #{selectedOrder?.orderNumber}</h2>
+                        <button className="invoice-close-btn" onClick={handleCloseInvoiceDialog}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div className="invoice-dialog-content">
+                        {invoiceData ? (
+                            <iframe
+                                src={invoiceData.pdfUrl}
+                                width="100%"
+                                height="100%"
+                                style={{ border: 'none' }}
+                                title={`Invoice for Order ${selectedOrder?.orderNumber}`}
+                            />
+                        ) : (
+                            <div className="invoice-loading">
+                                <div className="loading-spinner"></div>
+                                <p>Loading invoice...</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="invoice-dialog-footer">
+                        <button className="invoice-download-btn" onClick={handleDownloadInvoice}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download Invoice
+                        </button>
+                        <button className="invoice-close-dialog-btn" onClick={handleCloseInvoiceDialog}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+        </div>
+    );
+    }
 };
 
 export default MedicineOrderHistory; 

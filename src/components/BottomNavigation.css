@@ -4,6 +4,7 @@
     left: 0;
     right: 0;
     z-index: 1000;
+    height: 64px;
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     opacity: 1;
 }
@@ -14,164 +15,162 @@
     pointer-events: none;
 }
 
-.bottom-nav {
-    position: relative;
+/* Curved background */
+.nav-curved-bg {
+    position: absolute;
+    bottom: 0;
     left: 0;
     right: 0;
     height: 64px;
-    background: #38A3A5; /* Primary color from colors.js */
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    background: #38A3A5;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.bottom-nav {
+    position: relative;
+    height: 100%;
     display: flex;
     justify-content: space-around;
     align-items: center;
-    border-radius: 16px 16px 0 0;
+    padding: 0 16px;
 }
 
+/* Navigation items */
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: white;
     text-decoration: none;
     font-size: 12px;
-    font-weight: 500;
+    font-weight: 600;
     background: none;
     border: none;
     outline: none;
     cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 8px 16px;
-    position: relative;
-    border-radius: 20px;
+    padding: 0;
+    height: 48px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .nav-item svg {
-    width: 28px;
-    height: 28px;
-    margin-bottom: 2px;
-    stroke: #fff;
-    transition: stroke 0.2s;
-}
-
-.nav-item.active {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background: #fff;
-    border-radius: 50%;
-}
-
-.nav-item.active svg,
-.nav-item:active svg {
-    stroke: #fff;
-}
-
-.emergency-call svg {
-    stroke: #fff;
     width: 24px;
     height: 24px;
+    margin-bottom: 4px;
+    stroke: white;
 }
 
-.phone-blink-bg {
-    width: 40px;
-    height: 40px;
+/* Speak button */
+.speak-button-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+}
+
+.speak-button {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    background: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.speak-button::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(
+        var(--gradient-rotation),
+        #8A2BE2,
+        #4169E1,
+        #AC4A79,
+        #8A2BE2
+    );
+    animation: rotate 3s linear infinite;
+}
+
+.speak-button-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.speak-button-inner svg {
+    width: 24px;
+    height: 24px;
+    stroke: #8A2BE2;
+    stroke-width: 2;
+}
+
+/* Emergency button */
+.emergency-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+}
+
+.emergency-icon-wrapper {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: #DC2626;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: blink-red-bg 1s infinite alternate;
-    margin-bottom: 2px;
+    animation: pulse 1s infinite alternate;
+    margin-bottom: 4px;
 }
 
-@keyframes blink-red-bg {
-    0% { background: #DC2626; }
-    100% { background: #ff4d4f; }
+.emergency-icon-wrapper svg {
+    width: 20px;
+    height: 20px;
+    stroke: white;
 }
 
-.emergency-call span {
-    color: #fff;
+@keyframes pulse {
+    0% { transform: scale(1); background: #DC2626; }
+    100% { transform: scale(1.1); background: #ff4d4f; }
 }
 
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Hide on desktop */
 @media (min-width: 769px) {
-    .bottom-nav {
+    .bottom-nav-container {
         display: none;
     }
 }
 
-/* Adjust for smaller screens */
-@media (max-width: 360px) {
-    .nav-item {
-        padding: 8px 12px;
+/* Safe area padding for iOS */
+@supports (padding: env(safe-area-inset-bottom)) {
+    .bottom-nav-container {
+        padding-bottom: env(safe-area-inset-bottom);
     }
-    
-    .mic-circle {
-        width: 56px;
-        height: 56px;
-        border-radius: 28px;
-    }
-
-    .nav-background::before {
-        width: 56px;
-        height: 56px;
-        top: -28px;
-    }
-    
-    .mic-circle svg {
-        width: 24px;
-        height: 24px;
-    }
-}
-
-/* Mobile Only */
-@media (max-width: 768px) {
-    .bottom-nav {
-        display: flex;
-    }
-}
-
-/* Remove the app padding style completely */
-.app {
-    padding-bottom: 0 !important;
 }
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
-    .bottom-nav .nav-item,
-    .bottom-nav .phone-icon-wrapper,
-    .bottom-nav .phone-icon-wrapper::before {
+    .speak-button::before,
+    .emergency-icon-wrapper {
         animation: none;
-        transition: none;
     }
 }
-
-/* Focus states for accessibility */
-.bottom-nav .nav-item:focus {
-    outline: none;
-    background: rgba(255, 255, 255, 0.15);
-}
-
-.bottom-nav .nav-item:first-child svg {
-    width: 32px;
-    height: 32px;
-}
-
-/* Preserve emergency call button styling */
-.emergency-call.active {
-    background: none;
-    transform: none;
-}
-
-.emergency-call.active::after {
-    display: none;
-} 

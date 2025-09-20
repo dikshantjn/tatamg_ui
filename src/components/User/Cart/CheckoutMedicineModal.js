@@ -7,6 +7,7 @@ import Lottie from 'lottie-react';
 import findingDeliveryPartnerAnimation from '../../../assets/animations/findingDeliveryPartner.json';
 import './CheckoutProductModal.css';
 import medicineOrderPaymentService from '../../../services/payment/medicine-order-payment.service';
+import { placeMedicineOrder } from '../../../services/User/MedicineDelivery/medicine-delivery.service';
 import _ from 'lodash';
 
 const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, orderData }) => {
@@ -76,27 +77,25 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
         total: orderDataToUse?.total || 70.00
     };
 
-    // Group items by orderId
-    const itemsGroupedByOrder = _.groupBy(orderDataToUse.items, 'orderId');
-    const orderGroups = Object.entries(itemsGroupedByOrder).map(([orderId, items]) => {
-        // Calculate cost breakdown for each order
-        const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        // For simplicity, split discount, deliveryCharge, platformFee proportionally by subtotal
-        const totalSubtotal = orderDataToUse.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const discount = (orderDataToUse.discount || 0) * (subtotal / totalSubtotal);
-        const deliveryCharge = (orderDataToUse.deliveryCharge || 0) * (subtotal / totalSubtotal);
-        const platformFee = (orderDataToUse.platformFee || 0) * (subtotal / totalSubtotal);
-        const total = subtotal + deliveryCharge + platformFee - discount;
-        return {
-            orderId,
-            items,
-            subtotal,
-            discount,
-            deliveryCharge,
-            platformFee,
-            total
-        };
-    });
+    // For medicine orders, we don't need to group by orderId since each order is already separate
+    // Create order groups directly from the orders array
+    const orderGroups = orderDataToUse.orders ? orderDataToUse.orders.map(order => ({
+        orderId: order.orderId,
+        items: [], // Medicine orders don't have individual items in the cart
+        subtotal: order.totalAmount,
+        discount: 0,
+        deliveryCharge: 0,
+        platformFee: 0,
+        total: order.totalAmount
+    })) : [{
+        orderId: orderDataToUse.orderId || 'ORD-' + Date.now(),
+        items: [],
+        subtotal: orderDataToUse.subtotal,
+        discount: orderDataToUse.discount || 0,
+        deliveryCharge: orderDataToUse.deliveryCharge || 0,
+        platformFee: orderDataToUse.platformFee || 0,
+        total: orderDataToUse.total
+    }];
 
     const showNotification = (message, type = 'success') => {
         setNotification({ message, type });
@@ -233,15 +232,31 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
         console.log('Pay Now button clicked');
         console.log('orderDataToUse:', orderDataToUse);
         console.log('orderGroups:', orderGroups);
+        console.log('selectedAddress:', selectedAddress);
+        
         try {
             setLoading(true);
+            
+            // Check if we have orders to process
+            if (!orderGroups || orderGroups.length === 0) {
+                console.error('No orders to process');
+                throw new Error('No orders found. Please add items to cart and try again.');
+            }
+            
+            // Check if Razorpay is available
+            if (typeof window === 'undefined' || !window.Razorpay) {
+                console.error('Razorpay SDK not loaded');
+                throw new Error('Payment gateway not available. Please refresh the page and try again.');
+            }
+            
             // Debugging: print all orderGroups and their data
             console.debug('Order Groups for Payment:', orderGroups);
+            
             // For each order group, process payment and update order
             for (const group of orderGroups) {
                 console.debug('Processing payment for orderId:', group.orderId, 'with data:', group);
-                await medicineOrderPaymentService.processPayment(
-                    {
+                
+                const paymentData = {
                         ...orderDataToUse,
                         orderId: group.orderId,
                         items: group.items,
@@ -251,32 +266,94 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                         platformFee: group.platformFee,
                         total: group.total,
                         addressId: selectedAddress?.id || selectedAddress?.addressId || null
-                    },
-                    (paymentResult) => {
-                        setPaymentResult(paymentResult);
+                };
+                
+                console.log('Payment data being sent:', paymentData);
+                
+                // Add a timeout to prevent infinite loading
+                const paymentTimeout = setTimeout(() => {
+                    console.error('Payment timeout - no response from payment service');
+                    setLoading(false);
+                    setPaymentResult({ message: 'Payment timeout. Please try again.' });
+                    setPaymentStatus('failed');
+                    setCurrentStep('payment-failed');
+                }, 10000); // 10 second timeout
+                
+                try {
+                    await medicineOrderPaymentService.processPayment(
+                        paymentData,
+                        async (paymentResult) => {
+                            clearTimeout(paymentTimeout);
+                            console.log('Payment success callback:', paymentResult);
+                            
+                            try {
+                                // Place the medicine order after successful payment
+                                const orderIds = orderGroups.map(group => group.orderId);
+                                const addressId = selectedAddress?.id || selectedAddress?.addressId;
+                                const paymentId = paymentResult.paymentId;
+                                
+                                console.log('Placing medicine order with:', { orderIds, addressId, paymentId });
+                                
+                                const placeOrderResult = await placeMedicineOrder(orderIds, addressId, paymentId);
+                                console.log('Medicine order placed successfully:', placeOrderResult);
+                                
+                                // Clear medicine cart after successful order placement
+                                try {
+                                    // Clear the medicine cart by removing all pending orders
+                                    // This will trigger a re-render and show empty cart
+                                    if (onPaymentSuccess) {
+                                        onPaymentSuccess();
+                                    }
+                                    console.log('Medicine cart cleared after successful order placement');
+                                } catch (clearError) {
+                                    console.error('Error clearing medicine cart:', clearError);
+                                }
+                                
+                                setPaymentResult({
+                                    ...paymentResult,
+                                    placeOrderResult: placeOrderResult
+                                });
+                                setPaymentStatus('success');
+                                setCurrentStep('payment-success');
+                                setLoading(false);
+                                dispatch(fetchCartItems());
+                            } catch (placeOrderError) {
+                                console.error('Failed to place medicine order:', placeOrderError);
+                                // Still show payment success but with a warning about order placement
+                                setPaymentResult({
+                                    ...paymentResult,
+                                    warning: 'Payment successful but order placement failed. Please contact support.'
+                                });
                         setPaymentStatus('success');
                         setCurrentStep('payment-success');
                         setLoading(false);
                         dispatch(fetchCartItems());
-                        if (typeof window !== 'undefined') {
-                            // Optionally clear local medicine cart state if needed
-                            if (typeof window.clearMedicineCart === 'function') {
-                                window.clearMedicineCart();
-                            }
-                        }
+                                
                         if (onPaymentSuccess) {
                             onPaymentSuccess();
+                                }
                         }
                     },
                     (errorMessage) => {
+                            clearTimeout(paymentTimeout);
+                            console.error('Payment failure callback:', errorMessage);
                         setPaymentResult({ message: errorMessage });
                         setPaymentStatus('failed');
                         setCurrentStep('payment-failed');
                         setLoading(false);
                     }
                 );
+                } catch (paymentError) {
+                    clearTimeout(paymentTimeout);
+                    console.error('Payment service error:', paymentError);
+                    setPaymentResult({ message: paymentError.message || 'Payment service error' });
+                    setPaymentStatus('failed');
+                    setCurrentStep('payment-failed');
+                    setLoading(false);
+                }
             }
         } catch (error) {
+            console.error('Payment error:', error);
             setPaymentResult({ message: error.message || 'Payment failed. Please try again.' });
             setPaymentStatus('failed');
             setCurrentStep('payment-failed');
@@ -401,8 +478,95 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                                 </>
                             ) : (
                                 <div className="address-form">
-                                    {/* ... address form fields ... */}
-                                    {/* (Same as in CheckoutProductModal) */}
+                                    <div className="form-group">
+                                        <label htmlFor="houseStreet">House/Street Address *</label>
+                                        <input
+                                            type="text"
+                                            id="houseStreet"
+                                            name="houseStreet"
+                                            value={formData.houseStreet}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter house number and street name"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="addressLine1">Address Line 1 *</label>
+                                        <input
+                                            type="text"
+                                            id="addressLine1"
+                                            name="addressLine1"
+                                            value={formData.addressLine1}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter locality/area"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="addressLine2">Address Line 2</label>
+                                        <input
+                                            type="text"
+                                            id="addressLine2"
+                                            name="addressLine2"
+                                            value={formData.addressLine2}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter landmark (optional)"
+                                        />
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="city">City *</label>
+                                            <input
+                                                type="text"
+                                                id="city"
+                                                name="city"
+                                                value={formData.city}
+                                                onChange={handleInputChange}
+                                                placeholder="Enter city"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="state">State *</label>
+                                            <input
+                                                type="text"
+                                                id="state"
+                                                name="state"
+                                                value={formData.state}
+                                                onChange={handleInputChange}
+                                                placeholder="Enter state"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="form-row">
+                                        <div className="form-group">
+                                            <label htmlFor="zipCode">Pincode *</label>
+                                            <input
+                                                type="text"
+                                                id="zipCode"
+                                                name="zipCode"
+                                                value={formData.zipCode}
+                                                onChange={handleInputChange}
+                                                placeholder="Enter pincode"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <label htmlFor="addressType">Address Type *</label>
+                                            <select
+                                                id="addressType"
+                                                name="addressType"
+                                                value={formData.addressType}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="Home">Home</option>
+                                                <option value="Work">Work</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </>
@@ -452,51 +616,30 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                                     </div>
                                 </div>
                             </div>
-                            <div className="order-items-section">
-                                <h3>Order Items ({safeOrderData.items.length})</h3>
-                                <div className="order-items-list">
-                                    {safeOrderData.items.map((item) => (
-                                        <div key={item.id} className="order-item">
-                                            <div className="item-image">
-                                                <div className="image-placeholder">
-                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                        <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div className="item-details">
-                                                <h4 className="item-name">{item.name}</h4>
-                                                <p className="item-quantity">Qty: {item.quantity}</p>
-                                            </div>
-                                            <div className="item-price">
-                                                <span className="price">₹{item.price.toFixed(2)}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
                             <div className="cost-breakdown-section">
                                 <h3>Cost Breakdown</h3>
                                 <div className="cost-breakdown">
                                     <div className="cost-row">
                                         <span>Subtotal</span>
-                                        <span>₹{safeOrderData.subtotal.toFixed(2)}</span>
+                                        <span>₹{orderDataToUse.subtotal.toFixed(2)}</span>
                                     </div>
                                     <div className="cost-row">
                                         <span>Platform Fee</span>
-                                        <span>₹{safeOrderData.platformFee.toFixed(2)}</span>
-                                    </div>
-                                    <div className="cost-row discount">
-                                        <span>Discount</span>
-                                        <span>-₹{safeOrderData.discount.toFixed(2)}</span>
+                                        <span>₹{orderDataToUse.platformFee.toFixed(2)}</span>
                                     </div>
                                     <div className="cost-row">
                                         <span>Delivery Charge</span>
-                                        <span>₹{safeOrderData.deliveryCharge.toFixed(2)}</span>
+                                        <span>₹{orderDataToUse.deliveryCharge.toFixed(2)}</span>
                                     </div>
+                                    {orderDataToUse.discount > 0 && (
+                                        <div className="cost-row discount">
+                                            <span>Discount</span>
+                                            <span>-₹{orderDataToUse.discount.toFixed(2)}</span>
+                                    </div>
+                                    )}
                                     <div className="cost-row total">
                                         <span>Total</span>
-                                        <span>₹{safeOrderData.total.toFixed(2)}</span>
+                                        <span>₹{orderDataToUse.total.toFixed(2)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -513,6 +656,11 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                             <div className="success-content">
                                 <h2>Payment Successful!</h2>
                                 <p className="success-message">Your order has been placed successfully.</p>
+                                {paymentResult.warning && (
+                                    <div className="warning-message">
+                                        <p style={{ color: '#f59e0b', fontWeight: '500' }}>⚠️ {paymentResult.warning}</p>
+                                    </div>
+                                )}
                                 <div className="order-details">
                                     <div className="detail-row">
                                         <span>Order ID:</span>
@@ -612,7 +760,7 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                         <>
                             <div className="total-amount">
                                 <span className="total-label">Total Amount:</span>
-                                <span className="total-value">₹{safeOrderData.total.toFixed(2)}</span>
+                                <span className="total-value">₹{orderDataToUse.total.toFixed(2)}</span>
                             </div>
                             <button 
                                 className="pay-now-button"

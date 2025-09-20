@@ -1,0 +1,218 @@
+/* Custom styles for NewMedicineOrder component */
+
+.medicine-order-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.store-card {
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.store-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.store-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 12px 12px 0 0;
+}
+
+.feature-chip {
+  margin: 2px;
+  font-size: 0.75rem;
+}
+
+.upload-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.upload-fab:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.prescription-upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  transition: border-color 0.3s ease;
+  cursor: pointer;
+}
+
+.prescription-upload-area:hover {
+  border-color: #667eea;
+  background-color: #f8f9ff;
+}
+
+.store-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.medicine-type-chip {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.store-timing {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.store-location {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+
+.store-contact {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+}
+
+.action-button {
+  flex: 1;
+  border-radius: 8px;
+  text-transform: none;
+  font-weight: 600;
+  padding: 12px 16px;
+}
+
+.call-button {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+}
+
+.upload-button {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .store-card {
+    margin-bottom: 16px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  
+  .upload-fab {
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .mobile-store-name {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    word-break: break-word;
+  }
+  
+  .mobile-button {
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+  }
+  
+  .mobile-dialog-title {
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    word-break: break-word;
+  }
+  
+  .mobile-dialog-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .mobile-dialog-content {
+    padding-top: 8px !important;
+  }
+}
+
+/* Loading animation */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Error state */
+.error-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+/* Success animation */
+.success-animation {
+  animation: successPulse 0.6s ease-in-out;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Card hover effects */
+.store-card:hover .store-header {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* Custom scrollbar for dialog */
+.prescription-dialog .MuiDialog-paper {
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f1f1f1;
+}
+
+.prescription-dialog .MuiDialog-paper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.prescription-dialog .MuiDialog-paper::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.prescription-dialog .MuiDialog-paper::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 3px;
+}
+
+.prescription-dialog .MuiDialog-paper::-webkit-scrollbar-thumb:hover {
+  background: #5a6fd8;
+}

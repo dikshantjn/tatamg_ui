@@ -1,135 +1,273 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Membership.css';
+import membershipService from '../services/User/membership.service.js';
+import membershipPaymentService from '../services/payment/membership-payment.service.js';
+import { getUserId } from '../services/User/Auth/auth.utils';
 
 function Membership() {
-    const [activeTestimonial, setActiveTestimonial] = useState(0);
     const [activeFaq, setActiveFaq] = useState(null);
+    const [membershipPlans, setMembershipPlans] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+    const [successData, setSuccessData] = useState(null);
+    const [processingPayment, setProcessingPayment] = useState(false);
+    const [showErrorDialog, setShowErrorDialog] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const benefits = [
+    // Fetch membership plans and current user plan from API
+    useEffect(() => {
+        const fetchPlansAndCurrent = async () => {
+            try {
+                setLoading(true);
+                const plansPromise = membershipService.getMembershipPlans();
+                const userId = getUserId();
+                const currentPromise = userId ? membershipService.getCurrentUserPlan(userId) : Promise.resolve({ currentPlan: null });
+                const [plans, current] = await Promise.all([plansPromise, currentPromise]);
+                setMembershipPlans(plans);
+                setCurrentPlan(current?.currentPlan || null);
+            } catch (err) {
+                setError('Failed to load membership plans');
+                console.error('Error fetching plans:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPlansAndCurrent();
+    }, []);
+
+    // Fallback plans in case API fails
+    const fallbackPlans = [
         {
-            icon: "₹",
-            title: "8% Extra Vedika Credits",
-            description: "Applicable on medicines and healthcare products",
-            highlight: true,
-            iconClass: "icon-credits"
+            membershipPlanId: "fallback-silver",
+            planName: "Silver",
+            fees: 12000,
+            planType: "Yearly",
+            applicable: "1 Member only",
+            services: [
+                "24/7 Emergency Services"
+            ],
+            features: [
+                "3 free online consultations per month.",
+                "150 MB storage for Medical Health Records",
+                "Access to Nutrition Plans",
+                "Medico Legal Assistance",
+                "Early Access to New Launched Products"
+            ],
+            offers: {
+                medicineDiscount: "5%",
+                labTestDiscount: "5%",
+                productDiscount: "5%"
+            },
+            color: "#64748B",
+            gradient: "linear-gradient(135deg, #64748B 0%, #475569 100%)",
+            popular: false
         },
         {
-            icon: "LAB",
-            title: "60% Extra Credits on Lab Tests",
-            description: "Applicable on your first diagnostic order",
-            highlight: true,
-            iconClass: "icon-lab"
+            membershipPlanId: "fallback-gold",
+            planName: "Gold",
+            fees: 18000,
+            planType: "Yearly",
+            applicable: "1 Member only",
+            services: [
+                "24/7 Emergency Services"
+            ],
+            features: [
+                "5 free online consultations per month.",
+                "300 MB storage for Medical Health Records",
+                "Access to Nutrition Plans",
+                "Medico Legal Assistance",
+                "Early Access to New Launched Products"
+            ],
+            offers: {
+                medicineDiscount: "10%",
+                labTestDiscount: "10%",
+                productDiscount: "10%"
+            },
+            color: "#F59E0B",
+            gradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+            popular: true
         },
         {
-            icon: "FREE",
-            title: "FREE Delivery",
-            description: "Enjoy free delivery on orders above ₹399",
-            highlight: false,
-            iconClass: "icon-delivery"
-        },
-        {
-            icon: "DOC",
-            title: "Free Doctor Consultations",
-            description: "Get 10 free teleconsultations with certified doctors",
-            highlight: false,
-            iconClass: "icon-doctor"
-        },
-        {
-            icon: "24/7",
-            title: "Priority Support",
-            description: "24/7 priority customer support for all queries",
-            highlight: false,
-            iconClass: "icon-support"
-        },
-        {
-            icon: "₹0",
-            title: "Zero Convenience Fees",
-            description: "No additional charges on any transactions",
-            highlight: false,
-            iconClass: "icon-fees"
+            membershipPlanId: "fallback-platinum",
+            planName: "Platinum",
+            fees: 24000,
+            planType: "Yearly",
+            applicable: "1 Member only",
+            services: [
+                "24/7 Emergency Services"
+            ],
+            features: [
+                "10 free online consultations per month.",
+                "500 MB storage for Medical Health Records",
+                "Access to Nutrition Plans",
+                "Medico Legal Assistance",
+                "Mediclaim included for Rs 1 Lakh",
+                "Early Access to New Launched Products"
+            ],
+            offers: {
+                medicineDiscount: "15%",
+                labTestDiscount: "15%",
+                productDiscount: "15%"
+            },
+            color: "#8B5CF6",
+            gradient: "linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)",
+            popular: false
         }
     ];
 
-    const steps = [
-        {
-            number: "1",
-            title: "Purchase Membership",
-            description: "Get your Vedika Plus membership for just ₹99",
-            icon: "₹"
-        },
-        {
-            number: "2",
-            title: "Instant Activation",
-            description: "Your membership activates immediately after purchase",
-            icon: "⚡"
-        },
-        {
-            number: "3",
-            title: "Start Saving",
-            description: "Enjoy exclusive benefits on every order for 12 months",
-            icon: "✓"
-        }
-    ];
+    // Transform API data to match component structure
+    const transformPlanData = (apiPlan) => {
+        const colorMap = {
+            'Silver': '#64748B',
+            'Gold': '#FFD700', 
+            'Platinum': '#8B5CF6'
+        };
 
-    const testimonials = [
-        {
-            name: "Priya Sharma",
-            location: "Mumbai",
-            rating: 5,
-            text: "Vedika Plus has saved me thousands on my family's healthcare expenses. The free consultations are incredibly helpful!"
-        },
-        {
-            name: "Rajesh Kumar",
-            location: "Delhi",
-            rating: 5,
-            text: "The extra credits and free delivery make it so convenient. Best investment for my health!"
-        },
-        {
-            name: "Meera Patel",
-            location: "Bangalore",
-            rating: 5,
-            text: "Priority support and zero convenience fees - Vedika Plus is worth every penny."
-        }
-    ];
+        const gradientMap = {
+            'Silver': 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+            'Gold': 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+            'Platinum': 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)'
+        };
 
-    const faqs = [
+        // Extract discount percentage from features
+        const discountFeature = apiPlan.features.find(f => f.category === 'discounts');
+        const discountValue = discountFeature ? discountFeature.value : '0%';
+
+        return {
+            membershipPlanId: apiPlan.membershipPlanId,
+            planName: apiPlan.type,
+            fees: apiPlan.price,
+            planType: apiPlan.title,
+            applicable: apiPlan.highlights[0] || `Up to ${apiPlan.type} members`,
+            services: apiPlan.highlights.slice(1, 6) || [],
+            features: apiPlan.highlights.slice(6) || [],
+            offers: {
+                medicineDiscount: discountValue,
+                labTestDiscount: discountValue,
+                productDiscount: discountValue
+            },
+            color: colorMap[apiPlan.type] || '#64748B',
+            gradient: gradientMap[apiPlan.type] || 'linear-gradient(135deg, #64748B 0%, #475569 100%)',
+            popular: apiPlan.isPopular || false
+        };
+    };
+
+    // Use API data if available, otherwise fallback
+    const displayPlans = membershipPlans.length > 0 
+        ? membershipPlans.map(transformPlanData)
+        : fallbackPlans;
+
+    // Order plans: Silver, Gold, Platinum
+    const orderedDisplayPlans = [...displayPlans].sort((a, b) => {
+        const order = ['Silver', 'Gold', 'Platinum'];
+        return order.indexOf(a.planName) - order.indexOf(b.planName);
+    });
+
+    const [currentPlan, setCurrentPlan] = useState(null);
+
+    // Generate dynamic FAQs based on API data
+    const generateFAQs = () => {
+        const baseFAQs = [
         {
-            question: "What are the benefits of Vedika Plus?",
-            answer: "Vedika Plus offers 8% extra credits on medicines, 60% extra credits on lab tests, free delivery, free doctor consultations, priority support, and zero convenience fees."
+            question: "How long is my membership valid?",
+            answer: "All memberships are valid for 12 months from the date of activation."
         },
         {
-            question: "How long is my Vedika Plus membership valid?",
-            answer: "Your membership is valid for 12 months from the date of activation."
-        },
-        {
-            question: "When will I get the Vedika Credits?",
-            answer: "Credits are automatically added to your wallet within 48 hours of order delivery."
-        },
-        {
-            question: "Can I cancel my Vedika Plus membership?",
-            answer: "Memberships are non-refundable once activated, but you can choose not to renew."
-        },
-        {
-            question: "Is there a limit on the credits I can earn?",
-            answer: "Credits are subject to monthly caps as mentioned in the terms and conditions."
+                question: "Can I upgrade or downgrade my plan?",
+                answer: "Yes, you can upgrade your plan at any time. Downgrades will take effect at the next renewal cycle."
+            },
+            {
+                question: "What is included in the emergency services?",
+                answer: "All plans include 24/7 emergency services with priority support and immediate assistance for urgent healthcare needs."
+            },
+            {
+                question: "Is the mediclaim coverage only for Platinum members?",
+                answer: "Yes, the Rs 1 Lakh mediclaim coverage is exclusively available for Platinum plan members."
+            }
+        ];
+
+        if (displayPlans.length > 0) {
+            const planNames = displayPlans.map(plan => plan.planName).join(', ');
+            const planPrices = displayPlans.map(plan => `${plan.planName} (₹${plan.fees.toLocaleString()}/year)`).join(', ');
+            
+            baseFAQs.unshift({
+                question: "What are the different membership plans available?",
+                answer: `We offer ${displayPlans.length} membership plans: ${planPrices}. Each plan offers different benefits and discounts.`
+            });
+
+            const discountInfo = displayPlans.map(plan => 
+                `${plan.planName} offers ${plan.offers.medicineDiscount} discount on medicines, lab tests, and products`
+            ).join('. ');
+            
+            baseFAQs.splice(2, 0, {
+                question: "What discounts do I get with each plan?",
+                answer: discountInfo + "."
+            });
         }
-    ];
+
+        return baseFAQs;
+    };
+
+    const faqs = generateFAQs();
 
     const toggleFaq = (index) => {
         setActiveFaq(activeFaq === index ? null : index);
     };
 
-    const nextTestimonial = () => {
-        setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    const handleChoosePlan = async (plan) => {
+        try {
+            setProcessingPayment(true);
+            
+            // Prepare plan data for payment
+            const planData = {
+                membershipPlanId: plan.membershipPlanId || plan.planName.toLowerCase(),
+                name: plan.planName,
+                type: plan.planName,
+                price: plan.fees
+            };
+
+            await membershipPaymentService.processPayment(
+                planData,
+                (successData) => {
+                    // Payment successful
+                    setSuccessData(successData);
+                    setShowSuccessDialog(true);
+                    setProcessingPayment(false);
+                },
+                (errorMessage) => {
+                    // Payment failed
+                    setErrorMessage(errorMessage || 'Payment failed. Please try again.');
+                    setShowErrorDialog(true);
+                    setProcessingPayment(false);
+                }
+            );
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            setErrorMessage(error.message || 'An unexpected error occurred. Please try again.');
+            setShowErrorDialog(true);
+            setProcessingPayment(false);
+        }
     };
 
-    const prevTestimonial = () => {
-        setActiveTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    const closeSuccessDialog = () => {
+        setShowSuccessDialog(false);
+        setSuccessData(null);
     };
+
+    const closeErrorDialog = () => {
+        setShowErrorDialog(false);
+        setErrorMessage('');
+    };
+
+    const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+    const openPurchaseDetails = () => setShowPurchaseDialog(true);
+    const closePurchaseDetails = () => setShowPurchaseDialog(false);
 
     return (
         <div className="membership-page">
-            {/* New Hero Section with Split Screen Design */}
+            {/* Hero Section with Floating Plans */}
             <section className="hero-section-new">
                 <div className="geometric-overlay">
                     <div className="shape-circle shape-1"></div>
@@ -139,181 +277,114 @@ function Membership() {
                 </div>
                 
                 <div className="container">
-                    <div className="hero-split-content">
-                        {/* Left Content */}
-                        <div className="hero-left">
+                    <div className="hero-content">
                             <div className="logo-section-new">
                                 <div className="plus-icon">+</div>
                                 <h1 className="logo-text-new">Vedika Plus</h1>
                             </div>
                             
                             <h2 className="hero-headline-new">
-                                Reduce your medical expenses with Vedika Plus
+                                Choose Your Perfect Healthcare Plan
                             </h2>
-                            
-                            <div className="benefit-highlight-card">
-                                Enjoy benefits worth ₹2000
                             </div>
                             
-                            <div className="section-header">
-                                Get exclusive access to
+                    {/* Floating Plans Cards */}
+                    <div className="floating-plans-container">
+                        <div className="floating-plans-grid">
+                            {loading ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: 'white' }}>
+                                    Loading membership plans...
                             </div>
-                        </div>
-                        
-                        {/* Right Content */}
-                        <div className="hero-right">
-                            <div className="family-image-container">
-                                <img 
-                                    src={require('../assets/portrait-successful-mid-adult-doctor-with-crossed-arms.jpg')} 
-                                    alt="Happy Healthcare Family" 
-                                    className="family-image"
-                                />
-                                <div className="floating-cta">
-                                    Start saving more! 💰
+                            ) : error ? (
+                                <div style={{ textAlign: 'center', padding: '2rem', color: 'white' }}>
+                                    {error}
                                 </div>
+                            ) : (
+                                orderedDisplayPlans.map((plan, index) => (
+                                <div 
+                                    key={index} 
+                                    className={`floating-plan-card ${plan.popular ? 'popular' : ''}`}
+                                >
+                                    {plan.popular && <div className="popular-badge">Most Popular</div>}
+                                    {currentPlan && (currentPlan.planDetails?.membershipPlanId === plan.membershipPlanId || currentPlan.planId === plan.membershipPlanId) && (
+                                        <div className="plan-badge plan-badge-active">Active</div>
+                                    )}
+                                    
+                                <div className="plan-header">
+                                        <div className="plan-icon" style={{ background: plan.gradient }}>
+                                            {plan.planName.charAt(0)}
+                                        </div>
+                                    <h3 className="plan-name">{plan.planName}</h3>
+                                    <div className="plan-type">{plan.planType}</div>
+                                </div>
+                                
+                                <div className="plan-pricing">
+                                    <div className="plan-price">₹{plan.fees.toLocaleString()}</div>
+                                    <div className="plan-period">per year</div>
+                                </div>
+
+                                    <div className="plan-applicable">{plan.applicable}</div>
+
+                                <div className="plan-services">
+                                    <h4>Services Included:</h4>
+                                    <ul>
+                                            {plan.services.map((service, idx) => (
+                                                <li key={idx}>{service}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="plan-features">
+                                    <h4>Features:</h4>
+                                    <ul>
+                                            {plan.features.map((feature, idx) => (
+                                                <li key={idx}>{feature}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+
+                                <div className="plan-offers">
+                                    <h4>Discounts:</h4>
+                                    <div className="offers-grid">
+                                        <div className="offer-item">
+                                            <span className="offer-label">Medicines:</span>
+                                            <span className="offer-value">{plan.offers.medicineDiscount} off</span>
+                                        </div>
+                                        <div className="offer-item">
+                                            <span className="offer-label">Lab Tests:</span>
+                                            <span className="offer-value">{plan.offers.labTestDiscount} off</span>
+                                        </div>
+                                        <div className="offer-item">
+                                            <span className="offer-label">Products:</span>
+                                            <span className="offer-value">{plan.offers.productDiscount} off</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                    {currentPlan && (currentPlan.planDetails?.membershipPlanId === plan.membershipPlanId || currentPlan.planId === plan.membershipPlanId) ? (
+                                        <div className="active-actions">
+                                            <div className="active-plan-tag">Active</div>
+                                            <button className="purchase-details-link" onClick={openPurchaseDetails}>View Details</button>
+                                        </div>
+                                    ) : (
+                                        <button 
+                                            className="plan-cta-button" 
+                                            style={{ 
+                                                color: plan.color,
+                                                borderColor: plan.color,
+                                                opacity: processingPayment ? 0.7 : 1,
+                                                cursor: processingPayment ? 'not-allowed' : 'pointer'
+                                            }}
+                                            onClick={() => handleChoosePlan(plan)}
+                                            disabled={processingPayment}
+                                        >
+                                            {processingPayment ? 'Processing...' : 'Upgrade'}
+                                        </button>
+                                    )}
                             </div>
+                                ))
+                            )}
                         </div>
-                    </div>
-                </div>
-
-                {/* Benefits Preview Section */}
-                <div className="benefits-preview">
-                    <div className="container">
-                        <div className="preview-cards">
-                            <div className="preview-card highlight">
-                                <div className="preview-icon wallet">₹</div>
-                                <h3>8% Extra Vedika Credits</h3>
-                                <p>Applicable on medicines and healthcare products. *TC Apply</p>
-                            </div>
-                            <div className="preview-card highlight">
-                                <div className="preview-icon lab">LAB</div>
-                                <h3>60% Extra Vedika Credits</h3>
-                                <p>Applicable on all lab tests. *TC Apply</p>
-                            </div>
-                            <div className="preview-card">
-                                <div className="preview-icon delivery">FREE</div>
-                                <h3>FREE Delivery</h3>
-                                <p>Enjoy free delivery on medicine and healthcare orders above ₹399</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Additional Benefits Section */}
-                <div className="additional-benefits">
-                    <div className="container">
-                        <h3 className="additional-title">Additional Benefits</h3>
-                        <div className="additional-grid">
-                            <div className="additional-item">
-                                <div className="additional-icon lab-flask">⚗️</div>
-                                <span>50% Extra Vedika Credits on 1st lab test</span>
-                            </div>
-                            <div className="additional-item">
-                                <div className="additional-icon home-medical">🏠</div>
-                                <span>Get 100% Vedika Credits on healthcare products from the House of Vedika</span>
-                            </div>
-                            <div className="additional-item">
-                                <div className="additional-icon doctor-consultation">👨‍⚕️</div>
-                                <span>10 Free Doctor Consultations</span>
-                            </div>
-                            <div className="additional-item">
-                                <div className="additional-icon no-fees">🚫</div>
-                                <span>Zero Convenience Fees</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Benefits Section */}
-            <section className="benefits-section">
-                <div className="container">
-                    <h2 className="section-title">Exclusive Benefits Worth ₹2000+</h2>
-                    <div className="benefits-grid">
-                        {benefits.map((benefit, index) => (
-                            <div 
-                                key={index} 
-                                className={`benefit-card ${benefit.highlight ? 'highlight' : ''}`}
-                            >
-                                <div className={`icon ${benefit.iconClass}`}>{benefit.icon}</div>
-                                <h3 className="benefit-title">{benefit.title}</h3>
-                                <p className="benefit-description">{benefit.description}</p>
-                                {benefit.highlight && <div className="highlight-badge">Popular</div>}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Pricing Section */}
-            <section className="pricing-section">
-                <div className="container">
-                    <div className="pricing-card">
-                        <div className="discount-badge">67% OFF</div>
-                        <h3 className="pricing-title">Vedika Plus Membership</h3>
-                        <div className="pricing-duration">12 Months</div>
-                        <div className="pricing-details">
-                            <span className="original-price">₹299</span>
-                            <span className="discounted-price">₹99</span>
-                        </div>
-                        <button className="cta-button" onClick={() => alert('Membership purchase coming soon!')}>
-                            Get Vedika Plus Now
-                        </button>
-                        <ul className="pricing-features">
-                            <li>✓ Valid for 12 months from activation</li>
-                            <li>✓ Instant activation upon purchase</li>
-                            <li>✓ Non-transferable membership</li>
-                            <li>✓ All benefits included</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            {/* How It Works Section */}
-            <section className="how-it-works">
-                <div className="container">
-                    <h2 className="section-title">How Vedika Plus Works</h2>
-                    <div className="steps-container">
-                        {steps.map((step, index) => (
-                            <div key={index} className="step-card">
-                                <div className="step-number">{step.number}</div>
-                                <div className={`icon icon-step`}>{step.icon}</div>
-                                <h3 className="step-title">{step.title}</h3>
-                                <p className="step-description">{step.description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials Section */}
-            <section className="testimonials-section">
-                <div className="container">
-                    <h2 className="section-title">What Our Members Say</h2>
-                    <div className="testimonials-carousel">
-                        <button className="carousel-btn prev" onClick={prevTestimonial}>‹</button>
-                        <div className="testimonial-card">
-                            <div className="rating">
-                                {[...Array(testimonials[activeTestimonial].rating)].map((_, i) => (
-                                    <span key={i} className="star">★</span>
-                                ))}
-                            </div>
-                            <p className="testimonial-text">"{testimonials[activeTestimonial].text}"</p>
-                            <div className="testimonial-author">
-                                <strong>{testimonials[activeTestimonial].name}</strong>
-                                <span>{testimonials[activeTestimonial].location}</span>
-                            </div>
-                        </div>
-                        <button className="carousel-btn next" onClick={nextTestimonial}>›</button>
-                    </div>
-                    <div className="carousel-indicators">
-                        {testimonials.map((_, index) => (
-                            <button
-                                key={index}
-                                className={`indicator ${index === activeTestimonial ? 'active' : ''}`}
-                                onClick={() => setActiveTestimonial(index)}
-                            />
-                        ))}
                     </div>
                 </div>
             </section>
@@ -337,9 +408,87 @@ function Membership() {
                                 </div>
                             </div>
                         ))}
+                    </div>
                 </div>
-            </div>
             </section>
+
+            {/* Success Dialog */}
+            {showSuccessDialog && (
+                <div className="success-dialog-overlay">
+                    <div className="success-dialog">
+                        <div className="success-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M9.00039 16.2L4.80039 12L3.40039 13.4L9.00039 19L21.0004 7.00002L19.6004 5.60002L9.00039 16.2Z"/>
+                            </svg>
+                        </div>
+                        <h2>Membership Activated</h2>
+                        <div className="success-details">
+                            <div className="success-breakdown">
+                                <div className="bd-row">
+                                    <div className="bd-label">Plan</div>
+                                    <div className="bd-value">{successData?.plan?.name || successData?.membership?.planName}</div>
+                                </div>
+                                <div className="bd-row">
+                                    <div className="bd-label">Amount</div>
+                                    <div className="bd-value">₹{successData?.amount?.toLocaleString()}</div>
+                                </div>
+                                <div className="bd-row">
+                                    <div className="bd-label">Valid until</div>
+                                    <div className="bd-value">{new Date(successData?.membership?.endDate).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="success-message">
+                            Your membership is now active. Enjoy exclusive benefits and savings.
+                        </p>
+                        <button 
+                            className="success-close-btn"
+                            onClick={closeSuccessDialog}
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Dialog */}
+            {showErrorDialog && (
+                <div className="error-dialog-overlay">
+                    <div className="error-dialog">
+                        <div className="error-icon">❌</div>
+                        <h2>Payment Failed</h2>
+                        <p className="error-message">{errorMessage}</p>
+                        <div className="error-actions">
+                            <button className="error-primary-btn" onClick={closeErrorDialog}>Try Again</button>
+                            <button className="error-secondary-btn" onClick={closeErrorDialog}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Purchase Details Dialog */}
+            {showPurchaseDialog && currentPlan && (
+                <div className="purchase-dialog-overlay">
+                    <div className="purchase-dialog">
+                        <div className="purchase-header">
+                            <div className="purchase-icon">🧾</div>
+                            <h3>Purchase Details</h3>
+                        </div>
+                        <div className="purchase-grid">
+                            <div className="row"><span className="label">Plan</span><span className="value">{currentPlan.planName}</span></div>
+                            <div className="row"><span className="label">Amount Paid</span><span className="value">₹{currentPlan.amountPaid?.toLocaleString()}</span></div>
+                            <div className="row"><span className="label">Status</span><span className="value status-paid">{currentPlan.status}</span></div>
+                            <div className="row"><span className="label">Start Date</span><span className="value">{new Date(currentPlan.startDate).toLocaleDateString()}</span></div>
+                            <div className="row"><span className="label">End Date</span><span className="value">{new Date(currentPlan.endDate).toLocaleDateString()}</span></div>
+                            <div className="row"><span className="label">Duration</span><span className="value">{currentPlan.planDetails?.duration}</span></div>
+                            <div className="row full"><span className="label">Description</span><span className="value">{currentPlan.planDetails?.description}</span></div>
+                        </div>
+                        <div className="purchase-actions">
+                            <button className="purchase-close-btn" onClick={closePurchaseDetails}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

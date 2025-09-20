@@ -218,7 +218,7 @@ class OrderHistoryService {
             }
 
             const endpoint = replaceUrlParams(
-                API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_DELIVERED_ORDERS,
+                API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_DELIVERED_ORDERS_NEW,
                 { userId: targetUserId }
             );
 
@@ -234,8 +234,9 @@ class OrderHistoryService {
 
             const data = response.data;
             return {
-                success: true,
-                data: data.orders || [],
+                success: data.success || true,
+                data: data.data || [],
+                count: data.count || 0,
                 message: data.message || 'Delivered orders fetched successfully'
             };
 
@@ -259,35 +260,42 @@ class OrderHistoryService {
             id: order.orderId,
             orderNumber: order.orderId,
             date: order.createdAt,
-            status: order.orderStatus,
+            status: order.status,
             total: order.totalAmount,
-            subtotal: order.subtotal,
-            deliveryCharge: order.deliveryCharge,
-            platformFee: order.platformFee,
-            discountAmount: order.discountAmount,
+            subtotal: order.totalAmount, // Using totalAmount as subtotal since no separate subtotal field
+            deliveryCharge: 0, // Not provided in new API response
+            platformFee: order.platformFee || 0,
+            discountAmount: 0, // Not provided in new API response
             prescriptionId: order.prescriptionId,
-            paymentMethod: order.paymentMethod,
-            paymentStatus: order.paymentStatus,
-            transactionId: order.transactionId,
-            items: order.Carts.map(item => ({
-                id: item.cartId,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                manufacturer: item.MedicineProduct?.manufacturer || 'Unknown',
-                type: item.MedicineProduct?.type || 'N/A',
-                packSize: item.MedicineProduct?.packSizeLabel || 'N/A',
-                composition: item.MedicineProduct?.shortComposition || 'N/A',
-                discount: item.MedicineProduct?.discount || 0,
-                image: item.MedicineProduct?.productURLs?.[0] || null
-            })),
+            paymentMethod: 'Online Payment', // Default since not provided in response
+            paymentStatus: 'Paid', // Default since not provided in response
+            transactionId: order.paymentId || 'N/A',
+            items: [], // No items array in new API response, will be empty for now
             user: {
-                name: order.User?.name || 'Unknown',
-                email: order.User?.emailId || 'N/A',
-                userId: order.User?.userId
+                name: order.user?.name || 'Unknown',
+                email: order.user?.phone_number || 'N/A', // Using phone as email is not provided
+                userId: order.user?.userId
             },
-            estimatedDelivery: order.estimatedDeliveryDate || this.calculateEstimatedDelivery(order.createdAt),
-            actualDelivery: order.orderStatus === 'Delivered' ? order.updatedAt : null
+            vendor: {
+                name: order.vendor?.name || 'Unknown Vendor',
+                vendorId: order.vendor?.vendorId
+            },
+            deliveryAddress: {
+                houseStreet: order.deliveryAddress?.houseStreet || '',
+                addressLine1: order.deliveryAddress?.addressLine1 || '',
+                addressLine2: order.deliveryAddress?.addressLine2 || '',
+                city: order.deliveryAddress?.city || '',
+                state: order.deliveryAddress?.state || '',
+                zipCode: order.deliveryAddress?.zipCode || '',
+                country: order.deliveryAddress?.country || '',
+                addressType: order.deliveryAddress?.addressType || 'Home'
+            },
+            prescription: {
+                prescriptionId: order.prescription?.prescriptionId,
+                status: order.prescription?.status
+            },
+            estimatedDelivery: this.calculateEstimatedDelivery(order.createdAt),
+            actualDelivery: order.status === 'delivered' ? order.updatedAt : null
         };
     }
 
@@ -536,6 +544,58 @@ class OrderHistoryService {
                 photo: booking.user?.photo || ''
             }
         };
+    }
+
+    /**
+     * Get invoice for a specific order
+     * @param {string} orderId - Order ID
+     * @returns {Promise<Object>} - Response with invoice data
+     */
+    async getInvoice(orderId) {
+        try {
+            if (!orderId) {
+                throw new Error('Order ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_INVOICE,
+                { orderId: orderId }
+            );
+
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                    'Accept': 'application/pdf'
+                },
+                responseType: 'blob'
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Create a blob URL for the PDF
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+
+            return {
+                success: true,
+                data: {
+                    pdfUrl: pdfUrl,
+                    blob: blob,
+                    orderId: orderId
+                },
+                message: 'Invoice fetched successfully'
+            };
+
+        } catch (error) {
+            console.error('Error fetching invoice:', error);
+            return {
+                success: false,
+                data: null,
+                message: error.message || 'Failed to fetch invoice'
+            };
+        }
     }
 }
 

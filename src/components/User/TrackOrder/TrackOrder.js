@@ -28,30 +28,25 @@ const TrackOrder = () => {
     // Define medicine order status mapping at component level
     const medicineOrderSteps = [
         'Pending',
-        'PrescriptionVerified',
-        'Accepted',
-        'AddedItemsInCart',
-        'PaymentConfirmed',
+        'WaitingForPayment',
+        'PaymentCompleted',
         'OutForDelivery',
         'Delivered'
     ];
     
     const medicineOrderStatusMapping = {
-        'PENDING': 'Pending',
-        'PRESCRIPTION_VERIFIED': 'PrescriptionVerified',
-        'ACCEPTED': 'Accepted',
-        'ADDED_ITEMS_IN_CART': 'AddedItemsInCart',
-        'PAYMENT_CONFIRMED': 'PaymentConfirmed',
-        'OUT_FOR_DELIVERY': 'OutForDelivery',
-        'DELIVERED': 'Delivered'
+        'pending': 'Pending',
+        'waiting_for_payment': 'WaitingForPayment',
+        'payment_completed': 'PaymentCompleted',
+        'ready_to_pickup': 'PaymentCompleted', // Map ready_to_pickup to PaymentCompleted for user display
+        'out_for_delivery': 'OutForDelivery',
+        'delivered': 'Delivered'
     };
 
     const medicineOrderDisplayNames = {
         'Pending': ['Pending'],
-        'PrescriptionVerified': ['Prescription', 'Verified'],
-        'Accepted': ['Accepted'],
-        'AddedItemsInCart': ['Items', 'Added'],
-        'PaymentConfirmed': ['Payment', 'Confirmed'],
+        'WaitingForPayment': ['Waiting', 'for Payment'],
+        'PaymentCompleted': ['Payment', 'Completed'],
         'OutForDelivery': ['Out for', 'Delivery'],
         'Delivered': ['Delivered']
     };
@@ -107,7 +102,7 @@ const TrackOrder = () => {
     // Fetch medicine orders
     const fetchMedicineOrders = async () => {
         try {
-            const orders = await trackOrderService.getOngoingMedicineOrders();
+            const orders = await trackOrderService.getActiveMedicineOrders();
             setMedicineOrders(orders);
         } catch (error) {
             if (error && error.message && error.message.includes('404')) {
@@ -143,7 +138,7 @@ const TrackOrder = () => {
             const orderData = typeof data === 'string' ? JSON.parse(data) : data;
             
             // Get orderId and status from the data
-            const { orderId, productOrderId, newStatus, status } = orderData;
+            const { orderId, productOrderId, newStatus, status, totalAmount, estimatedDeliveryDate, orderType } = orderData;
             const finalOrderId = orderId || productOrderId;
             const finalStatus = newStatus || status;
 
@@ -152,73 +147,87 @@ const TrackOrder = () => {
                 return;
             }
 
-            // Check if this is a medicine order
+            let orderUpdated = false;
+            let toastShown = false;
+
+            // Check if this is a medicine order first
             setMedicineOrders(prevOrders => {
                 const medicineOrder = prevOrders.find(order => order.orderId === finalOrderId);
                 if (medicineOrder) {
                     console.log('[MedicineOrderUpdate] Updating medicine order:', {
                         orderId: finalOrderId,
-                        oldStatus: medicineOrder.orderStatus,
-                        newStatus: finalStatus
+                        oldStatus: medicineOrder.status,
+                        newStatus: finalStatus,
+                        totalAmount,
+                        estimatedDeliveryDate
                     });
                     
                     const updatedOrders = prevOrders.map(order => {
                         if (order.orderId === finalOrderId) {
                             return {
                                 ...order,
-                                orderStatus: finalStatus
+                                status: finalStatus,
+                                totalAmount: totalAmount ?? order.totalAmount,
+                                estimatedDeliveryDate: estimatedDeliveryDate ?? order.estimatedDeliveryDate
                             };
                         }
                         return order;
                     });
 
-                    // Show toast notification for medicine order
-                    addToast({
-                        type: 'success',
-                        title: 'Medicine Order Updated',
-                        message: `Order #${finalOrderId.slice(-8)} status changed to ${finalStatus}`,
-                        duration: 3000
-                    });
-
+                    orderUpdated = true;
                     return updatedOrders;
                 }
                 return prevOrders;
             });
 
-            // If not a medicine order, update product orders
+            // If medicine order was updated, show toast and return early
+            if (orderUpdated) {
+                addToast({
+                    type: 'success',
+                    title: 'Medicine Order Updated',
+                    message: `Order #${finalOrderId.slice(-8)} status changed to ${finalStatus}`,
+                    duration: 3000
+                });
+                return;
+            }
+
+            // Only update product orders if it's not a medicine order
             setOrders(prevOrders => {
                 const productOrder = prevOrders.find(order => order.orderId === finalOrderId);
                 if (productOrder) {
-                const updatedOrders = prevOrders.map(order => {
-                    if (order.orderId === finalOrderId) {
-                        const updatedOrder = {
-                            ...order,
-                            status: finalStatus,
-                            timelineSteps: trackOrderService.generateTimelineSteps(finalStatus)
-                        };
-                        const formattedOrder = trackOrderService.formatOrderData(updatedOrder);
-                        
-                        setTimeout(() => {
-                            scrollToActiveNode(finalOrderId, formattedOrder.timelineSteps);
-                        }, 100);
+                    const updatedOrders = prevOrders.map(order => {
+                        if (order.orderId === finalOrderId) {
+                            const updatedOrder = {
+                                ...order,
+                                status: finalStatus,
+                                timelineSteps: trackOrderService.generateTimelineSteps(finalStatus)
+                            };
+                            const formattedOrder = trackOrderService.formatOrderData(updatedOrder);
+                            
+                            setTimeout(() => {
+                                scrollToActiveNode(finalOrderId, formattedOrder.timelineSteps);
+                            }, 100);
 
-                        return formattedOrder;
-                    }
-                    return order;
-                });
-
-                    // Show toast notification for product order
-            addToast({
-                type: 'success',
-                        title: 'Product Order Updated',
-                        message: `Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
-                duration: 3000
+                            return formattedOrder;
+                        }
+                        return order;
                     });
 
+                    orderUpdated = true;
                     return updatedOrders;
                 }
                 return prevOrders;
             });
+
+            // Show toast for product order only if it was updated and no medicine order was found
+            if (orderUpdated && !toastShown) {
+                addToast({
+                    type: 'success',
+                    title: 'Product Order Updated',
+                    message: `Order #${finalOrderId.slice(-8)} status changed to ${trackOrderService.getStatusDisplayText(finalStatus)}`,
+                    duration: 3000
+                });
+            }
 
         } catch (error) {
             console.error('❌ Error handling order status update:', error);
@@ -268,53 +277,6 @@ const TrackOrder = () => {
         }
     }, [addToast, scrollToActiveNode]);
 
-    // Handle medicine order status updates
-    const handleMedicineOrderUpdate = useCallback((data) => {
-        try {
-            const update = typeof data === 'string' ? JSON.parse(data) : data;
-            const { orderId, status, totalAmount, estimatedDeliveryDate } = update;
-            console.log('[MedicineOrderUpdate] Received update:', {
-                orderId,
-                status,
-                totalAmount,
-                estimatedDeliveryDate
-            });
-            
-            setMedicineOrders(prevOrders => {
-                const updatedOrders = prevOrders.map(order => {
-                if (order.orderId === orderId) {
-                        console.log('[MedicineOrderUpdate] Updating order:', {
-                            before: order.orderStatus,
-                            after: status
-                        });
-                    return {
-                        ...order,
-                        orderStatus: status,
-                        totalAmount: totalAmount ?? order.totalAmount,
-                        estimatedDeliveryDate: estimatedDeliveryDate ?? order.estimatedDeliveryDate,
-                    };
-                }
-                return order;
-                });
-                return updatedOrders;
-            });
-
-            addToast({
-                type: 'success',
-                title: 'Medicine Order Updated',
-                message: `Order #${orderId?.slice(-8)} status changed to ${status}`,
-                duration: 3000
-            });
-        } catch (error) {
-            console.error('[MedicineOrderUpdate] Error:', error);
-            addToast({
-                type: 'error',
-                title: 'Update Failed',
-                message: 'Failed to update medicine order status.',
-                duration: 3000
-            });
-        }
-    }, [addToast]);
 
     // Subscribe to socket events
     useEffect(() => {
@@ -346,15 +308,6 @@ const TrackOrder = () => {
         };
     }, [subscribe, unsubscribe]);
 
-    // Subscribe to medicine order socket events
-    useEffect(() => {
-        console.log('[MedicineOrderUpdate] Subscribing to MedicineOrderUpdate event');
-        subscribe('MedicineOrderUpdate', handleMedicineOrderUpdate);
-        return () => {
-            console.log('[MedicineOrderUpdate] Unsubscribing from MedicineOrderUpdate event');
-            unsubscribe('MedicineOrderUpdate', handleMedicineOrderUpdate);
-        };
-    }, [subscribe, unsubscribe, handleMedicineOrderUpdate]);
 
     // Initial orders fetch
     useEffect(() => {
@@ -472,16 +425,19 @@ const TrackOrder = () => {
         <div className="track-order-container">
             <ToastContainer toasts={toasts} removeToast={removeToast} />
             <div className="track-order-header">
-                <button 
-                    className="back-icon-button"
-                    onClick={() => navigate(-1)}
-                    title="Back"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <h1>Track Your Orders</h1>
+                <div className="header-content">
+                    <button 
+                        className="back-icon-button"
+                        onClick={() => navigate(-1)}
+                        title="Back"
+                        aria-label="Go back"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h1>Track Your Orders</h1>
+                </div>
             </div>
 
             {/* Ambulance Bookings Timeline */}
@@ -677,12 +633,12 @@ const TrackOrder = () => {
                 <div className="orders-grid">
                     {medicineOrders.map((order) => {
                         // Add debug logging for initial render
-                        const normalizedStatus = medicineOrderStatusMapping[order.orderStatus] || order.orderStatus;
+                        const normalizedStatus = medicineOrderStatusMapping[order.status] || order.status;
                         const currentStepIndex = medicineOrderSteps.indexOf(normalizedStatus);
                         
                         console.log('[MedicineOrder] Rendering order:', {
                             orderId: order.orderId,
-                            status: order.orderStatus,
+                            status: order.status,
                             normalizedStatus,
                             timelineSteps: medicineOrderSteps,
                             currentStepIndex
@@ -743,9 +699,18 @@ const TrackOrder = () => {
                                     </div>
                                 </div>
                                 <div className="order-items">
-                                    {order.totalAmount && <span className="item-price">Total: ₹{order.totalAmount}</span>}
+                                    <h4>Medical Store: {order.vendor?.name || 'N/A'}</h4>
+                                    <div className="item-row">
+                                        <div className="item-info">
+                                            <span className="item-name">Order ID: {order.orderId}</span>
+                                            <span className="item-name">Prescription Status: {order.prescription?.status || 'N/A'}</span>
+                                        </div>
+                                        <div className="item-details">
+                                            <span className="item-price">Total: ₹{order.totalAmount}</span>
+                                        </div>
+                                    </div>
                                     <div className="cart-items-list">
-                                        {medicineOrderCartItems[order.orderId]?.length > 0 ? (
+                                        {medicineOrderCartItems[order.orderId]?.length > 0 && (
                                             medicineOrderCartItems[order.orderId].map(item => (
                                                 <div key={item.cartId} className="item-row">
                                                     <div className="item-info">
@@ -757,8 +722,6 @@ const TrackOrder = () => {
                                                     </div>
                                                 </div>
                                             ))
-                                        ) : (
-                                            <div className="no-cart-items">No items found for this order.</div>
                                         )}
                                     </div>
                                 </div>

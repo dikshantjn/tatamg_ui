@@ -2,79 +2,102 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
-    Card,
-    CardContent,
     Avatar,
-    IconButton,
-    useTheme,
-    useMediaQuery,
     Container,
-    Chip,
-    Rating
+    Chip
 } from '@mui/material';
 import {
-    ArrowBackIos,
-    ArrowForwardIos,
     FormatQuote,
     Verified
 } from '@mui/icons-material';
-import female1 from '../../../assets/Testimonial female face 1.jpg';
-import male1 from '../../../assets/Testimonial male face 1.jpg';
-import female2 from '../../../assets/Testimonial female face 2.jpg';
-import male2 from '../../../assets/Testimonial male face 3.jpg';
+// Removed unused legacy testimonial assets
+import drVishal from '../../../assets/doctorsPic/DrVishalBhandari.jpeg';
+import drPiyush from '../../../assets/doctorsPic/Piyush-Lodha.jpg';
+import drSachin from '../../../assets/doctorsPic/Dr.sachin-lakade.png';
+import drSweta from '../../../assets/doctorsPic/Dr.-Sweta-Lunkad.webp';
+import drRajeev from '../../../assets/doctorsPic/DrRajeevDoshi.jpeg';
+import drAmrut from '../../../assets/doctorsPic/Dr.AmrutOswal.jpg';
 
 function Testimonials() {
-    const theme = useTheme();
 
-  const testimonialsData = [
+  const mobileTestimonials = [
     {
-      name: 'Dr. Sarah Johnson',
-            designation: 'Senior Healthcare Advisor',
-            credentials: 'MBBS, MD',
-      text: 'With over 15 years of experience in healthcare consulting, I\'ve seen how this platform revolutionizes access to quality medical care. The integration of technology with healthcare delivery is truly remarkable.',
-      image: female1,
-            rating: 5,
-            specialty: 'Healthcare Consulting'
+      name: 'Dr. Vishal Bhandari',
+      designation: 'Anesthesiologist',
+      credentials: 'MBBS, MD (Internal Medicine)',
+      text: 'A seasoned anesthesiologist renowned in Pune region for anesthesia expertise. Known for his calm presence in stressful OR and ICU settings, supporting safe surgical outcomes and patient comfort.',
+      image: drVishal,
+      rating: 5,
+      specialty: 'Anesthesiology'
     },
     {
-      name: 'Dr. Michael Chen',
-            designation: 'Medical Technology Advisor',
-            credentials: 'MD, MPH',
-      text: 'The platform\'s commitment to patient safety and data security is exemplary. Their innovative approach to telemedicine and healthcare delivery sets new standards in the industry.',
-      image: male1,
-            rating: 5,
-            specialty: 'Medical Technology'
+      name: 'Dr. Piyush Lodha',
+      designation: 'Endocrinologist',
+      credentials: 'MBBS, MD – Medicine, DM – Endocrinology',
+      text: 'A distinguished endocrinologist treating hormonal disorders across ages—from diabetes and thyroid to growth and adrenal diseases. Has strong academic credentials with award-winning conference papers and integrates advanced tools for diabetes management.',
+      image: drPiyush,
+      rating: 5,
+      specialty: 'Endocrinology'
     },
     {
-      name: 'Dr. Priya Sharma',
-            designation: 'Wellness & Preventive Care Advisor',
-            credentials: 'MBBS, DNB',
-      text: 'What sets this platform apart is its holistic approach to healthcare. From preventive care to specialized treatments, the comprehensive coverage ensures patients receive the best possible care.',
-      image: female2,
-            rating: 5,
-            specialty: 'Preventive Care'
+      name: 'Dr. Sachin Lakade',
+      designation: 'Cardiologist',
+      credentials: 'MBBS, MD – General Medicine, DNB – Cardiology',
+      text: 'A well-established cardiologist delivering comprehensive cardiac care, from preventive screening to advanced procedures like angioplasty and pacemaker management. Known for his patient-centric approach and precision in diagnosis.',
+      image: drSachin,
+      rating: 5,
+      specialty: 'Cardiology'
     },
     {
-      name: 'Dr. James Wilson',
-            designation: 'Healthcare Policy Advisor',
-            credentials: 'MD, PhD',
-      text: 'The platform\'s ability to connect patients with specialized care while maintaining affordability is impressive. Their focus on quality and accessibility makes healthcare more democratic.',
-      image: male2,
-            rating: 5,
-            specialty: 'Healthcare Policy'
+      name: 'Dr. Sweta Lunkad',
+      designation: 'Haematologist',
+      credentials: 'MBBS, DNB – General Medicine, DM – Clinical Haematology',
+      text: 'A leading haematologist performing advanced bone marrow transplants including autologous, allogeneic, MUD and haploidentical types. Recognized for expertise in complex blood disorders and compassionate patient care.',
+      image: drSweta,
+      rating: 5,
+      specialty: 'Haematology'
+    },
+    {
+      name: 'Dr. Rajeev Doshi',
+      designation: 'General Surgeon, Laparoscopic Surgeon, Proctologist',
+      credentials: 'MBBS, MS – General Surgery, DNB – General Surgery',
+      text: 'An accomplished surgeon specializing in laparoscopic, gastrointestinal, and proctology procedures. Known for precise minimally invasive techniques and a track record of effective treatment for complex surgical cases.',
+      image: drRajeev,
+      rating: 5,
+      specialty: 'General Surgery'
+    },
+    {
+      name: 'Dr. Amrut Oswal',
+      designation: 'Orthopaedic Surgeon',
+      credentials: 'MBBS, Diploma in Orthopaedics, MS – Orthopaedics',
+      text: 'A veteran orthopedic surgeon specializing in joint replacement, spinal surgeries, and complex fracture management. Recognized for surgical mastery and dedication to restoring mobility.',
+      image: drAmrut,
+      rating: 5,
+      specialty: 'Orthopaedics'
     },
   ];
 
+  const tabletTestimonials = mobileTestimonials; // same data for now
+
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobileView, setIsMobileView] = useState(true);
+
+  useEffect(() => {
+    const onResize = () => {
+      setIsMobileView(window.innerWidth < 900);
+    };
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   const [isAutoScrollPaused, setIsAutoScrollPaused] = useState(false);
 
-  const handleNextClick = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex === testimonialsData.length - 1 ? 0 : prevIndex + 1));
-  }, [testimonialsData.length]);
+  // Choose dataset (mobile/tablet) first so we can use its length in callbacks
+  const data = isMobileView ? mobileTestimonials : tabletTestimonials;
 
-  const handlePrevClick = () => {
-    setCurrentIndex((prevIndex) => (prevIndex === 0 ? testimonialsData.length - 1 : prevIndex - 1));
-  };
+  const handleNextClick = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex === data.length - 1 ? 0 : prevIndex + 1));
+  }, [data.length]);
 
   const handleDotClick = (index) => {
     setCurrentIndex(index);
@@ -97,12 +120,14 @@ function Testimonials() {
     };
   }, [isAutoScrollPaused, handleNextClick]);
 
-    const currentTestimonial = testimonialsData[currentIndex];
+  const currentTestimonial = data[currentIndex % data.length];
 
   return (
         <Box
             sx={{
-                py: { xs: 4, md: 6 },
+                width: '100vw',
+                marginLeft: 'calc(-50vw + 50%)',
+                py: { xs: 3, md: 4 },
                 backgroundColor: 'background.default',
                 position: 'relative',
                 overflow: 'hidden'
@@ -126,8 +151,8 @@ function Testimonials() {
                 <Box
                     sx={{
                         textAlign: 'center',
-                        mb: 5,
-                        px: { xs: 2, md: 0 }
+                        mb: 3,
+                        px: { xs: 1.5, md: 0 }
                     }}
                 >
                     <Typography
@@ -135,8 +160,8 @@ function Testimonials() {
                         sx={{
                             fontWeight: 700,
                             color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1.75rem', md: '2.5rem' }
+                            mb: 1.5,
+                            fontSize: { xs: '1.5rem', md: '2rem' }
                         }}
                     >
                         Our Healthcare Advisors
@@ -147,215 +172,142 @@ function Testimonials() {
                             color: 'text.secondary',
                             maxWidth: 600,
                             mx: 'auto',
-                            fontSize: { xs: '1rem', md: '1.125rem' }
+                            fontSize: { xs: '0.9rem', md: '1rem' }
                         }}
                     >
                         Expert insights from leading healthcare professionals who trust and recommend our platform
                     </Typography>
                 </Box>
 
-                {/* Testimonial Card */}
+                {/* Testimonial Panel */}
                 <Box
                     sx={{
                         position: 'relative',
                         maxWidth: 800,
                         mx: 'auto',
-                        px: { xs: 2, md: 0 }
+                        px: { xs: 2, md: 3 },
+                        py: { xs: 2, md: 3 },
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'grey.200',
+                        backgroundColor: 'white',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)'
                     }}
-      onMouseEnter={() => setIsAutoScrollPaused(true)}
-      onMouseLeave={() => setIsAutoScrollPaused(false)}
+                    onMouseEnter={() => setIsAutoScrollPaused(true)}
+                    onMouseLeave={() => setIsAutoScrollPaused(false)}
                 >
-                    <Card
-                        sx={{
-                            borderRadius: 4,
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-                            border: '1px solid',
-                            borderColor: 'grey.200',
-                            position: 'relative',
-                            overflow: 'visible',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
-                                transform: 'translateY(-2px)'
-                            }
-                        }}
-                    >
-                        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-                            {/* Quote Icon */}
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    top: -20,
-                                    left: 40,
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: '50%',
-                                    backgroundColor: 'primary.main',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    color: 'white'
-                                }}
-                            >
-                                <FormatQuote sx={{ fontSize: 20 }} />
+                    {/* Doctor Profile Section */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mb: 3 }}>
+                        {/* Avatar */}
+                        <Box sx={{ position: 'relative' }}>
+                            <Avatar 
+                                src={currentTestimonial.image} 
+                                alt={currentTestimonial.name} 
+                                sx={{ 
+                                    width: { xs: 80, sm: 100 }, 
+                                    height: { xs: 80, sm: 100 }, 
+                                    border: '3px solid', 
+                                    borderColor: 'primary.main',
+                                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                                }} 
+                            />
+                            <Box sx={{ 
+                                position: 'absolute', 
+                                bottom: -2, 
+                                right: -2, 
+                                backgroundColor: 'success.main', 
+                                borderRadius: '50%', 
+                                width: 24, 
+                                height: 24, 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                color: 'white',
+                                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                            }}>
+                                <Verified sx={{ fontSize: 12 }} />
                             </Box>
+                        </Box>
 
-                            {/* Testimonial Content */}
-                            <Box sx={{ mt: 2 }}>
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        fontSize: { xs: '1rem', md: '1.125rem' },
-                                        lineHeight: 1.7,
-                                        color: 'text.primary',
-                                        fontStyle: 'italic',
-                                        mb: 4,
-                                        textAlign: 'center'
-                                    }}
-                                >
-                                    "{currentTestimonial.text}"
-                                </Typography>
+                        {/* Doctor Details */}
+                        <Box sx={{ textAlign: { xs: 'center', sm: 'left' }, flex: 1 }}>
+                            <Typography sx={{ 
+                                fontWeight: 800, 
+                                color: 'text.primary', 
+                                mb: 0.5, 
+                                fontSize: { xs: '1.1rem', sm: '1.3rem' }
+                            }}>
+                                {currentTestimonial.name}
+                            </Typography>
+                            <Typography sx={{ 
+                                color: 'primary.main', 
+                                fontWeight: 700, 
+                                mb: 0.5, 
+                                fontSize: { xs: '0.9rem', sm: '1rem' }
+                            }}>
+                                {currentTestimonial.designation}
+                            </Typography>
+                            <Typography variant="body2" sx={{ 
+                                color: 'text.secondary', 
+                                display: 'block', 
+                                mb: 1, 
+                                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                lineHeight: 1.4
+                            }}>
+                                {currentTestimonial.credentials}
+                            </Typography>
+                            <Chip 
+                                label={currentTestimonial.specialty} 
+                                size="small" 
+                                sx={{ 
+                                    backgroundColor: 'primary.50', 
+                                    color: 'primary.main', 
+                                    fontWeight: 700, 
+                                    fontSize: { xs: '0.7rem', sm: '0.75rem' }, 
+                                    height: 24,
+                                    border: '1px solid',
+                                    borderColor: 'primary.200'
+                                }} 
+                            />
+                        </Box>
+                    </Box>
 
-                                {/* Doctor Info */}
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexDirection: { xs: 'column', sm: 'row' },
-                                        gap: 2
-                                    }}
-                                >
-                                    {/* Avatar */}
-                                    <Box sx={{ position: 'relative' }}>
-                                        <Avatar
-                                            src={currentTestimonial.image}
-                                            alt={currentTestimonial.name}
-                                            sx={{
-                                                width: 80,
-                                                height: 80,
-                                                border: '3px solid',
-                                                borderColor: 'primary.main'
-                                            }}
-                                        />
-                                        <Box
-                                            sx={{
-                                                position: 'absolute',
-                                                bottom: -2,
-                                                right: -2,
-                                                backgroundColor: 'success.main',
-                                                borderRadius: '50%',
-                                                width: 24,
-                                                height: 24,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                color: 'white'
-                                            }}
-                                        >
-                                            <Verified sx={{ fontSize: 14 }} />
-                                        </Box>
-                                    </Box>
+                    {/* Quote Section */}
+                    <Box sx={{ position: 'relative' }}>
+                        {/* Quote Icon */}
+                        <Box sx={{ 
+                            position: 'absolute', 
+                            top: -8, 
+                            left: 16, 
+                            width: 28, 
+                            height: 28, 
+                            borderRadius: '50%', 
+                            backgroundColor: 'primary.main', 
+                            color: 'white', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                        }}>
+                            <FormatQuote sx={{ fontSize: 16 }} />
+                        </Box>
 
-                                    {/* Doctor Details */}
-                                    <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
-                                        <Typography
-                                            variant="h6"
-                                            sx={{
-                                                fontWeight: 700,
-                                                color: 'text.primary',
-                                                mb: 0.5
-                                            }}
-                                        >
-                                            {currentTestimonial.name}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'primary.main',
-                                                fontWeight: 600,
-                                                mb: 0.5
-                                            }}
-                                        >
-                                            {currentTestimonial.designation}
-                                        </Typography>
-                                        <Typography
-                                            variant="caption"
-                                            sx={{
-                                                color: 'text.secondary',
-                                                display: 'block',
-                                                mb: 1
-                                            }}
-                                        >
-                                            {currentTestimonial.credentials}
-                                        </Typography>
-                                        
-                                        {/* Specialty Chip */}
-                                        <Chip
-                                            label={currentTestimonial.specialty}
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: 'primary.50',
-                                                color: 'primary.main',
-                                                fontWeight: 600
-                                            }}
-                                        />
-                                    </Box>
+                        <Typography
+                            sx={{
+                                fontSize: { xs: '1rem', md: '1.1rem' },
+                                lineHeight: 1.7,
+                                color: 'text.primary',
+                                fontStyle: 'italic',
+                                textAlign: 'center',
+                                pt: 1,
+                                px: 1,
+                                fontWeight: 500
+                            }}
+                        >
+                            "{currentTestimonial.text}"
+                        </Typography>
+                    </Box>
 
-                                    {/* Rating */}
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                        <Rating
-                                            value={currentTestimonial.rating}
-                                            readOnly
-                                            size="small"
-                                            sx={{ color: 'warning.main' }}
-                                        />
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ color: 'text.secondary', fontWeight: 600 }}
-                                        >
-                                            {currentTestimonial.rating}.0
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
-
-                    {/* Navigation Arrows */}
-                    <IconButton
-                        onClick={handlePrevClick}
-                        sx={{
-                            position: 'absolute',
-                            left: { xs: -10, md: -20 },
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            backgroundColor: 'white',
-                            boxShadow: 2,
-                            '&:hover': {
-                                backgroundColor: 'grey.50'
-                            }
-                        }}
-                    >
-                        <ArrowBackIos />
-                    </IconButton>
-
-                    <IconButton
-                        onClick={handleNextClick}
-                        sx={{
-                            position: 'absolute',
-                            right: { xs: -10, md: -20 },
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            backgroundColor: 'white',
-                            boxShadow: 2,
-                            '&:hover': {
-                                backgroundColor: 'grey.50'
-                            }
-                        }}
-                    >
-                        <ArrowForwardIos />
-                    </IconButton>
                 </Box>
 
                 {/* Dots Indicator */}
@@ -364,49 +316,27 @@ function Testimonials() {
                         display: 'flex',
                         justifyContent: 'center',
                         gap: 1,
-                        mt: 4
+                        mt: 3
                     }}
                 >
-        {testimonialsData.map((_, index) => (
+                    {data.map((_, index) => (
                         <Box
-            key={index}
-            onClick={() => handleDotClick(index)}
+                            key={index}
+                            onClick={() => handleDotClick(index)}
                             sx={{
-                                width: 12,
-                                height: 12,
+                                width: 10,
+                                height: 10,
                                 borderRadius: '50%',
                                 backgroundColor: currentIndex === index ? 'primary.main' : 'grey.300',
                                 cursor: 'pointer',
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
-                                    backgroundColor: currentIndex === index ? 'primary.dark' : 'grey.400'
+                                    backgroundColor: currentIndex === index ? 'primary.dark' : 'grey.400',
+                                    transform: 'scale(1.1)'
                                 }
                             }}
                         />
                     ))}
-                </Box>
-
-                {/* Progress Bar */}
-                <Box
-                    sx={{
-                        width: '100%',
-                        maxWidth: 200,
-                        height: 3,
-                        backgroundColor: 'grey.200',
-                        borderRadius: 2,
-                        mx: 'auto',
-                        mt: 3,
-                        overflow: 'hidden'
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: `${((currentIndex + 1) / testimonialsData.length) * 100}%`,
-                            height: '100%',
-                            backgroundColor: 'primary.main',
-                            transition: 'width 0.3s ease'
-                        }}
-                    />
                 </Box>
             </Container>
         </Box>

@@ -3,20 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
-    Card,
-    CardContent,
-    IconButton,
     useTheme,
     useMediaQuery,
-    Container,
     Stack,
     Button,
-    Chip,
-    Grid
+    Chip
 } from '@mui/material';
 import {
-    ArrowForwardIos,
-    ArrowBackIos,
     LocalHospital,
     LocalShipping,
     LocalPharmacy,
@@ -27,46 +20,14 @@ import {
 } from '@mui/icons-material';
 
 function ServicesAndOffers() {
-    const scrollRef = useRef(null);
-    const [showLeftButton, setShowLeftButton] = useState(false);
-    const [showRightButton, setShowRightButton] = useState(true);
+    const trackRef = useRef(null);
+    const [isPaused, setIsPaused] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const navigate = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-    const handleScroll = () => {
-        if (scrollRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-            setShowLeftButton(scrollLeft > 0);
-            setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-    };
-
-    useEffect(() => {
-        const scrollElement = scrollRef.current;
-        if (scrollElement) {
-            scrollElement.addEventListener('scroll', handleScroll);
-            handleScroll();
-            return () => scrollElement.removeEventListener('scroll', handleScroll);
-        }
-    }, []);
-
-    const scroll = (direction) => {
-        if (scrollRef.current) {
-            const scrollAmount = scrollRef.current.clientWidth / 2;
-            scrollRef.current.scrollBy({
-                left: direction === 'left' ? -scrollAmount : scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-    };
-
-    const handleNavigation = (path, e) => {
-        if (e) {
-            e.preventDefault();
-        }
-        navigate(path);
-    };
+    const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMd = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    // const isLgUp = useMediaQuery(theme.breakpoints.up('md'));
 
     const servicesAndOffers = [
         {
@@ -146,384 +107,156 @@ function ServicesAndOffers() {
         }
     ];
 
+    const itemsPerView = isXs ? 1 : isMd ? 2 : 3;
+    const maxIndex = Math.max(0, servicesAndOffers.length - itemsPerView);
+
+    useEffect(() => {
+        if (currentIndex > maxIndex) {
+            setCurrentIndex(0);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemsPerView]);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            if (!isPaused) {
+                setCurrentIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+            }
+        }, 4000);
+        return () => clearInterval(timer);
+    }, [isPaused, maxIndex]);
+
+
+    const handleNavigation = (path, e) => {
+        if (e) {
+            e.preventDefault();
+        }
+        navigate(path);
+    };
+
+    
+
     return (
         <Box
             sx={{
-                py: { xs: 4, md: 6 },
+                width: '100vw',
+                marginLeft: 'calc(-50vw + 50%)',
+                py: { xs: 2.5, md: 3 },
                 backgroundColor: 'grey.50',
                 position: 'relative'
             }}
         >
-            <Container maxWidth="xl">
-                {/* Section Header */}
-                <Box
+            {/* Section Header */}
+            <Box sx={{ mb: 1.5, px: { xs: 1.5, sm: 2, md: 3 } }}>
+                <Typography
                     sx={{
-                        textAlign: 'center',
-                        mb: 5,
-                        px: { xs: 2, md: 0 }
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        fontSize: { xs: '1.1rem', md: '1.3rem' }
                     }}
                 >
-                    <Typography
-                        variant="h3"
+                    Services & Offers
+                </Typography>
+            </Box>
+
+            {/* Carousel (no cards) */}
+            <Box
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+                sx={{ position: 'relative' }}
+            >
+
+                {/* Track */}
+                <Box sx={{ overflow: 'hidden', px: { xs: 0.5, sm: 1 }, py: 1 }}>
+                    <Box
+                        ref={trackRef}
                         sx={{
-                            fontWeight: 700,
-                            color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1.75rem', md: '2.5rem' }
+                            display: 'flex',
+                            width: `${(100 / itemsPerView) * servicesAndOffers.length}%`,
+                            transform: `translateX(-${currentIndex * (100 / servicesAndOffers.length)}%)`,
+                            transition: 'transform 600ms cubic-bezier(0.4, 0, 0.2, 1)'
                         }}
                     >
-                        Services & Offers
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        sx={{
-                            color: 'text.secondary',
-                            maxWidth: 600,
-                            mx: 'auto',
-                            fontSize: { xs: '1rem', md: '1.125rem' }
-                        }}
-                    >
-                        Discover our healthcare services and exclusive offers designed for your wellness
-                    </Typography>
-                </Box>
-
-                {/* Mobile Grid View */}
-                {isMobile && (
-                    <Grid container spacing={3} sx={{ px: 2 }}>
-                        {servicesAndOffers.map((item) => (
-                            <Grid item xs={12} sm={6} key={item.id}>
-                                <Card
-                                    sx={{
-                                        height: '100%',
-                                        borderRadius: 3,
-                                        transition: 'all 0.3s ease',
-                                        cursor: 'pointer',
-                                        border: '1px solid',
-                                        borderColor: 'grey.200',
-                                        position: 'relative',
-                                        overflow: 'visible',
-                                        '&:hover': {
-                                            transform: 'translateY(-4px)',
-                                            boxShadow: `0 8px 32px ${item.color}20`,
-                                            borderColor: item.color
-                                        }
-                                    }}
-                                    onClick={(e) => handleNavigation(item.link, e)}
-                                >
-                                    <CardContent sx={{ p: 3, textAlign: 'center', height: '100%' }}>
-                                        {/* Badge */}
-                                        <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
-                                            <Chip
-                                                label={item.badge}
-                                                size="small"
-                                                color={item.badgeColor}
-                                                sx={{ fontWeight: 600 }}
-                                            />
-                                        </Box>
-
-                                        {/* Icon */}
-                                        <Box
-                                            sx={{
-                                                width: 64,
-                                                height: 64,
-                                                borderRadius: 2,
-                                                backgroundColor: `${item.color}15`,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                mx: 'auto',
-                                                mb: 2
-                                            }}
-                                        >
-                                            {item.icon}
-                                        </Box>
-
-                                        {/* Content */}
-                                        <Typography
-                                            variant="h6"
-                                            sx={{
-                                                fontWeight: 700,
-                                                mb: 1,
-                                                color: 'text.primary'
-                                            }}
-                                        >
-                                            {item.title}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'text.secondary',
-                                                mb: 3,
-                                                lineHeight: 1.5
-                                            }}
-                                        >
-                                            {item.description}
-                                        </Typography>
-
-                                        {/* Time Left for Offers */}
-                                        {item.timeLeft && (
-                                            <Stack
-                                                direction="row"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                spacing={0.5}
-                                                sx={{ mb: 2 }}
-                                            >
-                                                <AccessTime sx={{ fontSize: 14, color: 'warning.main' }} />
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        color: 'warning.main',
-                                                        fontWeight: 600
-                                                    }}
-                                                >
-                                                    {item.timeLeft}
-                                                </Typography>
-                                            </Stack>
-                                        )}
-
-                                        {/* CTA Button */}
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: item.color,
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                '&:hover': {
-                                                    backgroundColor: item.color,
-                                                    opacity: 0.9
-                                                }
-                                            }}
-                                        >
-                                            {item.cta}
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        ))}
-                    </Grid>
-                )}
-
-                {/* Desktop Horizontal Scroll View */}
-                {!isMobile && (
-                    <Box sx={{ position: 'relative', px: { xs: 2, md: 0 } }}>
-                        {/* Left Scroll Button */}
-                        {showLeftButton && (
-                            <IconButton
-                                onClick={() => scroll('left')}
+                        {servicesAndOffers.map((item, idx) => (
+                            <Box
+                                key={item.id}
+                                onClick={(e) => handleNavigation(item.link, e)}
                                 sx={{
-                                    position: 'absolute',
-                                    left: -8,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    zIndex: 10,
-                                    backgroundColor: 'white',
-                                    boxShadow: 2,
-                                    '&:hover': {
-                                        backgroundColor: 'grey.50'
-                                    }
+                                    flex: `0 0 ${100 / servicesAndOffers.length}%`,
+                                    boxSizing: 'border-box',
+                                    px: { xs: 0.5, sm: 1 }
                                 }}
                             >
-                                <ArrowBackIos />
-                            </IconButton>
-                        )}
-
-                        {/* Cards Container */}
-                        <Box
-                            ref={scrollRef}
-                            sx={{
-                                display: 'flex',
-                                gap: 3,
-                                overflowX: 'auto',
-                                scrollbarWidth: 'none',
-                                '&::-webkit-scrollbar': { display: 'none' },
-                                pb: 2,
-                                scrollSnapType: 'x mandatory'
-                            }}
-                        >
-                            {servicesAndOffers.map((item) => (
-                                <Card
-                                    key={item.id}
+                                <Box
                                     sx={{
-                                        minWidth: { xs: 280, md: 320 },
-                                        maxWidth: { xs: 280, md: 320 },
-                                        borderRadius: 3,
-                                        transition: 'all 0.3s ease',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                        justifyContent: 'space-between',
+                                        gap: 1,
+                                        height: { xs: 120, sm: 130, md: 140 },
+                                        px: { xs: 1.5, sm: 2, md: 2 },
+                                        py: { xs: 1.5, sm: 2 },
+                                        background: `${item.color}10`,
+                                        border: `1px solid ${item.color}25`,
+                                        borderRadius: 2,
                                         cursor: 'pointer',
-                                        border: '1px solid',
-                                        borderColor: 'grey.200',
-                                        position: 'relative',
-                                        overflow: 'visible',
-                                        scrollSnapAlign: 'start',
-                                        '&:hover': {
-                                            transform: 'translateY(-8px)',
-                                            boxShadow: `0 8px 32px ${item.color}20`,
-                                            borderColor: item.color
+                                        transition: 'all 0.25s ease',
+                                        '&:hover': { 
+                                            transform: 'translateY(-2px)', 
+                                            boxShadow: `0 6px 16px ${item.color}20`,
+                                            borderTopColor: 'transparent'
                                         }
                                     }}
-                                    onClick={(e) => handleNavigation(item.link, e)}
                                 >
-                                    <CardContent sx={{ p: 3, textAlign: 'center', height: '100%' }}>
-                                        {/* Badge */}
-                                        <Box sx={{ position: 'absolute', top: 12, right: 12 }}>
-                                            <Chip
-                                                label={item.badge}
-                                                size="small"
-                                                color={item.badgeColor}
-                                                sx={{ fontWeight: 600 }}
-                                            />
+                                    <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
+                                        <Box sx={{ width: 32, height: 32, borderRadius: 1.5, backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {React.cloneElement(item.icon, { sx: { fontSize: 18 } })}
                                         </Box>
-
-                                        {/* Icon */}
-                                        <Box
-                                            sx={{
-                                                width: 64,
-                                                height: 64,
-                                                borderRadius: 2,
-                                                backgroundColor: `${item.color}15`,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                mx: 'auto',
-                                                mb: 2
-                                            }}
-                                        >
-                                            {item.icon}
-                                        </Box>
-
-                                        {/* Content */}
-                                        <Typography
-                                            variant="h6"
-                                            sx={{
-                                                fontWeight: 700,
-                                                mb: 1,
-                                                color: 'text.primary'
-                                            }}
-                                        >
-                                            {item.title}
-                                        </Typography>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: 'text.secondary',
-                                                mb: 3,
-                                                lineHeight: 1.5
-                                            }}
-                                        >
-                                            {item.description}
-                                        </Typography>
-
-                                        {/* Time Left for Offers */}
+                                        <Chip label={item.badge} color={item.badgeColor} size="small" sx={{ fontWeight: 700, fontSize: '0.7rem', height: 20 }} />
                                         {item.timeLeft && (
-                                            <Stack
-                                                direction="row"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                spacing={0.5}
-                                                sx={{ mb: 2 }}
-                                            >
-                                                <AccessTime sx={{ fontSize: 14, color: 'warning.main' }} />
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        color: 'warning.main',
-                                                        fontWeight: 600
-                                                    }}
-                                                >
+                                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ ml: 'auto' }}>
+                                                <AccessTime sx={{ fontSize: 12, color: 'warning.main' }} />
+                                                <Typography variant="caption" sx={{ color: 'warning.main', fontWeight: 700, fontSize: '0.65rem' }}>
                                                     {item.timeLeft}
                                                 </Typography>
                                             </Stack>
                                         )}
-
-                                        {/* CTA Button */}
-                                        <Button
-                                            variant="contained"
-                                            size="small"
-                                            sx={{
-                                                backgroundColor: item.color,
-                                                color: 'white',
-                                                fontWeight: 600,
-                                                '&:hover': {
-                                                    backgroundColor: item.color,
-                                                    opacity: 0.9
-                                                }
-                                            }}
-                                        >
-                                            {item.cta}
-                                        </Button>
-                                    </CardContent>
-
-                                    {/* Background Decoration */}
-                                    <Box
-                                        sx={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            right: 0,
-                                            width: '100%',
-                                            height: '100%',
-                                            opacity: 0.02,
-                                            background: `radial-gradient(circle at 80% 20%, ${item.color} 0%, transparent 50%)`,
-                                            borderRadius: 3,
-                                            pointerEvents: 'none'
+                                    </Stack>
+                                    <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '0.9rem', md: '1rem' }, lineHeight: 1.2 }}>
+                                        {item.title}
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{ 
+                                            borderColor: item.color, 
+                                            color: item.color, 
+                                            fontWeight: 700, 
+                                            textTransform: 'none', 
+                                            fontSize: '0.75rem',
+                                            py: 0.5,
+                                            px: 1.5,
+                                            '&:hover': { backgroundColor: `${item.color}20`, borderColor: item.color },
+                                            mt: 'auto'
                                         }}
-                                    />
-                                </Card>
-                            ))}
-                        </Box>
-
-                        {/* Right Scroll Button */}
-                        {showRightButton && (
-                            <IconButton
-                                onClick={() => scroll('right')}
-                                sx={{
-                                    position: 'absolute',
-                                    right: -8,
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    zIndex: 10,
-                                    backgroundColor: 'white',
-                                    boxShadow: 2,
-                                    '&:hover': {
-                                        backgroundColor: 'grey.50'
-                                    }
-                                }}
-                            >
-                                <ArrowForwardIos />
-                            </IconButton>
-                        )}
+                                    >
+                                        {item.cta}
+                                    </Button>
+                                </Box>
+                            </Box>
+                        ))}
                     </Box>
-                )}
-
-                {/* View All Button */}
-                <Box
-                    sx={{
-                        textAlign: 'center',
-                        mt: 5
-                    }}
-                >
-                    <Button
-                        variant="outlined"
-                        size="large"
-                        endIcon={<ArrowForwardIos />}
-                        onClick={(e) => handleNavigation('/offers', e)}
-                        sx={{
-                            borderColor: 'primary.main',
-                            color: 'primary.main',
-                            px: 4,
-                            py: 1.5,
-                            fontSize: '1rem',
-                            fontWeight: 600,
-                            '&:hover': {
-                                backgroundColor: 'primary.50',
-                                borderColor: 'primary.main'
-                            }
-                        }}
-                    >
-                        View All Services & Offers
-                    </Button>
                 </Box>
-            </Container>
+
+                {/* Dots */}
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.75, mt: 1.5 }}>
+                    {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+                        <Box key={i} onClick={() => setCurrentIndex(i)} sx={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: i === currentIndex ? 'text.primary' : 'grey.400', cursor: 'pointer' }} />
+                    ))}
+                </Box>
+            </Box>
+
         </Box>
     );
 }

@@ -3,26 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
-    Card,
-    CardContent,
-    CardMedia,
-    IconButton,
-    useTheme,
-    useMediaQuery,
-    Container,
     Stack,
     Button,
     Chip
 } from '@mui/material';
 import {
-    ArrowForward,
-    ArrowBack,
     LocalPharmacy,
     HealthAndSafety,
     Spa,
     Favorite,
     MonitorHeart,
-    ChildCare
+    ChildCare,
 } from '@mui/icons-material';
 import category1 from '../../../assets/category1.jpg';
 import category2 from '../../../assets/category2.jpg';
@@ -30,10 +21,7 @@ import category3 from '../../../assets/category3.jpg';
 
 function SearchByCategory() {
     const scrollRef = useRef(null);
-    const [showLeftButton, setShowLeftButton] = useState(false);
-    const [showRightButton, setShowRightButton] = useState(true);
     const navigate = useNavigate();
-    const theme = useTheme();
 
     const categories = [
         {
@@ -86,37 +74,8 @@ function SearchByCategory() {
         }
     ];
 
-    const handleScroll = () => {
-        if (scrollRef.current) {
-            const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-            setShowLeftButton(scrollLeft > 0);
-            setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
-        }
-    };
 
-    const scroll = (direction) => {
-        if (scrollRef.current) {
-            const scrollAmount = direction === 'left' ? -240 : 240;
-            scrollRef.current.scrollBy({
-                left: scrollAmount,
-                behavior: 'smooth'
-            });
-        }
-    };
 
-    useEffect(() => {
-        const scrollContainer = scrollRef.current;
-        if (scrollContainer) {
-            scrollContainer.addEventListener('scroll', handleScroll);
-            handleScroll();
-        }
-
-        return () => {
-            if (scrollContainer) {
-                scrollContainer.removeEventListener('scroll', handleScroll);
-            }
-        };
-    }, []);
 
     const handleNavigation = (path, e) => {
         if (e) {
@@ -128,196 +87,103 @@ function SearchByCategory() {
     return (
         <Box
             sx={{
-                py: { xs: 3, md: 4 },
+                width: '100vw',
+                marginLeft: 'calc(-50vw + 50%)',
+                py: { xs: 2, md: 2.5 },
                 backgroundColor: 'grey.50',
                 position: 'relative'
             }}
         >
-            <Container maxWidth="xl">
-                {/* Section Header */}
-                <Box
+            {/* Section Header */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1.5,
+                    px: { xs: 1.5, sm: 2, md: 3 }
+                }}
+            >
+                <Typography
                     sx={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        mb: 3,
-                        px: { xs: 2, md: 0 }
+                        fontWeight: 700,
+                        color: 'text.primary',
+                        fontSize: { xs: '1.1rem', md: '1.3rem' }
                     }}
                 >
-                    <Typography
-                        variant="h4"
-                        sx={{
-                            fontWeight: 600,
-                            color: 'primary.main',
-                            fontSize: { xs: '1.25rem', md: '1.5rem' }
-                        }}
-                    >
-                        Shop by Category
-                    </Typography>
-                    <Button
-                        variant="outlined"
-                        endIcon={<ArrowForward />}
-                        onClick={(e) => handleNavigation('/search', e)}
-                        sx={{
-                            borderColor: 'primary.main',
-                            color: 'primary.main',
-                            '&:hover': {
-                                backgroundColor: 'primary.50',
-                                borderColor: 'primary.main'
-                            }
-                        }}
-                    >
-                        View All Categories
-                    </Button>
-                </Box>
+                    Shop by Category
+                </Typography>
+                <Button
+                    variant="text"
+                    onClick={(e) => handleNavigation('/search', e)}
+                    sx={{
+                        color: 'text.primary',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        fontSize: '0.85rem',
+                        px: 1
+                    }}
+                >
+                    View All
+                </Button>
+            </Box>
 
-                {/* Categories Container */}
-                <Box sx={{ position: 'relative', px: { xs: 2, md: 0 } }}>
-                    {/* Left Scroll Button */}
-                {showLeftButton && (
-                        <IconButton
-                            onClick={() => scroll('left')}
-                            sx={{
-                                position: 'absolute',
-                                left: -8,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                zIndex: 10,
-                                backgroundColor: 'white',
-                                boxShadow: 2,
-                                '&:hover': {
-                                    backgroundColor: 'grey.50'
-                                }
-                            }}
-                        >
-                            <ArrowBack />
-                        </IconButton>
-                    )}
 
-                    {/* Categories Grid */}
-                    <Box
-                        ref={scrollRef}
-                        sx={{
-                            display: 'flex',
-                            gap: 3,
-                            overflowX: 'auto',
-                            scrollbarWidth: 'none',
-                            '&::-webkit-scrollbar': { display: 'none' },
-                            pb: 2
-                        }}
-                    >
+            {/* Horizontal Strip of Category Tiles (not cards) */}
+            <Box sx={{ position: 'relative' }}>
+                <Box
+                    ref={scrollRef}
+                    sx={{
+                        display: 'flex',
+                        gap: { xs: 1.5, md: 2 },
+                        overflowX: 'auto',
+                        scrollbarWidth: 'none',
+                        '&::-webkit-scrollbar': { display: 'none' },
+                        px: { xs: 1.5, sm: 2, md: 3 },
+                        pb: 0.5
+                    }}
+                >
                     {categories.map((category) => (
-                            <Card
+                        <Box
                             key={category.title}
-                                sx={{
-                                    minWidth: { xs: 280, md: 320 },
-                                    maxWidth: { xs: 280, md: 320 },
-                                    borderRadius: 3,
-                                    overflow: 'hidden',
-                                    transition: 'all 0.3s ease',
-                                    cursor: 'pointer',
-                                    border: '1px solid',
-                                    borderColor: 'grey.200',
-                                    '&:hover': {
-                                        transform: 'translateY(-4px)',
-                                        boxShadow: `0 8px 32px ${category.color}20`,
-                                        borderColor: category.color
-                                    }
-                                }}
                             onClick={(e) => handleNavigation(category.link, e)}
-                        >
-                                {/* Image */}
-                                <CardMedia
-                                    component="img"
-                                    height={160}
-                                    image={category.image}
-                                    alt={category.title} 
-                                    sx={{
-                                        transition: 'transform 0.3s ease',
-                                        '&:hover': {
-                                            transform: 'scale(1.05)'
-                                        }
-                                    }}
-                                />
-
-                                {/* Content */}
-                                <CardContent sx={{ p: 3 }}>
-                                    <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-                                        <Box
-                                            sx={{
-                                                width: 40,
-                                                height: 40,
-                                                borderRadius: 1,
-                                                backgroundColor: `${category.color}15`,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center'
-                                            }}
-                                        >
-                                            {category.icon}
-                                        </Box>
-                                        <Typography
-                                            variant="h6"
-                                            sx={{
-                                                fontWeight: 600,
-                                                color: 'text.primary'
-                                            }}
-                                        >
-                                            {category.title}
-                                        </Typography>
-                                    </Stack>
-
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            color: 'text.secondary',
-                                            mb: 2,
-                                            lineHeight: 1.5
-                                        }}
-                                    >
-                                        {category.description}
-                                    </Typography>
-
-                                    {/* Category Badge */}
-                                    <Chip
-                                        label="Explore"
-                                        size="small"
-                                        sx={{
-                                            backgroundColor: `${category.color}15`,
-                                            color: category.color,
-                                            fontWeight: 600,
-                                            '&:hover': {
-                                                backgroundColor: `${category.color}25`
-                                            }
-                                        }}
-                                    />
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </Box>
-
-                    {/* Right Scroll Button */}
-                {showRightButton && (
-                        <IconButton
-                            onClick={() => scroll('right')}
                             sx={{
-                                position: 'absolute',
-                                right: -8,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                zIndex: 10,
-                                backgroundColor: 'white',
-                                boxShadow: 2,
-                                '&:hover': {
-                                    backgroundColor: 'grey.50'
-                                }
+                                minWidth: { xs: 220, md: 260 },
+                                maxWidth: { xs: 220, md: 260 },
+                                borderRadius: 2,
+                                border: '1px solid',
+                                borderColor: 'grey.200',
+                                overflow: 'hidden',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                '&:hover': { transform: 'translateY(-2px)', boxShadow: `0 6px 16px ${category.color}20`, borderColor: category.color }
                             }}
                         >
-                            <ArrowForward />
-                        </IconButton>
-                    )}
+                            <Box
+                                component="img"
+                                src={category.image}
+                                alt={category.title}
+                                sx={{ width: '100%', height: 120, objectFit: 'cover' }}
+                            />
+                            <Box sx={{ p: 1.5 }}>
+                                <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+                                    <Box sx={{ width: 32, height: 32, borderRadius: 1, backgroundColor: `${category.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        {React.cloneElement(category.icon, { sx: { fontSize: 18 } })}
+                                    </Box>
+                                    <Typography sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>
+                                        {category.title}
+                                    </Typography>
+                                </Stack>
+                                <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', mb: 1, lineHeight: 1.4 }}>
+                                    {category.description}
+                                </Typography>
+                                <Chip label="Explore" size="small" sx={{ backgroundColor: `${category.color}15`, color: category.color, fontWeight: 600, fontSize: '0.7rem', height: 24 }} />
+                            </Box>
+                        </Box>
+                    ))}
                 </Box>
-            </Container>
+            </Box>
+
         </Box>
     );
 }

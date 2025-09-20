@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -27,7 +27,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-
+  Chip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -36,14 +36,20 @@ import {
   Mic as MicIcon,
   Person as PersonIcon,
   Menu as MenuIcon,
-  ShoppingCart as ShoppingCartIcon,
+  ShoppingCartOutlined as ShoppingCartIcon,
   GpsFixed as GpsFixedIcon,
   Logout as LogoutIcon,
   AccountCircle as AccountCircleIcon,
   History as HistoryIcon,
-  LocalShipping as TrackingIcon,
-  FolderSpecial as HealthRecordsIcon,
-  Emergency as EmergencyIcon
+  LocalShippingOutlined as TrackingIcon,
+  FolderSpecialOutlined as HealthRecordsIcon,
+  Emergency as EmergencyIcon,
+  Close as CloseIcon,
+  NotificationsOutlined as NotificationsIcon,
+  PersonAddOutlined as InviteFriendsIcon,
+  SettingsOutlined as SettingsIcon,
+  HelpOutline as HelpCenterIcon,
+  DescriptionOutlined as TermsIcon
 } from '@mui/icons-material';
 import Logo from '../../ui/Logo';
 import { colors } from '../../../styles/colors';
@@ -78,10 +84,12 @@ if (typeof document !== 'undefined') {
 
 const SearchBox = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [searchAnchorEl, setSearchAnchorEl] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState('Mumbai');
   const [searchQuery, setSearchQuery] = useState('');
   const [locationSearch, setLocationSearch] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const searchInputRef = useRef(null);
 
   const placeholders = [
     'Search for doctors...',
@@ -114,6 +122,21 @@ const SearchBox = () => {
     { name: 'Chennai', address: 'Tamil Nadu, India' }
   ];
 
+  const searchSuggestions = [
+    { text: 'Cardiologist', category: 'Doctors', icon: '🫀' },
+    { text: 'Dermatologist', category: 'Doctors', icon: '🧴' },
+    { text: 'Pediatrician', category: 'Doctors', icon: '👶' },
+    { text: 'Apollo Hospital', category: 'Hospitals', icon: '🏥' },
+    { text: 'Fortis Healthcare', category: 'Hospitals', icon: '🏥' },
+    { text: 'Blood Bank Near Me', category: 'Blood Banks', icon: '🩸' },
+    { text: 'Medicine Delivery', category: 'Services', icon: '💊' },
+    { text: 'Lab Tests', category: 'Services', icon: '🧪' },
+    { text: 'Ambulance Service', category: 'Emergency', icon: '🚑' },
+    { text: 'Physiotherapy', category: 'Services', icon: '🏃' },
+    { text: 'Mental Health', category: 'Services', icon: '🧠' },
+    { text: 'Dental Care', category: 'Doctors', icon: '🦷' }
+  ];
+
   const handleLocationClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -133,15 +156,51 @@ const SearchBox = () => {
     handleLocationClose();
   };
 
+  const handleSearchFocus = (event) => {
+    if (searchQuery.trim()) {
+      setSearchAnchorEl(searchInputRef.current);
+    }
+  };
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    setSearchQuery(value);
+    if (value.trim()) {
+      setSearchAnchorEl(searchInputRef.current);
+    } else {
+      setSearchAnchorEl(null);
+    }
+  };
+
+  const handleSearchInputClick = (event) => {
+    if (searchQuery.trim()) {
+      setSearchAnchorEl(searchInputRef.current);
+    }
+  };
+
+  const handleSearchClose = () => {
+    setSearchAnchorEl(null);
+  };
+
+  const handleSearchSelect = (suggestion) => {
+    setSearchQuery(suggestion.text);
+    setSearchAnchorEl(null);
+  };
+
   const filteredLocations = popularLocations.filter(location =>
     location.name.toLowerCase().includes(locationSearch.toLowerCase()) ||
     location.address.toLowerCase().includes(locationSearch.toLowerCase())
   );
 
+  const filteredSuggestions = searchSuggestions.filter(suggestion =>
+    suggestion.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    suggestion.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Box sx={{ 
       flex: 1, 
-      maxWidth: 600, 
+      maxWidth: 800, 
       mx: 2,
       display: { xs: 'none', md: 'flex' }
     }}>
@@ -151,9 +210,10 @@ const SearchBox = () => {
           display: 'flex',
           alignItems: 'center',
           width: '100%',
+          height: 40,
           bgcolor: '#F8FAFC',
           border: `1px solid ${colors.primary}`,
-          borderRadius: 1.5,
+          borderRadius: 2,
           overflow: 'hidden',
           transition: 'all 0.3s ease',
           '&:focus-within': {
@@ -180,14 +240,16 @@ const SearchBox = () => {
             }} />}
             sx={{
               width: '100%',
+              height: 40,
               justifyContent: 'space-between',
               px: 1.5,
-              py: 1,
+              py: 0.5,
               color: '#64748B',
               fontSize: '0.875rem',
               fontWeight: 500,
               textTransform: 'none',
               borderRadius: 0,
+              minHeight: 'auto',
               '&:hover': {
                 bgcolor: 'rgba(56, 163, 165, 0.05)'
               }
@@ -271,11 +333,14 @@ const SearchBox = () => {
         {/* Search Section */}
         <Box sx={{ flex: 1, position: 'relative' }}>
           <TextField
+            ref={searchInputRef}
             fullWidth
             variant="standard"
             placeholder={placeholders[placeholderIndex]}
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
+            onFocus={handleSearchFocus}
+            onClick={handleSearchInputClick}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -287,10 +352,12 @@ const SearchBox = () => {
             sx={{
               '& .MuiInputBase-root': {
                 px: 2,
-                py: 1,
+                py: 0.5,
+                height: 40,
                 fontSize: '0.875rem'
               },
               '& .MuiInputBase-input': {
+                height: '100%',
                 '&::placeholder': {
                   color: '#94A3B8',
                   opacity: 1
@@ -298,6 +365,77 @@ const SearchBox = () => {
               }
             }}
           />
+
+          {/* Search Suggestions Menu */}
+          <Menu
+            anchorEl={searchAnchorEl}
+            open={Boolean(searchAnchorEl)}
+            onClose={handleSearchClose}
+            disableAutoFocus
+            disableEnforceFocus
+            disableRestoreFocus
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+            PaperProps={{
+              sx: {
+                width: 400,
+                maxHeight: 400,
+                mt: 1,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                border: '1px solid #E2E8F0',
+                borderRadius: 2
+              }
+            }}
+          >
+            <Box sx={{ p: 2, pb: 1 }}>
+              <Typography variant="subtitle2" sx={{ color: '#64748B', mb: 1, fontSize: '0.8rem' }}>
+                Search Suggestions
+              </Typography>
+            </Box>
+            <Divider />
+            {filteredSuggestions.length > 0 ? (
+              filteredSuggestions.slice(0, 8).map((suggestion, index) => (
+                <MenuItem 
+                  key={index}
+                  onClick={() => handleSearchSelect(suggestion)}
+                  sx={{ 
+                    mx: 1, 
+                    borderRadius: 1,
+                    py: 1.5,
+                    '&:hover': {
+                      bgcolor: 'rgba(56, 163, 165, 0.05)'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+                    <Box sx={{ fontSize: '1.2rem' }}>
+                      {suggestion.icon}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2" fontWeight={500} sx={{ color: '#1A365D' }}>
+                        {suggestion.text}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+                        {suggestion.category}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </MenuItem>
+              ))
+            ) : (
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  No suggestions found
+                </Typography>
+              </Box>
+            )}
+          </Menu>
         </Box>
       </Paper>
     </Box>
@@ -315,11 +453,14 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+  const [mobileSearchAnchorEl, setMobileSearchAnchorEl] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [showNav, setShowNav] = useState(true);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const topBarRef = useRef(null);
+  const mobileSearchInputRef = useRef(null);
 
   // Fetch cart items when user is authenticated
   useEffect(() => {
@@ -328,32 +469,38 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     }
   }, [dispatch, isAuthenticated]);
 
-  // Scroll handling for header styling and navigation visibility
+  // Scroll handling for header styling and mobile top bar visibility
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 50);
-      
-      // Show/hide navigation based on scroll direction
-      if (currentScrollY > 100) {
-        if (currentScrollY > lastScrollY) {
-          // Scrolling down - hide nav
-          setShowNav(false);
-        } else {
-          // Scrolling up - show nav
-          setShowNav(true);
+      const scrollDifference = currentScrollY - lastScrollY;
+
+      setIsScrolled(currentScrollY > 10);
+
+      if (isMobile) {
+        if (currentScrollY < 10) {
+          setIsHeaderVisible(true);
+        } else if (scrollDifference > 0 && currentScrollY > 100) {
+          // Scrolling down beyond threshold – hide top bar
+          setIsHeaderVisible(false);
+        } else if (scrollDifference < 0) {
+          // Scrolling up – show top bar
+          setIsHeaderVisible(true);
         }
       } else {
-        // At top of page - always show nav
-        setShowNav(true);
+        // Desktop keeps header visible
+        setIsHeaderVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
+    // Initial check
+    handleScroll();
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isMobile]);
 
   // Fetch user profile data when authenticated
   useEffect(() => {
@@ -415,9 +562,41 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
       setIsDrawerOpen(false);
       document.body.style.overflow = 'auto';
     }
-    if (onShowSignIn) {
+    if (onShowSignIn && typeof onShowSignIn === 'function') {
       onShowSignIn();
     }
+  };
+
+  // Handle mobile search suggestions
+  const handleMobileSearchFocus = (event) => {
+    if (mobileSearchQuery.trim()) {
+      setMobileSearchAnchorEl(mobileSearchInputRef.current);
+    }
+  };
+
+  const handleMobileSearchChange = (event) => {
+    const value = event.target.value;
+    setMobileSearchQuery(value);
+    if (value.trim()) {
+      setMobileSearchAnchorEl(mobileSearchInputRef.current);
+    } else {
+      setMobileSearchAnchorEl(null);
+    }
+  };
+
+  const handleMobileSearchInputClick = (event) => {
+    if (mobileSearchQuery.trim()) {
+      setMobileSearchAnchorEl(mobileSearchInputRef.current);
+    }
+  };
+
+  const handleMobileSearchClose = () => {
+    setMobileSearchAnchorEl(null);
+  };
+
+  const handleMobileSearchSelect = (suggestion) => {
+    setMobileSearchQuery(suggestion.text);
+    setMobileSearchAnchorEl(null);
   };
 
   // Handle speech recognition
@@ -433,6 +612,9 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
         setMobileSearchQuery(transcript);
+        if (transcript.trim()) {
+          setMobileSearchAnchorEl(mobileSearchInputRef.current);
+        }
       };
 
       recognition.onerror = (event) => {
@@ -452,7 +634,9 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     document.body.style.overflow = 'auto';
 
     clearAuthData();
-    onAuthChange(false);
+    if (onAuthChange && typeof onAuthChange === 'function') {
+      onAuthChange(false);
+    }
     navigate("/");
   };
 
@@ -462,34 +646,6 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     document.body.style.overflow = !isDrawerOpen ? 'hidden' : 'auto';
   };
 
-  // Navigation Links
-  const mainNavLinks = [
-    { path: '/ambulance', text: 'AMBULANCE' },
-    { path: '/blood-bank', text: 'BLOOD BANK' },
-    { path: '/medicine-order', text: 'MEDICINE DELIVERY' },
-    { path: '/hospital-bed-booking', text: 'HOSPITAL BED BOOKING' },
-    { path: '/doctor-consultation', text: 'CONSULT DOCTORS' },
-    { path: '/lab-tests', text: 'LAB TESTS' },
-    { path: '/products', text: 'PRODUCTS' },
-    { path: '/child-care', text: 'CHILD CARE' },
-    { path: '/ayurveda', text: 'AYURVEDA' },
-    { path: '/medical-loans', text: 'MEDICAL LOANS' },
-  ];
-
-  const subNavLinks = [
-    { path: '/physiotherapy', text: 'Physiotherapy' },
-    { path: '/care-at-home', text: 'Care At Home' },
-    { path: '/medical-tourism', text: 'Medical Tourism' },
-    { path: '/rehabilitation', text: 'Rehabilitation' },
-    { path: '/early-detection', text: 'Early Detection' },
-    { path: '/nutrition', text: 'Nutrition' },
-    { path: '/pet-care', text: 'Pet Care' },
-    { path: '/organ-donation', text: 'Organ/Hair Donation' },
-    { path: '/vaccines', text: 'Vaccines' },
-    { path: '/maternal-care', text: 'Maternal Care' },
-    { path: '/insurance', text: 'Medical Insurance' },
-    { path: '/health-blogs', text: 'Health Blogs' },
-  ];
 
   // Profile dropdown items
   const profileDropdownItems = [
@@ -498,6 +654,27 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     { path: '/track-order', text: 'Track Order', icon: <TrackingIcon /> },
     { path: '/health-records', text: 'Health Records', icon: <HealthRecordsIcon /> }
   ];
+
+  // Search suggestions for mobile
+  const mobileSearchSuggestions = [
+    { text: 'Cardiologist', category: 'Doctors', icon: '🫀' },
+    { text: 'Dermatologist', category: 'Doctors', icon: '🧴' },
+    { text: 'Pediatrician', category: 'Doctors', icon: '👶' },
+    { text: 'Apollo Hospital', category: 'Hospitals', icon: '🏥' },
+    { text: 'Fortis Healthcare', category: 'Hospitals', icon: '🏥' },
+    { text: 'Blood Bank Near Me', category: 'Blood Banks', icon: '🩸' },
+    { text: 'Medicine Delivery', category: 'Services', icon: '💊' },
+    { text: 'Lab Tests', category: 'Services', icon: '🧪' },
+    { text: 'Ambulance Service', category: 'Emergency', icon: '🚑' },
+    { text: 'Physiotherapy', category: 'Services', icon: '🏃' },
+    { text: 'Mental Health', category: 'Services', icon: '🧠' },
+    { text: 'Dental Care', category: 'Doctors', icon: '🦷' }
+  ];
+
+  const filteredMobileSuggestions = mobileSearchSuggestions.filter(suggestion =>
+    suggestion.text.toLowerCase().includes(mobileSearchQuery.toLowerCase()) ||
+    suggestion.category.toLowerCase().includes(mobileSearchQuery.toLowerCase())
+  );
 
   // Render profile section
   const renderProfileSection = () => {
@@ -516,14 +693,24 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
               }
             }}
           >
-            {userProfile && userProfile.photo ? (
-              <Avatar 
-                src={userProfile.photo} 
-                sx={{ width: 32, height: 32 }}
-              />
-            ) : (
-              <PersonIcon />
-            )}
+            <Avatar 
+              src={userProfile?.photo}
+              sx={{ 
+                width: 32, 
+                height: 32,
+                bgcolor: colors.primary,
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '0.9rem'
+              }}
+              imgProps={{
+                onError: (e) => {
+                  e.target.style.display = 'none';
+                }
+              }}
+            >
+              {userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon sx={{ fontSize: 18 }} />}
+            </Avatar>
           </IconButton>
 
           <Menu
@@ -535,12 +722,49 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
             PaperProps={{
               sx: {
                 mt: 1,
-                minWidth: 200,
+                minWidth: 240,
                 boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
                 border: '1px solid #E2E8F0'
               }
             }}
           >
+            {/* User Info Header */}
+            <Box sx={{ 
+              px: 2, 
+              py: 1.5, 
+              borderBottom: '1px solid #E2E8F0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5
+            }}>
+              <Avatar
+                src={userProfile?.photo}
+                sx={{ 
+                  width: 32, 
+                  height: 32,
+                  bgcolor: colors.primary,
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.9rem'
+                }}
+                imgProps={{
+                  onError: (e) => {
+                    e.target.style.display = 'none';
+                  }
+                }}
+              >
+                {userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon sx={{ fontSize: 18 }} />}
+              </Avatar>
+              <Box>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ color: '#1A365D', mb: 0.5 }}>
+                  {userProfile?.name || 'User'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                  {userProfile?.phone_number || userProfile?.email || 'No contact info'}
+                </Typography>
+              </Box>
+            </Box>
+            
             {profileDropdownItems.map((item) => (
               <MenuItem 
                 key={item.path}
@@ -552,18 +776,34 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                 }}
                 sx={{ py: 1.5 }}
               >
-                <ListItemIcon>
-                  {item.icon}
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  {React.cloneElement(item.icon, { 
+                    sx: { color: '#1A365D', fontSize: 20 } 
+                  })}
                 </ListItemIcon>
-                <ListItemText primary={item.text} />
+                <ListItemText 
+                  primary={item.text}
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.9rem'
+                  }}
+                />
               </MenuItem>
             ))}
             <Divider />
             <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: 'error.main' }}>
-              <ListItemIcon>
-                <LogoutIcon color="error" />
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <LogoutIcon sx={{ color: '#EF4444', fontSize: 20 }} />
               </ListItemIcon>
-              <ListItemText primary="Logout" />
+              <ListItemText 
+                primary="Logout"
+                primaryTypographyProps={{ 
+                  fontWeight: 500, 
+                  color: '#EF4444',
+                  fontSize: '0.9rem'
+                }}
+              />
             </MenuItem>
           </Menu>
         </Box>
@@ -573,7 +813,19 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     return (
       <Button
         onClick={handleLoginClick}
-        startIcon={<PersonIcon />}
+        startIcon={
+          <Avatar 
+            sx={{ 
+              width: 20, 
+              height: 20, 
+              bgcolor: colors.primary,
+              color: 'white',
+              fontSize: '0.75rem'
+            }}
+          >
+            <PersonIcon sx={{ fontSize: 14 }} />
+          </Avatar>
+        }
         sx={{
           color: '#1A365D',
           textTransform: 'none',
@@ -595,21 +847,39 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     <Box sx={{ flexGrow: 1 }}>
       {/* Main Header */}
       <AppBar 
-        position="sticky" 
-        elevation={1}
+        position="fixed" 
+        elevation={isScrolled ? 4 : 1}
         sx={{ 
-          bgcolor: 'white',
+          bgcolor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'white',
           color: 'text.primary',
           transition: 'all 0.3s ease',
-          transform: isScrolled ? 'translateY(0)' : 'translateY(0)'
+          top: 0,
+          left: 0,
+          right: 0,
+          width: '100%',
+          zIndex: 1000,
+          backdropFilter: isScrolled ? 'blur(10px)' : 'none',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+          borderRadius: 0,
+          '&.MuiAppBar-root': {
+            position: 'fixed !important'
+          }
         }}
       >
+        <Box sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          height: isMobile ? (isHeaderVisible ? 120 : 56) : 'auto',
+          transition: 'height 0.25s ease'
+        }}>
         {/* Top Toolbar */}
-        <Toolbar 
+        <Toolbar ref={topBarRef}
           sx={{ 
             px: { xs: 2, sm: 4 },
             py: 0.75,
-            minHeight: '64px !important'
+            minHeight: '64px !important',
+            transition: 'transform 0.25s ease',
+            transform: isMobile && !isHeaderVisible ? 'translateY(-100%)' : 'translateY(0)'
           }}
         >
           {/* Logo Section */}
@@ -617,23 +887,65 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
             display: 'flex', 
             alignItems: 'center', 
             gap: 2,
-            minWidth: { xs: 'auto', md: 220 }
+            minWidth: { xs: 'auto', md: 280 }
           }}>
             {isMobile && (
               <IconButton
                 onClick={toggleDrawer}
                 sx={{ 
-                  color: '#1A365D',
-                  p: 1
+                  p: 0.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
                 }}
               >
-                <MenuIcon />
+                <Avatar
+                  src={userProfile?.photo}
+                  sx={{ 
+                    width: 32, 
+                    height: 32,
+                    bgcolor: colors.primary,
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    border: '2px solid #E2E8F0'
+                  }}
+                  imgProps={{
+                    onError: (e) => {
+                      e.target.style.display = 'none';
+                    }
+                  }}
+                >
+                  {userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon sx={{ fontSize: 18 }} />}
+                </Avatar>
               </IconButton>
             )}
             
             <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-              <Logo size={isMobile ? 'small' : 'regular'} />
+              <Logo size={isMobile ? 'small' : 'small'} />
             </Link>
+
+            {/* Vedika Plus Button - Desktop Only */}
+            <Button
+              component={Link}
+              to="/membership"
+              sx={{
+                color: 'primary.main',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2,
+                borderRadius: 2,
+                display: { xs: 'none', md: 'flex' },
+                background: 'white',
+                border: '1px solid transparent',
+                '&:hover': {
+                  bgcolor: 'transparent',
+                  border: '1px solid #8A2BE2'
+                }
+              }}
+            >
+              <Box component="span" sx={{ color: 'black' }}>Vedika</Box><Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5 }}>Plus</Box>
+            </Button>
           </Box>
 
           {/* Search Box - Desktop Only */}
@@ -647,25 +959,6 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
             mr: { xs: 0, md: 0.5 },
             ml: { xs: 'auto', md: 0 }
           }}>
-            {/* Vedika Plus Button */}
-            <Button
-              component={Link}
-              to="/membership"
-              sx={{
-                color: 'primary.main',
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2,
-                borderRadius: 2,
-                display: { xs: 'none', md: 'flex' },
-                background: 'white',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 215, 0, 0.1)'
-                }
-              }}
-            >
-              Vedika<Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5 }}>Plus</Box>
-            </Button>
 
             {/* Vedika AI Button */}
             <Button
@@ -773,25 +1066,31 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
           </Box>
         </Toolbar>
 
-        {/* Mobile Search Bar */}
+        {/* Mobile Search Bar - Inside same container */}
         {isMobile && (
           <Box sx={{ 
             px: 2, 
             pb: 1,
             display: { xs: 'block', md: 'none' },
-            position: isScrolled ? 'sticky' : 'static',
-            top: isScrolled ? 0 : 'auto',
-            zIndex: isScrolled ? 1000 : 'auto',
-            bgcolor: 'white',
-            borderBottom: isScrolled ? '1px solid #E2E8F0' : 'none',
-            transition: 'all 0.3s ease'
+            bgcolor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'white',
+            borderTop: '1px solid #E2E8F0',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1,
+            transition: 'all 0.25s ease',
+            borderRadius: 0
           }}>
             <TextField
+              ref={mobileSearchInputRef}
               fullWidth
               size="small"
               placeholder="Search for doctors, hospitals, services..."
               value={mobileSearchQuery}
-              onChange={(e) => setMobileSearchQuery(e.target.value)}
+              onChange={handleMobileSearchChange}
+              onFocus={handleMobileSearchFocus}
+              onClick={handleMobileSearchInputClick}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -808,7 +1107,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  bgcolor: '#F8FAFC',
+                  bgcolor: isScrolled ? 'rgba(248, 250, 252, 0.8)' : '#F8FAFC',
                   borderRadius: 2,
                   border: `1px solid ${colors.primary}`,
                   py: 0.5,
@@ -819,89 +1118,90 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                 }
               }}
             />
+
+            {/* Mobile Search Suggestions Menu */}
+            <Menu
+              anchorEl={mobileSearchAnchorEl}
+              open={Boolean(mobileSearchAnchorEl)}
+              onClose={handleMobileSearchClose}
+              disableAutoFocus
+              disableEnforceFocus
+              disableRestoreFocus
+              anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+              PaperProps={{
+                sx: {
+                  width: '90vw',
+                  maxWidth: 400,
+                  maxHeight: 400,
+                  mt: 1,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                  border: '1px solid #E2E8F0',
+                  borderRadius: 2
+                }
+              }}
+            >
+              <Box sx={{ p: 2, pb: 1 }}>
+                <Typography variant="subtitle2" sx={{ color: '#64748B', mb: 1, fontSize: '0.8rem' }}>
+                  Search Suggestions
+                </Typography>
+              </Box>
+              <Divider />
+              {filteredMobileSuggestions.length > 0 ? (
+                filteredMobileSuggestions.slice(0, 8).map((suggestion, index) => (
+                  <MenuItem 
+                    key={index}
+                    onClick={() => handleMobileSearchSelect(suggestion)}
+                    sx={{ 
+                      mx: 1, 
+                      borderRadius: 1,
+                      py: 1.5,
+                      '&:hover': {
+                        bgcolor: 'rgba(56, 163, 165, 0.05)'
+                      }
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+                      <Box sx={{ fontSize: '1.2rem' }}>
+                        {suggestion.icon}
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" fontWeight={500} sx={{ color: '#1A365D' }}>
+                          {suggestion.text}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+                          {suggestion.category}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </MenuItem>
+                ))
+              ) : (
+                <Box sx={{ p: 2, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No suggestions found
+                  </Typography>
+                </Box>
+              )}
+            </Menu>
           </Box>
         )}
-
-        {/* Navigation Links */}
-        <Box sx={{ 
-          px: { xs: 2, sm: 4 },
-          display: { xs: 'none', lg: 'block' },
-          borderTop: '1px solid #E2E8F0',
-          transform: showNav ? 'translateY(0)' : 'translateY(-100%)',
-          opacity: showNav ? 1 : 0,
-          transition: 'all 0.3s ease',
-          overflow: 'hidden',
-          maxHeight: showNav ? '200px' : '0px'
-        }}>
-          {/* Main Navigation */}
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 0.5,
-            py: 1,
-            overflowX: 'auto',
-            '&::-webkit-scrollbar': { display: 'none' }
-          }}>
-            {mainNavLinks.map((link) => (
-              <Button
-                key={link.path}
-                component={Link}
-                to={link.path}
-                sx={{
-                  color: location.pathname === link.path ? colors.primary : '#64748B',
-                  textTransform: 'none',
-                  fontWeight: location.pathname === link.path ? 600 : 500,
-                  fontSize: '0.75rem',
-                  px: 1.5,
-                  py: 0.5,
-                  minWidth: 'auto',
-                  whiteSpace: 'nowrap',
-                  borderRadius: 1,
-                  '&:hover': {
-                    bgcolor: 'rgba(56, 163, 165, 0.1)',
-                    color: colors.primary
-                  }
-                }}
-              >
-                {link.text}
-              </Button>
-            ))}
-          </Box>
-
-          {/* Sub Navigation */}
-          <Box sx={{ 
-            display: 'flex', 
-            gap: 0.5,
-            pb: 1,
-            overflowX: 'auto',
-            '&::-webkit-scrollbar': { display: 'none' }
-          }}>
-            {subNavLinks.map((link) => (
-              <Button
-                key={link.path}
-                component={Link}
-                to={link.path}
-                sx={{
-                  color: location.pathname === link.path ? colors.primary : '#94A3B8',
-                  textTransform: 'none',
-                  fontWeight: location.pathname === link.path ? 600 : 400,
-                  fontSize: '0.7rem',
-                  px: 1.5,
-                  py: 0.5,
-                  minWidth: 'auto',
-                  whiteSpace: 'nowrap',
-                  borderRadius: 1,
-                  '&:hover': {
-                    bgcolor: 'rgba(56, 163, 165, 0.1)',
-                    color: colors.primary
-                  }
-                }}
-              >
-                {link.text}
-              </Button>
-            ))}
-          </Box>
         </Box>
+
       </AppBar>
+
+      {/* Spacer to account for fixed header without layout shift */}
+      <Box sx={{ 
+        height: isMobile ? 120 : 64,
+        transition: 'height 0.25s ease',
+        flexShrink: 0
+      }} />
 
       {/* Mobile Drawer */}
       <Drawer
@@ -910,134 +1210,368 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
         onClose={toggleDrawer}
         PaperProps={{
           sx: {
-            width: 320,
-            bgcolor: 'white'
+            width: 340,
+            bgcolor: 'background.paper',
+            borderTopRightRadius: 12,
+            borderBottomRightRadius: 12,
+            overflow: 'hidden',
+            boxShadow: '0 12px 40px rgba(2, 6, 23, 0.25)',
+            display: 'flex',
+            flexDirection: 'column'
           }
         }}
       >
-        <Box sx={{ p: 3 }}>
-          {/* User Profile Section */}
+        {/* Drawer Header */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2.5,
+          py: 2,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.default'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Logo size="small" />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Menu
+            </Typography>
+          </Box>
+          <IconButton onClick={toggleDrawer} sx={{ color: 'text.secondary' }}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', maxHeight: 'calc(100dvh - 64px)' }}>
+          {/* User Profile Section - Header */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
             gap: 2, 
-            mb: 3,
-            p: 2,
-            bgcolor: '#F8FAFC',
-            borderRadius: 2
+            p: 2.5,
+            borderBottom: '1px solid #E2E8F0'
           }}>
             <Avatar
               src={userProfile?.photo}
-              sx={{ width: 48, height: 48 }}
+              sx={{ 
+                width: 48, 
+                height: 48,
+                bgcolor: colors.primary,
+                color: 'white',
+                fontWeight: 600,
+                fontSize: '1.2rem',
+                border: '2px solid #E2E8F0'
+              }}
+              imgProps={{
+                onError: (e) => {
+                  e.target.style.display = 'none';
+                }
+              }}
             >
-              {userProfile?.name?.charAt(0) || <PersonIcon />}
+              {userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon />}
             </Avatar>
             <Box sx={{ flex: 1 }}>
               {isAuthenticated && userProfile ? (
                 <>
-                  <Typography variant="subtitle1" fontWeight={600}>
+                  <Typography variant="subtitle1" fontWeight={700} sx={{ color: '#1A365D', mb: 0.5 }}>
                     {userProfile.name || 'Welcome User'}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem', mb: 0.5 }}>
                     {userProfile.phone_number || 'No phone number'}
                   </Typography>
-                  <Button
-                    component={Link}
-                    to="/profile"
-                    onClick={toggleDrawer}
-                    size="small"
-                    sx={{ 
-                      mt: 1,
-                      textTransform: 'none',
-                      color: colors.primary
-                    }}
-                  >
-                    View & Edit Profile
-                  </Button>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                    {userProfile.email || 'No email address'}
+                  </Typography>
                 </>
               ) : (
-                <Button
-                  onClick={handleLoginClick}
-                  variant="contained"
-                  sx={{
-                    bgcolor: colors.primary,
-                    color: 'white',
-                    textTransform: 'none'
-                  }}
-                >
-                  Sign In
-                </Button>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ color: '#1A365D' }}>
+                  Welcome to Vedika
+                </Typography>
               )}
             </Box>
-          </Box>
-
-          {/* Navigation Links */}
-          <List>
-            {[...mainNavLinks, ...subNavLinks].map((link) => (
-              <ListItem
-                key={link.path}
+            {isAuthenticated && (
+              <Button
                 component={Link}
-                to={link.path}
-                onClick={() => handleLinkClick(link.path)}
-                sx={{
+                to="/profile"
+                onClick={toggleDrawer}
+                size="small"
+                sx={{ 
+                  textTransform: 'none',
+                  color: '#3B82F6',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  px: 2,
+                  py: 0.5,
                   borderRadius: 1,
-                  mb: 0.5,
-                  color: location.pathname === link.path ? colors.primary : 'text.primary',
-                  bgcolor: location.pathname === link.path ? 'rgba(56, 163, 165, 0.1)' : 'transparent',
                   '&:hover': {
-                    bgcolor: 'rgba(56, 163, 165, 0.1)'
+                    bgcolor: 'rgba(59, 130, 246, 0.1)'
                   }
                 }}
               >
+                EDIT
+              </Button>
+            )}
+          </Box>
+
+          {/* Vedika Plus Section - Mobile Only */}
+          <Box sx={{ 
+            px: 2.5, 
+            py: 2,
+            borderBottom: '1px solid #E2E8F0',
+            bgcolor: 'rgba(138, 43, 226, 0.05)'
+          }}>
+            <Button
+              component={Link}
+              to="/membership"
+              onClick={toggleDrawer}
+              fullWidth
+              sx={{
+                color: 'primary.main',
+                textTransform: 'none',
+                fontWeight: 600,
+                px: 2,
+                py: 1.5,
+                borderRadius: 2,
+                background: 'white',
+                border: '1px solid #8A2BE2',
+                '&:hover': {
+                  bgcolor: 'rgba(138, 43, 226, 0.1)',
+                  border: '1px solid #8A2BE2'
+                }
+              }}
+            >
+              <Box component="span" sx={{ color: 'black' }}>Vedika</Box>
+              <Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5 }}>Plus</Box>
+            </Button>
+          </Box>
+
+          {/* Menu Items - Body */}
+          <Box sx={{ p: 0 }}>
+            <List sx={{ py: 0 }}>
+              {/* My Orders */}
+              <ListItem
+                component={Link}
+                to="/order-history"
+                onClick={() => handleLinkClick('/order-history')}
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <ShoppingCartIcon sx={{ color: '#64748B' }} />
+                </ListItemIcon>
                 <ListItemText 
-                  primary={link.text}
-                  primaryTypographyProps={{
-                    fontWeight: location.pathname === link.path ? 600 : 400
-                  }}
+                  primary="My Orders" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
                 />
               </ListItem>
-            ))}
 
-            {isAuthenticated && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                {profileDropdownItems.map((item) => (
-                  <ListItem
-                    key={item.path}
-                    component={Link}
-                    to={item.path}
-                    onClick={() => handleLinkClick(item.path)}
-                    sx={{
-                      borderRadius: 1,
-                      mb: 0.5,
-                      '&:hover': {
-                        bgcolor: 'rgba(56, 163, 165, 0.1)'
-                      }
-                    }}
-                  >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
-                  </ListItem>
-                ))}
-                <ListItem
-                  onClick={handleLogout}
-                  sx={{
-                    borderRadius: 1,
-                    color: 'error.main',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      bgcolor: 'rgba(244, 67, 54, 0.1)'
-                    }
-                  }}
-                >
-                  <ListItemIcon>
-                    <LogoutIcon color="error" />
-                  </ListItemIcon>
-                  <ListItemText primary="Logout" />
-                </ListItem>
-              </>
-            )}
-          </List>
+              {/* Notifications */}
+              <ListItem
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <NotificationsIcon sx={{ color: '#64748B', fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Notifications" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Health Records */}
+              <ListItem
+                component={Link}
+                to="/health-records"
+                onClick={() => handleLinkClick('/health-records')}
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <HealthRecordsIcon sx={{ color: '#64748B' }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Health Records" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Track Order */}
+              <ListItem
+                component={Link}
+                to="/track-order"
+                onClick={() => handleLinkClick('/track-order')}
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <TrackingIcon sx={{ color: '#64748B' }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Track Order" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Logout */}
+              <ListItem
+                onClick={handleLogout}
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  color: '#EF4444',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: 'rgba(239, 68, 68, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <LogoutIcon sx={{ color: '#EF4444' }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Logout" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#EF4444',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Divider */}
+              <Divider sx={{ my: 1 }} />
+
+              {/* Invite Friends */}
+              <ListItem
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <InviteFriendsIcon sx={{ color: '#64748B', fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Invite Friends" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Settings */}
+              <ListItem
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <SettingsIcon sx={{ color: '#64748B', fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Settings" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Help Center */}
+              <ListItem
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <HelpCenterIcon sx={{ color: '#64748B', fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Help Center" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+
+              {/* Terms and Conditions */}
+              <ListItem
+                sx={{
+                  px: 2.5,
+                  py: 1.5,
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <TermsIcon sx={{ color: '#64748B', fontSize: 20 }} />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Terms and Conditions" 
+                  primaryTypographyProps={{ 
+                    fontWeight: 500, 
+                    color: '#1A365D',
+                    fontSize: '0.95rem'
+                  }} 
+                />
+              </ListItem>
+            </List>
+          </Box>
         </Box>
       </Drawer>
 
@@ -1098,6 +1632,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
       </Dialog>
     </Box>
   );
+};
+
+// Default props to prevent errors
+Header.defaultProps = {
+  isAuthenticated: false,
+  onAuthChange: () => {},
+  onShowSignIn: () => {}
 };
 
 export default Header;

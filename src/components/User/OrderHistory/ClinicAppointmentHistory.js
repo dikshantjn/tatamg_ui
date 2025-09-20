@@ -84,50 +84,50 @@ const ClinicAppointmentHistory = () => {
     const renderAppointmentCard = (appointment) => {
         return (
             <div key={appointment.id} className="clinic-appointment-card">
+                {/* Status Header */}
                 <div className="appointment-header">
-                    <div className="appointment-status">
-                        <span className="status-badge" style={{ backgroundColor: getStatusColor(appointment.status) }}>
-                            {appointment.status}
-                        </span>
+                    <span className="status-badge" style={{ backgroundColor: getStatusColor(appointment.status) }}>
+                        {appointment.status}
+                    </span>
+                </div>
+
+                {/* Doctor Information */}
+                <div className="doctor-info">
+                    <h4>{appointment.doctor.name}</h4>
+                    <p className="appointment-datetime">
+                        {formatDate(appointment.date)} at {formatTime(appointment.time)}
+                    </p>
+                    <div className="specializations">
+                        {appointment.doctor.specializations.map((spec, index) => (
+                            <span key={index} className="specialization-tag">{spec}</span>
+                        ))}
                     </div>
                 </div>
 
-                <div className="appointment-content">
-                    <div className="doctor-info">
-                        <h4>{appointment.doctor.name}</h4>
-                        <p className="appointment-datetime">
-                            {formatDate(appointment.date)} at {formatTime(appointment.time)}
-                        </p>
-                        <div className="specializations">
-                            {appointment.doctor.specializations.map((spec, index) => (
-                                <span key={index} className="specialization-tag">{spec}</span>
-                            ))}
-                        </div>
+                {/* Appointment Details */}
+                <div className="appointment-details">
+                    <div className="detail-row">
+                        <span className="detail-label">Type:</span>
+                        <span className="detail-value">{appointment.isOnline ? 'Online' : 'In-Person'}</span>
                     </div>
-
-                    <div className="appointment-details">
-                        <div className="detail-row">
-                            <span className="detail-label">Consultation Type:</span>
-                            <span className="detail-value">{appointment.isOnline ? 'Online' : 'In-Person'}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Payment Status:</span>
-                            <span className="detail-value">{appointment.paymentStatus}</span>
-                        </div>
-                        {appointment.meetingUrl && (
-                            <div className="detail-row">
-                                <span className="detail-label">Meeting URL:</span>
-                                <a href={appointment.meetingUrl} target="_blank" rel="noopener noreferrer" className="meeting-link">
-                                    Join Meeting
-                                </a>
-                            </div>
-                        )}
+                    <div className="detail-row">
+                        <span className="detail-label">Payment:</span>
+                        <span className="detail-value">{appointment.paymentStatus}</span>
                     </div>
+                    {appointment.meetingUrl && (
+                        <div className="detail-row">
+                            <span className="detail-label">Meeting:</span>
+                            <a href={appointment.meetingUrl} target="_blank" rel="noopener noreferrer" className="meeting-link">
+                                Join Meeting
+                            </a>
+                        </div>
+                    )}
                 </div>
 
+                {/* Footer with Amount and Actions */}
                 <div className="appointment-footer">
                     <div className="appointment-amount">
-                        <span className="amount-label">Consultation Fee:</span>
+                        <span className="amount-label">Fee:</span>
                         <span className="amount-value">{formatCurrency(appointment.paidAmount)}</span>
                     </div>
                     <div className="appointment-actions">
@@ -152,51 +152,59 @@ const ClinicAppointmentHistory = () => {
         return (
             <div className={`side-panel-overlay ${isSidePanelOpen ? 'active' : ''}`} onClick={handleCloseSidePanel}>
                 <div className="side-panel" onClick={(e) => e.stopPropagation()}>
-                    <div className="side-panel-header">
-                        <h2>Appointment Details</h2>
-                        <button className="close-btn" onClick={handleCloseSidePanel}>×</button>
-                    </div>
-
+                    {/* Content */}
                     <div className="side-panel-content">
                         <div className="appointment-summary">
+                            {/* Title */}
+                            <div className="modal-title">
+                                <h2>Appointment Details</h2>
+                                <button className="close-btn" onClick={handleCloseSidePanel}>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Status */}
                             <div className="appointment-basic-info">
                                 <span className="status-badge" style={{ backgroundColor: getStatusColor(selectedAppointment.status) }}>
                                     {selectedAppointment.status}
                                 </span>
                             </div>
 
+                            {/* Doctor Info */}
                             <div className="doctor-details">
-                                <h4>Doctor Information</h4>
-                                <div className="doctor-info-detail">
-                                    <h5>{selectedAppointment.doctor.name}</h5>
-                                    <p className="appointment-datetime">
-                                        {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
-                                    </p>
-                                    <div className="specializations">
-                                        {selectedAppointment.doctor.specializations.map((spec, index) => (
-                                            <span key={index} className="specialization-tag">{spec}</span>
-                                        ))}
-                                    </div>
+                                <h4>Doctor</h4>
+                                <h5>{selectedAppointment.doctor.name}</h5>
+                                <p className="appointment-datetime">
+                                    {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
+                                </p>
+                                <div className="specializations">
+                                    {selectedAppointment.doctor.specializations.map((spec, index) => (
+                                        <span key={index} className="specialization-tag">{spec}</span>
+                                    ))}
                                 </div>
                             </div>
 
+                            {/* Appointment Details */}
                             <div className="appointment-info-detail">
-                                <h4>Appointment Information</h4>
+                                <h4>Details</h4>
                                 <div className="info-row">
-                                    <span className="label">Consultation Type:</span>
+                                    <span className="label">Type</span>
                                     <span className="value">{selectedAppointment.isOnline ? 'Online' : 'In-Person'}</span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="label">Payment Status:</span>
+                                    <span className="label">Payment</span>
                                     <span className="value">{selectedAppointment.paymentStatus}</span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="label">Consultation Fee:</span>
+                                    <span className="label">Fee</span>
                                     <span className="value">{formatCurrency(selectedAppointment.paidAmount)}</span>
                                 </div>
                                 {selectedAppointment.meetingUrl && (
                                     <div className="info-row">
-                                        <span className="label">Meeting URL:</span>
+                                        <span className="label">Meeting</span>
                                         <a href={selectedAppointment.meetingUrl} target="_blank" rel="noopener noreferrer" className="meeting-link">
                                             Join Meeting
                                         </a>
@@ -204,28 +212,30 @@ const ClinicAppointmentHistory = () => {
                                 )}
                             </div>
 
+                            {/* Reminder Info */}
                             <div className="reminder-info">
-                                <h4>Reminder Information</h4>
+                                <h4>Reminder</h4>
                                 <div className="info-row">
-                                    <span className="label">Reminder Set For:</span>
+                                    <span className="label">Set For</span>
                                     <span className="value">
                                         {selectedAppointment.reminderTime ? formatDate(selectedAppointment.reminderTime) : 'Not set'}
                                     </span>
                                 </div>
                                 <div className="info-row">
-                                    <span className="label">Reminder Status:</span>
+                                    <span className="label">Status</span>
                                     <span className="value">{selectedAppointment.reminderSent ? 'Sent' : 'Pending'}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="side-panel-footer">
+                    {/* Action Buttons */}
+                    <div className="modal-actions">
                         <button className="reschedule-btn">
-                            Reschedule Appointment
+                            Reschedule
                         </button>
                         <button className="cancel-btn">
-                            Cancel Appointment
+                            Cancel
                         </button>
                     </div>
                 </div>

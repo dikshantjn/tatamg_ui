@@ -4,7 +4,7 @@
 export const PAYMENT_CONFIG = {
     // Razorpay Configuration
     RAZORPAY: {
-        KEY_ID: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_uMMypIJ2X2bn1N',
+        KEY_ID: process.env.REACT_APP_RAZORPAY_KEY_ID || 'rzp_test_R7wuZ7PnhxSIOE',
         KEY_SECRET: process.env.REACT_APP_RAZORPAY_KEY_SECRET || 'your_razorpay_secret_key_here', // Add your secret key here
         CURRENCY: 'INR',
         COMPANY_NAME: 'Vedika Healthcare',

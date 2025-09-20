@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "http://localhost:5000/api",
-  SOCKET_URL: "http://localhost:5000",
+  BASE_URL: "http://192.168.1.38:5000/api",
+  SOCKET_URL: "http://192.168.1.38:5000",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
   ENDPOINTS: {
@@ -116,13 +116,20 @@ export const API_CONFIG = {
       COMPLETE_BOOKING: "/blood-bank-bookings/:bookingId/complete",
     },
     MEDICINE_DELIVERY: {
+      GET_MEDICAL_STORES: "/medicine-delivery/medicalstores",
+      SEND_PRESCRIPTION: "/medicine-delivery/send",
       UPLOAD_PRESCRIPTION: "/prescription/upload-prescription",
       SEARCH_MORE_VENDORS: "/prescription/:prescriptionId/search-more-vendors",
       TRACK_ORDERS: "/orders/track-orders/:userId",
+      GET_ACTIVE_ORDERS: "/medicine-delivery/orders/active/:userId",
       GET_CART_ITEMS_BY_ORDER: "/cart/:orderId",
       GET_USER_ORDERS_WITH_CART: "/user/orders/cart/:userId",
       UPDATE_ORDER: "/orders/update-order/:orderId",
       GET_DELIVERED_ORDERS: "/orders/:userId",
+      GET_DELIVERED_ORDERS_NEW: "/medicine-delivery/orders/delivered/:userId",
+      GET_INVOICE: "/medicine-delivery/invoice/:orderId",
+      GET_PENDING_ORDERS: "/medicine-delivery/orders/user/:userId/pending-payments",
+      PLACE_MEDICINE_ORDER: "/medicine-delivery/place-medicine-order",
     },
     LAB_TEST: {
       GET_ALL_DIAGNOSTIC_CENTERS: "/lab-test/all-diagnostic-centers",
@@ -153,8 +160,11 @@ export const API_CONFIG = {
       GET_PROFILE: "/vendor/:vendorId",
       UPDATE_PROFILE: "/vendors/update",
       GET_PENDING_REQUESTS: "/prescription/requests/:vendorId",
+      GET_PENDING_PRESCRIPTIONS: "/medicine-delivery/prescriptions/pending/:vendorId",
       ACCEPT_PRESCRIPTION: "/prescription/accept-status",
+      ACCEPT_PRESCRIPTION_NEW: "/medicine-delivery/prescriptions/:prescriptionId/accept",
       GET_ALL_ORDERS: "/orders/getOrders/:vendorId",
+      GET_ORDERS_BY_VENDOR: "/medicine-delivery/orders/vendor/:vendorId",
       CONFIRM_ORDER: "/orders/:orderId/accept",
       SEARCH_MEDICINES: "/orders/search",
       ADD_TO_USER_CART: "/cart/add",
@@ -162,6 +172,9 @@ export const API_CONFIG = {
       DELETE_CART_ITEM: "/cart/delete/:cartId",
       UPDATE_CART_QUANTITY: "/cart/update-quantity/:cartId",
       UPDATE_ORDER_STATUS: "/orders/:orderId/status",
+      UPDATE_ORDER_PAYMENT: "/medicine-delivery/orders/:orderId/payment",
+      UPDATE_ORDER_NOTE: "/medicine-delivery/orders/:orderId/note",
+      UPDATE_ORDER_STATUS_NEW: "/medicine-delivery/update-status",
       GET_VENDOR_PRODUCTS: "/medicineProduct/products/vendor/:vendorId",
       DELETE_PRODUCT: "/medicineProduct/product/:productId",
       ADD_PRODUCT: "/medicineProduct/add-product/:vendorId",
@@ -174,6 +187,12 @@ export const API_CONFIG = {
     },
     BLOG_CATEGORIES: {
       GET_ALL: "/blog-categories/categories/",
+    },
+    MEMBERSHIP: {
+      GET_PLANS: "/membership/plans",
+      CREATE_ORDER: "/membership/order",
+      VERIFY_PAYMENT: "/membership/verify-payment",
+      GET_CURRENT_USER_PLAN: "/membership/user/:userId/current-plan",
     },
   },
 };

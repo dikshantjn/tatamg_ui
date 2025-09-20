@@ -123,8 +123,11 @@
 }
 
 .button-icon {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .button-info {
@@ -136,13 +139,13 @@
 }
 
 .button-label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-align: left;
 }
 
 .button-count {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     opacity: 0.7;
     font-weight: 500;
 }
@@ -464,11 +467,11 @@
     }
 
     .button-icon {
-        font-size: 1.2rem;
+        font-size: 1rem;
     }
 
     .button-label {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
     .orders-grid {
@@ -525,15 +528,15 @@
     }
 
     .button-icon {
-        font-size: 1.1rem;
+        font-size: 0.95rem;
     }
 
     .button-label {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
     }
 
     .button-count {
-        font-size: 0.7rem;
+        font-size: 0.65rem;
     }
 
     .order-card {

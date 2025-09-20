@@ -2,16 +2,11 @@ import React from 'react';
 import {
   Drawer,
   Box,
-  Card,
-  CardContent,
-  Avatar,
-  Typography,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   Chip,
-  Divider,
   useTheme,
   useMediaQuery
 } from '@mui/material';
@@ -23,7 +18,6 @@ import {
   People,
   Assessment,
   Settings,
-  Store,
   TrendingUp,
   LocalShipping,
   ListAlt
@@ -110,56 +104,6 @@ const MedicalStoreVendorSidebar = ({
       background: theme.palette.background.paper,
       borderRight: `1px solid ${theme.palette.divider}`,
     }}>
-      {/* Vendor Profile Card */}
-      <Card 
-        sx={{ 
-          mb: 3,
-          backgroundColor: theme.palette.background.default,
-          border: `1px solid ${theme.palette.divider}`,
-          '&:hover': {
-            boxShadow: theme.shadows[4]
-          }
-        }}
-      >
-        <CardContent sx={{ textAlign: 'center', p: 3 }}>
-          <Avatar 
-            sx={{ 
-              width: 64, 
-              height: 64, 
-              mx: 'auto', 
-              mb: 2,
-              backgroundColor: 'primary.main',
-              fontSize: '1.5rem'
-            }}
-          >
-            <Store />
-          </Avatar>
-          <Typography 
-            variant="h6" 
-            gutterBottom 
-            sx={{ 
-              fontWeight: 600,
-              color: 'primary.main'
-            }}
-          >
-            {vendorData?.generatedId || 'Medical Store'}
-          </Typography>
-          <Typography 
-            variant="body2" 
-            color="text.secondary" 
-            sx={{ mb: 2 }}
-          >
-            {vendorData?.email || 'vendor@example.com'}
-          </Typography>
-          <Chip 
-            label="Medical Store Vendor" 
-            color="primary" 
-            size="small" 
-            variant="outlined"
-            sx={{ fontWeight: 500 }}
-          />
-        </CardContent>
-      </Card>
 
       {/* Navigation Menu */}
       <Box sx={{ flexGrow: 1 }}>

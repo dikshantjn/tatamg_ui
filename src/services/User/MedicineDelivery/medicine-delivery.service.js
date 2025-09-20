@@ -30,4 +30,21 @@ export const updateMedicineOrder = async (orderId, updateFields) => {
   return response.data;
 };
 
+export const getPendingMedicineOrders = async (userId) => {
+  const endpoint = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_PENDING_ORDERS, { userId }));
+  const response = await apiClient.get(endpoint);
+  return response.data;
+};
+
+export const placeMedicineOrder = async (orderIds, addressId, paymentId) => {
+  const endpoint = getApiUrl(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.PLACE_MEDICINE_ORDER);
+  const payload = {
+    orderIds,
+    addressId,
+    paymentId
+  };
+  const response = await apiClient.post(endpoint, payload);
+  return response.data;
+};
+
  

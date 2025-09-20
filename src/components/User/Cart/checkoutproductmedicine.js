@@ -7,8 +7,9 @@ import { getUserId, isAuthenticated } from '../../../services/User/Auth/auth.uti
 import './checkoutproductmedicine.css';
 import CheckoutProductModal from './CheckoutProductModal';
 import { fetchCartItems } from '../../../store/slices/cartSlice';
-import { getUserOrdersWithCart } from '../../../services/User/MedicineDelivery/medicine-delivery.service';
+import { getUserOrdersWithCart, getPendingMedicineOrders } from '../../../services/User/MedicineDelivery/medicine-delivery.service';
 import CheckoutMedicineModal from './CheckoutMedicineModal';
+import { FaPhone, FaTrash } from 'react-icons/fa';
 
 // Image Fallback Icon Component
 const ImageIcon = () => (
@@ -58,7 +59,7 @@ function CheckoutProducts() {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState('products'); // 'products' or 'medicine'
+    const [activeTab, setActiveTab] = useState('medicine'); // 'medicine' or 'products'
     const [notification, setNotification] = useState(null);
     const [showCheckoutModal, setShowCheckoutModal] = useState(false);
     const navigate = useNavigate();
@@ -69,6 +70,8 @@ function CheckoutProducts() {
     const [productItemCount, setProductItemCount] = useState(0);
     const [showMedicineCheckoutModal, setShowMedicineCheckoutModal] = useState(false);
     const [medicineCheckoutOrderData, setMedicineCheckoutOrderData] = useState(null);
+    const [pendingOrders, setPendingOrders] = useState([]);
+    const [removedOrders, setRemovedOrders] = useState(new Set());
 
     // Show notification function
     const showNotification = (message, type = 'success') => {
@@ -101,22 +104,25 @@ function CheckoutProducts() {
     }, [navigate]);
 
     useEffect(() => {
-        // Fetch medicine orders on mount for immediate count
-        const fetchMedicineOrders = async () => {
+        // Fetch pending medicine orders on mount
+        const fetchPendingOrders = async () => {
             const userId = getUserId();
             if (!userId || !isAuthenticated()) return;
             try {
                 setLoadingMedicine(true);
-                const orders = await getUserOrdersWithCart(userId);
-                setMedicineOrders(orders);
+                const response = await getPendingMedicineOrders(userId);
+                if (response.success) {
+                    setPendingOrders(response.data || []);
+                    setMedicineItemCount(response.count || 0);
+                }
                 setMedicineError(null);
             } catch (error) {
-                setMedicineError('Failed to load your medicine orders. Please try again.');
+                setMedicineError('Failed to load your pending medicine orders. Please try again.');
             } finally {
                 setLoadingMedicine(false);
             }
         };
-        fetchMedicineOrders();
+        fetchPendingOrders();
     }, []);
 
     useEffect(() => {
@@ -132,9 +138,10 @@ function CheckoutProducts() {
     }, [cartItems]);
 
     useEffect(() => {
-        // Initialize medicine item count
-        setMedicineItemCount(medicineOrders.reduce((sum, order) => sum + (order.Carts ? order.Carts.length : 0), 0));
-    }, [medicineOrders]);
+        // Update medicine item count based on non-removed orders
+        const activeOrders = pendingOrders.filter(order => !removedOrders.has(order.orderId));
+        setMedicineItemCount(activeOrders.length);
+    }, [pendingOrders, removedOrders]);
 
     const handleQuantityChange = async (cartId, newQuantity) => {
         try {
@@ -206,43 +213,35 @@ function CheckoutProducts() {
         }
     };
 
-    const handleRemoveMedicineItem = (cartId) => {
-        setMedicineOrders(prevOrders => {
-            const updated = prevOrders.map(order => ({
-                ...order,
-                Carts: order.Carts.filter(item => item.cartId !== cartId)
-            })).filter(order => order.Carts.length > 0);
-            // If all orders are empty, show empty cart UI
-            if (updated.length === 0) setMedicineItemCount(0);
-            return updated;
-        });
-        showNotification('Item removed from medicine cart!');
+    const handleRemoveOrder = (orderId) => {
+        setRemovedOrders(prev => new Set([...prev, orderId]));
+        showNotification('Order removed from cart!');
+    };
+
+    const handleCallStore = (vendor) => {
+        // You can implement call functionality here
+        showNotification(`Calling ${vendor.name}...`);
     };
 
     const handleMedicineCheckout = () => {
-        // Transform real backend data for modal
-        const allCartItems = medicineOrders.flatMap(order =>
-            (order.Carts || []).map(item => ({
-                ...item,
-                orderId: order.orderId, // ensure real backend orderId
-                name: item.MedicineProduct?.name || item.name,
-                price: item.price,
-                quantity: item.quantity,
-                // add any other fields needed by modal
-            }))
-        );
+        // Get only non-removed orders
+        const activeOrders = pendingOrders.filter(order => !removedOrders.has(order.orderId));
+        
+        if (activeOrders.length === 0) {
+            showNotification('No orders to checkout!', 'error');
+            return;
+        }
+
         // Prepare orderData for modal
         const orderData = {
-            // No dummy orderId here; grouping will be done in modal
-            items: allCartItems,
-            deliveryAddress: null, // Will be selected in modal
-            subtotal: allCartItems.reduce((total, item) => total + (item.price * item.quantity), 0),
-            platformFee: 5.00,
-            discount: 0.00,
-            deliveryCharge: allCartItems.length > 0 ? 49 : 0,
-            total: 0 // Will be calculated in modal
+            orders: activeOrders,
+            subtotal: activeOrders.reduce((total, order) => total + order.totalAmount, 0),
+            platformFee: 0,
+            discount: 0,
+            deliveryCharge: 0,
+            total: activeOrders.reduce((total, order) => total + order.totalAmount, 0)
         };
-        orderData.total = orderData.subtotal + orderData.platformFee + orderData.deliveryCharge - orderData.discount;
+        
         setMedicineCheckoutOrderData(orderData);
         setShowMedicineCheckoutModal(true);
     };
@@ -447,7 +446,7 @@ function CheckoutProducts() {
                 </div>
             );
         }
-        if (!medicineOrders || medicineOrders.length === 0 || medicineItemCount === 0) {
+        if (!pendingOrders || pendingOrders.length === 0) {
             return (
                 <div className="tab-content">
                     <div className="medicine-placeholder">
@@ -464,92 +463,92 @@ function CheckoutProducts() {
             );
         }
 
-        // Flatten all cart items for summary
-        const allCartItems = medicineOrders.flatMap(order => order.Carts || []);
-        const subtotal = allCartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
-        const gst = subtotal * 0.18;
-        const delivery = allCartItems.length > 0 ? 49 : 0;
-        const total = subtotal + gst + delivery;
+        // Filter out removed orders
+        const activeOrders = pendingOrders.filter(order => !removedOrders.has(order.orderId));
+        const subtotal = activeOrders.reduce((total, order) => total + order.totalAmount, 0);
+        const total = subtotal;
 
         return (
             <div className="tab-content">
                 <div className="checkout-content">
                     <div className="cart-items">
-                        {medicineOrders.map(order => (
-                            <div key={order.orderId} className="medicine-order-item">
-                                <div className="medicine-cart-items">
-                                    {order.Carts && order.Carts.length > 0 ? order.Carts.map(item => (
-                                        <div key={item.cartId} className="item-row medicine-item-row">
-                                            <div className="item-info">
-                                                <div className="item-image">
-                                                    <div className="image-fallback-container" style={{ display: 'flex' }}>
-                                                        <ImageIcon />
-                                                    </div>
-                                                </div>
-                                                <span className="item-name">{item.MedicineProduct?.name || item.name}</span>
-                                            </div>
-                                            <div className="item-details medicine-item-details">
-                                                <div className="quantity-controls">
-                                                    <button 
-                                                        onClick={() => handleMedicineQuantityChange(item.cartId, Math.max(1, item.quantity - 1))}
-                                                        disabled={item.quantity <= 1}
-                                                        style={{ color: colors.primary }}
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <span>{item.quantity}</span>
-                                                    <button 
-                                                        onClick={() => handleMedicineQuantityChange(item.cartId, item.quantity + 1)}
-                                                        style={{ color: colors.primary }}
-                                                    >
-                                                        +
-                                                    </button>
-                                                </div>
-                                                <span className="item-price">₹{item.price}</span>
-                                                <button 
-                                                    className="remove-item"
-                                                    onClick={() => handleRemoveMedicineItem(item.cartId)}
-                                                >
-                                                    Remove
-                                                </button>
-                                            </div>
+                        {pendingOrders.map(order => {
+                            const isRemoved = removedOrders.has(order.orderId);
+                            return (
+                                <div 
+                                    key={order.orderId} 
+                                    className={`medicine-order-item ${isRemoved ? 'removed' : ''}`}
+                                >
+                                    <div className="order-header">
+                                        <div className="order-info">
+                                            <h3 className="order-id">Order #{order.orderId}</h3>
+                                            <p className="order-date">
+                                                {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
                                         </div>
-                                    )) : <div className="no-cart-items">No items in this order.</div>}
+                                    </div>
+
+                                    <div className="order-content">
+                                        <div className="store-info">
+                                            <h4>Medical Store: {order.vendor.name}</h4>
+                                        </div>
+                                        
+                                        <div className="order-amount">
+                                            <span className="amount-label">Amount:</span>
+                                            <span className="amount-value">₹{order.totalAmount.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="order-actions">
+                                        <button 
+                                            className="call-store-btn"
+                                            onClick={() => handleCallStore(order.vendor)}
+                                            disabled={isRemoved}
+                                        >
+                                            <FaPhone /> Call Store
+                                        </button>
+                                        <button 
+                                            className="remove-order-btn"
+                                            onClick={() => handleRemoveOrder(order.orderId)}
+                                            disabled={isRemoved}
+                                        >
+                                            <FaTrash /> {isRemoved ? 'Removed' : 'Remove'}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    
+                    {activeOrders.length > 0 && (
+                        <div className="order-summary">
+                            <h3>Order Summary</h3>
+                            <div className="summary-details">
+                                <div className="summary-row">
+                                    <span>Total Orders</span>
+                                    <span>{activeOrders.length}</span>
+                                </div>
+                                <div className="summary-row total">
+                                    <span>Total Amount</span>
+                                    <span>₹{total.toLocaleString()}</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                    <div className="order-summary">
-                        <h3>Order Summary</h3>
-                        <div className="summary-details">
-                            <div className="summary-row">
-                                <span>Subtotal</span>
-                                <span>₹{subtotal.toLocaleString()}</span>
-                            </div>
-                            <div className="summary-row">
-                                <span>GST (18%)</span>
-                                <span>₹{gst.toLocaleString()}</span>
-                            </div>
-                            <div className="summary-row">
-                                <span>Delivery</span>
-                                <span>₹{delivery.toLocaleString()}</span>
-                            </div>
-                            <div className="summary-row total">
-                                <span>Total</span>
-                                <span>₹{total.toLocaleString()}</span>
-                            </div>
+                            <button 
+                                className="checkout-button"
+                                onClick={handleMedicineCheckout}
+                                style={{ background: colors.primary, color: '#fff' }}
+                            >
+                                Proceed to Checkout
+                            </button>
+                            <Link to="/medicine" className="continue-shopping" style={{ color: colors.primary }}>
+                                Continue Shopping
+                            </Link>
                         </div>
-                        <button 
-                            className="checkout-button"
-                            onClick={handleMedicineCheckout}
-                            style={{ background: colors.primary, color: '#fff' }}
-                        >
-                            Proceed to Checkout
-                        </button>
-                        <Link to="/medicine" className="continue-shopping" style={{ color: colors.primary }}>
-                            Continue Shopping
-                        </Link>
-                    </div>
+                    )}
                 </div>
             </div>
         );
@@ -570,22 +569,22 @@ function CheckoutProducts() {
             <div className="tabs-container">
                 <div className="tabs">
                     <TabButton 
-                        active={activeTab === 'products'} 
-                        onClick={() => setActiveTab('products')}
-                    >
-                        Products ({productItemCount})
-                    </TabButton>
-                    <TabButton 
                         active={activeTab === 'medicine'} 
                         onClick={() => setActiveTab('medicine')}
                     >
                         Medicine ({medicineItemCount})
                     </TabButton>
+                    <TabButton 
+                        active={activeTab === 'products'} 
+                        onClick={() => setActiveTab('products')}
+                    >
+                        Products ({productItemCount})
+                    </TabButton>
                 </div>
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'products' ? renderProductsTab() : renderMedicineTab()}
+            {activeTab === 'medicine' ? renderMedicineTab() : renderProductsTab()}
             
             {/* Unified Checkout Modal */}
             <CheckoutProductModal 
@@ -616,6 +615,14 @@ function CheckoutProducts() {
             <CheckoutMedicineModal
                 isOpen={showMedicineCheckoutModal}
                 onClose={() => setShowMedicineCheckoutModal(false)}
+                onPaymentSuccess={() => {
+                    // Clear medicine cart after successful payment and order placement
+                    setPendingOrders([]);
+                    setRemovedOrders(new Set());
+                    setMedicineItemCount(0);
+                    setShowMedicineCheckoutModal(false);
+                    showNotification('Order placed successfully! Medicine cart cleared.');
+                }}
                 orderData={medicineCheckoutOrderData}
             />
         </div>
@@ -623,3 +630,5 @@ function CheckoutProducts() {
 }
 
 export default CheckoutProducts;
+
+

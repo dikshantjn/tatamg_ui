@@ -1,4 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { 
+    FaUserMd, 
+    FaPills, 
+    FaAmbulance, 
+    FaFlask, 
+    FaTint, 
+    FaBed, 
+    FaBox 
+} from 'react-icons/fa';
 import ProductOrderHistory from './ProductOrderHistory';
 import AmbulanceOrderHistory from './AmbulanceOrderHistory';
 import BloodBankOrderHistory from './BloodBankOrderHistory';
@@ -63,13 +72,13 @@ const OrderHistory = () => {
     }, []);
 
     const tabs = [
-        { id: 'clinic', label: 'Clinic Appointments', icon: '👨‍⚕️', count: clinicCount },
-        { id: 'medicine', label: 'Medicine Orders', icon: '💊', count: 12 },
-        { id: 'ambulance', label: 'Ambulance Bookings', icon: '🚑', count: ambulanceCount },
-        { id: 'labTest', label: 'Lab Tests', icon: '🔬', count: labTestCount },
-        { id: 'bloodBank', label: 'Blood Bank', icon: '🩸', count: bloodBankCount },
-        { id: 'bedBooking', label: 'Bed Bookings', icon: '🏥', count: bedBookingCount },
-        { id: 'product', label: 'Product Orders', icon: '📦', count: 7 }
+        { id: 'clinic', label: 'Clinic Appointments', icon: FaUserMd, count: clinicCount },
+        { id: 'medicine', label: 'Medicine Orders', icon: FaPills, count: 12 },
+        { id: 'ambulance', label: 'Ambulance Bookings', icon: FaAmbulance, count: ambulanceCount },
+        { id: 'labTest', label: 'Lab Tests', icon: FaFlask, count: labTestCount },
+        { id: 'bloodBank', label: 'Blood Bank', icon: FaTint, count: bloodBankCount },
+        { id: 'bedBooking', label: 'Bed Bookings', icon: FaBed, count: bedBookingCount },
+        { id: 'product', label: 'Product Orders', icon: FaBox, count: 7 }
     ];
 
     // Mock data for demonstration
@@ -393,21 +402,26 @@ const OrderHistory = () => {
                     </div>
                     
                     <div className="sidebar-buttons">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
-                                onClick={() => setActiveTab(tab.id)}
-                            >
-                                <div className="button-content">
-                                    <span className="button-icon">{tab.icon}</span>
-                                    <div className="button-info">
-                                        <span className="button-label">{tab.label}</span>
-                                        <span className="button-count">{tab.count} orders</span>
+                        {tabs.map((tab) => {
+                            const IconComponent = tab.icon;
+                            return (
+                                <button
+                                    key={tab.id}
+                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab.id)}
+                                >
+                                    <div className="button-content">
+                                        <span className="button-icon">
+                                            <IconComponent />
+                                        </span>
+                                        <div className="button-info">
+                                            <span className="button-label">{tab.label}</span>
+                                            <span className="button-count">{tab.count} orders</span>
+                                        </div>
                                     </div>
-                                </div>
-                            </button>
-                        ))}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 

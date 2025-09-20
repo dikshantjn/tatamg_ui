@@ -8,8 +8,6 @@ import healthcareTheme from './theme/healthcareTheme';
 
 import Header from './components/User/header/Header';
 import Footer from './components/Footer';
-import SearchResults from './components/SearchResults';
-import DoctorProfile from './components/DoctorProfile';
 
 import Login from './components/Login';
 import ProductVendorDashboard from './components/Vendors/ProductVendor/ProductVendorDashboard';
@@ -46,41 +44,18 @@ import BloodBankVendorProcessRequest from './components/Vendors/BloodBankVendor/
 import LabTestVendorDashboard from './components/Vendors/LabTestVendor/LabTestVendorDashboard';
 import DeliveryPartnerVendorDashboard from './components/Vendors/DeliveryPartnerVendor/DeliveryPartnerVendorDashboard';
 
-import Checkout from './components/Checkout';
 import Products from './components/User/Products/Products';
-import ProductProfilePage from './components/ProductsProfile';
 import Ambulance from './components/User/Ambulance/Ambulance';
-import Offers from './components/Offers';
 import Membership from './components/Membership';
 import Home from './components/User/Home/Home';
 import ConsultDoctors from './components/User/DoctorConsultation/ConsultDoctors';
 import LabTests from './components/User/LabTest/LabTests';
 import BloodBank from './components/User/BloodBank/BloodBank';
-import FindDonor from './components/FindDonor';
-import RegisterDonor from './components/RegisterDonor';
-import MedicalLoans from './components/MedicalLoans';
-import LoanForm from './components/LoanForm';
-import MedicalInsurance from './components/MedicalInsurance';
-import Vaccines from './components/Vaccines';
-import MaternalCare from './components/MaternalCare';
-import ChildCare from './components/ChildCare';
 import MedicineDelivery from './components/User/MedicineOrder/MedicineDelivery';
-import Physiotherapy from './components/Physiotherapy';
+import NewMedicineOrder from './components/User/NewMedicineOrder';
 import HospitalBedBooking from './components/User/Hospital/HospitalBedBooking';
 import BookHospitalBed from './components/User/Hospital/BookHospitalBed';
-import HospitalResults from './components/HospitalResults';
-import CareAtHome from './components/CareAtHome';
-import MedicalTourism from './components/MedicalTourism';
-import Rehabilitation from './components/Rehabilitation';
-import EarlyDetection from './components/EarlyDetection';
-import Nutrition from './components/Nutrition';
-import PetCare from './components/PetCare';
-import OrganDonation from './components/OrganDonation';
-import Ayurveda from './components/Ayurveda';
 import CheckoutProducts from './components/User/Cart/checkoutproductmedicine';
-import CheckoutDelivery from './components/checkoutdelivery';
-import CheckoutAmbulance from './components/checkoutambulance';
-import PaymentGateway from './components/PaymentGateway';
 import UserProfile from './components/User/UserProfile/UserProfile';
 import BottomNavigation from './components/BottomNavigation';
 import ProductList from './components/User/Products/ProductList';
@@ -200,48 +175,23 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
             })() : <Home />
           } />
           <Route path="/products" element={<Products />} />
-          <Route path="/product/:id" element={<ProductProfilePage />} />
           <Route path="/products/:category" element={<ProductList />} />
 
           {/* Protected Routes */}
-          <Route path="/doctor-profile/:id" element={<DoctorProfile />} />
-          <Route path="/search" element={<SearchResults />} />
           <Route path="/doctor-consultation" element={<ConsultDoctors />} />
           <Route path="/doctor-consultation/offline" element={<OfflineDoctorConsultation />} />
           <Route path="/doctor-consultation/online" element={<OnlineDoctorConsultation />} />
           <Route path="/doctor-consultation/offline/book/:vendorId" element={<BookOfflineAppointment />} />
-          <Route path="/checkout" element={<Checkout />} />
           <Route path="/ambulance" element={<Ambulance />} />
-          <Route path="/offers" element={<Offers />} />
           <Route path="/membership" element={<Membership />} />
           <Route path="/lab-tests" element={<LabTests />} />
           <Route path="/lab-tests/book/:labId" element={<BookLabTestAppt />} />
           <Route path="/blood-bank" element={<BloodBank />} />
-          <Route path="/find-donor" element={<FindDonor />} />
-          <Route path="/register-donor" element={<RegisterDonor />} />
-          <Route path="/medical-loans" element={<MedicalLoans />} />
-          <Route path="/loan-form" element={<LoanForm />} />
-          <Route path="/insurance" element={<MedicalInsurance />} />
-          <Route path="/vaccines" element={<Vaccines />} />
-          <Route path="/maternal-care" element={<MaternalCare />} />
-          <Route path="/child-care" element={<ChildCare />} />
           <Route path="/medicine-order" element={<MedicineDelivery />} />
-          <Route path="/physiotherapy" element={<Physiotherapy />} />
+          <Route path="/new-medicine-order" element={<NewMedicineOrder />} />
           <Route path="/hospital-bed-booking" element={<HospitalBedBooking />} />
           <Route path="/hospital-bed-booking/:vendorId" element={<BookHospitalBed />} />
-          <Route path="/hospital-results" element={<HospitalResults />} />
-          <Route path="/care-at-home" element={<CareAtHome />} />
-          <Route path="/medical-tourism" element={<MedicalTourism />} />
-          <Route path="/rehabilitation" element={<Rehabilitation />} />
-          <Route path="/early-detection" element={<EarlyDetection />} />
-          <Route path="/nutrition" element={<Nutrition />} />
-          <Route path="/pet-care" element={<PetCare />} />
-          <Route path="/organ-donation" element={<OrganDonation />} />
-          <Route path="/ayurveda" element={<Ayurveda />} />
           <Route path="/checkout-product-medicine" element={<CheckoutProducts />} />
-          <Route path="/checkout-3" element={<CheckoutDelivery />} />
-          <Route path="/checkout-4" element={<CheckoutAmbulance />} />
-          <Route path="/gateway" element={<PaymentGateway />} />
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/orders" element={<OrderHistory />} />
           <Route path="/order-history" element={<OrderHistory />} />

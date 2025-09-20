@@ -785,6 +785,122 @@
     }
 }
 
+/* New Medicine Order Styles */
+.medicine-order-item.removed {
+    opacity: 0.5;
+    background: #f1f5f9;
+}
+
+.medicine-order-item .order-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.medicine-order-item .order-info {
+    width: 100%;
+}
+
+.medicine-order-item .order-info h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a365d;
+    margin: 0 0 0.25rem 0;
+    width: 100%;
+    word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.medicine-order-item .order-date {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+    width: 100%;
+}
+
+.medicine-order-item .order-content {
+    margin-bottom: 1rem;
+}
+
+.medicine-order-item .store-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5rem 0;
+}
+
+.medicine-order-item .order-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.medicine-order-item .amount-label {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.medicine-order-item .amount-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1a365d;
+}
+
+.medicine-order-item .order-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.medicine-order-item .call-store-btn,
+.medicine-order-item .remove-order-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.medicine-order-item .call-store-btn {
+    background-color: #10b981;
+    color: white;
+}
+
+.medicine-order-item .call-store-btn:hover:not(:disabled) {
+    background-color: #059669;
+}
+
+.medicine-order-item .remove-order-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+.medicine-order-item .remove-order-btn:hover:not(:disabled) {
+    background-color: #dc2626;
+}
+
+.medicine-order-item .call-store-btn:disabled,
+.medicine-order-item .remove-order-btn:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+}
+
+
 .medicine-order-item {
     background: #fff;
     border-radius: 12px;
