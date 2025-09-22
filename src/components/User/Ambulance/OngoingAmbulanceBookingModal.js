@@ -1,10 +1,9 @@
 import React from 'react';
-import Modal from '@mui/material/Modal';
+import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import OutlinedButton from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CloseIcon from '@mui/icons-material/Close';
@@ -15,8 +14,14 @@ import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import CallIcon from '@mui/icons-material/Call';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
-import { styled } from '@mui/material/styles';
-import './OngoingAmbulanceBookingModal.css';
+import { useTheme, styled } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Chip from '@mui/material/Chip';
+import CheckIcon from '@mui/icons-material/Check';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import AmbulanceBookingPaymentService from '../../../services/payment/ambulance-booking-payment.service';
 import { getUserData } from '../../../services/User/Auth/auth.utils';
 import { PAYMENT_ERRORS } from '../../../config/payment.config';
@@ -33,49 +38,66 @@ function ReceiptRow({ label, value, bold }) {
 }
 
 // Helper: Timeline (connected, continuous, custom CSS, with numbered filled nodes)
-function Timeline({ steps, currentStepIndex }) {
-  const containerRef = React.useRef(null);
-  const nodeRefs = React.useRef([]);
+// Horizontal MUI Stepper with numbered/tick icons and connected bars
+const ColorConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 16,
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.grey[300],
+    borderRadius: 2,
+  },
+}));
 
-  React.useEffect(() => {
-    if (nodeRefs.current[currentStepIndex] && containerRef.current) {
-      nodeRefs.current[currentStepIndex].scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: currentStepIndex === 0 ? 'start' : 'center',
-      });
-    }
-  }, [currentStepIndex]);
-
+function NumberedStepIcon(props) {
+  const { active, completed, icon } = props;
   return (
-    <div className="timeline-container" ref={containerRef}>
-      <div className="timeline">
-        {steps.map((step, idx) => {
-          const isActive = idx === currentStepIndex;
-          const isCompleted = idx < currentStepIndex;
-          const isLast = idx === steps.length - 1;
-          const isFilled = isCompleted || isActive;
-          return (
-            <div className="timeline-item" key={step} ref={el => nodeRefs.current[idx] = el}>
-              {/* Line before node */}
-              {idx > 0 && (
-                <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
-              )}
-              {/* Node with number */}
-              <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
-                <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{idx + 1}</span>
-              </div>
-              {/* Step label */}
-              <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{step}</div>
-              {/* Line after node */}
-              {!isLast && (
-                <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <Box
+      sx={{
+        width: { xs: 28, sm: 32 },
+        height: { xs: 28, sm: 32 },
+        borderRadius: '50%',
+        bgcolor: completed ? 'success.main' : active ? 'primary.main' : 'grey.200',
+        border: active ? '3px solid' : '2px solid',
+        borderColor: completed ? 'success.main' : active ? 'primary.dark' : 'grey.300',
+        boxShadow: active ? '0 0 0 4px rgba(25,118,210,0.12)' : 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: completed || active ? 'common.white' : 'text.secondary',
+      }}
+    >
+      {completed ? (
+        <CheckIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
+      ) : (
+        <Typography sx={{ fontSize: { xs: 13, sm: 14 }, fontWeight: 700 }}>{icon}</Typography>
+      )}
+    </Box>
+  );
+}
+
+function BookingTimeline({ steps, currentStepIndex }) {
+  return (
+    <Box sx={{ width: '100%', overflowX: 'auto', px: 0.5 }}>
+      <Stepper
+        alternativeLabel
+        activeStep={currentStepIndex}
+        connector={<ColorConnector />}
+        sx={{ minWidth: { xs: 420, sm: 520 } }}
+      >
+        {steps.map((label, idx) => (
+          <Step key={label} completed={idx < currentStepIndex}>
+            <StepLabel StepIconComponent={NumberedStepIcon}>
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, fontWeight: idx === currentStepIndex ? 700 : 500 }}>
+                {label}
+              </Typography>
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
   );
 }
 
@@ -102,6 +124,9 @@ function PickupDropTimeline({ pickup, drop }) {
 export default function OngoingAmbulanceBookingModal({ open, booking, steps, currentStepIndex, onClose, onRefreshBooking }) {
   const [paymentStatus, setPaymentStatus] = React.useState('idle'); // idle | processing | success | failed
   const [paymentError, setPaymentError] = React.useState('');
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const headerHeight = isMdUp ? 64 : 56;
 
   // WebSocket for real-time updates
   const userId = booking?.userId;
@@ -157,71 +182,75 @@ export default function OngoingAmbulanceBookingModal({ open, booking, steps, cur
     );
   };
 
-  // Responsive styles for side panel (desktop) and bottom sheet (mobile)
-  const modalBoxSx = {
-    position: 'fixed',
-    right: { xs: 0, md: 0 },
-    left: { xs: 0, md: 'auto' },
-    bottom: { xs: 0, md: 'auto' },
-    top: { xs: 'auto', md: 0 },
-    width: { xs: '100vw', md: 400 },
-    height: { xs: 'auto', md: '100vh' },
-    maxHeight: { xs: '90vh', md: '100vh' },
-    bgcolor: 'white',
-    borderRadius: { xs: '24px 24px 0 0', md: '24px 0 0 24px' },
-    boxShadow: 3,
-    p: { xs: 1.5, md: 3 },
-    overflowY: 'auto',
-    zIndex: 1300,
-    outline: 'none',
-    mx: { xs: 0, md: 'auto' },
-    transition: 'all 0.3s',
+  // Panel container styles
+  const panelSx = {
+    p: { xs: 2, md: 3 },
+    height: { xs: 'auto', md: '100%' },
+    overflowY: 'auto'
   };
 
-  // Completed State
-  if (isCompleted) {
-    return (
-      <Modal open={open} onClose={onClose} sx={{ zIndex: 1300 }}>
-        <Box sx={modalBoxSx}>
-          <Box display="flex" justifyContent="flex-end">
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
-            <Box bgcolor="green.50" borderRadius="50%" p={2} mb={1}>
-              <CheckCircleOutlineIcon sx={{ fontSize: 48, color: 'green' }} />
-            </Box>
-            <Typography variant="h5" fontWeight={700} color="green" mb={1}>Service Completed</Typography>
-            <Typography align="center" color="text.secondary" mb={3}>
-              Your ambulance service has been completed successfully. Thank you for choosing our service.
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-evenly">
-            <Button variant="outlined" startIcon={<CloseIcon />} onClick={onClose} sx={{ px: 3, py: 1.5 }}>
-              Close
-            </Button>
-            <Button variant="contained" startIcon={<StarOutlineIcon />} sx={{ px: 3, py: 1.5, bgcolor: 'green', color: 'white', '&:hover': { bgcolor: 'green' } }} onClick={onClose}>
-              Rate Service
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-    );
-  }
-
   return (
-    <Modal open={open} onClose={onClose} sx={{ zIndex: 1300 }}>
-      <Box sx={modalBoxSx}>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      anchor={isMdUp ? 'right' : 'bottom'}
+      ModalProps={{
+        keepMounted: true,
+        BackdropProps: { invisible: true, sx: { backgroundColor: 'transparent' } }
+      }}
+      PaperProps={{
+        sx: {
+          top: isMdUp ? headerHeight : 'auto',
+          height: isMdUp ? `calc(100vh - ${headerHeight}px)` : 'auto',
+          maxHeight: isMdUp ? `calc(100vh - ${headerHeight}px)` : `calc(100vh - 80px)`,
+          width: isMdUp ? 400 : '100%',
+          borderRadius: isMdUp ? '24px 0 0 24px' : '24px 24px 0 0'
+        }
+      }}
+    >
+      <Box sx={panelSx}>
         <Box display="flex" justifyContent="flex-end">
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
         </Box>
-        <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
-          <LocalShippingRoundedIcon sx={{ fontSize: 32, color: 'green' }} />
-          <Typography variant="h6" fontWeight={700} mt={1}>Ongoing Ambulance Booking</Typography>
-        </Box>
+        {/* Header Info */}
+        {!isCompleted && (
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <LocalShippingRoundedIcon sx={{ fontSize: 28, color: 'success.main' }} />
+              <Typography variant="h6" fontWeight={700}>Ongoing Ambulance Booking</Typography>
+            </Box>
+            <Chip
+              size="small"
+              label={booking.status}
+              color={booking.status === 'WaitingForPayment' ? 'warning' : booking.status === 'paymentCompleted' ? 'success' : 'default'}
+              variant="outlined"
+            />
+          </Box>
+        )}
+        {isCompleted ? (
+          <>
+            <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+              <Box bgcolor="green.50" borderRadius="50%" p={2} mb={1}>
+                <CheckCircleOutlineIcon sx={{ fontSize: 48, color: 'green' }} />
+              </Box>
+              <Typography variant="h5" fontWeight={700} color="green" mb={1}>Service Completed</Typography>
+              <Typography align="center" color="text.secondary" mb={3}>
+                Your ambulance service has been completed successfully. Thank you for choosing our service.
+              </Typography>
+            </Box>
+            <Box display="flex" justifyContent="space-evenly">
+              <Button variant="outlined" startIcon={<CloseIcon />} onClick={onClose} sx={{ px: 3, py: 1.5 }}>
+                Close
+              </Button>
+              <Button variant="contained" startIcon={<StarOutlineIcon />} sx={{ px: 3, py: 1.5, bgcolor: 'green', color: 'white', '&:hover': { bgcolor: 'green' } }} onClick={onClose}>
+                Rate Service
+              </Button>
+            </Box>
+          </>
+        ) : (
+          <>
         <Box display="flex" alignItems="center" mb={2}>
           <ApartmentRoundedIcon sx={{ fontSize: 20, color: 'blueGrey' }} />
           <Typography ml={1} fontWeight={600}>{booking.agency?.agencyName || 'Unknown Agency'}</Typography>
@@ -236,7 +265,7 @@ export default function OngoingAmbulanceBookingModal({ open, booking, steps, cur
           <Typography ml={1} fontSize={14}>Date: {formattedDate}</Typography>
         </Box>
         <Box mb={2}>
-          <Timeline steps={steps} currentStepIndex={currentStepIndex} />
+              <BookingTimeline steps={steps} currentStepIndex={currentStepIndex} />
         </Box>
         {hasPaymentInfo && (isWaitingForPayment || isPaymentCompleted || booking.isPaymentBypassed) && (
           <Box width="100%" p={2} mb={2} borderRadius={2} border={1} borderColor={booking.isPaymentBypassed ? 'blue.200' : 'grey.300'} bgcolor={booking.isPaymentBypassed ? 'blue.50' : 'grey.100'}>
@@ -301,7 +330,9 @@ export default function OngoingAmbulanceBookingModal({ open, booking, steps, cur
         >
           Call Agency
         </Button>
+          </>
+        )}
       </Box>
-    </Modal>
+    </Drawer>
   );
 } 

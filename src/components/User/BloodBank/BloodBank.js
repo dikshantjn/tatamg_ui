@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MAPS_API_KEY } from '../../../config/map.config';
 import './BloodBank.css';
 import { getActiveBloodBanks, createBloodBankRequest, getOngoingBloodBankBooking } from '../../../services/User/BloodBank/blood-bank.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
@@ -10,6 +9,9 @@ import userService from '../../../services/User/Profile/user.service';
 const BLOOD_TYPES = [
   'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
 ];
+
+// Default location for static map
+const defaultLocation = "18.5204, 73.8567"; // Pune coordinates
 
 function BloodBank() {
   const [locationEnabled, setLocationEnabled] = useState(true);
@@ -31,7 +33,6 @@ function BloodBank() {
     date: '',
   });
   const [donorSubmitted, setDonorSubmitted] = useState(false);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [bloodBanks, setBloodBanks] = useState([]);
   const [selectedBloodBank, setSelectedBloodBank] = useState(null);
   const [requestLoading, setRequestLoading] = useState(false);
@@ -39,27 +40,15 @@ function BloodBank() {
   const [formError, setFormError] = useState('');
   const [ongoingBooking, setOngoingBooking] = useState(null);
   const [ongoingModalOpen, setOngoingModalOpen] = useState(false);
-  const mapRef = useRef(null);
   const navigate = useNavigate();
 
-  // Dynamically load Google Maps JS API
-  useEffect(() => {
-    if (!window.google || !window.google.maps) {
-      const scriptId = 'google-maps-script';
-      if (!document.getElementById(scriptId)) {
-        const script = document.createElement('script');
-        script.id = scriptId;
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_API_KEY}`;
-        script.async = true;
-        script.onload = () => setMapLoaded(true);
-        document.body.appendChild(script);
-      } else {
-        document.getElementById(scriptId).onload = () => setMapLoaded(true);
-      }
-    } else {
-      setMapLoaded(true);
+  // Get map center coordinates
+  const getMapCenter = () => {
+    if (userLocation) {
+      return `${userLocation.lat},${userLocation.lng}`;
     }
-  }, []);
+    return defaultLocation;
+  };
 
   // Geolocation on mount
   useEffect(() => {
@@ -84,17 +73,15 @@ function BloodBank() {
     );
   }, []);
 
-  // Fetch blood banks when map is loaded
+  // Fetch blood banks on mount
   useEffect(() => {
-    if (mapLoaded) {
-      getActiveBloodBanks()
-        .then(data => {
-          if (Array.isArray(data)) setBloodBanks(data);
-          else if (Array.isArray(data.data)) setBloodBanks(data.data);
-        })
-        .catch(() => setBloodBanks([]));
-    }
-  }, [mapLoaded]);
+    getActiveBloodBanks()
+      .then(data => {
+        if (Array.isArray(data)) setBloodBanks(data);
+        else if (Array.isArray(data.data)) setBloodBanks(data.data);
+      })
+      .catch(() => setBloodBanks([]));
+  }, []);
 
   // Fetch ongoing blood bank booking on mount and for refresh
   const fetchOngoingBooking = async () => {
@@ -122,41 +109,20 @@ function BloodBank() {
     fetchOngoingBooking();
   }, []);
 
-  // Google Maps loader
-  useEffect(() => {
-    if (userLocation && mapLoaded && window.google && mapRef.current) {
-      const map = new window.google.maps.Map(mapRef.current, {
-        center: userLocation,
-        zoom: 13,
-        mapId: 'blood-bank-map',
-      });
-      new window.google.maps.Marker({
-        position: userLocation,
-        map,
-        title: 'Your Location',
-        icon: {
-          url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        },
-      });
-      // Add blood bank markers
-      bloodBanks.forEach(bank => {
-        if (bank.googleMapsLocation) {
-          const [lat, lng] = bank.googleMapsLocation.split(',').map(Number);
-          if (!isNaN(lat) && !isNaN(lng)) {
-            const marker = new window.google.maps.Marker({
-              position: { lat, lng },
-              map,
-              title: bank.agencyName,
-              icon: {
-                url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-              },
-            });
-            marker.addListener('click', () => setSelectedBloodBank(bank));
-          }
-        }
-      });
-    }
-  }, [userLocation, mapLoaded, bloodBanks]);
+  const renderMap = () => {
+    const centerCoords = getMapCenter();
+    return (
+      <iframe
+        src={`https://maps.google.com/maps?q=${centerCoords}&z=13&output=embed`}
+        width="100%"
+        height="100%"
+        style={{ border: 0 }}
+        allowFullScreen=""
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    );
+  };
 
   // Handle prescription upload
   const handlePrescriptionChange = (e) => {
@@ -278,7 +244,9 @@ function BloodBank() {
         </div>
       )}
       {/* Google Map */}
-      <div className="bloodbank-map" ref={mapRef} />
+      <div className="bloodbank-map">
+        {renderMap()}
+      </div>
 
       {/* Blood Bank Info Side Panel (left) */}
       {selectedBloodBank && (

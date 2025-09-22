@@ -1,9 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiMapPin, FiPhone, FiClock, FiCalendar, FiInfo, FiAward, FiBriefcase, FiStar, FiHeart, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { hospitalService } from '../../../services/User/Hospital/hospital.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
-import './BookHospitalBed.css';
+import {
+  Box,
+  Paper,
+  Typography,
+  Chip,
+  Grid,
+  Button,
+  Divider,
+  IconButton,
+  TextField
+} from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import PlaceIcon from '@mui/icons-material/Place';
+import PhoneIcon from '@mui/icons-material/Phone';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import StarIcon from '@mui/icons-material/Star';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const BookHospitalBed = () => {
     const { vendorId } = useParams();
@@ -128,227 +147,215 @@ const BookHospitalBed = () => {
 
     const renderDialog = () => {
         if (!showDialog) return null;
-
+        const isSuccess = dialogContent.type === 'success';
         return (
-            <div className="dialog-overlay">
-                <div className="modern-dialog">
-                    {dialogContent.type === 'success' ? (
-                        <div className="dialog-content success">
-                            <div className="dialog-icon">
-                                <FiCheckCircle className="success-icon" />
-                            </div>
-                            <h2>Booking Request Sent!</h2>
-                            <div className="booking-info">
-                                <p>Your bed booking request has been successfully submitted.</p>
-                                <div className="status-message">
-                                    <FiInfo className="info-icon" />
-                                    <p>Please wait for the hospital to review and approve your request. 
-                                    You will be notified once the hospital confirms your booking.</p>
-                                </div>
-                            </div>
-                            <div className="dialog-buttons">
-                                <button className="go-back-button" onClick={() => navigate(-1)}>
-                                    Go Back
-                                </button>
-                                <button className="close-button" onClick={() => setShowDialog(false)}>
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="dialog-content error">
-                            <div className="dialog-icon">
-                                <FiAlertCircle className="error-icon" />
-                            </div>
-                            <h2>Booking Failed</h2>
-                            <p>{dialogContent.message}</p>
-                            <div className="dialog-buttons">
-                                <button className="go-back-button" onClick={() => navigate(-1)}>
-                                    Go Back
-                                </button>
-                                <button className="close-button" onClick={() => setShowDialog(false)}>
-                                    Close
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 1300, bgcolor: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
+            <Paper sx={{ p: 3, maxWidth: 420, width: '100%', borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                {isSuccess ? (
+                  <CheckCircleIcon color="success" sx={{ mr: 1 }} />
+                ) : (
+                  <InfoOutlinedIcon color="error" sx={{ mr: 1 }} />
+                )}
+                <Typography variant="h6" fontWeight={700}>{isSuccess ? 'Booking Request Sent!' : 'Booking Failed'}</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {isSuccess ? 'Your bed booking request has been submitted. We will notify you when the hospital confirms your booking.' : dialogContent.message}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                <Button variant="outlined" onClick={() => navigate(-1)}>Go Back</Button>
+                <Button variant="contained" onClick={() => setShowDialog(false)}>Close</Button>
+              </Box>
+            </Paper>
+          </Box>
         );
     };
 
     if (loading) {
         return (
-            <div className="loading-state">
-                <div className="spinner"></div>
-                <p>Loading hospital details...</p>
-            </div>
+          <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography>Loading hospital details...</Typography>
+            </Paper>
+          </Box>
         );
     }
 
     if (error) {
         return (
-            <div className="error-state">
-                <FiInfo size={48} />
-                <h3>Oops! Something went wrong</h3>
-                <p>{error}</p>
-                <button onClick={fetchHospitalAndWards}>Try Again</button>
-            </div>
+          <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+            <Paper sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h6" sx={{ mb: 1 }}>Oops! Something went wrong</Typography>
+              <Typography sx={{ mb: 2 }}>{error}</Typography>
+              <Button variant="contained" onClick={fetchHospitalAndWards}>Try Again</Button>
+            </Paper>
+          </Box>
         );
     }
 
     return (
-        <div className="book-hospital-bed-container">
-            {/* Hospital Info Section */}
-            <section className="hospital-info-section">
-                <div className="hospital-header">
-                    <h2>{hospital.name}</h2>
-                    <div className="hospital-badges">
-                        <span className="badge">
-                            <FiAward />
-                            {hospital.generatedId}
-                        </span>
-                        <span className="badge">
-                            <FiStar />
-                            4.5/5 Rating
-                        </span>
-                        <span className="badge">
-                            <FiHeart />
-                            98% Success Rate
-                        </span>
-                    </div>
-                </div>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 4 } }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <IconButton onClick={() => navigate(-1)} sx={{ mr: 1 }}>
+            <ArrowBackIosNewIcon fontSize="small" />
+          </IconButton>
+          <Typography variant="h5" fontWeight={700}>Book Hospital Bed</Typography>
+        </Box>
+        {/* Unified container */}
+        <Paper sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
+          {/* Top: Hospital summary */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <LocalHospitalIcon color="primary" />
+            <Typography variant="h6" fontWeight={700}>{hospital.name}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+            <Chip icon={<StarIcon />} label="4.5/5 Rating" size="small" />
+            <Chip icon={<FavoriteIcon />} label="98% Success Rate" size="small" />
+          </Box>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PlaceIcon color="action" />
+                <Typography variant="body2" color="text.secondary">{hospital.address}</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <PhoneIcon color="action" />
+                <Typography variant="body2" color="text.secondary">{hospital.phone}</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AccessTimeIcon color="action" />
+                <Typography variant="body2" color="text.secondary">{hospital.openHours}</Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CalendarMonthIcon color="action" />
+                <Typography variant="body2" color="text.secondary">{hospital.workingDays}</Typography>
+              </Box>
+            </Grid>
+          </Grid>
+          {!!hospital.features?.length && (
+            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {hospital.features.map((feature, i) => (
+                <Chip key={i} label={feature} size="small" />
+              ))}
+            </Box>
+          )}
+          <Divider sx={{ my: 2 }} />
 
-                <div className="hospital-services">
-                    <h3>Services & Facilities</h3>
-                    <div className="services-grid">
-                        {hospital.features?.map((feature, index) => (
-                            <div key={index} className="service-item">
-                                <FiBriefcase />
-                                {feature}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="hospital-contact">
-                    <h3>Location & Contact</h3>
-                    <p><FiMapPin /> {hospital.address}</p>
-                    <p><FiPhone /> {hospital.phone}</p>
-                    <p><FiClock /> {hospital.openHours}</p>
-                    <p><FiCalendar /> {hospital.workingDays}</p>
-                </div>
-
-                <div className="hospital-about">
-                    <h3>About Hospital</h3>
-                    <p>{hospital.type}</p>
-                </div>
-            </section>
-
-            {/* Booking Section */}
-            <section className="booking-section">
-                <h3>Book Hospital Bed</h3>
-
-                <div className="form-section">
-                    <h4>Select Ward</h4>
-                    <div className="wards-grid">
-                        {wards.map(ward => (
-                            <div
-                                key={ward.wardId}
-                                className={`ward-card ${selectedWard?.wardId === ward.wardId ? 'selected' : ''}`}
-                                onClick={() => setSelectedWard(ward)}
-                            >
-                                <div className="ward-header">
-                                    <h4>{ward.name}</h4>
-                                    <span className="ward-type">{ward.wardType}</span>
-                                </div>
-                                <div className="ward-details">
-                                    <p>₹{ward.pricePerDay}/day • {ward.availableBeds} available</p>
-                                </div>
-                                <div className="ward-facilities">
+          {/* Middle: Ward list and Booking details within same container */}
+          <Grid container spacing={3} alignItems="stretch">
+            <Grid item xs={12} md={8}>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Select Ward</Typography>
+              <Grid container spacing={2}>
+                {wards.map((ward) => (
+                  <Grid key={ward.wardId} item xs={12} sm={6}>
+                    <Box onClick={() => setSelectedWard(ward)} sx={{
+                      p: 2,
+                      border: '1px solid',
+                      borderColor: selectedWard?.wardId === ward.wardId ? 'primary.main' : 'divider',
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                      transition: 'all .2s',
+                      '&:hover': { boxShadow: 2 }
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography fontWeight={700}>{ward.name}</Typography>
+                        <Chip label={ward.wardType} size="small" />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">₹{ward.pricePerDay}/day • {ward.availableBeds} available</Typography>
+                      <Box sx={{ mt: 'auto', display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                                     {ward.facilities && Object.keys(ward.facilities)
                                         .filter(facility => ward.facilities[facility])
                                         .map((facility, index) => (
-                                            <span key={index} className="facility">{facility}</span>
-                                        ))}
-                                    {ward.isAC && <span className="facility">AC</span>}
-                                    {ward.hasAttachedBathroom && <span className="facility">Attached Bathroom</span>}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="form-section">
-                    <h4>Select Date</h4>
-                    <input
+                            <Chip key={index} label={facility} size="small" />
+                          ))}
+                        {ward.isAC && <Chip label="AC" size="small" />}
+                        {ward.hasAttachedBathroom && <Chip label="Attached Bathroom" size="small" />}
+                      </Box>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Booking Details</Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, border: '1px solid', borderColor: 'divider', p: 2, borderRadius: 2, height: '100%' }}>
+                <TextField
                         type="date"
-                        className="date-input"
+                  label="Select Date"
+                  InputLabelProps={{ shrink: true }}
                         value={selectedDate}
                         onChange={(e) => setSelectedDate(e.target.value)}
-                        min={new Date().toISOString().split('T')[0]}
-                    />
-                </div>
-
-                <div className="form-section">
-                    <h4>Select Time Slot</h4>
-                    <div className="time-slots">
+                  inputProps={{ min: new Date().toISOString().split('T')[0] }}
+                />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>Select Time Slot</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                         {timeSlots.map(time => (
-                            <button
+                      <Chip
                                 key={time}
-                                className={`time-slot ${selectedTime === time ? 'selected' : ''}`}
+                        label={time}
+                        color={selectedTime === time ? 'primary' : 'default'}
                                 onClick={() => setSelectedTime(time)}
-                            >
-                                {time}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Booking Summary */}
+                        variant={selectedTime === time ? 'filled' : 'outlined'}
+                        sx={{ cursor: 'pointer' }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
                 {selectedWard && (
-                    <div className="booking-summary">
-                        <h4>Booking Summary</h4>
-                        <div className="summary-item">
-                            <span>Ward Type</span>
-                            <span>{selectedWard.name}</span>
-                        </div>
-                        <div className="summary-item">
-                            <span>Price per Day</span>
-                            <span>₹{selectedWard.pricePerDay}</span>
-                        </div>
-                        <div className="summary-item">
-                            <span>Date</span>
-                            <span>{selectedDate || 'Not selected'}</span>
-                        </div>
-                        <div className="summary-item">
-                            <span>Time</span>
-                            <span>{selectedTime || 'Not selected'}</span>
-                        </div>
-                        <div className="summary-item total">
-                            <span>Total Amount</span>
-                            <span>₹{calculateTotalAmount()}</span>
-                        </div>
-                    </div>
+                  <Box>
+                    <Divider sx={{ my: 1 }} />
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>Booking Summary</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary">Ward Type</Typography>
+                      <Typography variant="body2">{selectedWard.name}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary">Price per Day</Typography>
+                      <Typography variant="body2">₹{selectedWard.pricePerDay}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary">Date</Typography>
+                      <Typography variant="body2">{selectedDate || 'Not selected'}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary">Time</Typography>
+                      <Typography variant="body2">{selectedTime || 'Not selected'}</Typography>
+                    </Box>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="subtitle2">Total Amount</Typography>
+                      <Typography variant="subtitle2">₹{calculateTotalAmount()}</Typography>
+                    </Box>
+                  </Box>
                 )}
-
-                <button
-                    className="confirm-booking-btn"
+                <Button
+                  variant="contained"
+                  size="large"
                     disabled={!selectedWard || !selectedDate || !selectedTime || bookingInProgress}
                     onClick={handleBookingConfirmation}
+                  sx={{ mt: 'auto' }}
                 >
-                    {bookingInProgress 
-                        ? 'Creating Booking...' 
-                        : selectedWard 
-                            ? 'Confirm Booking' 
-                            : 'Select a Ward to Continue'
-                    }
-                </button>
-            </section>
+                  {bookingInProgress ? 'Creating Booking...' : selectedWard ? 'Confirm Booking' : 'Select a Ward to Continue'}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
 
             {/* Dialog */}
             {renderDialog()}
-        </div>
+      </Box>
     );
 };
 

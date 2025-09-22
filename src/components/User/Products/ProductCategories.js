@@ -1,25 +1,25 @@
-// Icons mapping from Material Icons to React Icons
+// MUI Icons for category mapping
 import {
-    MdMedicalServices,
-    MdScience,
-    MdFavorite,
-    MdChildCare,
-    MdElderly,
-    MdWoman,
-    MdWatch,
-    MdRingVolume,
-    MdMedicalInformation,
-    MdHealthAndSafety,
-    MdPregnantWoman,
-    MdHealing,
-    MdMonitorHeart,
-    MdCalendarToday
-} from 'react-icons/md';
+    MedicalServices,
+    Science,
+    Favorite,
+    ChildCare,
+    Elderly,
+    Woman,
+    Watch,
+    RingVolume,
+    MedicalInformation,
+    HealthAndSafety,
+    PregnantWoman,
+    Healing,
+    MonitorHeart,
+    CalendarToday
+} from '@mui/icons-material';
 
 export const productCategories = [
     {
         name: "Dental Care",
-        icon: MdMedicalServices,
+        icon: MedicalServices,
         color: "#E3F2FD",
         subCategories: [
             "Toothpaste",
@@ -31,7 +31,7 @@ export const productCategories = [
     },
     {
         name: "Genetic Testing",
-        icon: MdScience,
+        icon: Science,
         color: "#E8F5E9",
         subCategories: [
             "DNA Testing",
@@ -43,7 +43,7 @@ export const productCategories = [
     },
     {
         name: "Heart Care",
-        icon: MdFavorite,
+        icon: Favorite,
         color: "#FFEBEE",
         subCategories: [
             "Heart Monitors",
@@ -55,7 +55,7 @@ export const productCategories = [
     },
     {
         name: "Baby Care",
-        icon: MdChildCare,
+        icon: ChildCare,
         color: "#F3E5F5",
         subCategories: [
             "Baby Food",
@@ -67,7 +67,7 @@ export const productCategories = [
     },
     {
         name: "Elder Care",
-        icon: MdElderly,
+        icon: Elderly,
         color: "#FFF3E0",
         subCategories: [
             "Mobility Aids",
@@ -79,7 +79,7 @@ export const productCategories = [
     },
     {
         name: "Women Care",
-        icon: MdWoman,
+        icon: Woman,
         color: "#FCE4EC",
         subCategories: [
             "Feminine Hygiene",
@@ -91,7 +91,7 @@ export const productCategories = [
     },
     {
         name: "Digital Health Tracker",
-        icon: MdWatch,
+        icon: Watch,
         color: "#E0F7FA",
         subCategories: [
             "Fitness Trackers",
@@ -103,7 +103,7 @@ export const productCategories = [
     },
     {
         name: "Digital Health Ring",
-        icon: MdRingVolume,
+        icon: RingVolume,
         color: "#E8F5E9",
         subCategories: [
             "Smart Rings",
@@ -115,7 +115,7 @@ export const productCategories = [
     },
     {
         name: "Epilepsy Care",
-        icon: MdMedicalInformation,
+        icon: MedicalInformation,
         color: "#E3F2FD",
         subCategories: [
             "Seizure Monitors",
@@ -127,7 +127,7 @@ export const productCategories = [
     },
     {
         name: "UTI Test Kit",
-        icon: MdScience,
+        icon: Science,
         color: "#F3E5F5",
         subCategories: [
             "Home Test Kits",
@@ -139,7 +139,7 @@ export const productCategories = [
     },
     {
         name: "Wellness Care Kit",
-        icon: MdHealthAndSafety,
+        icon: HealthAndSafety,
         color: "#FFF3E0",
         subCategories: [
             "First Aid Kits",
@@ -151,7 +151,7 @@ export const productCategories = [
     },
     {
         name: "Pregnancy Care",
-        icon: MdPregnantWoman,
+        icon: PregnantWoman,
         color: "#FCE4EC",
         subCategories: [
             "Prenatal Vitamins",
@@ -163,7 +163,7 @@ export const productCategories = [
     },
     {
         name: "Wound Care",
-        icon: MdHealing,
+        icon: Healing,
         color: "#E0F7FA",
         subCategories: [
             "Bandages",
@@ -175,7 +175,7 @@ export const productCategories = [
     },
     {
         name: "Portable ECG",
-        icon: MdMonitorHeart,
+        icon: MonitorHeart,
         color: "#E8F5E9",
         subCategories: [
             "ECG Monitors",
@@ -187,7 +187,7 @@ export const productCategories = [
     },
     {
         name: "Period Care",
-        icon: MdCalendarToday,
+        icon: CalendarToday,
         color: "#F3E5F5",
         subCategories: [
             "Sanitary Products",

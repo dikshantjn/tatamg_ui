@@ -36,15 +36,39 @@ export const getPendingMedicineOrders = async (userId) => {
   return response.data;
 };
 
-export const placeMedicineOrder = async (orderIds, addressId, paymentId) => {
-  const endpoint = getApiUrl(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.PLACE_MEDICINE_ORDER);
-  const payload = {
-    orderIds,
-    addressId,
-    paymentId
-  };
-  const response = await apiClient.post(endpoint, payload);
-  return response.data;
+export const placeMedicineOrder = async (orderIds, addressId, paymentId, retryCount = 0) => {
+  const maxRetries = 3;
+  const retryDelay = 1000; // 1 second base delay
+  
+  try {
+    const endpoint = getApiUrl(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.PLACE_MEDICINE_ORDER);
+    const payload = {
+      orderIds,
+      addressId,
+      paymentId
+    };
+    const response = await apiClient.post(endpoint, payload);
+    return response.data;
+  } catch (error) {
+    console.error(`Medicine order placement attempt ${retryCount + 1} failed:`, error);
+    
+    // Retry for network errors or server errors (5xx)
+    if (retryCount < maxRetries && (
+      error.code === 'ECONNABORTED' || // timeout
+      error.code === 'ENOTFOUND' || // DNS error
+      error.code === 'ECONNREFUSED' || // connection refused
+      (error.response && error.response.status >= 500) // server errors
+    )) {
+      const delay = retryDelay * Math.pow(2, retryCount); // exponential backoff
+      console.log(`Retrying medicine order placement in ${delay}ms...`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return placeMedicineOrder(orderIds, addressId, paymentId, retryCount + 1);
+    }
+    
+    // If max retries reached or non-retryable error, throw the error
+    throw error;
+  }
 };
 
  

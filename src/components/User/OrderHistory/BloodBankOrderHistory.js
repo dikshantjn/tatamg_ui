@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './ProductOrderHistory.css';
+import { Box, Stack, Typography, Paper, Button, Grid } from '@mui/material';
+import { LoadingState, ErrorState, EmptyState, StatusChip, Row, Section } from './mui/Primitives';
 
 const BloodBankOrderHistory = () => {
     const [bookings, setBookings] = useState([]);
@@ -65,92 +66,67 @@ const BloodBankOrderHistory = () => {
         const units = bloodRequest.units || 'N/A';
         const formattedDate = booking.createdAt ? formatDate(booking.createdAt) : 'N/A';
         return (
-            <div key={booking.bookingId} className="product-order-card bloodbank-order-card">
-                <div className="order-header">
-                    <div className="order-info">
-                        <h3 className="order-number">Booking #{booking.bookingId?.slice(-8)}</h3>
-                        <p className="order-date">Booked on {formattedDate}</p>
-                    </div>
-                    <div className="order-status">
-                        <span className="status-badge delivered">Completed</span>
-                    </div>
-                </div>
-                <div className="order-content">
-                    <div className="order-items">
-                        <h4>Blood Bank Details:</h4>
-                        <div className="items-list">
-                            <div className="item-card bloodbank-item-card">
-                                <div className="item-details">
-                                    <h5 className="item-name">Agency: {agency.agencyName || 'N/A'}</h5>
-                                    <p className="item-category">Blood Types: {bloodTypes}</p>
-                                    <p className="item-category">Units: {units}</p>
-                                    <p className="item-category">Customer: {customerName}</p>
-                                    <p className="item-category">Contact: {agency.phoneNumber || agency.contactNumber || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="order-details">
-                        <div className="detail-row">
-                            <span className="detail-label">Completed On:</span>
-                            <span className="detail-value">{formattedDate}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="order-footer">
-                    <div className="order-total">
-                        <span className="total-label">Total Amount:</span>
-                        <span className="total-amount">{formatCurrency(booking.totalAmount)}</span>
-                    </div>
-                    {/* You can add a View Details button if you want a side panel */}
-                </div>
-            </div>
+            <Paper key={booking.bookingId} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Stack>
+                        <Typography fontWeight={600}>Booking #{booking.bookingId?.slice(-8)}</Typography>
+                        <Typography variant="caption" color="text.secondary">Booked on {formattedDate}</Typography>
+                    </Stack>
+                    <StatusChip label="Completed" />
+                </Stack>
+                <Stack spacing={1.25} sx={{ mb: 1.5 }}>
+                    <Section title="Blood Bank Details">
+                        <Typography variant="body2">Agency: {agency.agencyName || 'N/A'}</Typography>
+                        <Typography variant="body2" color="text.secondary">Blood Types: {bloodTypes}</Typography>
+                        <Typography variant="body2" color="text.secondary">Units: {units}</Typography>
+                        <Typography variant="body2" color="text.secondary">Customer: {customerName}</Typography>
+                        <Typography variant="body2" color="text.secondary">Contact: {agency.phoneNumber || agency.contactNumber || 'N/A'}</Typography>
+                    </Section>
+                    <Section title="Completion">
+                        <Row label="Completed On" value={formattedDate} />
+                    </Section>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1}>
+                        <Typography variant="body2" color="text.secondary">Total</Typography>
+                        <Typography fontWeight={600}>{formatCurrency(booking.totalAmount)}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" size="small" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={async () => {
+                            const res = await orderHistoryService.getBloodBankInvoice(booking.bookingId);
+                            if (res.success && res.data?.pdfUrl) {
+                                const a = document.createElement('a');
+                                a.href = res.data.pdfUrl;
+                                a.download = `bloodbank-invoice-${(booking.bookingId || '').slice(-8)}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }
+                        }}>Download Invoice</Button>
+                    </Stack>
+                </Stack>
+            </Paper>
         );
     };
 
-    if (loading) {
-        return (
-            <div className="product-orders-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your completed blood bank bookings...</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <LoadingState label="Loading your completed blood bank bookings..." />;
 
-    if (error) {
-        return (
-            <div className="product-orders-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Bookings</h3>
-                    <p>{error}</p>
-                    <button className="retry-btn" onClick={fetchCompletedBookings}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (error) return <ErrorState message={error} onRetry={fetchCompletedBookings} />;
 
     return (
-        <div className="product-orders-container">
-            <div className="orders-section">
+        <Box>
                 {bookings.length > 0 ? (
-                    <div className="orders-grid">
-                        {bookings.map((booking) => renderBookingCard(booking))}
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">🩸</div>
-                        <h3>No Completed Blood Bank Bookings Found</h3>
-                        <p>You haven't completed any blood bank bookings yet.</p>
-                        <button className="browse-btn">Book Blood</button>
-                    </div>
-                )}
-            </div>
-        </div>
+                <Grid container spacing={2}>
+                    {bookings.map((booking) => (
+                        <Grid key={booking.bookingId} item xs={12} md={6}>
+                            {renderBookingCard(booking)}
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <EmptyState icon="🩸" title="No Completed Blood Bank Bookings Found" subtitle="You haven't completed any blood bank bookings yet." actionLabel="Book Blood" />
+            )}
+        </Box>
     );
 };
 

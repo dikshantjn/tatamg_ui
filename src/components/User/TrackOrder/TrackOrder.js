@@ -4,9 +4,26 @@ import { trackOrderService } from '../../../services/User/TrackOrder/track-order
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import { useSocket } from '../../../hooks/useSocket';
 import { ToastContainer } from '../../ui/Toast';
-import './TrackOrder.css';
 import BloodBankPaymentService from '../../../services/payment/blood-bank-payment.service';
 import { getCartItemsByOrderId } from '../../../services/User/MedicineDelivery/medicine-delivery.service';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Grid,
+  Divider,
+  IconButton
+} from '@mui/material';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
+import CheckIcon from '@mui/icons-material/Check';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const TrackOrder = () => {
     const [orders, setOrders] = useState([]);
@@ -21,6 +38,8 @@ const TrackOrder = () => {
     const navigate = useNavigate();
     const userId = getUserId();
     const timelineRefs = useRef({});
+    const theme = useTheme();
+    const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
     const [medicineOrderCartItems, setMedicineOrderCartItems] = useState({});
 
     const { error: socketError, subscribe, unsubscribe } = useSocket(userId);
@@ -382,127 +401,130 @@ const TrackOrder = () => {
 
     if (loading) {
         return (
-            <div className="track-order-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your orders...</p>
-                </div>
-            </div>
+            <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography>Loading your orders...</Typography>
+                </Paper>
+            </Box>
         );
     }
 
     if (error) {
         return (
-            <div className="track-order-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Orders</h3>
-                    <p>{error}</p>
-                    <button className="retry-button" onClick={() => { fetchOrders(); fetchAmbulanceBookings(); fetchBloodBankBookings(); fetchMedicineOrders(); }}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
+            <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ mb: 1 }}>Error Loading Orders</Typography>
+                    <Typography sx={{ mb: 2 }}>{error}</Typography>
+                    <Button variant="contained" onClick={() => { fetchOrders(); fetchAmbulanceBookings(); fetchBloodBankBookings(); fetchMedicineOrders(); }}>Try Again</Button>
+                </Paper>
+            </Box>
         );
     }
 
     if (orders.length === 0 && ambulanceBookings.length === 0 && bloodBankBookings.length === 0 && medicineOrders.length === 0) {
         return (
-            <div className="track-order-container">
-                <div className="empty-state">
-                    <div className="empty-icon">📦</div>
-                    <h3>No Orders or Ambulance Bookings Found</h3>
-                    <p>You haven't placed any orders or ambulance bookings yet.</p>
-                    <button className="shop-button" onClick={() => navigate('/products')}>
-                        Start Shopping
-                    </button>
-                </div>
-            </div>
+            <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+                <Paper sx={{ p: 4, textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ mb: 1 }}>No Orders or Ambulance Bookings Found</Typography>
+                    <Typography sx={{ mb: 2 }}>You haven't placed any orders or ambulance bookings yet.</Typography>
+                    <Button variant="contained" onClick={() => navigate('/products')}>Start Shopping</Button>
+                </Paper>
+            </Box>
         );
     }
 
-    return (
-        <div className="track-order-container">
-            <ToastContainer toasts={toasts} removeToast={removeToast} />
-            <div className="track-order-header">
-                <div className="header-content">
-                    <button 
-                        className="back-icon-button"
-                        onClick={() => navigate(-1)}
-                        title="Back"
-                        aria-label="Go back"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <h1>Track Your Orders</h1>
-                </div>
-            </div>
+    // Horizontal Stepper helpers
+    const ColorConnector = styled(StepConnector)(({ theme }) => ({
+      [`&.${stepConnectorClasses.alternativeLabel}`]: {
+        top: 16,
+      },
+      [`& .${stepConnectorClasses.line}`]: {
+        height: 3,
+        border: 0,
+        backgroundColor: theme.palette.grey[300],
+        borderRadius: 2,
+      },
+    }));
 
-            {/* Ambulance Bookings Timeline */}
+    function NumberedStepIcon(props) {
+      const { active, completed, icon } = props;
+      return (
+        <Box
+          sx={{
+            width: { xs: 28, md: 32 },
+            height: { xs: 28, md: 32 },
+            borderRadius: '50%',
+            bgcolor: completed ? 'success.main' : active ? 'primary.main' : 'grey.200',
+            border: active ? '3px solid' : '2px solid',
+            borderColor: completed ? 'success.main' : active ? 'primary.dark' : 'grey.300',
+            boxShadow: active ? '0 0 0 4px rgba(25,118,210,0.12)' : 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: completed || active ? 'common.white' : 'text.secondary'
+          }}
+        >
+          {completed ? <CheckIcon sx={{ fontSize: { xs: 16, md: 18 } }} /> : (
+            <Typography sx={{ fontSize: { xs: 13, md: 14 }, fontWeight: 700 }}>{icon}</Typography>
+          )}
+        </Box>
+      );
+    }
+
+    const HorizontalStepper = ({ labels, activeStep }) => (
+      <Box sx={{ 
+        width: '100%', 
+        overflowX: 'auto',
+        '::-webkit-scrollbar': { display: 'none' },
+        scrollbarWidth: 'none',
+        MsOverflowStyle: 'none'
+      }}>
+        <Stepper alternativeLabel activeStep={activeStep} connector={<ColorConnector />} sx={{ minWidth: { xs: 420, md: 560 } }}>
+          {labels.map((label, idx) => (
+            <Step key={`${label}-${idx}`} completed={idx < activeStep}>
+              <StepLabel StepIconComponent={NumberedStepIcon}>
+                <Typography sx={{ fontSize: { xs: 11, md: 12 }, fontWeight: idx === activeStep ? 700 : 500 }}>{label}</Typography>
+              </StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Box>
+    );
+
+    return (
+        <Box sx={{ maxWidth: 1000, mx: 'auto', p: { xs: 2, md: 4 } }}>
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <IconButton onClick={() => navigate(-1)} aria-label="Back" sx={{ mr: 1 }}>
+                    <ArrowBackIosNewIcon fontSize="small" />
+                </IconButton>
+                <Typography variant={isMdUp ? 'h4' : 'h5'} fontWeight={700}>Track Your Orders</Typography>
+            </Box>
+
+            {/* Ambulance Bookings */}
             {ambulanceBookings.length > 0 && (
-                <div className="orders-grid">
-                    {ambulanceBookings.map((booking) => (
-                        <div key={booking.requestId} className="order-card ambulance-booking-card">
-                            <div className="order-header">
-                                <h3>Ambulance Booking #{booking.requestId.slice(-8)}</h3>
-                                <span className="order-date">{booking.placedAt}</span>
-                                <span className="order-status">{booking.status}</span>
-                            </div>
-                            <div className="timeline-container trackorder-timeline-container">
-                                <div className="timeline trackorder-timeline">
-                                    {booking.timelineSteps.map((step, index, steps) => (
-                                        <div
-                                            key={step.id}
-                                            className="timeline-item"
-                                            ref={el => timelineRefs.current[`${booking.requestId}-${index}`] = el}
-                                        >
-                                            {index > 0 && (
-                                                <div className={`timeline-line before ${steps[index - 1].completed ? 'completed' : ''}`}></div>
-                                            )}
-                                            <div className={`timeline-circle ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}>
-                                                {step.completed ? (
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                ) : step.active ? (
-                                                    <svg className="tick-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                ) : (
-                                                    <span className="step-number">{step.id}</span>
-                                                )}
-                                            </div>
-                                            <div className="timeline-label">
-                                                <span className="step-title">{step.title}</span>
-                                            </div>
-                                            {index < steps.length - 1 && (
-                                                <div className={`timeline-line after ${step.completed ? 'completed' : ''}`}></div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="order-items">
-                                <h4>Agency: {booking.agencyProfile?.agencyName || 'N/A'}</h4>
-                                <div className="item-row">
-                                    <div className="item-info">
-                                        <span className="item-name">Contact: {booking.agencyProfile?.contactNumber || 'N/A'}</span>
-                                    </div>
-                                    <div className="item-details">
-                                        <span className="item-quantity">Status: {booking.status}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
+                {ambulanceBookings.map((booking) => {
+                  const labels = booking.timelineSteps.map(s => s.title);
+                  const activeIdx = Math.max(0, booking.timelineSteps.findIndex(s => s.active));
+                  return (
+                    <Paper key={booking.requestId} sx={{ p: 2, borderLeft: '4px solid', borderColor: 'error.main', border: '1px solid', borderColor: 'divider' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography variant="h6">Ambulance Booking #{booking.requestId.slice(-8)}</Typography>
+                        <Chip label={booking.status} size="small" />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{booking.placedAt}</Typography>
+                      <HorizontalStepper labels={labels} activeStep={activeIdx === -1 ? 0 : activeIdx} />
+                      <Divider sx={{ my: 2 }} />
+                      <Typography variant="subtitle2">Agency: {booking.agencyProfile?.agencyName || 'N/A'}</Typography>
+                      <Typography variant="body2" color="text.secondary">Contact: {booking.agencyProfile?.contactNumber || 'N/A'}</Typography>
+                    </Paper>
+                  );
+                })}
+              </Box>
             )}
 
             {/* Blood Bank Bookings Timeline */}
             {bloodBankBookings.length > 0 && (
-                <div className="orders-grid">
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
                     {bloodBankBookings.map((booking) => {
                         // Timeline logic (replicate from OngoingBloodBankBookingModal.js)
                         const status = booking.status || booking.bloodRequest?.status || 'PENDING';
@@ -548,89 +570,27 @@ const TrackOrder = () => {
                         const isPaymentCompleted = status === 'PaymentCompleted' || booking.paymentStatus === 'PAID';
                         const hasPaymentInfo = booking.totalAmount != null;
                         return (
-                          <div key={booking.bookingId} className="order-card bloodbank-booking-card">
-                            <div className="order-header">
-                              <h3>Blood Bank Booking #{booking.bookingId?.slice(-8)}</h3>
-                              <span className="order-date">{formattedDate}</span>
-                              <span className="order-status">{status}</span>
-                            </div>
-                            <div className="timeline-container trackorder-timeline-container">
-                              <div className="timeline trackorder-timeline">
-                                {STEPS.map((step, idx) => {
-                                  let label = DISPLAY_NAMES[step];
-                                  let isActive = idx === currentStepIndex;
-                                  let isCompleted = idx < currentStepIndex;
-                                  let isFilled = isCompleted || isActive;
-                                  if (step === 'PAYMENT') {
-                                    if (status === 'PaymentCompleted' || status === 'WaitingForPickup' || status === 'COMPLETED') {
-                                      label = 'Payment Completed';
-                                      isCompleted = true;
-                                      isFilled = true;
-                                    } else if (status === 'WaitingForPayment') {
-                                      label = 'Waiting for Payment';
-                                      isActive = true;
-                                      isFilled = true;
-                                    }
-                                  }
-                                  const isLast = idx === STEPS.length - 1;
-                                  const labelLines = getLabelLines(label);
-                                  return (
-                                    <div className="timeline-item" key={step}>
-                                      {idx > 0 && (
-                                        <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
-                                      )}
-                                      <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
-                                        <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" style={{width:16,height:16}}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> : idx + 1}</span>
-                                      </div>
-                                      <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{labelLines.map((line, i) => <div key={i}>{line}</div>)}</div>
-                                      {!isLast && (
-                                        <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                            <div className="order-items">
-                              <h4>Blood Bank: {agency?.agencyName || 'N/A'}</h4>
-                              <div className="item-row">
-                                <div className="item-info">
-                                  <span className="item-name">Customer Name: {customerName}</span>
-                                  <span className="item-name">Blood Types: {bloodTypes}</span>
-                                  <span className="item-name">Units: {units}</span>
-                                  <span className="item-name">Date: {formattedDate}</span>
-                                </div>
-                                <div className="item-details">
-                                  <span className="item-quantity">Status: {status}</span>
-                                  {hasPaymentInfo && (
-                                    <span className="item-price">Amount: ₹{(typeof booking.totalAmount === 'number' && !isNaN(booking.totalAmount))
-                                      ? booking.totalAmount.toFixed(2)
-                                      : (typeof booking.totalAmount === 'string' && !isNaN(parseFloat(booking.totalAmount)))
-                                        ? parseFloat(booking.totalAmount).toFixed(2)
-                                        : '--'}</span>
-                                  )}
-                                  {isPaymentCompleted && <span className="item-status paid">PAID</span>}
-                                  {isWaitingForPayment && <span className="item-status pending">PENDING</span>}
-                                  {isWaitingForPayment && (
-                                    <button className="pay-now-btn" onClick={() => handleBloodBankPayNow(booking)}>
-                                      Pay Now
-                                    </button>
-                                  )}
-                                  {paymentStatusMsg && (
-                                    <div className={`payment-status-msg ${paymentStatusMsg.startsWith('Payment successful') ? 'success' : 'error'}`}>{paymentStatusMsg}</div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <Paper key={booking.bookingId} sx={{ p: 2, borderLeft: '4px solid', borderColor: 'error.main', border: '1px solid', borderColor: 'divider' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                              <Typography variant="h6">Blood Bank Booking #{booking.bookingId?.slice(-8)}</Typography>
+                              <Chip label={status} size="small" />
+                            </Box>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{formattedDate}</Typography>
+                            <HorizontalStepper labels={STEPS.map(s => DISPLAY_NAMES[s])} activeStep={currentStepIndex} />
+                            <Divider sx={{ my: 2 }} />
+                            <Typography variant="subtitle2">Blood Bank: {agency?.agencyName || 'N/A'}</Typography>
+                            <Typography variant="body2" color="text.secondary">Customer: {customerName}</Typography>
+                            <Typography variant="body2" color="text.secondary">Blood Types: {bloodTypes}</Typography>
+                            <Typography variant="body2" color="text.secondary">Units: {units}</Typography>
+                          </Paper>
                         );
                     })}
-                </div>
+                </Box>
             )}
 
             {/* Medicine Orders Timeline */}
             {medicineOrders.length > 0 && (
-                <div className="orders-grid">
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
                     {medicineOrders.map((order) => {
                         // Add debug logging for initial render
                         const normalizedStatus = medicineOrderStatusMapping[order.status] || order.status;
@@ -645,178 +605,67 @@ const TrackOrder = () => {
                         });
 
                         return (
-                            <div key={order.orderId} className="order-card medicine-order-card">
-                                <div className="order-header">
-                                    <h3>Medicine Order #{order.orderId.slice(-8)}</h3>
-                                    <span className="order-date">{order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</span>
-                                    <span className={`order-status-badge status-${normalizedStatus.toLowerCase()}`}>
-                                        {medicineOrderDisplayNames[normalizedStatus]?.join(' ') || normalizedStatus}
-                                    </span>
-                                </div>
-                                <div className="timeline-container trackorder-timeline-container">
-                                    <div className="timeline trackorder-timeline">
-                                        {medicineOrderSteps.map((step, idx, arr) => {
-                                            const isActive = idx === currentStepIndex;
-                                            const isCompleted = idx < currentStepIndex;
-                                            
-                                            console.log('Timeline Step Status:', {
-                                                step,
-                                                idx,
-                                                currentStepIndex,
-                                                isActive,
-                                                isCompleted,
-                                                orderStatus: order.orderStatus
-                                            });
-
-                                            const isLast = idx === arr.length - 1;
-                                            const lines = medicineOrderDisplayNames[step] || [step];
-                                            
-                                            return (
-                                                <div className="timeline-item" key={step}>
-                                                    {idx > 0 && (
-                                                        <div className={`timeline-line before ${isCompleted ? 'completed' : ''}`}></div>
-                                                    )}
-                                                    <div className={`timeline-circle ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}`}> 
-                                                        <span className="timeline-number">
-                                                            {isCompleted ? (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="white" style={{width:16,height:16}}>
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                                </svg>
-                                                            ) : (
-                                                                idx + 1
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                    <div className={`timeline-label ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}>
-                                                        {lines.map((line, i) => <div key={i}>{line}</div>)}
-                                                    </div>
-                                                    {!isLast && (
-                                                        <div className={`timeline-line after ${isCompleted ? 'completed' : ''}`}></div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                                <div className="order-items">
-                                    <h4>Medical Store: {order.vendor?.name || 'N/A'}</h4>
-                                    <div className="item-row">
-                                        <div className="item-info">
-                                            <span className="item-name">Order ID: {order.orderId}</span>
-                                            <span className="item-name">Prescription Status: {order.prescription?.status || 'N/A'}</span>
-                                        </div>
-                                        <div className="item-details">
-                                            <span className="item-price">Total: ₹{order.totalAmount}</span>
-                                        </div>
-                                    </div>
-                                    <div className="cart-items-list">
-                                        {medicineOrderCartItems[order.orderId]?.length > 0 && (
-                                            medicineOrderCartItems[order.orderId].map(item => (
-                                                <div key={item.cartId} className="item-row">
-                                                    <div className="item-info">
-                                                        <span className="item-name">{item.MedicineProduct?.name || item.name}</span>
-                                                    </div>
-                                                    <div className="item-details">
-                                                        <span className="item-quantity">Qty: {item.quantity}</span>
-                                                        <span className="item-price">₹{item.price}</span>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <Paper key={order.orderId} sx={{ p: 2, borderLeft: '4px solid', borderColor: 'primary.main', border: '1px solid', borderColor: 'divider' }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                    <Typography variant="h6">Medicine Order #{order.orderId.slice(-8)}</Typography>
+                                    <Chip label={medicineOrderDisplayNames[normalizedStatus]?.join(' ') || normalizedStatus} size="small" />
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A'}</Typography>
+                                <HorizontalStepper labels={medicineOrderSteps.map(s => medicineOrderDisplayNames[s].join(' '))} activeStep={currentStepIndex} />
+                                <Divider sx={{ my: 2 }} />
+                                <Typography variant="subtitle2">Medical Store: {order.vendor?.name || 'N/A'}</Typography>
+                                <Typography variant="body2" color="text.secondary">Order ID: {order.orderId}</Typography>
+                                <Typography variant="body2" color="text.secondary">Prescription Status: {order.prescription?.status || 'N/A'}</Typography>
+                                <Typography variant="body2" sx={{ mt: 1 }}>Total: ₹{order.totalAmount}</Typography>
+                            </Paper>
                         );
                     })}
-                </div>
+                </Box>
             )}
 
             {/* Product Orders Timeline */}
-            <div className="orders-grid">
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {orders.map((order) => (
-                    <div key={order.orderId} className="order-card">
+                    <Paper key={order.orderId} sx={{ p: 2, border: '1px solid', borderColor: 'divider' }}>
                         {/* Order Header */}
-                        <div className="order-header">
-                            <h3>Product Order #{order.orderId.slice(-8)}</h3>
-                            <span className="order-date">{order.placedAt}</span>
-                        </div>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                            <Typography variant="h6">Product Order #{order.orderId.slice(-8)}</Typography>
+                            <Typography variant="body2" color="text.secondary">{order.placedAt}</Typography>
+                        </Box>
 
                         {/* Timeline */}
-                        <div className="timeline-container trackorder-timeline-container">
-                            <div className="timeline trackorder-timeline">
-                                {order.timelineSteps.map((step, index, steps) => (
-                                    <div 
-                                        key={step.id} 
-                                        className="timeline-item"
-                                        ref={el => timelineRefs.current[`${order.orderId}-${index}`] = el}
-                                    >
-                                        {/* Show line before circle only if not first step and previous step is completed */}
-                                        {index > 0 && (
-                                            <div className={`timeline-line before ${steps[index - 1].completed ? 'completed' : ''}`}></div>
-                                        )}
-                                        
-                                        <div className={`timeline-circle ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}`}> 
-                                            {step.completed ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            ) : step.active ? (
-                                                <svg className="tick-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            ) : (
-                                                <span className="step-number">{step.id}</span>
-                                            )}
-                                        </div>
-                                        
-                                        <div className="timeline-label">
-                                            <span className="step-title">{step.title}</span>
-                                        </div>
-                                        
-                                        {/* Show line after circle only if not last step and current step is completed */}
-                                        {index < steps.length - 1 && (
-                                            <div className={`timeline-line after ${step.completed ? 'completed' : ''}`}></div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <HorizontalStepper labels={order.timelineSteps.map(s => s.title)} activeStep={Math.max(0, order.timelineSteps.findIndex(s => s.active))} />
 
                         {/* Order Items */}
-                        <div className="order-items">
-                            <h4>
-                                Order Items
+                        <Box sx={{ mt: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="subtitle1">Order Items</Typography>
                                 {shouldShowMoreButton(order.items) && (
-                                    <button 
-                                        className="show-more-btn"
-                                        onClick={() => toggleOrderExpansion(order.orderId)}
-                                    >
+                                    <Button size="small" onClick={() => toggleOrderExpansion(order.orderId)}>
                                         {expandedOrders[order.orderId] ? 'Show Less' : 'Show More'}
-                                    </button>
+                                    </Button>
                                 )}
-                            </h4>
-                            <div className={`items-list ${!expandedOrders[order.orderId] && shouldShowMoreButton(order.items) ? 'collapsed' : ''}`}>
+                            </Box>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 1 }}>
                                 {getVisibleItems(order.items, order.orderId).map((item) => (
-                                    <div key={item.orderItemId} className="item-row">
-                                        <div className="item-info">
-                                            <span className="item-name">{item.VendorProduct.name}</span>
-                                            <span className="item-category">{item.VendorProduct.category}</span>
-                                        </div>
-                                        <div className="item-details">
-                                            <span className="item-quantity">Qty: {item.quantity}</span>
-                                            <span className="item-price">₹{item.priceAtPurchase.toFixed(2)}</span>
-                                        </div>
-                                    </div>
+                                    <Paper key={item.orderItemId} variant="outlined" sx={{ p: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Box>
+                                            <Typography variant="body2" fontWeight={600}>{item.VendorProduct.name}</Typography>
+                                            <Typography variant="caption" color="text.secondary">{item.VendorProduct.category}</Typography>
+                                        </Box>
+                                        <Box sx={{ textAlign: 'right' }}>
+                                            <Typography variant="caption" color="text.secondary">Qty: {item.quantity}</Typography>
+                                            <Typography variant="body2">₹{item.priceAtPurchase.toFixed(2)}</Typography>
+                                        </Box>
+                                    </Paper>
                                 ))}
-                            </div>
-                            <div className="order-total">
-                                <span>Total: ₹{order.totalAmount.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
+                            </Box>
+                            <Typography variant="subtitle2" textAlign="right">Total: ₹{order.totalAmount.toFixed(2)}</Typography>
+                        </Box>
+                    </Paper>
                 ))}
-            </div>
-        </div>
+            </Box>
+        </Box>
     );
 };
 

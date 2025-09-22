@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.38:5000/api",
-  SOCKET_URL: "http://192.168.1.38:5000",
+  BASE_URL: "http://192.168.1.39:5000/api",
+  SOCKET_URL: "http://192.168.1.39:5000",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
   ENDPOINTS: {
@@ -42,6 +42,9 @@ export const API_CONFIG = {
       GET_PROFILE: "/clinic/profile/:vendorId",
       UPDATE_PROFILE: "/clinic/profile/:vendorId",
     },
+    CLINIC_INVOICE: {
+      GET_INVOICE: "/clinic-invoice/invoice/:appointmentId",
+    },
     USER: {
       GET_USER: "/user/:userId",
       UPDATE_USER: "/user/edit/:userId",
@@ -73,6 +76,7 @@ export const API_CONFIG = {
       GET_USER_ORDERS: "/product-order/orders/:userId",
       GET_USER_ORDERS_TRACKING: "/product-order/orders/user/:userId",
       GET_DELIVERED_ORDERS: "/product-order/orders/user/:userId/delivered",
+      GET_ORDER_INVOICE: "/product-order/orders/:orderId/invoice",
     },
     PAYMENTS: {
       GET_PAYMENT_HISTORY: "/payments/history",
@@ -97,6 +101,9 @@ export const API_CONFIG = {
       UPLOAD_PHOTOS: "/ambulance/profile/:vendorId/photos",
       DELETE_PHOTO: "/ambulance/profile/:vendorId/photos/:photoId",
     },
+    AMBULANCE_INVOICE: {
+      GET_INVOICE: "/ambulance-invoce/ambulance/invoice/:requestId",
+    },
     BLOOD_BANK: {
       GET_ACTIVE_BLOOD_BANKS: "/blood-bank/blood-bank-agencies",
       CREATE_BLOOD_BANK_REQUEST: "/blood-bank/requests",
@@ -114,6 +121,12 @@ export const API_CONFIG = {
       ADD_SERVICE_DETAILS: "/blood-bank-bookings/:bookingId/payment",
       UPDATE_STATUS_WAITING_FOR_PICKUP: "/blood-bank-bookings/:bookingId/status/waiting-for-pickup",
       COMPLETE_BOOKING: "/blood-bank-bookings/:bookingId/complete",
+    },
+    BLOOD_BANK_INVOICE: {
+      GET_INVOICE: "/blood-bank-invoice/invoice/:bookingId",
+    },
+    HOSPITAL_INVOICE: {
+      GET_INVOICE: "/hospital-invoice/:bookingId/invoice",
     },
     MEDICINE_DELIVERY: {
       GET_MEDICAL_STORES: "/medicine-delivery/medicalstores",
@@ -135,6 +148,9 @@ export const API_CONFIG = {
       GET_ALL_DIAGNOSTIC_CENTERS: "/lab-test/all-diagnostic-centers",
       CREATE_BOOKING: "/labtest-booking/create",
       GET_COMPLETED_BOOKINGS: "/labtest-booking/bookings/user/completed/:userId",
+    },
+    LAB_TEST_INVOICE: {
+      GET_INVOICE: "/lab-invoice/invoice/:bookingId",
     },
     HEALTH_RECORDS: {
       CHECK_PASSWORD: "/health-record/user/:userId/health-record-password/check",

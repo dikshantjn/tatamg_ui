@@ -270,14 +270,14 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                 
                 console.log('Payment data being sent:', paymentData);
                 
-                // Add a timeout to prevent infinite loading
+                // Add a timeout to prevent infinite loading (5 minutes to match payment config)
                 const paymentTimeout = setTimeout(() => {
                     console.error('Payment timeout - no response from payment service');
                     setLoading(false);
                     setPaymentResult({ message: 'Payment timeout. Please try again.' });
                     setPaymentStatus('failed');
                     setCurrentStep('payment-failed');
-                }, 10000); // 10 second timeout
+                }, 300000); // 5 minutes timeout to match payment config
                 
                 try {
                     await medicineOrderPaymentService.processPayment(
@@ -337,7 +337,17 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                     (errorMessage) => {
                             clearTimeout(paymentTimeout);
                             console.error('Payment failure callback:', errorMessage);
-                        setPaymentResult({ message: errorMessage });
+                            
+                            let displayMessage = errorMessage;
+                            if (errorMessage.includes('timeout')) {
+                                displayMessage = 'Payment request timed out. Please check your connection and try again.';
+                            } else if (errorMessage.includes('cancelled')) {
+                                displayMessage = 'Payment was cancelled. Please try again if you want to complete the order.';
+                            } else if (errorMessage.includes('network')) {
+                                displayMessage = 'Network error. Please check your internet connection and try again.';
+                            }
+                            
+                        setPaymentResult({ message: displayMessage });
                         setPaymentStatus('failed');
                         setCurrentStep('payment-failed');
                         setLoading(false);
@@ -346,7 +356,24 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
                 } catch (paymentError) {
                     clearTimeout(paymentTimeout);
                     console.error('Payment service error:', paymentError);
-                    setPaymentResult({ message: paymentError.message || 'Payment service error' });
+                    
+                    let errorMessage = 'Payment service error. Please try again.';
+                    
+                    if (paymentError.message) {
+                        if (paymentError.message.includes('timeout')) {
+                            errorMessage = 'Payment service timed out. Please check your connection and try again.';
+                        } else if (paymentError.message.includes('network')) {
+                            errorMessage = 'Unable to connect to payment service. Please check your internet connection.';
+                        } else {
+                            errorMessage = paymentError.message;
+                        }
+                    } else if (paymentError.response) {
+                        errorMessage = `Server error: ${paymentError.response.status} - ${paymentError.response.statusText}`;
+                    } else if (paymentError.request) {
+                        errorMessage = 'Unable to connect to payment service. Please check your internet connection.';
+                    }
+                    
+                    setPaymentResult({ message: errorMessage });
                     setPaymentStatus('failed');
                     setCurrentStep('payment-failed');
                     setLoading(false);
@@ -354,7 +381,24 @@ const CheckoutMedicineModal = ({ isOpen, onClose, onPayNow, onPaymentSuccess, or
             }
         } catch (error) {
             console.error('Payment error:', error);
-            setPaymentResult({ message: error.message || 'Payment failed. Please try again.' });
+            
+            let errorMessage = 'Payment failed. Please try again.';
+            
+            if (error.message) {
+                if (error.message.includes('timeout')) {
+                    errorMessage = 'Payment request timed out. Please check your connection and try again.';
+                } else if (error.message.includes('network')) {
+                    errorMessage = 'Network error. Please check your internet connection and try again.';
+                } else {
+                    errorMessage = error.message;
+                }
+            } else if (error.response) {
+                errorMessage = `Server error: ${error.response.status} - ${error.response.statusText}`;
+            } else if (error.request) {
+                errorMessage = 'Unable to connect to payment service. Please check your internet connection.';
+            }
+            
+            setPaymentResult({ message: errorMessage });
             setPaymentStatus('failed');
             setCurrentStep('payment-failed');
             setLoading(false);

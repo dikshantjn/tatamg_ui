@@ -1,10 +1,31 @@
 import React, { useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
-import { FaUser, FaArrowLeft, FaCloudUploadAlt, FaFileImage } from 'react-icons/fa';
 import labTestPaymentService from '../../../services/payment/lab-test-payment.service';
 import PaymentSuccessDialog from './PaymentSuccessDialog';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
-import './BookLabTestAppt.css';
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+  Stack,
+  Grid,
+  TextField,
+  FormControlLabel,
+  Switch,
+  IconButton,
+  Card,
+  CardContent,
+  Container
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PersonIcon from '@mui/icons-material/Person';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ImageIcon from '@mui/icons-material/Image';
+import PhoneIcon from '@mui/icons-material/Phone';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const timeSlots = [
   '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -31,13 +52,15 @@ const BookLabTestAppt = () => {
 
   if (!lab) {
     return (
-      <div className="book-lab-page">
-        <div className="book-lab-header">
-          <button className="back-btn" onClick={() => navigate(-1)}><FaArrowLeft /></button>
-          <h2>Lab Not Found</h2>
-        </div>
-        <p style={{ margin: '2rem 0', color: '#ef4444' }}>Sorry, we couldn't find the lab details. Please go back and try again.</p>
-      </div>
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <IconButton onClick={() => navigate(-1)}><ArrowBackIcon /></IconButton>
+          <Typography variant="h6" fontWeight={700}>Lab Not Found</Typography>
+        </Paper>
+        <Paper sx={{ p: 3, textAlign: 'center' }}>
+          <Typography color="error.main">Sorry, we couldn't find the lab details. Please go back and try again.</Typography>
+        </Paper>
+      </Box>
     );
   }
 
@@ -139,142 +162,172 @@ const BookLabTestAppt = () => {
   };
 
   return (
-    <div className="book-lab-page wider">
-      <div className="lab-header-card">
-        <button className="back-btn" onClick={() => navigate(-1)}><FaArrowLeft /></button>
-        <div className="lab-header-main">
-          <div className="lab-header-img-wrap">
-            {lab.image && !imageError ? (
-              <img 
-                src={lab.image} 
-                alt={lab.name} 
-                className="lab-header-img" 
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <div className="lab-header-fallback">
-                <FaUser size={38} />
-              </div>
-            )}
-          </div>
-          <div className="lab-header-info">
-            <h2>{lab.name}</h2>
-            <div className="lab-header-meta">
-              <span className="lab-header-address">{lab.address}</span>
-              <span className="lab-header-contact">{lab.phone}</span>
-            </div>
-            <div className="lab-header-tags">
-              <span className="lab-header-owner">Owner: {lab.ownerName || 'N/A'}</span>
-              <span className="lab-header-services">{lab.services ? lab.services.slice(0, 3).join(', ') : 'N/A'}{lab.services && lab.services.length > 3 ? '...' : ''}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="book-lab-content wider">
-        {/* Test Selection */}
-        <div className="section">
-          <h4>Select Tests</h4>
-          <div className="test-list">
-            {lab.services && lab.services.map((test, idx) => (
-              <label key={idx} className="test-checkbox">
-                <input
-                  type="checkbox"
-                  checked={selectedTests.includes(test)}
-                  onChange={() => handleTestToggle(test)}
-                />
-                {test}
-              </label>
-            ))}
-          </div>
-        </div>
-        {/* Date & Time Selection */}
-        <div className="section">
-          <h4>Select Date & Time</h4>
-          <input type="date" value={selectedDate} onChange={handleDateChange} className="date-input" />
-          <div className="time-slots">
-            {timeSlots.map(slot => (
-              <button
-                key={slot}
-                className={`time-slot-btn${selectedTime === slot ? ' selected' : ''}`}
-                onClick={() => handleTimeSelect(slot)}
-              >
-                {slot}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Collection Method */}
-        <div className="section">
-          <h4>Collection Method</h4>
-          <div className="collection-method-container">
-            <label className="switch-row">
-              <input type="checkbox" checked={homeCollection} onChange={e => setHomeCollection(e.target.checked)} />
-              <span>Home Sample Collection</span>
-            </label>
-            <label className="switch-row">
-              <input type="checkbox" checked={reportDelivery} onChange={e => setReportDelivery(e.target.checked)} />
-              <span>Report Delivery at Home</span>
-            </label>
-          </div>
-        </div>
-        {/* Prescription Upload */}
-        <div className="section">
-          <h4>Upload Prescription</h4>
-          <div 
-            className={`prescription-upload-area ${isDragOver ? 'drag-over' : ''}`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={handlePrescriptionChange}
-              className="prescription-file-input"
-              id="prescription-upload"
-            />
-            <label htmlFor="prescription-upload" className="prescription-upload-label">
-              <div className="upload-icon">
-                <FaCloudUploadAlt size={48} />
-              </div>
-              <div className="upload-text">
-                <h5>Upload Prescription</h5>
-                <p>Drag & drop your prescription image here or click to browse</p>
-                <span className="upload-hint">Supports: JPG, PNG, PDF (Max 5MB)</span>
-              </div>
-            </label>
-          </div>
-          {prescription && (
-            <div className="prescription-preview">
-              <div className="prescription-preview-content">
-                <div className="prescription-preview-icon">
-                  <FaFileImage size={24} />
-                </div>
-                <div className="prescription-preview-info">
-                  <h6>Prescription Uploaded</h6>
-                  <p>Image successfully uploaded</p>
-                </div>
-                <button onClick={() => setPrescription(null)} className="remove-prescription">
-                  Remove
-                </button>
-              </div>
-              <img src={prescription} alt="Prescription Preview" className="prescription-preview-img" />
-            </div>
+    <Box sx={{ py: { xs: 2, md: 3 } }}>
+      <Container maxWidth="md">
+      {/* Header: Profile + quick info */}
+      <Paper sx={{ p: { xs: 1.5, md: 2 }, mb: 2, border: '1px solid', borderColor: 'divider' }}>
+        <Stack direction="row" alignItems="center" spacing={2}>
+          {lab.image && !imageError ? (
+            <Avatar src={lab.image} alt={lab.name} sx={{ width: 56, height: 56 }} onError={() => setImageError(true)} />
+          ) : (
+            <Avatar sx={{ width: 56, height: 56 }}>
+              <PersonIcon />
+            </Avatar>
           )}
-        </div>
-        {/* Book Button */}
-        <button className="book-btn" onClick={handleBook} disabled={isSubmitting}>
-          {isSubmitting ? 'Processing Payment...' : 'Book Appointment'}
-        </button>
-      </div>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="h6" fontWeight={800} noWrap>{lab.name}</Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 0.5 }}>
+              {lab.address && (
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <LocationOnIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  <Typography variant="caption" color="text.secondary" noWrap>{lab.address}</Typography>
+                </Stack>
+              )}
+              {lab.phone && (
+                <Stack direction="row" spacing={0.5} alignItems="center">
+                  <PhoneIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  <Typography variant="caption" color="text.secondary">{lab.phone}</Typography>
+                </Stack>
+              )}
+            </Stack>
+            <Stack direction="row" spacing={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
+              {(lab.services || []).slice(0, 4).map((s, idx) => (
+                <Chip key={idx} size="small" label={s} variant="outlined" />
+              ))}
+            </Stack>
+          </Box>
+        </Stack>
+      </Paper>
+
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item xs={12} md={12}>
+          <Paper sx={{ p: { xs: 1.5, md: 2 }, mb: 2, border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Select Tests</Typography>
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              {(lab.services || []).map((test, idx) => {
+                const selected = selectedTests.includes(test);
+                return (
+                  <Chip
+                    key={idx}
+                    label={test}
+                    color={selected ? 'primary' : 'default'}
+                    variant={selected ? 'filled' : 'outlined'}
+                    onClick={() => handleTestToggle(test)}
+                    sx={{ mb: 1 }}
+                  />
+                );
+              })}
+              {(!lab.services || lab.services.length === 0) && (
+                <Typography variant="body2" color="text.secondary">No services listed for this lab.</Typography>
+              )}
+            </Stack>
+          </Paper>
+
+          <Paper sx={{ p: { xs: 1.5, md: 2 }, mb: 2, border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Select Date & Time</Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }}>
+              <TextField
+                type="date"
+                label="Date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+                sx={{ width: { xs: '100%', sm: 220 } }}
+              />
+              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                {timeSlots.map(slot => (
+                  <Chip
+                    key={slot}
+                    label={slot}
+                    variant={selectedTime === slot ? 'filled' : 'outlined'}
+                    color={selectedTime === slot ? 'primary' : 'default'}
+                    onClick={() => handleTimeSelect(slot)}
+                    sx={{ mb: 1 }}
+                  />
+                ))}
+              </Stack>
+            </Stack>
+          </Paper>
+
+          <Paper sx={{ p: { xs: 1.5, md: 2 }, mb: 2, border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Collection Method</Typography>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <FormControlLabel control={<Switch checked={homeCollection} onChange={e => setHomeCollection(e.target.checked)} />} label="Home Sample Collection" />
+              <FormControlLabel control={<Switch checked={reportDelivery} onChange={e => setReportDelivery(e.target.checked)} />} label="Report Delivery at Home" />
+            </Stack>
+          </Paper>
+
+          <Paper sx={{ p: { xs: 1.5, md: 2 }, border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 1 }}>Upload Prescription</Typography>
+            <Box
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              sx={{
+                p: 2,
+                border: '1px dashed',
+                borderColor: isDragOver ? 'primary.main' : 'divider',
+                borderRadius: 2,
+                textAlign: 'center',
+                backgroundColor: isDragOver ? 'action.hover' : 'background.default',
+              }}
+            >
+              <input
+                id="prescription-upload"
+                type="file"
+                accept="image/*"
+                onChange={handlePrescriptionChange}
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="prescription-upload">
+                <Button component="span" startIcon={<CloudUploadIcon />} variant="outlined">
+                  Upload Prescription
+                </Button>
+              </label>
+              <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 1 }}>
+                Drag & drop image here or click to browse. JPG, PNG. Max 5MB.
+              </Typography>
+            </Box>
+            {prescription && (
+              <Card sx={{ mt: 2 }}>
+                <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <ImageIcon color="action" />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2">Prescription Uploaded</Typography>
+                    <Typography variant="caption" color="text.secondary">Image successfully added</Typography>
+                  </Box>
+                  <Button size="small" onClick={() => setPrescription(null)}>Remove</Button>
+                </CardContent>
+                <Box sx={{ p: 2, pt: 0 }}>
+                  <Box component="img" src={prescription} alt="Prescription Preview" sx={{ width: '100%', borderRadius: 1 }} />
+                </Box>
+              </Card>
+            )}
+            {/* Primary CTA (visible for both mobile and desktop) */}
+            <Stack sx={{ mt: 2 }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleBook}
+                disabled={isSubmitting}
+                fullWidth
+              >
+                {isSubmitting ? 'Processing Payment...' : 'Book Appointment'}
+              </Button>
+            </Stack>
+          </Paper>
+        </Grid>
+      </Grid>
+      </Container>
 
       {/* Payment Success Dialog */}
-      <PaymentSuccessDialog 
+      <PaymentSuccessDialog
         isOpen={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
         paymentData={paymentData}
       />
-    </div>
+    </Box>
   );
 };
 

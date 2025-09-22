@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef, memo, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Container,
@@ -20,7 +20,6 @@ import {
     ArrowBackIos,
     ArrowForwardIos,
     Category,
-    FavoriteBorder,
     ShoppingCart,
 
 } from '@mui/icons-material';
@@ -58,7 +57,7 @@ const categoryColors = {
     default: { bg: '#E3F2FD', icon: '#1976D2' }
 };
 
-// Category Card Component
+// Category Card Component (compact, minimal)
 const CategoryCard = ({ category }) => {
     const navigate = useNavigate();
     const theme = useTheme();
@@ -72,21 +71,21 @@ const CategoryCard = ({ category }) => {
         <Card
             onClick={handleClick}
             sx={{
-                width: 200,
-                height: 200,
+                width: 136,
+                height: 136,
                 cursor: 'pointer',
                 borderRadius: 2,
                 background: categoryStyle.bg,
-                transition: 'all 0.3s ease',
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.shadows[8],
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
                 },
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                p: 2,
+                p: 1.5,
                 position: 'relative',
                 overflow: 'hidden'
             }}
@@ -103,38 +102,39 @@ const CategoryCard = ({ category }) => {
             >
                 <Box
                     sx={{
-                        width: 60,
-                        height: 60,
+                        width: 40,
+                        height: 40,
                         borderRadius: '50%',
                         background: 'rgba(255, 255, 255, 0.9)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mb: 2
+                        mb: 1.5
                     }}
                 >
-                    <category.icon 
-                        size={32} 
-                        style={{ color: categoryStyle.icon }} 
-                    />
+                    <category.icon sx={{ fontSize: 22, color: categoryStyle.icon }} />
                 </Box>
                 <Typography
-                    variant="h6"
+                    variant="subtitle1"
                     sx={{
                         fontWeight: 600,
                         color: theme.palette.text.primary,
-                        mb: 1,
-                        fontSize: '1rem',
-                        lineHeight: 1.2
+                        mb: 0.5,
+                        fontSize: '0.9rem',
+                        lineHeight: 1.2,
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        maxWidth: 112
                     }}
                 >
                     {category.name}
                 </Typography>
                 <Typography
-                    variant="body2"
+                    variant="caption"
                     sx={{
                         color: theme.palette.text.secondary,
-                        fontSize: '0.875rem'
+                        fontSize: '0.72rem'
                     }}
                 >
                     {category.subCategories.length} items
@@ -144,7 +144,9 @@ const CategoryCard = ({ category }) => {
     );
 };
 
-// Product Card Component
+const MemoCategoryCard = memo(CategoryCard);
+
+// Product Card Component (minimal, fixed size)
 const ProductCard = ({ product }) => {
     const theme = useTheme();
     const [imageLoading, setImageLoading] = useState(true);
@@ -162,26 +164,29 @@ const ProductCard = ({ product }) => {
     return (
         <Card
             sx={{
-                height: '100%',
+                height: 300,
                 borderRadius: 2,
-                boxShadow: theme.shadows[2],
-                transition: 'all 0.3s ease',
+                boxShadow: theme.shadows[1],
+                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: theme.shadows[8],
+                    transform: 'translateY(-2px)',
+                    boxShadow: theme.shadows[4],
                 },
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
             }}
         >
             <Box sx={{ position: 'relative' }}>
                 <CardMedia
                     component="img"
-                    height="200"
+                    height="120"
                     image={product.image}
                         alt={product.name}
                         onLoad={handleImageLoad}
                         onError={handleImageError}
+                        loading="lazy"
                     sx={{
                         objectFit: 'cover',
                         opacity: imageLoading ? 0 : 1,
@@ -191,14 +196,14 @@ const ProductCard = ({ product }) => {
                 {imageLoading && (
                     <Skeleton
                         variant="rectangular"
-                        height={200}
+                        height={120}
                         sx={{ position: 'absolute', top: 0, left: 0, right: 0 }}
                     />
                 )}
                 {imageError && (
                     <Box
                         sx={{
-                            height: 200,
+                            height: 120,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -217,8 +222,8 @@ const ProductCard = ({ product }) => {
                             label={`${product.discount}% OFF`}
                             size="small"
                             sx={{
-                                background: theme.palette.error.main,
-                                color: 'white',
+                                background: theme.palette.error.light,
+                                color: theme.palette.error.dark,
                                 fontWeight: 600
                             }}
                         />
@@ -228,8 +233,8 @@ const ProductCard = ({ product }) => {
                             label="Low Stock"
                             size="small"
                             sx={{
-                                background: theme.palette.warning.main,
-                                color: 'white',
+                                background: theme.palette.warning.light,
+                                color: theme.palette.warning.dark,
                                 fontWeight: 600
                             }}
                         />
@@ -239,129 +244,95 @@ const ProductCard = ({ product }) => {
                             label="Out of Stock"
                             size="small"
                             sx={{
-                                background: theme.palette.grey[500],
-                                color: 'white',
+                                background: theme.palette.grey[200],
+                                color: theme.palette.text.secondary,
                                 fontWeight: 600
                             }}
                         />
                     )}
                 </Box>
-
-                {/* Action buttons */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 8,
-                        right: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1
-                    }}
-                >
-                    <IconButton
-                        size="small"
-                        sx={{
-                            background: 'rgba(255, 255, 255, 0.9)',
-                            '&:hover': {
-                                background: 'rgba(255, 255, 255, 1)'
-                            }
-                        }}
-                    >
-                        <FavoriteBorder fontSize="small" />
-                    </IconButton>
-                </Box>
             </Box>
 
-            <CardContent sx={{ p: 2 }}>
-                <Typography
-                    variant="h6"
-                    sx={{
-                        fontWeight: 600,
-                        mb: 1,
-                        fontSize: '1rem',
-                        lineHeight: 1.3,
-                        height: '2.6em',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                    }}
-                >
-                    {product.name}
-                </Typography>
-                
-                <Typography
-                    variant="body2"
-                    sx={{
-                        color: theme.palette.text.secondary,
-                        mb: 2,
-                        height: '2.4em',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical'
-                    }}
-                >
-                    {product.description}
-                </Typography>
+            <CardContent sx={{ p: 1.5, display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
+                <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+                    <Typography
+                        variant="subtitle2"
+                        sx={{
+                            fontWeight: 600,
+                            mb: 0.5,
+                            fontSize: '0.9rem',
+                            lineHeight: 1.3,
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                        }}
+                    >
+                        {product.name}
+                    </Typography>
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: theme.palette.text.secondary,
+                            mb: 1,
+                            overflow: 'hidden',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                        }}
+                    >
+                        {product.description}
+                    </Typography>
+                </Box>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Box>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1 }}>
+                    <Typography
+                        variant="subtitle1"
+                        sx={{
+                            fontWeight: 700,
+                            color: theme.palette.primary.main,
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        ₹{product.currentPrice.toLocaleString()}
+                    </Typography>
+                    {product.originalPrice && (
                         <Typography
-                            variant="h6"
+                            variant="caption"
                             sx={{
-                                fontWeight: 700,
-                                color: theme.palette.primary.main,
-                                fontSize: '1.125rem'
+                                textDecoration: 'line-through',
+                                color: theme.palette.text.secondary,
+                                fontSize: '0.8rem'
                             }}
                         >
-                            ₹{product.currentPrice.toLocaleString()}
-                        </Typography>
-                        {product.originalPrice && (
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    textDecoration: 'line-through',
-                                    color: theme.palette.text.secondary,
-                                    fontSize: '0.875rem'
-                                }}
-                            >
-                                ₹{product.originalPrice.toLocaleString()}
-                            </Typography>
-                        )}
-                    </Box>
-                    {product.discount > 0 && (
-                        <Typography
-                            variant="body2"
-                            sx={{
-                                color: theme.palette.success.main,
-                                fontWeight: 600,
-                                fontSize: '0.875rem'
-                            }}
-                        >
-                            Save {product.discount}%
+                            ₹{product.originalPrice.toLocaleString()}
                         </Typography>
                     )}
                 </Box>
 
-                <Button
-                    variant="contained"
-                    fullWidth
-                    disabled={product.stock === 'out'}
-                    startIcon={<ShoppingCart />}
-                    sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        py: 1
-                    }}
-                >
-                    {product.stock === 'out' ? 'Out of Stock' : 'Add to Cart'}
-                </Button>
+                {product.stock !== 'out' ? (
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        startIcon={<ShoppingCart />}
+                        sx={{
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            py: 0.7
+                        }}
+                    >
+                        Add to Cart
+                    </Button>
+                ) : (
+                    <Box sx={{ height: 36 }} />
+                )}
             </CardContent>
         </Card>
     );
 };
+
+const MemoProductCard = memo(ProductCard);
 
 // Scrollable Categories Section
 const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }) => {
@@ -402,11 +373,11 @@ const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }
     }, []);
 
     return (
-        <Box sx={{ mb: 6 }}>
+        <Box sx={{ mb: 5 }}>
             <Container maxWidth="lg">
                 <Box sx={{ mb: 3 }}>
                     <Typography
-                        variant="h4"
+                        variant="h5"
                         sx={{
                             fontWeight: 700,
                             mb: 1,
@@ -416,7 +387,7 @@ const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }
                         {title}
                     </Typography>
                     <Typography
-                        variant="body1"
+                        variant="body2"
                         sx={{
                             color: theme.palette.text.secondary,
                             mb: 3
@@ -464,7 +435,7 @@ const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }
                     >
                         {categories.map((category, index) => (
                             <Box key={index} sx={{ flexShrink: 0 }}>
-                                <CategoryCard category={category} />
+                                <MemoCategoryCard category={category} />
                             </Box>
                         ))}
                     </Box>
@@ -495,6 +466,68 @@ const ScrollableCategories = ({ title, subtitle, categories, showArrows = true }
     );
 };
 
+// Horizontal Products Section (scrollable like SearchByCategory)
+const HorizontalProducts = ({ title, subtitle, products, loading }) => {
+    const theme = useTheme();
+    const scrollRef = useRef(null);
+
+    return (
+        <Box sx={{ mb: 5 }}>
+            <Container maxWidth="lg">
+                <Box sx={{ mb: 2 }}>
+                    <Typography
+                        variant="h5"
+                        sx={{
+                            fontWeight: 700,
+                            mb: 0.5,
+                            color: theme.palette.text.primary
+                        }}
+                    >
+                        {title}
+                    </Typography>
+                    {subtitle && (
+                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                            {subtitle}
+                        </Typography>
+                    )}
+                </Box>
+            </Container>
+            <Box sx={{ position: 'relative' }}>
+                <Box
+                    ref={scrollRef}
+                    sx={{
+                        display: 'flex',
+                        gap: 2,
+                        overflowX: 'auto',
+                        scrollbarWidth: 'none',
+                        '&::-webkit-scrollbar': { display: 'none' },
+                        px: { xs: 1.5, sm: 2, md: 0 },
+                        pb: 0.5
+                    }}
+                >
+                    {(loading ? Array.from({ length: 8 }) : products).map((item, index) => (
+                        <Box key={item?.id || item?._id || index} sx={{ minWidth: 240, maxWidth: 240 }}>
+                            {loading ? (
+                                <Card sx={{ height: 300, borderRadius: 2 }}>
+                                    <Skeleton variant="rectangular" height={120} />
+                                    <CardContent sx={{ p: 1.5 }}>
+                                        <Skeleton variant="text" height={22} sx={{ mb: 0.5 }} />
+                                        <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
+                                        <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
+                                        <Skeleton variant="rectangular" height={36} />
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                <MemoProductCard product={item} />
+                            )}
+                        </Box>
+                    ))}
+                </Box>
+            </Box>
+        </Box>
+    );
+};
+
 // Products Grid Section
 const ProductsGrid = ({ title, subtitle, products, loading }) => {
     const theme = useTheme();
@@ -504,7 +537,7 @@ const ProductsGrid = ({ title, subtitle, products, loading }) => {
             <Container maxWidth="lg">
                 <Box sx={{ mb: 4 }}>
                     <Typography
-                        variant="h4"
+                        variant="h5"
                         sx={{
                             fontWeight: 700,
                             mb: 1,
@@ -514,7 +547,7 @@ const ProductsGrid = ({ title, subtitle, products, loading }) => {
                         {title}
                     </Typography>
                     <Typography
-                        variant="body1"
+                        variant="body2"
                         sx={{
                             color: theme.palette.text.secondary,
                             mb: 3
@@ -525,12 +558,12 @@ const ProductsGrid = ({ title, subtitle, products, loading }) => {
                 </Box>
 
                 {loading ? (
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                         {Array.from({ length: 8 }).map((_, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                                <Card sx={{ height: '100%', borderRadius: 2 }}>
-                                    <Skeleton variant="rectangular" height={200} />
-                                    <CardContent sx={{ p: 2 }}>
+                            <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
+                                <Card sx={{ height: 340, borderRadius: 2 }}>
+                                    <Skeleton variant="rectangular" height={140} />
+                                    <CardContent sx={{ p: 1.75 }}>
                                         <Skeleton variant="text" height={24} sx={{ mb: 1 }} />
                                         <Skeleton variant="text" height={20} sx={{ mb: 2 }} />
                                         <Skeleton variant="text" height={20} sx={{ mb: 2 }} />
@@ -541,9 +574,9 @@ const ProductsGrid = ({ title, subtitle, products, loading }) => {
                         ))}
                     </Grid>
                 ) : products.length > 0 ? (
-                    <Grid container spacing={3}>
+                    <Grid container spacing={2}>
                         {products.map((product, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={product.id || index}>
+                            <Grid item xs={6} sm={6} md={4} lg={3} key={product.id || index}>
                                 <ProductCard product={product} />
                             </Grid>
                         ))}
@@ -688,24 +721,24 @@ function Products() {
     ];
 
     // Popular categories (first 6)
-    const popularCategories = productCategories.slice(0, 6);
+    const popularCategories = useMemo(() => productCategories.slice(0, 6), []);
     
     // Electronic categories (filtered by digital/electronic keywords)
-    const electronicCategories = productCategories.filter(cat => 
+    const electronicCategories = useMemo(() => productCategories.filter(cat => 
         cat.name.toLowerCase().includes('digital') || 
         cat.name.toLowerCase().includes('ecg') ||
         cat.name.toLowerCase().includes('monitor')
-    );
+    ), []);
     
     // Personal care categories (filtered by care keywords)
-    const personalCareCategories = productCategories.filter(cat => 
+    const personalCareCategories = useMemo(() => productCategories.filter(cat => 
         cat.name.toLowerCase().includes('care') && 
         !cat.name.toLowerCase().includes('digital') &&
         !cat.name.toLowerCase().includes('ecg')
-    );
+    ), []);
 
     // Use API products if available, otherwise use sample data
-    const displayProducts = products.length > 0 ? products : sampleProducts;
+    const displayProducts = useMemo(() => (products.length > 0 ? products : sampleProducts), [products]);
 
     return (
         <Box sx={{ minHeight: '100vh', background: theme.palette.background.default }}>
@@ -718,8 +751,8 @@ function Products() {
                 categories={popularCategories}
             />
 
-            {/* Featured Products */}
-            <ProductsGrid
+            {/* Featured Products - Horizontal */}
+            <HorizontalProducts
                 title="Featured Products"
                 subtitle="Handpicked products for your health and wellness"
                 products={displayProducts}

@@ -32,7 +32,7 @@ import ProductItem from './ProductItem';
 
 // Styled Components
 const StyledContainer = styled(Container)(({ theme }) => ({
-    padding: theme.spacing(3),
+    padding: theme.spacing(2.5),
     maxWidth: 1440,
     margin: '0 auto',
     [theme.breakpoints.down('md')]: {
@@ -43,9 +43,9 @@ const StyledContainer = styled(Container)(({ theme }) => ({
 const HeaderCard = styled(Paper)(({ theme, categorycolor }) => ({
     background: categorycolor || 'linear-gradient(135deg, #38A3A5, #2C7A7B)',
     color: 'white',
-    padding: theme.spacing(4),
-    borderRadius: 20,
-    marginBottom: theme.spacing(3),
+    padding: theme.spacing(3),
+    borderRadius: 16,
+    marginBottom: theme.spacing(2.5),
     position: 'relative',
     overflow: 'hidden',
     display: 'flex',
@@ -74,86 +74,22 @@ const HeaderCard = styled(Paper)(({ theme, categorycolor }) => ({
         zIndex: 0,
     },
     [theme.breakpoints.down('md')]: {
-        padding: theme.spacing(3),
+        padding: theme.spacing(2.5),
         flexDirection: 'column',
         gap: theme.spacing(2),
         textAlign: 'center',
     }
 }));
 
-// Enhanced Product Skeleton with consistent sizing
+// Compact Product Skeleton matching Products page cards
 const ProductSkeleton = () => (
-    <Card sx={{ 
-        height: '100%', 
-        display: 'flex', 
-        flexDirection: 'column',
-        borderRadius: 2,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-        }
-    }}>
-        {/* Image skeleton - fixed aspect ratio */}
-        <Box sx={{ position: 'relative', width: '100%', paddingTop: '75%' }}>
-            <Skeleton 
-                variant="rectangular" 
-                sx={{ 
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: 0
-                }} 
-            />
-        </Box>
-        
-        <CardContent sx={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            flexDirection: 'column',
-            p: 2
-        }}>
-            {/* Product name skeleton */}
-            <Skeleton 
-                variant="text" 
-                width="90%" 
-                height={24} 
-                sx={{ mb: 1 }} 
-            />
-            
-            {/* Description skeleton - 2 lines */}
-            <Skeleton 
-                variant="text" 
-                width="100%" 
-                height={16} 
-                sx={{ mb: 0.5 }} 
-            />
-            <Skeleton 
-                variant="text" 
-                width="70%" 
-                height={16} 
-                sx={{ mb: 2 }} 
-            />
-            
-            {/* Price skeleton */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                <Skeleton variant="text" width={60} height={20} />
-                <Skeleton variant="text" width={40} height={16} />
-            </Box>
-            
-            {/* Button skeleton */}
-            <Skeleton 
-                variant="rectangular" 
-                height={40} 
-                sx={{ 
-                    borderRadius: 2,
-                    mt: 'auto'
-                }} 
-            />
+    <Card sx={{ height: 300, borderRadius: 2 }}>
+        <Skeleton variant="rectangular" height={120} />
+        <CardContent sx={{ p: 1.5 }}>
+            <Skeleton variant="text" height={22} sx={{ mb: 0.5 }} />
+            <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
+            <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
+            <Skeleton variant="rectangular" height={36} />
         </CardContent>
     </Card>
 );
@@ -243,7 +179,7 @@ const ProductList = () => {
         <Box sx={{ 
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)',
-            py: 3
+            py: 2.5
         }}>
             <StyledContainer maxWidth="xl">
                 {/* Header */}
@@ -268,13 +204,13 @@ const ProductList = () => {
                             <ArrowBack />
                         </IconButton>
                         <Box>
-                            <Typography variant="h4" sx={{ 
+                            <Typography variant="h5" sx={{ 
                                 fontWeight: 700,
                                 mb: 0.5
                             }}>
                                 {decodedCategory}
                             </Typography>
-                            <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                            <Typography variant="body2" sx={{ opacity: 0.9 }}>
                                 Explore our curated collection
                             </Typography>
                         </Box>
@@ -286,8 +222,8 @@ const ProductList = () => {
                         zIndex: 1
                     }}>
                         <Box sx={{
-                            width: 40,
-                            height: 40,
+                            width: 36,
+                            height: 36,
                             borderRadius: 2,
                             background: 'rgba(255, 255, 255, 0.15)',
                             backdropFilter: 'blur(4px)',
@@ -297,8 +233,8 @@ const ProductList = () => {
                             }
                         }} />
                         <Box sx={{
-                            width: 32,
-                            height: 32,
+                            width: 28,
+                            height: 28,
                             borderRadius: '50%',
                             background: 'rgba(255, 255, 255, 0.15)',
                             backdropFilter: 'blur(4px)',
@@ -308,8 +244,8 @@ const ProductList = () => {
                             }
                         }} />
                         <Box sx={{
-                            width: 36,
-                            height: 36,
+                            width: 32,
+                            height: 32,
                             borderRadius: 1,
                             background: 'rgba(255, 255, 255, 0.15)',
                             backdropFilter: 'blur(4px)',
@@ -324,16 +260,16 @@ const ProductList = () => {
             {error && <ErrorMessage error={error} />}
 
                 {/* Products Grid */}
-                <Grid container spacing={3}>
+                <Grid container spacing={2}>
                 {loading ? (
                     Array.from({ length: 8 }).map((_, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+                            <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
                                 <ProductSkeleton />
                             </Grid>
                     ))
                 ) : products.length > 0 ? (
                         products.map((product, index) => (
-                            <Grid item xs={12} sm={6} md={4} lg={3} key={product.productId}>
+                            <Grid item xs={6} sm={6} md={4} lg={3} key={product.productId}>
                                 <ProductItem product={product} />
                             </Grid>
                     ))
@@ -341,20 +277,20 @@ const ProductList = () => {
                         <Grid item xs={12}>
                             <Box sx={{ 
                                 textAlign: 'center', 
-                                py: 8,
+                                py: 6,
                                 color: 'text.secondary'
                             }}>
                                 <Search sx={{ fontSize: 64, mb: 2, opacity: 0.5 }} />
                                 <Typography variant="h6" sx={{ mb: 1 }}>
                                     No products found
                                 </Typography>
-                                <Typography variant="body1">
+                                <Typography variant="body2">
                                     We couldn't find any products in {decodedCategory}. Try browsing other categories.
                                 </Typography>
                                 <Button
                                     variant="outlined"
                                     onClick={handleBack}
-                                    sx={{ mt: 3 }}
+                                    sx={{ mt: 2.5 }}
                                 >
                                     Go Back
                                 </Button>

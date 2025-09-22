@@ -29,7 +29,9 @@ class MedicineOrderPaymentService {
         }
     }
 
-    async processPayment(orderData, onSuccess, onFailure) {
+    async processPayment(orderData, onSuccess, onFailure, retryCount = 0) {
+        const maxRetries = 2;
+        
         try {
             console.log('Starting payment process...');
             console.log('Order data:', orderData);
@@ -107,6 +109,19 @@ class MedicineOrderPaymentService {
             razorpayInstance.open();
             console.log('Razorpay modal opened successfully');
         } catch (error) {
+            console.error(`Payment process attempt ${retryCount + 1} failed:`, error);
+            
+            // Retry for network errors or SDK loading issues
+            if (retryCount < maxRetries && (
+                error.message.includes('SDK') || 
+                error.message.includes('timeout') ||
+                error.message.includes('network')
+            )) {
+                console.log(`Retrying payment process in 2 seconds...`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return this.processPayment(orderData, onSuccess, onFailure, retryCount + 1);
+            }
+            
             if (onFailure) onFailure(error.message || PAYMENT_ERRORS.PAYMENT_FAILED);
         }
     }

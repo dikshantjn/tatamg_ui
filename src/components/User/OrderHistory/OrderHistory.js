@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    FaUserMd, 
-    FaPills, 
-    FaAmbulance, 
-    FaFlask, 
-    FaTint, 
-    FaBed, 
-    FaBox 
-} from 'react-icons/fa';
+import { Box, Stack, Typography, Tabs, Tab, Chip, Paper, useMediaQuery, Divider } from '@mui/material';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import MedicationIcon from '@mui/icons-material/Medication';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import ScienceIcon from '@mui/icons-material/Science';
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import HotelIcon from '@mui/icons-material/Hotel';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
 import ProductOrderHistory from './ProductOrderHistory';
 import AmbulanceOrderHistory from './AmbulanceOrderHistory';
 import BloodBankOrderHistory from './BloodBankOrderHistory';
@@ -16,7 +15,7 @@ import LabTestOrderHistory from './LabTestOrderHistory';
 import ClinicAppointmentHistory from './ClinicAppointmentHistory';
 import BedBookingHistory from './BedBookingHistory';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './OrderHistory.css';
+import { LoadingState } from './mui/Primitives';
 
 const OrderHistory = () => {
     const [activeTab, setActiveTab] = useState('clinic');
@@ -72,13 +71,13 @@ const OrderHistory = () => {
     }, []);
 
     const tabs = [
-        { id: 'clinic', label: 'Clinic Appointments', icon: FaUserMd, count: clinicCount },
-        { id: 'medicine', label: 'Medicine Orders', icon: FaPills, count: 12 },
-        { id: 'ambulance', label: 'Ambulance Bookings', icon: FaAmbulance, count: ambulanceCount },
-        { id: 'labTest', label: 'Lab Tests', icon: FaFlask, count: labTestCount },
-        { id: 'bloodBank', label: 'Blood Bank', icon: FaTint, count: bloodBankCount },
-        { id: 'bedBooking', label: 'Bed Bookings', icon: FaBed, count: bedBookingCount },
-        { id: 'product', label: 'Product Orders', icon: FaBox, count: 7 }
+        { id: 'clinic', label: 'Clinic', icon: <LocalHospitalIcon fontSize="small" />, count: clinicCount },
+        { id: 'medicine', label: 'Medicine', icon: <MedicationIcon fontSize="small" />, count: 0 },
+        { id: 'ambulance', label: 'Ambulance', icon: <LocalShippingIcon fontSize="small" />, count: ambulanceCount },
+        { id: 'labTest', label: 'Lab Tests', icon: <ScienceIcon fontSize="small" />, count: labTestCount },
+        { id: 'bloodBank', label: 'Blood Bank', icon: <BloodtypeIcon fontSize="small" />, count: bloodBankCount },
+        { id: 'bedBooking', label: 'Beds', icon: <HotelIcon fontSize="small" />, count: bedBookingCount },
+        { id: 'product', label: 'Products', icon: <Inventory2Icon fontSize="small" />, count: 0 }
     ];
 
     // Mock data for demonstration
@@ -224,122 +223,97 @@ const OrderHistory = () => {
     const renderOrderCard = (order, type) => {
         const statusColor = getStatusColor(order.status);
         const statusText = getStatusText(order.status);
-
         return (
-            <div key={order.id} className="order-card">
-                <div className="order-header">
-                    <div className="order-info">
-                        <h3 className="order-number">{order.orderNumber}</h3>
-                        <p className="order-date">{formatDate(order.date)}</p>
-                    </div>
-                    <div className="order-status">
-                        <span 
-                            className="status-badge"
-                            style={{ backgroundColor: statusColor }}
-                        >
-                            {statusText}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="order-content">
+            <Paper key={order.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Stack>
+                        <Typography fontWeight={600}>{order.orderNumber}</Typography>
+                        <Typography variant="caption" color="text.secondary">{formatDate(order.date)}</Typography>
+                    </Stack>
+                    <Chip label={statusText} size="small" sx={{ bgcolor: statusColor, color: '#fff' }} />
+                </Stack>
+                <Stack spacing={1.5} sx={{ mb: 1.5 }}>
                     {type === 'medicine' && (
                         <>
-                            <div className="order-items">
-                                <h4>Items:</h4>
-                                <ul>
-                                    {order.items.map((item, index) => (
-                                        <li key={index}>{item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="order-details">
-                                <p><strong>Delivery Address:</strong> {order.deliveryAddress}</p>
-                                <p><strong>Estimated Delivery:</strong> {formatDate(order.estimatedDelivery)}</p>
+                            <Typography variant="subtitle2">Items</Typography>
+                            <Stack spacing={0.5}>
+                                {order.items.map((item, index) => (
+                                    <Typography key={index} variant="body2">{item}</Typography>
+                                ))}
+                            </Stack>
+                            <Divider sx={{ my: 1 }} />
+                            <Stack spacing={0.5}>
+                                <Typography variant="body2"><b>Delivery Address:</b> {order.deliveryAddress}</Typography>
+                                <Typography variant="body2"><b>Estimated Delivery:</b> {formatDate(order.estimatedDelivery)}</Typography>
                                 {order.actualDelivery && (
-                                    <p><strong>Delivered On:</strong> {formatDate(order.actualDelivery)}</p>
+                                    <Typography variant="body2"><b>Delivered On:</b> {formatDate(order.actualDelivery)}</Typography>
                                 )}
-                            </div>
+                            </Stack>
                         </>
                     )}
-
                     {type === 'ambulance' && (
-                        <>
-                            <div className="order-details">
-                                <p><strong>Service:</strong> {order.service}</p>
-                                <p><strong>Pickup:</strong> {order.pickup}</p>
-                                <p><strong>Destination:</strong> {order.destination}</p>
-                                <p><strong>Driver:</strong> {order.driver}</p>
-                                <p><strong>Vehicle:</strong> {order.vehicle}</p>
-                            </div>
-                        </>
+                        <Stack spacing={0.5}>
+                            <Typography variant="body2"><b>Service:</b> {order.service}</Typography>
+                            <Typography variant="body2"><b>Pickup:</b> {order.pickup}</Typography>
+                            <Typography variant="body2"><b>Destination:</b> {order.destination}</Typography>
+                            <Typography variant="body2"><b>Driver:</b> {order.driver}</Typography>
+                            <Typography variant="body2"><b>Vehicle:</b> {order.vehicle}</Typography>
+                        </Stack>
                     )}
-
                     {type === 'bed' && (
-                        <>
-                            <div className="order-details">
-                                <p><strong>Hospital:</strong> {order.hospital}</p>
-                                <p><strong>Room Type:</strong> {order.roomType}</p>
-                                <p><strong>Check-in:</strong> {formatDate(order.checkIn)}</p>
-                                <p><strong>Check-out:</strong> {formatDate(order.checkOut)}</p>
-                                <p><strong>Patient:</strong> {order.patientName}</p>
-                            </div>
-                        </>
+                        <Stack spacing={0.5}>
+                            <Typography variant="body2"><b>Hospital:</b> {order.hospital}</Typography>
+                            <Typography variant="body2"><b>Room Type:</b> {order.roomType}</Typography>
+                            <Typography variant="body2"><b>Check-in:</b> {formatDate(order.checkIn)}</Typography>
+                            <Typography variant="body2"><b>Check-out:</b> {formatDate(order.checkOut)}</Typography>
+                            <Typography variant="body2"><b>Patient:</b> {order.patientName}</Typography>
+                        </Stack>
                     )}
-
                     {type === 'labTest' && (
                         <>
-                            <div className="order-items">
-                                <h4>Tests:</h4>
-                                <ul>
-                                    {order.tests.map((test, index) => (
-                                        <li key={index}>{test}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div className="order-details">
-                                <p><strong>Lab:</strong> {order.lab}</p>
-                                <p><strong>Report Date:</strong> {formatDate(order.reportDate)}</p>
-                                <p><strong>Report Status:</strong> {order.reportStatus}</p>
-                            </div>
+                            <Typography variant="subtitle2">Tests</Typography>
+                            <Stack spacing={0.5}>
+                                {order.tests.map((test, index) => (
+                                    <Typography key={index} variant="body2">{test}</Typography>
+                                ))}
+                            </Stack>
+                            <Divider sx={{ my: 1 }} />
+                            <Stack spacing={0.5}>
+                                <Typography variant="body2"><b>Lab:</b> {order.lab}</Typography>
+                                <Typography variant="body2"><b>Report Date:</b> {formatDate(order.reportDate)}</Typography>
+                                <Typography variant="body2"><b>Report Status:</b> {order.reportStatus}</Typography>
+                            </Stack>
                         </>
                     )}
-
                     {type === 'bloodBank' && (
-                        <>
-                            <div className="order-details">
-                                <p><strong>Blood Type:</strong> {order.bloodType}</p>
-                                <p><strong>Units:</strong> {order.units}</p>
-                                <p><strong>Hospital:</strong> {order.hospital}</p>
-                                <p><strong>Request Type:</strong> {order.requestType}</p>
-                            </div>
-                        </>
+                        <Stack spacing={0.5}>
+                            <Typography variant="body2"><b>Blood Type:</b> {order.bloodType}</Typography>
+                            <Typography variant="body2"><b>Units:</b> {order.units}</Typography>
+                            <Typography variant="body2"><b>Hospital:</b> {order.hospital}</Typography>
+                            <Typography variant="body2"><b>Request Type:</b> {order.requestType}</Typography>
+                        </Stack>
                     )}
-
                     {type === 'clinic' && (
-                        <>
-                            <div className="order-details">
-                                <p><strong>Doctor:</strong> {order.doctor}</p>
-                                <p><strong>Specialty:</strong> {order.specialty}</p>
-                                <p><strong>Clinic:</strong> {order.clinic}</p>
-                                <p><strong>Appointment:</strong> {order.appointmentTime}</p>
-                                <p><strong>Patient:</strong> {order.patientName}</p>
-                            </div>
-                        </>
+                        <Stack spacing={0.5}>
+                            <Typography variant="body2"><b>Doctor:</b> {order.doctor}</Typography>
+                            <Typography variant="body2"><b>Specialty:</b> {order.specialty}</Typography>
+                            <Typography variant="body2"><b>Clinic:</b> {order.clinic}</Typography>
+                            <Typography variant="body2"><b>Appointment:</b> {order.appointmentTime}</Typography>
+                            <Typography variant="body2"><b>Patient:</b> {order.patientName}</Typography>
+                        </Stack>
                     )}
-                </div>
-
-                <div className="order-footer">
-                    <div className="order-total">
-                        <span className="total-label">Total:</span>
-                        <span className="total-amount">{formatCurrency(order.total)}</span>
-                    </div>
-                    <div className="order-actions">
-                        <button className="action-btn primary">View Details</button>
-                        <button className="action-btn secondary">Track Order</button>
-                    </div>
-                </div>
-            </div>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1}>
+                        <Typography variant="body2" color="text.secondary">Total</Typography>
+                        <Typography fontWeight={600}>{formatCurrency(order.total)}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                        <Chip label="View Details" size="small" clickable disableRipple />
+                        <Chip label="Track" size="small" clickable disableRipple variant="outlined" />
+                    </Stack>
+                </Stack>
+            </Paper>
         );
     };
 
@@ -362,74 +336,99 @@ const OrderHistory = () => {
                 return <BedBookingHistory />;
             default:
                 return (
-                    <div className="orders-section">
+                    <Box>
                         {loading ? (
-                            <div className="loading-container">
-                                <div className="loading-spinner"></div>
-                                <p>Loading your orders...</p>
-                            </div>
+                            <LoadingState label="Loading your orders..." />
                         ) : (
-                            <div className="orders-grid">
+                            <Stack spacing={2}>
                                 {mockOrders[activeTab] && mockOrders[activeTab].length > 0 ? (
                                     mockOrders[activeTab].map((order) => renderOrderCard(order, activeTab))
                                 ) : (
-                                    <div className="empty-state">
-                                        <div className="empty-icon">📋</div>
-                                        <h3>No {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} found</h3>
-                                        <p>You haven't placed any {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} yet.</p>
-                                        <button className="browse-btn">Browse Services</button>
-                                    </div>
+                                    <Paper variant="outlined" sx={{ p: 3, borderRadius: 2, textAlign: 'center' }}>
+                                        <Stack spacing={1.5} alignItems="center">
+                                            <Typography fontSize={36}>📋</Typography>
+                                            <Typography variant="subtitle1">No {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} found</Typography>
+                                            <Typography variant="body2" color="text.secondary">You haven't placed any {tabs.find(tab => tab.id === activeTab)?.label.toLowerCase()} yet.</Typography>
+                                        </Stack>
+                                    </Paper>
                                 )}
-                            </div>
+                            </Stack>
                         )}
-                    </div>
+                    </Box>
                 );
         }
     };
 
-    return (
-        <div className="order-history-container">
-            <div className="order-history-layout">
-                <div className="sidebar">
-                    <div className="sidebar-header">
-                        <div className="geometric-shapes">
-                            <div className="shape shape-1"></div>
-                            <div className="shape shape-2"></div>
-                            <div className="shape shape-3"></div>
-                        </div>
-                        <h2 className="sidebar-title">My Orders</h2>
-                        <p className="sidebar-subtitle">Select category to view orders</p>
-                    </div>
-                    
-                    <div className="sidebar-buttons">
-                        {tabs.map((tab) => {
-                            const IconComponent = tab.icon;
-                            return (
-                                <button
-                                    key={tab.id}
-                                    className={`sidebar-button ${activeTab === tab.id ? 'active' : ''}`}
-                                    onClick={() => setActiveTab(tab.id)}
-                                >
-                                    <div className="button-content">
-                                        <span className="button-icon">
-                                            <IconComponent />
-                                        </span>
-                                        <div className="button-info">
-                                            <span className="button-label">{tab.label}</span>
-                                            <span className="button-count">{tab.count} orders</span>
-                                        </div>
-                                    </div>
-                                </button>
-                            );
-                        })}
-                    </div>
-                </div>
+    const isMobile = useMediaQuery('(max-width:600px)');
 
-                <div className="main-content">
-                    {renderMainContent()}
-                </div>
-            </div>
-        </div>
+    return (
+        <Box sx={{ px: { xs: 1.5, sm: 3 }, py: 2 }}>
+            <Stack spacing={2}>
+                <Stack spacing={0.5}>
+                    <Typography variant="h6" fontWeight={700}>My Orders</Typography>
+                    <Typography variant="body2" color="text.secondary">Select a category to view your orders</Typography>
+                </Stack>
+
+                {!isMobile ? (
+                    <Paper variant="outlined" sx={{ borderRadius: 2 }}>
+                        <Tabs
+                            value={tabs.findIndex(t => t.id === activeTab)}
+                            onChange={(_, idx) => setActiveTab(tabs[idx].id)}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            TabIndicatorProps={{ sx: { height: 2 } }}
+                            sx={{
+                                '& .MuiTabs-flexContainer': {
+                                    justifyContent: 'center',
+                                },
+                            }}
+                        >
+                            {tabs.map((t) => (
+                                <Tab
+                                    key={t.id}
+                                    icon={t.icon}
+                                    iconPosition="start"
+                                    label={`${t.label} ${t.count ? `(${t.count})` : ''}`}
+                                    disableRipple
+                                />
+                            ))}
+                        </Tabs>
+                    </Paper>
+                ) : (
+                    <Paper
+                        variant="outlined"
+                        sx={{
+                            borderRadius: 2,
+                            px: 1.5,
+                            py: 1.25,
+                        }}
+                    >
+                        <Stack direction="row" spacing={1.25} sx={{ overflowX: 'auto', pb: 0.5 }}>
+                            {tabs.map((t) => (
+                                <Chip
+                                    key={t.id}
+                                    icon={t.icon}
+                                    label={t.label}
+                                    onClick={() => setActiveTab(t.id)}
+                                    color={activeTab === t.id ? 'primary' : 'default'}
+                                    variant={activeTab === t.id ? 'filled' : 'outlined'}
+                                    size="medium"
+                                    clickable
+                                    disableRipple
+                                    sx={{ px: 1.25, py: 0.5, fontWeight: 600 }}
+                                />
+                            ))}
+                        </Stack>
+                    </Paper>
+                )}
+
+                <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                    <Box sx={{ width: '100%', maxWidth: 1200 }}>
+                        {renderMainContent()}
+                    </Box>
+                </Box>
+            </Stack>
+        </Box>
     );
 };
 

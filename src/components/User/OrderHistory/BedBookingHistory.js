@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './BedBookingHistory.css';
+import { Box, Stack, Typography, Paper, Button, Grid } from '@mui/material';
+import { BottomSheetDialog, LoadingState, ErrorState, EmptyState, StatusChip, Row, Section } from './mui/Primitives';
 
 const BedBookingHistory = () => {
     const [bookings, setBookings] = useState([]);
@@ -74,176 +75,98 @@ const BedBookingHistory = () => {
 
     const renderBookingCard = (booking) => {
         return (
-            <div key={booking.id} className="bed-booking-card">
-                <div className="booking-header">
-                    <div className="booking-status">
-                        <span className="status-badge" style={{ backgroundColor: getStatusColor(booking.status) }}>
-                            {booking.status}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="booking-content">
-                    <div className="hospital-info">
-                        <h4>{booking.hospital.name}</h4>
-                        <p className="booking-datetime">
-                            {formatDate(booking.date)} - {booking.timeSlot}
-                        </p>
-                        <p className="hospital-address">
-                            {booking.hospital.address}, {booking.hospital.city}, {booking.hospital.state}
-                        </p>
-                    </div>
-
-                    <div className="booking-details">
-                        <div className="detail-row">
-                            <span className="detail-label">Bed Type:</span>
-                            <span className="detail-value">{booking.bedType}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Payment Status:</span>
-                            <span className="detail-value">{booking.paymentStatus}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="booking-footer">
-                    <div className="booking-amount">
-                        <span className="amount-label">Paid Amount:</span>
-                        <span className="amount-value">{formatCurrency(booking.paidAmount)}</span>
-                    </div>
-                    <div className="booking-actions">
-                        <button 
-                            className="action-btn primary"
-                            onClick={() => handleViewDetails(booking)}
-                        >
-                            View Details
-                        </button>
-                        <button className="action-btn secondary">
-                            Book Again
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <Paper key={booking.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <StatusChip label={booking.status} />
+                    <Typography variant="caption" color="text.secondary">{formatDate(booking.date)} - {booking.timeSlot}</Typography>
+                </Stack>
+                <Stack spacing={1.25} sx={{ mb: 1.5 }}>
+                    <Section title="Hospital">
+                        <Typography variant="body2" fontWeight={600}>{booking.hospital.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">{booking.hospital.address}, {booking.hospital.city}, {booking.hospital.state}</Typography>
+                    </Section>
+                    <Section title="Details">
+                        <Row label="Bed Type" value={booking.bedType} />
+                        <Row label="Payment Status" value={booking.paymentStatus} />
+                    </Section>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1}>
+                        <Typography variant="body2" color="text.secondary">Paid</Typography>
+                        <Typography fontWeight={600}>{formatCurrency(booking.paidAmount)}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" size="small" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={() => handleViewDetails(booking)}>View Details</Button>
+                        <Button variant="outlined" size="small" sx={{ textTransform: 'none', borderRadius: 2 }}>Book Again</Button>
+                    </Stack>
+                </Stack>
+            </Paper>
         );
     };
 
     const renderSidePanel = () => {
         if (!selectedBooking) return null;
-
         return (
-            <div className={`side-panel-overlay ${isSidePanelOpen ? 'active' : ''}`} onClick={handleCloseSidePanel}>
-                <div className="side-panel" onClick={(e) => e.stopPropagation()}>
-                    <div className="side-panel-header">
-                        <h2>Booking Details</h2>
-                        <button className="close-btn" onClick={handleCloseSidePanel}>×</button>
-                    </div>
-
-                    <div className="side-panel-content">
-                        <div className="booking-summary">
-                            <div className="booking-basic-info">
-                                <span className="status-badge" style={{ backgroundColor: getStatusColor(selectedBooking.status) }}>
-                                    {selectedBooking.status}
-                                </span>
-                            </div>
-
-                            <div className="hospital-details">
-                                <h4>Hospital Information</h4>
-                                <div className="hospital-info-detail">
-                                    <h5>{selectedBooking.hospital.name}</h5>
-                                    <p className="booking-datetime">
-                                        {formatDate(selectedBooking.date)} - {selectedBooking.timeSlot}
-                                    </p>
-                                    <p className="hospital-address">
-                                        {selectedBooking.hospital.address}, {selectedBooking.hospital.city}, {selectedBooking.hospital.state}
-                                    </p>
-                                    <div className="contact-info">
-                                        <p>Contact: {selectedBooking.hospital.contactNumber}</p>
-                                        <p>Email: {selectedBooking.hospital.email}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="booking-info-detail">
-                                <h4>Booking Information</h4>
-                                <div className="info-row">
-                                    <span className="label">Bed Type:</span>
-                                    <span className="value">{selectedBooking.bedType}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Payment Status:</span>
-                                    <span className="value">{selectedBooking.paymentStatus}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Paid Amount:</span>
-                                    <span className="value">{formatCurrency(selectedBooking.paidAmount)}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Booking Created:</span>
-                                    <span className="value">{formatDate(selectedBooking.createdAt)}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Last Updated:</span>
-                                    <span className="value">{formatDate(selectedBooking.updatedAt)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="side-panel-footer">
-                        <button className="book-again-btn">
-                            Book Another Bed
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <BottomSheetDialog
+                open={isSidePanelOpen}
+                onClose={handleCloseSidePanel}
+                title="Booking Details"
+                actions={null}
+            >
+                <Stack spacing={2}>
+                    <StatusChip label={selectedBooking.status} />
+                    <Section title="Hospital Information">
+                        <Typography variant="subtitle1" fontWeight={600}>{selectedBooking.hospital.name}</Typography>
+                        <Typography variant="body2" color="text.secondary">{formatDate(selectedBooking.date)} - {selectedBooking.timeSlot}</Typography>
+                        <Typography variant="body2" color="text.secondary">{selectedBooking.hospital.address}, {selectedBooking.hospital.city}, {selectedBooking.hospital.state}</Typography>
+                        <Typography variant="body2" color="text.secondary">Contact: {selectedBooking.hospital.contactNumber}</Typography>
+                        <Typography variant="body2" color="text.secondary">Email: {selectedBooking.hospital.email}</Typography>
+                    </Section>
+                    <Section title="Booking Information">
+                        <Row label="Bed Type" value={selectedBooking.bedType} />
+                        <Row label="Payment Status" value={selectedBooking.paymentStatus} />
+                        <Row label="Paid Amount" value={formatCurrency(selectedBooking.paidAmount)} />
+                        <Row label="Booking Created" value={formatDate(selectedBooking.createdAt)} />
+                        <Row label="Last Updated" value={formatDate(selectedBooking.updatedAt)} />
+                    </Section>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" sx={{ textTransform: 'none', borderRadius: 2 }}>Book Another Bed</Button>
+                        <Button variant="outlined" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={async () => {
+                            const res = await orderHistoryService.getBedBookingInvoice(selectedBooking.bookingNumber || selectedBooking.id);
+                            if (res.success && res.data?.pdfUrl) {
+                                const a = document.createElement('a');
+                                a.href = res.data.pdfUrl;
+                                a.download = `bed-invoice-${(selectedBooking.bookingNumber || selectedBooking.id).toString().slice(-8)}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }
+                        }}>Download Invoice</Button>
+                    </Stack>
+                </Stack>
+            </BottomSheetDialog>
         );
     };
 
-    if (loading) {
-        return (
-            <div className="bed-bookings-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your bed bookings...</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <LoadingState label="Loading your bed bookings..." />;
 
-    if (error) {
-        return (
-            <div className="bed-bookings-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Bookings</h3>
-                    <p>{error}</p>
-                    <button className="retry-btn" onClick={fetchBookings}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (error) return <ErrorState message={error} onRetry={fetchBookings} />;
 
     return (
-        <div className="bed-bookings-container">
-            <div className="bookings-section">
-                {bookings.length > 0 ? (
-                    <div className="bookings-grid">
-                        {bookings.map((booking) => renderBookingCard(booking))}
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">🏥</div>
-                        <h3>No Bed Bookings Found</h3>
-                        <p>You haven't booked any hospital beds yet.</p>
-                        <button className="browse-btn">Book Hospital Bed</button>
-                    </div>
-                )}
-            </div>
-
+        <Box>
+            {bookings.length > 0 ? (
+                <Grid container spacing={2}>
+                    {bookings.map((booking) => (
+                        <Grid key={booking.id} item xs={12} md={6}>
+                            {renderBookingCard(booking)}
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <EmptyState icon="🏥" title="No Bed Bookings Found" subtitle="You haven't booked any hospital beds yet." actionLabel="Book Hospital Bed" />
+            )}
             {renderSidePanel()}
-        </div>
+        </Box>
     );
 };
 

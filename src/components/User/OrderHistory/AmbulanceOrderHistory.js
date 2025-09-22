@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './ProductOrderHistory.css';
+import { Box, Stack, Typography, Paper, Button, Grid } from '@mui/material';
+import { BottomSheetDialog, LoadingState, ErrorState, EmptyState, StatusChip, Row, Section } from './mui/Primitives';
 
 const AmbulanceOrderHistory = () => {
     const [bookings, setBookings] = useState([]);
@@ -60,185 +61,108 @@ const AmbulanceOrderHistory = () => {
 
     const renderBookingCard = (booking) => {
         return (
-            <div key={booking.id} className="product-order-card ambulance-order-card">
-                <div className="order-header">
-                    <div className="order-info">
-                        <h3 className="order-number">Booking #{booking.bookingNumber.slice(-8)}</h3>
-                        <p className="order-date">Booked on {formatDate(booking.date)}</p>
-                    </div>
-                    <div className="order-status">
-                        <span className="status-badge delivered">Completed</span>
-                    </div>
-                </div>
-                <div className="order-content">
-                    <div className="order-items">
-                        <h4>Ambulance Details:</h4>
-                        <div className="items-list">
-                            <div className="item-card ambulance-item-card">
-                                <div className="item-details">
-                                    <h5 className="item-name">Agency: {booking.agency}</h5>
-                                    <p className="item-category">Vehicle: {booking.vehicleType}</p>
-                                    <p className="item-vendor">Contact: {booking.agencyContact}</p>
-                                    <div className="item-price-qty">
-                                        <span className="item-price">{formatCurrency(booking.total)}</span>
-                                        <span className="item-quantity">Distance: {booking.totalDistance} km</span>
-                                    </div>
-                                    <div className="item-pickdrop">
-                                        <span>Pickup: {booking.pickupLocation}</span><br/>
-                                        <span>Drop: {booking.dropLocation}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="order-details">
-                        <div className="detail-row">
-                            <span className="detail-label">Base Charge:</span>
-                            <span className="detail-value">{formatCurrency(booking.baseCharge)}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Rate per km:</span>
-                            <span className="detail-value">{formatCurrency(booking.costPerKm)}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Payment Bypassed:</span>
-                            <span className="detail-value">{booking.isPaymentBypassed ? 'Yes' : 'No'}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="order-footer">
-                    <div className="order-total">
-                        <span className="total-label">Total Amount:</span>
-                        <span className="total-amount">{formatCurrency(booking.total)}</span>
-                    </div>
-                    <div className="order-actions">
-                        <button 
-                            className="action-btn primary"
-                            onClick={() => handleViewDetails(booking)}
-                        >
-                            View Details
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <Paper key={booking.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Stack>
+                        <Typography fontWeight={600}>Booking #{booking.bookingNumber.slice(-8)}</Typography>
+                        <Typography variant="caption" color="text.secondary">Booked on {formatDate(booking.date)}</Typography>
+                    </Stack>
+                    <StatusChip label="Completed" />
+                </Stack>
+                <Stack spacing={1.25} sx={{ mb: 1.5 }}>
+                    <Section title="Ambulance Details">
+                        <Typography variant="body2">Agency: {booking.agency}</Typography>
+                        <Typography variant="body2" color="text.secondary">Vehicle: {booking.vehicleType}</Typography>
+                        <Typography variant="body2" color="text.secondary">Contact: {booking.agencyContact}</Typography>
+                        <Typography variant="body2" color="text.secondary">Pickup: {booking.pickupLocation}</Typography>
+                        <Typography variant="body2" color="text.secondary">Drop: {booking.dropLocation}</Typography>
+                    </Section>
+                    <Section title="Booking Information">
+                        <Row label="Base Charge" value={formatCurrency(booking.baseCharge)} />
+                        <Row label="Rate per km" value={formatCurrency(booking.costPerKm)} />
+                        <Row label="Payment Bypassed" value={booking.isPaymentBypassed ? 'Yes' : 'No'} />
+                        <Row label="Distance" value={`${booking.totalDistance} km`} />
+                    </Section>
+                </Stack>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Stack direction="row" spacing={1}>
+                        <Typography variant="body2" color="text.secondary">Total</Typography>
+                        <Typography fontWeight={600}>{formatCurrency(booking.total)}</Typography>
+                    </Stack>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" size="small" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={() => handleViewDetails(booking)}>View Details</Button>
+                    </Stack>
+                </Stack>
+            </Paper>
         );
     };
 
     const renderSidePanel = () => {
         if (!selectedBooking) return null;
         return (
-            <div className={`side-panel-overlay ${isSidePanelOpen ? 'active' : ''}`} onClick={handleCloseSidePanel}>
-                <div className="side-panel" onClick={e => e.stopPropagation()}>
-                    <div className="side-panel-header">
-                        <h2>Booking Details</h2>
-                        <button className="close-btn" onClick={handleCloseSidePanel}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="side-panel-content">
-                        <div className="order-summary">
-                            <div className="order-basic-info">
-                                <h3>Booking #{selectedBooking.bookingNumber.slice(-8)}</h3>
-                                <p className="order-date">Booked on {formatDate(selectedBooking.date)}</p>
-                                <span className="status-badge delivered">Completed</span>
-                            </div>
-                            <div className="order-items-detail">
-                                <h4>Ambulance Details</h4>
-                                <div className="detail-item">
-                                    <div className="item-info">
-                                        <h5>Agency: {selectedBooking.agency}</h5>
-                                        <p className="item-category">Vehicle: {selectedBooking.vehicleType}</p>
-                                        <p className="item-vendor">Contact: {selectedBooking.agencyContact}</p>
-                                        <div className="item-pricing">
-                                            <span className="price">{formatCurrency(selectedBooking.total)}</span>
-                                            <span className="quantity">Distance: {selectedBooking.totalDistance} km</span>
-                                        </div>
-                                        <div className="item-pickdrop">
-                                            <span>Pickup: {selectedBooking.pickupLocation}</span><br/>
-                                            <span>Drop: {selectedBooking.dropLocation}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="delivery-info">
-                                <h4>Booking Information</h4>
-                                <div className="info-row">
-                                    <span className="label">Base Charge:</span>
-                                    <span className="value">{formatCurrency(selectedBooking.baseCharge)}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Rate per km:</span>
-                                    <span className="value">{formatCurrency(selectedBooking.costPerKm)}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Payment Bypassed:</span>
-                                    <span className="value">{selectedBooking.isPaymentBypassed ? 'Yes' : 'No'}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Completed On:</span>
-                                    <span className="value">{formatDate(selectedBooking.actualDelivery)}</span>
-                                </div>
-                            </div>
-                            <div className="order-total-section">
-                                <div className="total-row">
-                                    <span className="total-label">Total Amount:</span>
-                                    <span className="total-amount">{formatCurrency(selectedBooking.total)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <BottomSheetDialog
+                open={isSidePanelOpen}
+                onClose={handleCloseSidePanel}
+                title="Booking Details"
+                actions={null}
+            >
+                <Stack spacing={2}>
+                    <Section>
+                        <Typography variant="subtitle1" fontWeight={600}>Booking #{selectedBooking.bookingNumber.slice(-8)}</Typography>
+                        <Typography variant="body2" color="text.secondary">Booked on {formatDate(selectedBooking.date)}</Typography>
+                        <StatusChip label="Completed" />
+                    </Section>
+                    <Section title="Ambulance Details">
+                        <Row label="Agency" value={selectedBooking.agency} />
+                        <Row label="Vehicle" value={selectedBooking.vehicleType} />
+                        <Row label="Contact" value={selectedBooking.agencyContact} />
+                        <Row label="Pickup" value={selectedBooking.pickupLocation} />
+                        <Row label="Drop" value={selectedBooking.dropLocation} />
+                    </Section>
+                    <Section title="Booking Information">
+                        <Row label="Base Charge" value={formatCurrency(selectedBooking.baseCharge)} />
+                        <Row label="Rate per km" value={formatCurrency(selectedBooking.costPerKm)} />
+                        <Row label="Payment Bypassed" value={selectedBooking.isPaymentBypassed ? 'Yes' : 'No'} />
+                        <Row label="Completed On" value={formatDate(selectedBooking.actualDelivery)} />
+                        <Row label="Total Amount" value={formatCurrency(selectedBooking.total)} />
+                    </Section>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={async () => {
+                            const res = await orderHistoryService.getAmbulanceInvoice(selectedBooking.bookingNumber || selectedBooking.id);
+                            if (res.success && res.data?.pdfUrl) {
+                                const a = document.createElement('a');
+                                a.href = res.data.pdfUrl;
+                                a.download = `ambulance-invoice-${(selectedBooking.bookingNumber || selectedBooking.id).toString().slice(-8)}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }
+                        }}>Download Invoice</Button>
+                    </Stack>
+                </Stack>
+            </BottomSheetDialog>
         );
     };
 
-    if (loading) {
-        return (
-            <div className="product-orders-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your completed ambulance bookings...</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <LoadingState label="Loading your completed ambulance bookings..." />;
 
-    if (error) {
-        return (
-            <div className="product-orders-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Bookings</h3>
-                    <p>{error}</p>
-                    <button className="retry-btn" onClick={fetchCompletedBookings}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (error) return <ErrorState message={error} onRetry={fetchCompletedBookings} />;
 
     return (
-        <div className="product-orders-container">
-            <div className="orders-section">
-                {bookings.length > 0 ? (
-                    <div className="orders-grid">
-                        {bookings.map((booking) => renderBookingCard(booking))}
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">🚑</div>
-                        <h3>No Completed Ambulance Bookings Found</h3>
-                        <p>You haven't completed any ambulance bookings yet.</p>
-                        <button className="browse-btn">Book Ambulance</button>
-                    </div>
-                )}
-            </div>
+        <Box>
+            {bookings.length > 0 ? (
+                <Grid container spacing={2}>
+                    {bookings.map((booking) => (
+                        <Grid key={booking.id} item xs={12} md={6}>
+                            {renderBookingCard(booking)}
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <EmptyState icon="🚑" title="No Completed Ambulance Bookings Found" subtitle="You haven't completed any ambulance bookings yet." actionLabel="Book Ambulance" />
+            )}
             {renderSidePanel()}
-        </div>
+        </Box>
     );
 };
 

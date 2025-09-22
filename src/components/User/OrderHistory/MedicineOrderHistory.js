@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './MedicineOrderHistory.css';
+import { Box, Stack, Typography, Paper, Button, Grid } from '@mui/material';
+import { BottomSheetDialog, LoadingState, ErrorState, EmptyState, StatusChip, Row, Section } from './mui/Primitives';
 
 const MedicineOrderHistory = () => {
     const [orders, setOrders] = useState([]);
@@ -9,8 +10,6 @@ const MedicineOrderHistory = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
     const [orderCount, setOrderCount] = useState(0);
-    const [invoiceData, setInvoiceData] = useState(null);
-    const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
     const [invoiceLoading, setInvoiceLoading] = useState(false);
 
     useEffect(() => {
@@ -21,9 +20,7 @@ const MedicineOrderHistory = () => {
         try {
             setLoading(true);
             setError(null);
-            
             const response = await orderHistoryService.getDeliveredMedicineOrders();
-            
             if (response.success) {
                 const formattedOrders = response.data.map(order => 
                     orderHistoryService.formatMedicineOrderData(order)
@@ -65,14 +62,18 @@ const MedicineOrderHistory = () => {
         setSelectedOrder(null);
     };
 
-    const handleViewInvoice = async () => {
-        if (selectedOrder) {
+	const handleDownloadInvoice = async () => {
+		if (!selectedOrder) return;
             setInvoiceLoading(true);
             try {
-                const response = await orderHistoryService.getInvoice(selectedOrder.orderNumber);
-                if (response.success) {
-                    setInvoiceData(response.data);
-                    setIsInvoiceDialogOpen(true);
+			const response = await orderHistoryService.getMedicineInvoice(selectedOrder.orderNumber);
+			if (response.success && response.data?.pdfUrl) {
+				const a = document.createElement('a');
+				a.href = response.data.pdfUrl;
+				a.download = `medicine-invoice-${selectedOrder.orderNumber}.pdf`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
                 } else {
                     console.error('Failed to fetch invoice:', response.message);
                 }
@@ -80,289 +81,124 @@ const MedicineOrderHistory = () => {
                 console.error('Error fetching invoice:', error);
             } finally {
                 setInvoiceLoading(false);
-            }
-        }
-    };
-
-    const handleCloseInvoiceDialog = () => {
-        setIsInvoiceDialogOpen(false);
-        setInvoiceData(null);
-    };
-
-    const handleDownloadInvoice = () => {
-        if (invoiceData) {
-            const url = window.URL.createObjectURL(invoiceData.blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `invoice-${selectedOrder.orderNumber}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-    };
-
+		}
+	};
 
     const renderOrderCard = (order) => {
         return (
-            <div key={order.id} className="medicine-order-card">
-                <div className="order-header">
-                    <div className="order-info">
-                        <h3 className="order-number">Order #{order.orderNumber}</h3>
-                        <p className="order-date">Placed on {formatDate(order.date)}</p>
-                    </div>
-                    <div className="order-status">
-                        <span className="status-badge delivered">
-                            {order.status}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="order-content">
-                    <div className="order-details">
-                        <div className="detail-row">
-                            <span className="detail-label">Payment Method:</span>
-                            <span className="detail-value">{order.paymentMethod}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Payment Status:</span>
-                            <span className="detail-value">{order.paymentStatus}</span>
-                        </div>
+			<Paper key={order.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+				<Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+					<Stack>
+						<Typography fontWeight={600}>Order #{order.orderNumber}</Typography>
+						<Typography variant="caption" color="text.secondary">Placed on {formatDate(order.date)}</Typography>
+					</Stack>
+					<StatusChip label={order.status} />
+				</Stack>
+				<Stack spacing={0.5} sx={{ mb: 1.5 }}>
+					<Row label="Payment Method" value={order.paymentMethod} />
+					<Row label="Payment Status" value={order.paymentStatus} />
                         {order.actualDelivery && (
-                            <div className="detail-row">
-                                <span className="detail-label">Delivered On:</span>
-                                <span className="detail-value">{formatDate(order.actualDelivery)}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="order-footer">
-                    <div className="order-total">
-                        <span className="total-label">Total Amount:</span>
-                        <span className="total-amount">{formatCurrency(order.total)}</span>
-                    </div>
-                    <div className="order-actions">
-                        <button 
-                            className="action-btn primary"
-                            onClick={() => handleViewDetails(order)}
-                        >
-                            View Details
-                        </button>
-                        <button className="action-btn secondary">Reorder</button>
-                    </div>
-                </div>
-            </div>
+						<Row label="Delivered On" value={formatDate(order.actualDelivery)} />
+					)}
+				</Stack>
+				<Stack direction="row" justifyContent="space-between" alignItems="center">
+					<Stack direction="row" spacing={1}>
+						<Typography variant="body2" color="text.secondary">Total</Typography>
+						<Typography fontWeight={600}>{formatCurrency(order.total)}</Typography>
+					</Stack>
+					<Stack direction="row" spacing={1}>
+						<Button variant="contained" size="small" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={() => handleViewDetails(order)}>View Details</Button>
+						<Button variant="outlined" size="small" sx={{ textTransform: 'none', borderRadius: 2 }}>Reorder</Button>
+					</Stack>
+				</Stack>
+			</Paper>
         );
     };
 
     const renderSidePanel = () => {
         if (!selectedOrder) return null;
-
         return (
-            <div className={`side-panel-overlay ${isSidePanelOpen ? 'active' : ''}`} onClick={handleCloseSidePanel}>
-                <div className="side-panel" onClick={(e) => e.stopPropagation()}>
-                    <div className="side-panel-header">
-                        <h2>Order Details</h2>
-                        <button className="close-btn" onClick={handleCloseSidePanel}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div className="side-panel-content">
-                        <div className="order-summary">
-                            <div className="order-basic-info">
-                                <h3>Order #{selectedOrder.orderNumber}</h3>
-                                <p className="order-date">Placed on {formatDate(selectedOrder.date)}</p>
-                                <span className="status-badge delivered">{selectedOrder.status}</span>
-                            </div>
-
+			<BottomSheetDialog
+				open={isSidePanelOpen}
+				onClose={handleCloseSidePanel}
+				title="Order Details"
+				actions={null}
+			>
+				<Stack spacing={2}>
+					<Section>
+						<Typography variant="subtitle1" fontWeight={600}>Order #{selectedOrder.orderNumber}</Typography>
+						<Stack direction="row" justifyContent="space-between" alignItems="center">
+							<Typography variant="body2" color="text.secondary">Placed on {formatDate(selectedOrder.date)}</Typography>
+							<StatusChip label={selectedOrder.status} />
+						</Stack>
+					</Section>
 
                             {selectedOrder.vendor && (
-                                <div className="vendor-info">
-                                    <h5>Vendor Information</h5>
-                                    <p><strong>Name:</strong> {selectedOrder.vendor.name}</p>
-                                </div>
+						<Section title="Vendor Information">
+							<Row label="Name" value={selectedOrder.vendor.name} />
+						</Section>
                             )}
 
                             {selectedOrder.deliveryAddress && (
-                                <div className="address-info">
-                                    <h5>Delivery Address</h5>
-                                    <p><strong>Address:</strong> {selectedOrder.deliveryAddress.houseStreet}</p>
-                                    <p><strong>Area:</strong> {selectedOrder.deliveryAddress.addressLine1}</p>
-                                    <p><strong>City:</strong> {selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state}</p>
-                                    <p><strong>Pincode:</strong> {selectedOrder.deliveryAddress.zipCode}</p>
-                                    <p><strong>Type:</strong> {selectedOrder.deliveryAddress.addressType}</p>
-                                        </div>
+						<Section title="Delivery Address">
+							<Typography variant="body2">{selectedOrder.deliveryAddress.houseStreet}</Typography>
+							<Typography variant="body2">{selectedOrder.deliveryAddress.addressLine1}</Typography>
+							<Typography variant="body2">{selectedOrder.deliveryAddress.city}, {selectedOrder.deliveryAddress.state} - {selectedOrder.deliveryAddress.zipCode}</Typography>
+							<Typography variant="body2">Type: {selectedOrder.deliveryAddress.addressType}</Typography>
+						</Section>
                             )}
 
                             {selectedOrder.prescription && (
-                                <div className="vendor-info">
-                                    <h5>Prescription Details</h5>
-                                    <p><strong>Status:</strong> {selectedOrder.prescription.status}</p>
-                                            </div>
-                            )}
+						<Section title="Prescription Details">
+							<Row label="Status" value={selectedOrder.prescription.status} />
+						</Section>
+					)}
 
-                            <div className="payment-info">
-                                <h4>Payment Information</h4>
-                                <div className="info-row">
-                                    <span className="label">Payment Method:</span>
-                                    <span className="value">{selectedOrder.paymentMethod}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Payment Status:</span>
-                                    <span className="value">{selectedOrder.paymentStatus}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Transaction ID:</span>
-                                    <span className="value">{selectedOrder.transactionId}</span>
-                                </div>
-                            </div>
+					<Section title="Payment Information">
+						<Row label="Payment Method" value={selectedOrder.paymentMethod} />
+						<Row label="Payment Status" value={selectedOrder.paymentStatus} />
+						<Row label="Transaction ID" value={selectedOrder.transactionId} />
+					</Section>
 
-                            <div className="order-total-section">
-                                <div className="total-row">
-                                    <span>Subtotal:</span>
-                                    <span>{formatCurrency(selectedOrder.subtotal)}</span>
-                                </div>
-                                <div className="total-row">
-                                    <span>Delivery Charge:</span>
-                                    <span>{formatCurrency(selectedOrder.deliveryCharge)}</span>
-                                </div>
-                                <div className="total-row">
-                                    <span>Platform Fee:</span>
-                                    <span>{formatCurrency(selectedOrder.platformFee)}</span>
-                                </div>
-                                <div className="total-row">
-                                    <span>Discount:</span>
-                                    <span>-{formatCurrency(selectedOrder.discountAmount)}</span>
-                                </div>
-                                <div className="total-row grand-total">
-                                    <span>Total Amount:</span>
-                                    <span>{formatCurrency(selectedOrder.total)}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+					<Section title="Totals">
+						<Row label="Subtotal" value={formatCurrency(selectedOrder.subtotal)} />
+						<Row label="Delivery Charge" value={formatCurrency(selectedOrder.deliveryCharge)} />
+						<Row label="Platform Fee" value={formatCurrency(selectedOrder.platformFee)} />
+						<Row label="Discount" value={`-${formatCurrency(selectedOrder.discountAmount)}`} />
+						<Row label="Total Amount" value={formatCurrency(selectedOrder.total)} />
+					</Section>
 
-                    <div className="side-panel-footer">
-                        <button className="download-invoice-btn" onClick={handleViewInvoice} disabled={invoiceLoading}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            {invoiceLoading ? 'Loading...' : 'View Invoice'}
-                        </button>
-                        <button className="reorder-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                            </svg>
-                            Reorder
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
+					<Stack direction="row" spacing={1}>
+						<Button variant="contained" onClick={handleDownloadInvoice} disabled={invoiceLoading} sx={{ textTransform: 'none', borderRadius: 2 }}>
+							{invoiceLoading ? 'Downloading...' : 'Download Invoice'}
+						</Button>
+						<Button variant="outlined" sx={{ textTransform: 'none', borderRadius: 2 }}>Reorder</Button>
+					</Stack>
+				</Stack>
+			</BottomSheetDialog>
+		);
+	};
 
-    if (loading) {
-        return (
-            <div className="medicine-orders-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your delivered orders...</p>
-                </div>
-            </div>
-        );
-    }
+	if (loading) return <LoadingState label="Loading your delivered orders..." />;
 
-    if (error) {
-        return (
-            <div className="medicine-orders-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Orders</h3>
-                    <p>{error}</p>
-                    <button className="retry-btn" onClick={fetchDeliveredOrders}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
+	if (error) return <ErrorState message={error} onRetry={fetchDeliveredOrders} />;
 
     return (
-        <div className="medicine-orders-container">
-            <div className="orders-section">
+		<Box>
                 {orders.length > 0 ? (
-                    <div className="orders-grid">
-                        {orders.map((order) => renderOrderCard(order))}
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">💊</div>
-                        <h3>No Delivered Orders Found</h3>
-                        <p>You haven't received any medicine orders yet.</p>
-                        <button className="browse-btn">Order Medicines</button>
-                    </div>
-                )}
-            </div>
-
+				<Grid container spacing={2}>
+					{orders.map((order) => (
+						<Grid key={order.id} item xs={12} md={6}>
+							{renderOrderCard(order)}
+						</Grid>
+					))}
+				</Grid>
+			) : (
+				<EmptyState icon="💊" title="No Delivered Orders Found" subtitle="You haven't received any medicine orders yet." actionLabel="Order Medicines" />
+			)}
             {renderSidePanel()}
-            {renderInvoiceDialog()}
-        </div>
-    );
-
-    function renderInvoiceDialog() {
-        if (!isInvoiceDialogOpen) return null;
-
-        return (
-            <div className="invoice-dialog-overlay" onClick={handleCloseInvoiceDialog}>
-                <div className="invoice-dialog" onClick={(e) => e.stopPropagation()}>
-                    <div className="invoice-dialog-header">
-                        <h2>Invoice - Order #{selectedOrder?.orderNumber}</h2>
-                        <button className="invoice-close-btn" onClick={handleCloseInvoiceDialog}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div className="invoice-dialog-content">
-                        {invoiceData ? (
-                            <iframe
-                                src={invoiceData.pdfUrl}
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none' }}
-                                title={`Invoice for Order ${selectedOrder?.orderNumber}`}
-                            />
-                        ) : (
-                            <div className="invoice-loading">
-                                <div className="loading-spinner"></div>
-                                <p>Loading invoice...</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="invoice-dialog-footer">
-                        <button className="invoice-download-btn" onClick={handleDownloadInvoice}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            Download Invoice
-                        </button>
-                        <button className="invoice-close-dialog-btn" onClick={handleCloseInvoiceDialog}>
-                            Close
-                        </button>
-                    </div>
-                </div>
-        </div>
-    );
-    }
+		</Box>
+	);
 };
 
 export default MedicineOrderHistory; 

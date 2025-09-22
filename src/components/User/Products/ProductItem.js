@@ -11,7 +11,7 @@ import {
     Box,
     Stack,
     IconButton,
-  
+    CircularProgress,
     Rating,
     Snackbar,
     Alert,
@@ -32,26 +32,19 @@ import { VendorProductService } from '../../../services/User/Products/vendor-pro
 import { getUserId, isAuthenticated } from '../../../services/User/Auth/auth.utils';
 import { fetchCartItems } from '../../../store/slices/cartSlice';
 
-// Styled Components
+// Styled Components (compact card)
 const StyledCard = styled(Card)(({ theme }) => ({
-    height: '100%',
+    height: 300,
     display: 'flex',
     flexDirection: 'column',
-    borderRadius: 16,
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    border: '1px solid rgba(0, 0, 0, 0.04)',
+    borderRadius: 2,
+    boxShadow: theme.shadows[1],
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    border: '1px solid rgba(0, 0, 0, 0.06)',
     overflow: 'hidden',
     '&:hover': {
-        transform: 'translateY(-8px)',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)',
-        borderColor: theme.palette.primary.main,
-    },
-    '& .MuiCardMedia-root': {
-        transition: 'transform 0.3s ease',
-    },
-    '&:hover .MuiCardMedia-root': {
-        transform: 'scale(1.05)',
+        transform: 'translateY(-2px)',
+        boxShadow: theme.shadows[4]
     }
 }));
 
@@ -191,11 +184,11 @@ const ProductItem = ({ product }) => {
                 <Box sx={{ position: 'relative' }}>
                     <CardMedia
                         component="img"
-                        height="200"
+                        height="120"
                         image={mainImage}
                         alt={name}
+                        loading="lazy"
                         onError={() => {
-                            console.log('Image load error');
                             setImageError(true);
                         }}
                         sx={{ 
@@ -203,211 +196,109 @@ const ProductItem = ({ product }) => {
                             ...(imageError && { display: 'none' })
                         }}
                     />
-                    
                     {imageError && (
                         <Box sx={{ 
-                            height: 200, 
+                            height: 120, 
                             display: 'flex', 
                             alignItems: 'center', 
                             justifyContent: 'center',
                             background: 'rgba(0, 0, 0, 0.02)'
                         }}>
-                    <ImageIcon />
+                            <ImageIcon />
                         </Box>
-                )}
+                    )}
 
                     {/* Stock Badges */}
                     <Stack direction="row" spacing={1} sx={{ 
                         position: 'absolute', 
-                        top: 12, 
-                        left: 12,
+                        top: 8, 
+                        left: 8,
                         zIndex: 2
                     }}>
-                {stock <= 5 && stock > 0 && (
+                        {stock <= 5 && stock > 0 && (
                             <Chip
                                 icon={<Warning />}
                                 label={`Only ${stock} left`}
                                 size="small"
                                 sx={{ 
-                                    background: 'rgba(255, 193, 7, 0.9)',
-                                    color: 'white',
+                                    background: 'rgba(255, 193, 7, 0.18)',
+                                    color: '#8a6d00',
                                     fontWeight: 600
                                 }}
                             />
-                )}
-                {stock === 0 && (
+                        )}
+                        {stock === 0 && (
                             <Chip
                                 icon={<Cancel />}
                                 label="Out of Stock"
                                 size="small"
                                 sx={{ 
-                                    background: 'rgba(158, 158, 158, 0.9)',
-                                    color: 'white',
+                                    background: 'rgba(158, 158, 158, 0.2)',
+                                    color: 'text.secondary',
                                     fontWeight: 600
                                 }}
                             />
-                )}
+                        )}
                     </Stack>
-            
-                    {/* Quick Actions Overlay */}
-                    <Box sx={{
-                        position: 'absolute',
-                        top: 12,
-                        right: 12,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1,
-                        opacity: 0,
-                        transition: 'opacity 0.3s ease',
-                        '&:hover': {
-                            opacity: 1
-                        }
-                    }}>
-                        <IconButton size="small" sx={{ 
-                            background: 'rgba(255, 255, 255, 0.9)',
-                            '&:hover': { background: 'rgba(255, 255, 255, 1)' }
-                        }}>
-                            <Visibility fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small" sx={{ 
-                            background: 'rgba(255, 255, 255, 0.9)',
-                            '&:hover': { background: 'rgba(255, 255, 255, 1)' }
-                        }}>
-                            <Favorite fontSize="small" />
-                        </IconButton>
-                    </Box>
                 </Box>
                 
-                <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" component="h3" sx={{ 
+                <CardContent sx={{ p: 1.5, display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
+                    <Box sx={{ flexGrow: 1, minHeight: 0 }}>
+                        <Typography variant="subtitle2" sx={{
                             fontWeight: 600,
-                            mb: 1,
+                            mb: 0.5,
+                            fontSize: '0.9rem',
+                            lineHeight: 1.3,
                             overflow: 'hidden',
-                            textOverflow: 'ellipsis',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.3
+                            WebkitBoxOrient: 'vertical'
                         }}>
                             {name}
                         </Typography>
-                        
-                    {rating > 0 && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                <Rating 
-                                    value={rating} 
-                                    precision={0.1} 
-                                    size="small" 
-                                    readOnly
-                                    sx={{ '& .MuiRating-iconFilled': { color: '#FFD700' } }}
-                                />
-                                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                                    {rating.toFixed(1)}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    ({reviewCount} reviews)
-                                </Typography>
-                            </Box>
-                    )}
-                        
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                            mb: 2,
+                        <Typography variant="caption" sx={{
+                            color: 'text.secondary',
+                            mb: 1,
                             overflow: 'hidden',
-                            textOverflow: 'ellipsis',
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            lineHeight: 1.4
+                            WebkitBoxOrient: 'vertical'
                         }}>
-                        {description}
+                            {description}
                         </Typography>
-                    
-                    {highlights && highlights.length > 0 && (
-                            <Box sx={{ mb: 2 }}>
-                            {highlights.slice(0, 2).map((highlight, index) => (
-                                    <Box key={index} sx={{ 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        gap: 1, 
-                                        mb: 0.5 
-                                    }}>
-                                        <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
-                                        <Typography variant="body2" color="text.secondary" sx={{
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap'
-                                        }}>
-                                    {highlight}
-                                        </Typography>
-                                    </Box>
-                            ))}
-                            </Box>
-                    )}
                     </Box>
 
-                    <Box sx={{ mt: 'auto' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                            <Box>
-                        {priceTiers && priceTiers.length > 0 ? (
-                                    <Box>
-                                {priceTiers.slice(0, 1).map((tier, index) => (
-                                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-                                                    ₹{tier.price.toLocaleString()}
-                                                </Typography>
-                                                <Chip 
-                                                    label={tier.name}
-                                                    size="small"
-                                                    variant="outlined"
-                                                    color="primary"
-                                                />
-                                            </Box>
-                                ))}
-                                    </Box>
-                        ) : (
-                                    <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-                                        ₹{price.toLocaleString()}
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 1 }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.95rem' }}>
+                            ₹{(priceTiers && priceTiers.length > 0 ? priceTiers[0].price : price).toLocaleString()}
+                        </Typography>
+                    </Box>
 
+                    {stock !== 0 ? (
                         <Button
                             variant="contained"
                             fullWidth
-                            disabled={stock === 0 || loading}
-                        onClick={isInCart ? handleGoToCart : handleAddToCart}
+                            disabled={loading}
+                            onClick={isInCart ? handleGoToCart : handleAddToCart}
                             startIcon={loading ? (
-                                <Box sx={{ 
-                                    width: 16, 
-                                    height: 16, 
-                                    border: '2px solid transparent',
-                                    borderTop: '2px solid currentColor',
-                                    borderRadius: '50%',
-                                    animation: 'spin 1s linear infinite'
-                                }} />
-                        ) : isInCart ? (
+                                <CircularProgress size={16} color="inherit" thickness={5} />
+                            ) : isInCart ? (
                                 <CheckCircle />
                             ) : (
-                                stock === 0 ? <Cancel /> : <ShoppingCart />
+                                <ShoppingCart />
                             )}
                             sx={{
                                 borderRadius: 2,
                                 textTransform: 'none',
                                 fontWeight: 600,
-                                py: 1.5,
-                                ...(isInCart && {
-                                    background: 'linear-gradient(135deg, #4CAF50, #66BB6A)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(135deg, #43A047, #5CB85C)'
-                                    }
-                                })
+                                py: 0.7
                             }}
                         >
-                            {loading ? 'Adding...' : isInCart ? 'Go to Cart' : stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                            {loading ? 'Adding...' : isInCart ? 'Go to Cart' : 'Add to Cart'}
                         </Button>
-                    </Box>
+                    ) : (
+                        <Box sx={{ height: 36 }} />
+                    )}
                 </CardContent>
             </StyledCard>
 
@@ -454,14 +345,9 @@ const ProductItem = ({ product }) => {
                 </Alert>
             </StyledSnackbar>
 
-            <style jsx>{`
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            `}</style>
+            {/* Removed custom spinner keyframes; using MUI CircularProgress */}
         </>
     );
 };
 
-export default ProductItem; 
+export default React.memo(ProductItem); 

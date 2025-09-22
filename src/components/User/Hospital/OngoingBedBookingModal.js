@@ -1,5 +1,5 @@
 import React from 'react';
-import Modal from '@mui/material/Modal';
+import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -19,8 +19,8 @@ import StarOutlineIcon from '@mui/icons-material/StarOutline';
 import PersonIcon from '@mui/icons-material/Person';
 import BedIcon from '@mui/icons-material/Bed';
 import CircularProgress from '@mui/material/CircularProgress';
-import { styled } from '@mui/material/styles';
-import './OngoingBedBookingModal.css';
+import { styled, useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useSocket } from '../../../hooks/useSocket';
 import hospitalBedPaymentService from '../../../services/payment/hospital-bed-payment.service';
 
@@ -284,6 +284,9 @@ export default function OngoingBedBookingModal({ open, booking, onClose, onRefre
   const [paymentStatus, setPaymentStatus] = React.useState('idle');
   const [paymentError, setPaymentError] = React.useState('');
   const [paymentAmount, setPaymentAmount] = React.useState(null);
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+  const headerHeight = isMdUp ? 64 : 56;
 
   const steps = ['pending', 'accepted', 'WaitingForPayment', 'completed'];
   const currentStepIndex = steps.indexOf(booking?.status || 'pending');
@@ -343,57 +346,53 @@ export default function OngoingBedBookingModal({ open, booking, onClose, onRefre
     }
   };
 
-  // Update modalBoxSx in the main component
-  const modalBoxSx = {
-    position: 'fixed',
-    right: 0,
-    top: { xs: 'auto', md: 0 },
-    bottom: { xs: 0, md: 'auto' },
-    height: { xs: '90vh', md: '100vh' },
-    width: { xs: '100%', sm: '100%', md: 400 },
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    p: 3,
-    overflowY: 'auto',
-    transform: open ? 'translateX(0)' : 'translateX(100%)',
-    transition: 'transform 0.3s ease-in-out',
-    borderTopLeftRadius: { xs: '24px', md: '24px' },
-    borderTopRightRadius: { xs: '24px', md: 0 },
-    borderBottomLeftRadius: { xs: 0, md: '24px' },
-    zIndex: 1300,
-  };
+  const panelSx = { p: 3, height: { xs: 'auto', md: '100%' }, overflowY: 'auto' };
 
   // Completed State
   if (isCompleted) {
     return (
-      <Modal open={open} onClose={onClose}>
-        <Box sx={modalBoxSx}>
-          <IconButton
-            onClick={onClose}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
-          >
+      <Drawer
+        open={open}
+        onClose={onClose}
+        anchor={isMdUp ? 'right' : 'bottom'}
+        ModalProps={{ keepMounted: true, BackdropProps: { invisible: true } }}
+        PaperProps={{
+          sx: {
+            top: isMdUp ? headerHeight : 'auto',
+            height: isMdUp ? `calc(100vh - ${headerHeight}px)` : 'auto',
+            maxHeight: isMdUp ? `calc(100vh - ${headerHeight}px)` : '85vh',
+            width: isMdUp ? 400 : '100%',
+            borderRadius: isMdUp ? '24px 0 0 24px' : '24px 24px 0 0'
+          }
+        }}
+      >
+        <Box sx={panelSx}>
+          <IconButton onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
             <CloseIcon />
           </IconButton>
           <PaymentSuccessView onClose={onClose} amount={paymentAmount} />
         </Box>
-      </Modal>
+      </Drawer>
     );
   }
 
   return (
-    <Modal 
-      open={open} 
+    <Drawer
+      open={open}
       onClose={onClose}
-      sx={{ 
-        display: 'block',
-        '& .MuiBackdrop-root': {
-          backgroundColor: 'rgba(0, 0, 0, 0.2)'
+      anchor={isMdUp ? 'right' : 'bottom'}
+      ModalProps={{ keepMounted: true, BackdropProps: { invisible: true } }}
+      PaperProps={{
+        sx: {
+          top: isMdUp ? headerHeight : 'auto',
+          height: isMdUp ? `calc(100vh - ${headerHeight}px)` : 'auto',
+          maxHeight: isMdUp ? `calc(100vh - ${headerHeight}px)` : '85vh',
+          width: isMdUp ? 400 : '100%',
+          borderRadius: isMdUp ? '24px 0 0 24px' : '24px 24px 0 0'
         }
       }}
-      hideBackdrop={false}
-      disableEscapeKeyDown={false}
     >
-      <Box sx={modalBoxSx}>
+      <Box sx={panelSx}>
         {paymentStatus === 'processing' ? (
           <PaymentProcessingView />
         ) : paymentStatus === 'success' ? (
@@ -523,6 +522,6 @@ export default function OngoingBedBookingModal({ open, booking, onClose, onRefre
           </Stack>
         )}
       </Box>
-    </Modal>
+    </Drawer>
   );
 } 

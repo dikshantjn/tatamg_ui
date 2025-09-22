@@ -597,6 +597,186 @@ class OrderHistoryService {
             };
         }
     }
+
+    /**
+     * Get clinic appointment invoice PDF
+     * @param {string} appointmentId
+     * @returns {Promise<{success:boolean,data:{pdfUrl:string,blob:Blob}|null,message:string}>}
+     */
+    async getClinicInvoice(appointmentId) {
+        try {
+            if (!appointmentId) {
+                throw new Error('Appointment ID is required');
+            }
+
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.CLINIC_INVOICE.GET_INVOICE,
+                { appointmentId }
+            );
+
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: {
+                    ...getAuthHeader(),
+                    'Accept': 'application/pdf',
+                },
+                responseType: 'blob',
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+
+            return {
+                success: true,
+                data: { pdfUrl, blob, appointmentId },
+                message: 'Clinic invoice fetched successfully',
+            };
+        } catch (error) {
+            console.error('Error fetching clinic invoice:', error);
+            return {
+                success: false,
+                data: null,
+                message: error.message || 'Failed to fetch clinic invoice',
+            };
+        }
+    }
+
+    /**
+     * Get medicine order invoice PDF
+     */
+    async getMedicineInvoice(orderId) {
+        try {
+            if (!orderId) throw new Error('Order ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.GET_INVOICE,
+                { orderId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, orderId } };
+        } catch (error) {
+            console.error('Error fetching medicine invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
+
+    /** Get product order invoice PDF */
+    async getProductOrderInvoice(orderId) {
+        try {
+            if (!orderId) throw new Error('Order ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.PRODUCT_ORDER.GET_ORDER_INVOICE,
+                { orderId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, orderId } };
+        } catch (error) {
+            console.error('Error fetching product order invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
+
+    /** Get hospital bed booking invoice PDF */
+    async getBedBookingInvoice(bookingId) {
+        try {
+            if (!bookingId) throw new Error('Booking ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.HOSPITAL_INVOICE.GET_INVOICE,
+                { bookingId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, bookingId } };
+        } catch (error) {
+            console.error('Error fetching bed booking invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
+
+    /** Get lab test invoice PDF */
+    async getLabTestInvoice(bookingId) {
+        try {
+            if (!bookingId) throw new Error('Booking ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.LAB_TEST_INVOICE.GET_INVOICE,
+                { bookingId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, bookingId } };
+        } catch (error) {
+            console.error('Error fetching lab test invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
+
+    /** Get ambulance booking invoice PDF */
+    async getAmbulanceInvoice(requestId) {
+        try {
+            if (!requestId) throw new Error('Request ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.AMBULANCE_INVOICE.GET_INVOICE,
+                { requestId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, requestId } };
+        } catch (error) {
+            console.error('Error fetching ambulance invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
+
+    /** Get blood bank booking invoice PDF */
+    async getBloodBankInvoice(bookingId) {
+        try {
+            if (!bookingId) throw new Error('Booking ID is required');
+            const endpoint = replaceUrlParams(
+                API_CONFIG.ENDPOINTS.BLOOD_BANK_INVOICE.GET_INVOICE,
+                { bookingId }
+            );
+            const response = await apiClient.get(getApiUrl(endpoint), {
+                headers: { ...getAuthHeader(), 'Accept': 'application/pdf' },
+                responseType: 'blob',
+            });
+            if (response.status !== 200) throw new Error(`HTTP error! status: ${response.status}`);
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const pdfUrl = window.URL.createObjectURL(blob);
+            return { success: true, data: { pdfUrl, blob, bookingId } };
+        } catch (error) {
+            console.error('Error fetching blood bank invoice:', error);
+            return { success: false, data: null, message: error.message };
+        }
+    }
 }
 
 // Create and export a singleton instance

@@ -204,16 +204,20 @@ class LabTestService {
         }
       });
 
-      const data = response.data;
-
-      if (response.status !== 200) {
+      const data = response.data || {};
+      const isHttpOk = response.status >= 200 && response.status < 300; // accept 200/201
+      const apiSuccess = typeof data.success === 'undefined' ? true : Boolean(data.success);
+      if (!isHttpOk || !apiSuccess) {
         throw new Error(data.message || 'Failed to create lab test booking');
       }
 
+      // Normalize payload shape
+      const normalizedData = data.data || data.booking || data;
+
       return {
         success: true,
-        data: data.data,
-        message: data.message
+        data: normalizedData,
+        message: data.message || 'Lab test booking created successfully'
       };
     } catch (error) {
       console.error('Error creating lab test booking:', error);

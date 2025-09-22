@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import orderHistoryService from '../../../services/User/orderHistory.service';
-import './ClinicAppointmentHistory.css';
+import { Box, Stack, Typography, Paper, Button, Grid, Chip } from '@mui/material';
+import { BottomSheetDialog, LoadingState, ErrorState, EmptyState, StatusChip, Row, Section } from './mui/Primitives';
 
 const ClinicAppointmentHistory = () => {
     const [appointments, setAppointments] = useState([]);
@@ -82,212 +83,134 @@ const ClinicAppointmentHistory = () => {
     };
 
     const renderAppointmentCard = (appointment) => {
+        const doctorName = (appointment.doctor.name || '').replace(/^Dr\.?\s+/i, '');
         return (
-            <div key={appointment.id} className="clinic-appointment-card">
-                {/* Status Header */}
-                <div className="appointment-header">
-                    <span className="status-badge" style={{ backgroundColor: getStatusColor(appointment.status) }}>
-                        {appointment.status}
-                    </span>
-                </div>
-
-                {/* Doctor Information */}
-                <div className="doctor-info">
-                    <h4>{appointment.doctor.name}</h4>
-                    <p className="appointment-datetime">
+            <Paper key={appointment.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary">
                         {formatDate(appointment.date)} at {formatTime(appointment.time)}
-                    </p>
-                    <div className="specializations">
+                    </Typography>
+                </Stack>
+                <Stack spacing={1.5}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography variant="subtitle1" fontWeight={600}>{doctorName}</Typography>
+                        <StatusChip label={appointment.status} />
+                    </Stack>
+                    <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 0.5 }}>
                         {appointment.doctor.specializations.map((spec, index) => (
-                            <span key={index} className="specialization-tag">{spec}</span>
+                            <Chip key={index} label={spec} size="small" color="primary" sx={{ color: '#fff' }} />
                         ))}
-                    </div>
-                </div>
-
-                {/* Appointment Details */}
-                <div className="appointment-details">
-                    <div className="detail-row">
-                        <span className="detail-label">Type:</span>
-                        <span className="detail-value">{appointment.isOnline ? 'Online' : 'In-Person'}</span>
-                    </div>
-                    <div className="detail-row">
-                        <span className="detail-label">Payment:</span>
-                        <span className="detail-value">{appointment.paymentStatus}</span>
-                    </div>
-                    {appointment.meetingUrl && (
-                        <div className="detail-row">
-                            <span className="detail-label">Meeting:</span>
-                            <a href={appointment.meetingUrl} target="_blank" rel="noopener noreferrer" className="meeting-link">
-                                Join Meeting
-                            </a>
-                        </div>
-                    )}
-                </div>
-
-                {/* Footer with Amount and Actions */}
-                <div className="appointment-footer">
-                    <div className="appointment-amount">
-                        <span className="amount-label">Fee:</span>
-                        <span className="amount-value">{formatCurrency(appointment.paidAmount)}</span>
-                    </div>
-                    <div className="appointment-actions">
-                        <button 
-                            className="action-btn primary"
-                            onClick={() => handleViewDetails(appointment)}
-                        >
-                            View Details
-                        </button>
-                        <button className="action-btn secondary">
-                            Book Again
-                        </button>
-                    </div>
-                </div>
-            </div>
+                    </Stack>
+                    <Grid container spacing={1}>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="text.secondary">Type</Typography>
+                            <Typography variant="body2">{appointment.isOnline ? 'Online' : 'In-Person'}</Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="body2" color="text.secondary">Payment</Typography>
+                            <Typography variant="body2">{appointment.paymentStatus}</Typography>
+                        </Grid>
+                        {appointment.meetingUrl && (
+                            <Grid item xs={12}>
+                                <Button href={appointment.meetingUrl} target="_blank" rel="noopener noreferrer" size="small" variant="outlined" sx={{ textTransform: 'none', borderRadius: 2 }}>
+                                    Join Meeting
+                                </Button>
+                            </Grid>
+                        )}
+                    </Grid>
+                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Stack direction="row" spacing={1}>
+                            <Typography variant="body2" color="text.secondary">Fee</Typography>
+                            <Typography fontWeight={600}>{formatCurrency(appointment.paidAmount)}</Typography>
+                        </Stack>
+                        <Stack direction="row" spacing={1}>
+                            <Button variant="contained" size="small" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={() => handleViewDetails(appointment)}>View Details</Button>
+                            <Button variant="outlined" size="small" sx={{ textTransform: 'none', borderRadius: 2 }}>Book Again</Button>
+                        </Stack>
+                    </Stack>
+                </Stack>
+            </Paper>
         );
     };
 
     const renderSidePanel = () => {
         if (!selectedAppointment) return null;
-
+        const doctorName = (selectedAppointment.doctor.name || '').replace(/^Dr\.?\s+/i, '');
         return (
-            <div className={`side-panel-overlay ${isSidePanelOpen ? 'active' : ''}`} onClick={handleCloseSidePanel}>
-                <div className="side-panel" onClick={(e) => e.stopPropagation()}>
-                    {/* Content */}
-                    <div className="side-panel-content">
-                        <div className="appointment-summary">
-                            {/* Title */}
-                            <div className="modal-title">
-                                <h2>Appointment Details</h2>
-                                <button className="close-btn" onClick={handleCloseSidePanel}>
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Status */}
-                            <div className="appointment-basic-info">
-                                <span className="status-badge" style={{ backgroundColor: getStatusColor(selectedAppointment.status) }}>
-                                    {selectedAppointment.status}
-                                </span>
-                            </div>
-
-                            {/* Doctor Info */}
-                            <div className="doctor-details">
-                                <h4>Doctor</h4>
-                                <h5>{selectedAppointment.doctor.name}</h5>
-                                <p className="appointment-datetime">
-                                    {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
-                                </p>
-                                <div className="specializations">
-                                    {selectedAppointment.doctor.specializations.map((spec, index) => (
-                                        <span key={index} className="specialization-tag">{spec}</span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Appointment Details */}
-                            <div className="appointment-info-detail">
-                                <h4>Details</h4>
-                                <div className="info-row">
-                                    <span className="label">Type</span>
-                                    <span className="value">{selectedAppointment.isOnline ? 'Online' : 'In-Person'}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Payment</span>
-                                    <span className="value">{selectedAppointment.paymentStatus}</span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Fee</span>
-                                    <span className="value">{formatCurrency(selectedAppointment.paidAmount)}</span>
-                                </div>
-                                {selectedAppointment.meetingUrl && (
-                                    <div className="info-row">
-                                        <span className="label">Meeting</span>
-                                        <a href={selectedAppointment.meetingUrl} target="_blank" rel="noopener noreferrer" className="meeting-link">
-                                            Join Meeting
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Reminder Info */}
-                            <div className="reminder-info">
-                                <h4>Reminder</h4>
-                                <div className="info-row">
-                                    <span className="label">Set For</span>
-                                    <span className="value">
-                                        {selectedAppointment.reminderTime ? formatDate(selectedAppointment.reminderTime) : 'Not set'}
-                                    </span>
-                                </div>
-                                <div className="info-row">
-                                    <span className="label">Status</span>
-                                    <span className="value">{selectedAppointment.reminderSent ? 'Sent' : 'Pending'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="modal-actions">
-                        <button className="reschedule-btn">
-                            Reschedule
-                        </button>
-                        <button className="cancel-btn">
-                            Cancel
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <BottomSheetDialog
+                open={isSidePanelOpen}
+                onClose={handleCloseSidePanel}
+                title="Appointment Details"
+                actions={null}
+            >
+                <Stack spacing={2}>
+                    <Section title="Doctor">
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="subtitle1" fontWeight={600}>{doctorName}</Typography>
+                            <StatusChip label={selectedAppointment.status} />
+                        </Stack>
+                        <Typography variant="body2" color="text.secondary">
+                            {formatDate(selectedAppointment.date)} at {formatTime(selectedAppointment.time)}
+                        </Typography>
+                        <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 0.5 }}>
+                            {selectedAppointment.doctor.specializations.map((spec, index) => (
+                                <Chip key={index} label={spec} size="small" color="primary" sx={{ color: '#fff' }} />
+                            ))}
+                        </Stack>
+                    </Section>
+                    <Section title="Details">
+                        <Row label="Type" value={selectedAppointment.isOnline ? 'Online' : 'In-Person'} />
+                        <Row label="Payment" value={selectedAppointment.paymentStatus} />
+                        <Row label="Fee" value={formatCurrency(selectedAppointment.paidAmount)} />
+                        {selectedAppointment.meetingUrl && (
+                            <Button href={selectedAppointment.meetingUrl} target="_blank" rel="noopener noreferrer" size="small" variant="outlined" sx={{ textTransform: 'none', borderRadius: 2 }}>
+                                Join Meeting
+                            </Button>
+                        )}
+                    </Section>
+                    <Section title="Reminder">
+                        <Row label="Set For" value={selectedAppointment.reminderTime ? formatDate(selectedAppointment.reminderTime) : 'Not set'} />
+                        <Row label="Status" value={selectedAppointment.reminderSent ? 'Sent' : 'Pending'} />
+                    </Section>
+                    <Stack direction="row" spacing={1}>
+                        <Button variant="contained" sx={{ textTransform: 'none', borderRadius: 2 }}>Reschedule</Button>
+                        <Button variant="outlined" sx={{ textTransform: 'none', borderRadius: 2 }}>Cancel</Button>
+                        <Button variant="contained" color="secondary" sx={{ textTransform: 'none', borderRadius: 2 }} onClick={async () => {
+                            const res = await orderHistoryService.getClinicInvoice(selectedAppointment.appointmentNumber || selectedAppointment.id);
+                            if (res.success && res.data?.pdfUrl) {
+                                const a = document.createElement('a');
+                                a.href = res.data.pdfUrl;
+                                a.download = `clinic-invoice-${selectedAppointment.appointmentNumber || selectedAppointment.id}.pdf`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                            }
+                        }}>Download Invoice</Button>
+                    </Stack>
+                </Stack>
+            </BottomSheetDialog>
         );
     };
 
-    if (loading) {
-        return (
-            <div className="clinic-appointments-container">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <p>Loading your appointments...</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <LoadingState label="Loading your appointments..." />;
 
-    if (error) {
-        return (
-            <div className="clinic-appointments-container">
-                <div className="error-container">
-                    <div className="error-icon">⚠️</div>
-                    <h3>Error Loading Appointments</h3>
-                    <p>{error}</p>
-                    <button className="retry-btn" onClick={fetchAppointments}>
-                        Try Again
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (error) return <ErrorState message={error} onRetry={fetchAppointments} />;
 
     return (
-        <div className="clinic-appointments-container">
-            <div className="appointments-section">
-                {appointments.length > 0 ? (
-                    <div className="appointments-grid">
-                        {appointments.map((appointment) => renderAppointmentCard(appointment))}
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <div className="empty-icon">👨‍⚕️</div>
-                        <h3>No Appointments Found</h3>
-                        <p>You haven't booked any doctor appointments yet.</p>
-                        <button className="browse-btn">Book Appointment</button>
-                    </div>
-                )}
-            </div>
-
+        <Box>
+            {appointments.length > 0 ? (
+                <Grid container spacing={2}>
+                    {appointments.map((appointment) => (
+                        <Grid key={appointment.id} item xs={12} md={6}>
+                            {renderAppointmentCard(appointment)}
+                        </Grid>
+                    ))}
+                </Grid>
+            ) : (
+                <EmptyState icon="👨‍⚕️" title="No Appointments Found" subtitle="You haven't booked any doctor appointments yet." actionLabel="Book Appointment" />
+            )}
             {renderSidePanel()}
-        </div>
+        </Box>
     );
 };
 
