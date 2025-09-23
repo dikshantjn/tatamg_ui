@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import './BookDoctorAppointment.css';
 import doctorAppointmentPaymentService from '../../../services/payment/doctor-appointment-payment.service';
+import { doctorConsultationService } from '../../../services/User/DoctorConsultation/doctor-consultation.service';
+import { getUserData, getUserId } from '../../../services/User/Auth/auth.utils';
 
 const BookDoctorAppointment = () => {
   const location = useLocation();
@@ -13,6 +15,9 @@ const BookDoctorAppointment = () => {
   const [expandedFaq, setExpandedFaq] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [timeslotsData, setTimeslotsData] = useState(null);
+  const [loadingTimeslots, setLoadingTimeslots] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [dialogContent, setDialogContent] = useState({
     type: '', // 'success' or 'error'
     message: '',
@@ -37,6 +42,33 @@ const BookDoctorAppointment = () => {
       date: "2024-01-05"
     }
   ];
+
+  // Get current user on component mount
+  useEffect(() => {
+    const userData = getUserData();
+    const userId = getUserId();
+    setCurrentUser({ ...userData, uid: userId });
+  }, []);
+
+  // Fetch timeslots when date is selected
+  useEffect(() => {
+    if (selectedDate && vendorId) {
+      fetchTimeslots(selectedDate.full.toISOString().split('T')[0]);
+    }
+  }, [selectedDate, vendorId]);
+
+  const fetchTimeslots = async (date) => {
+    try {
+      setLoadingTimeslots(true);
+      const data = await doctorConsultationService.getTimeslots(vendorId, date);
+      setTimeslotsData(data);
+    } catch (error) {
+      console.error('Error fetching timeslots:', error);
+      setTimeslotsData(null);
+    } finally {
+      setLoadingTimeslots(false);
+    }
+  };
 
   const faqs = [
     {
@@ -95,13 +127,31 @@ const BookDoctorAppointment = () => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
+  const handleCallDoctor = () => {
+    // Check if doctor has a phone number
+    if (doctorData.phoneNumber) {
+      // Create a phone call link
+      window.open(`tel:${doctorData.phoneNumber}`, '_self');
+    } else {
+      // Show a message or modal if no phone number is available
+      setDialogContent({
+        type: 'error',
+        message: 'Phone Number Not Available',
+        details: {
+          error: 'Doctor contact number is not available. Please book an appointment to get in touch.'
+        }
+      });
+      setShowDialog(true);
+    }
+  };
+
   const handleAppointmentBooking = async () => {
     if (!selectedDate || !selectedTimeSlot || isProcessing) return;
 
     setIsProcessing(true);
 
-    // Format the time slot to extract just the start time (e.g., "14:30" from "14:30 - 15:00")
-    const formattedTime = selectedTimeSlot.split(' - ')[0];
+    // The time slot from API is already in the correct format (e.g., "14:30")
+    const formattedTime = selectedTimeSlot;
 
     const appointmentData = {
       doctorId: vendorId,
@@ -174,7 +224,8 @@ const BookDoctorAppointment = () => {
         <div className="book-appointment-container">
           {/* Doctor Info Header */}
           <div className="doctor-header">
-            <img 
+            <div className="doctor-header-content">
+              <img 
               src={doctorData.avatar} 
               alt={doctorData.name} 
               className="doctor-avatar"
@@ -187,6 +238,17 @@ const BookDoctorAppointment = () => {
                 <span>{doctorData.experience} yrs exp</span>
                 <span>₹{doctorData.consultationFee}</span>
               </div>
+            </div>
+            </div>
+            <div className="doctor-actions">
+              <button 
+                className="call-doctor-btn"
+                onClick={() => handleCallDoctor()}
+                title="Call Doctor"
+              >
+                <i className="fas fa-phone"></i>
+                Call Doctor
+              </button>
             </div>
           </div>
 
@@ -260,17 +322,41 @@ const BookDoctorAppointment = () => {
             {/* Time Slots */}
             <div className="slots-section">
               <h3>Available Time Slots</h3>
-              <div className="slots-grid">
-                {getTimeSlots().map((slot, index) => (
-                  <div
-                    key={index}
-                    className={`time-slot ${selectedTimeSlot === slot ? 'selected' : ''}`}
-                    onClick={() => handleTimeSlotSelect(slot)}
-                  >
-                    {slot}
-                  </div>
-                ))}
-              </div>
+              {loadingTimeslots ? (
+                <div className="loading-timeslots">Loading available slots...</div>
+              ) : timeslotsData ? (
+                <div className="slots-grid">
+                  {timeslotsData.availableSlots.map((slot, index) => {
+                    // Convert slot time to match booked time format for comparison
+                    const slotTimeFormatted = slot.includes(':') && slot.split(':').length === 2 
+                      ? `${slot}:00` 
+                      : slot;
+                    
+                    const isBooked = timeslotsData.bookedSlots.some(booked => booked.time === slotTimeFormatted);
+                    const isBookedByUser = isBooked && timeslotsData.bookedSlots.find(booked => booked.time === slotTimeFormatted)?.userId === currentUser?.uid;
+                    
+                    return (
+                      <div
+                        key={index}
+                        className={`time-slot ${selectedTimeSlot === slot ? 'selected' : ''} ${isBooked ? 'booked' : 'available'}`}
+                        onClick={() => !isBooked && handleTimeSlotSelect(slot)}
+                        style={{ cursor: isBooked ? 'not-allowed' : 'pointer' }}
+                      >
+                        <span className="slot-time">{slot}</span>
+                        {isBooked && (
+                          <span className={`slot-badge ${isBookedByUser ? 'booked-by-user' : 'booked-by-others'}`}>
+                            {isBookedByUser ? 'Booked by you' : 'Booked'}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : selectedDate ? (
+                <div className="no-timeslots">No time slots available for this date</div>
+              ) : (
+                <div className="select-date-message">Please select a date to view available time slots</div>
+              )}
             </div>
           </div>
 

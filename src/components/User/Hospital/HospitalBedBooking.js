@@ -26,6 +26,7 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import PhoneIcon from '@mui/icons-material/Phone';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 
@@ -138,6 +139,19 @@ function HospitalBedBooking() {
     navigate(`/hospital-bed-booking/${hospital.vendorId}`);
   };
 
+  const handleCallHospital = (hospital, e) => {
+    e.stopPropagation();
+    // Check if hospital has a phone number
+    if (hospital.phoneNumber) {
+      // Create a phone call link
+      window.open(`tel:${hospital.phoneNumber}`, '_self');
+    } else {
+      // Show a message if no phone number is available
+      console.warn('Hospital phone number not available');
+      // You could add a toast notification here if you have one
+    }
+  };
+
   const filteredHospitals = hospitals.filter(hospital => {
     const matchesSearch = 
       hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -224,9 +238,28 @@ function HospitalBedBooking() {
                 <Chip icon={<StarIcon />} label={hospital.rating} size="small" />
                 <Chip icon={<AccessTimeIcon />} label={hospital.openHours} size="small" />
                 <Chip icon={<ArrowForwardIosIcon />} label={hospital.availability} size="small" />
-                <Button variant="contained" size="small" onClick={(e) => handleBookNow(hospital, e)} sx={{ ml: 'auto' }}>
-                  Book Now
-                </Button>
+                <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
+                  <Button 
+                    variant="outlined" 
+                    size="small" 
+                    startIcon={<PhoneIcon />}
+                    onClick={(e) => handleCallHospital(hospital, e)}
+                    sx={{ 
+                      borderColor: 'primary.main',
+                      color: 'primary.main',
+                      '&:hover': {
+                        borderColor: 'primary.dark',
+                        backgroundColor: 'primary.light',
+                        color: 'primary.dark'
+                      }
+                    }}
+                  >
+                    Call
+                  </Button>
+                  <Button variant="contained" size="small" onClick={(e) => handleBookNow(hospital, e)}>
+                    Book Now
+                  </Button>
+                </Box>
               </Box>
             </Collapse>
           </Paper>

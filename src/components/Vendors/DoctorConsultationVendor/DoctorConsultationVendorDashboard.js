@@ -16,8 +16,6 @@ import {
   IconButton,
   Tooltip,
   useTheme,
-  Switch,
-  FormControlLabel,
   Divider,
   Badge,
   Table,
@@ -27,7 +25,8 @@ import {
   TableHead,
   TableRow,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Stack
 } from '@mui/material';
 import {
   TrendingUp,
@@ -55,7 +54,9 @@ import {
   People,
   Assessment,
   Timeline,
-  BarChart
+  BarChart,
+  PlayArrow,
+  Stop
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, BarChart as RechartsBarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { doctorConsultationVendorService } from '../../../services/Vendors/DoctorConsultationVendor.service';
@@ -233,232 +234,217 @@ const DoctorConsultationVendorDashboard = () => {
   return (
     <Box sx={{ 
       width: '100%', 
-      px: { xs: 2, sm: 3 }
+      px: { xs: 2, sm: 3 },
+      maxWidth: '1400px',
+      mx: 'auto'
     }}>
       {/* Welcome Card */}
       <Card 
         sx={{
           mb: 4,
           borderRadius: 3,
-          backgroundColor: theme.palette.background.card,
-          color: theme.palette.text.primary,
-          boxShadow: 'none',
-          width: '100%',
-          maxWidth: '1200px',
-          mx: 'auto',
-          border: `1px solid ${theme.palette.divider}`
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.secondary.main}15 100%)`,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`
+          }
         }}
       >
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <CardContent sx={{ p: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
               {profileLoading ? (
-                <CircularProgress size={60} />
+                <CircularProgress size={80} thickness={4} />
               ) : (
                 <Avatar
                   src={vendorData.profilePicture}
                   sx={{
                     width: 80,
                     height: 80,
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    backgroundColor: theme.palette.primary.main,
-                    color: theme.palette.primary.contrastText
+                    fontSize: '1.8rem',
+                    fontWeight: 700,
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    color: 'white',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
                   }}
                 >
                   {vendorData.avatar}
                 </Avatar>
               )}
               <Box>
-                <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+                <Typography variant="h4" sx={{ fontWeight: 600, mb: 1, color: theme.palette.text.primary }}>
                   Welcome back,
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: theme.palette.text.primary }}>
                   {profileLoading ? 'Loading...' : vendorData.name}
                 </Typography>
-                <Typography variant="body1" sx={{ opacity: 0.7 }}>
+                <Typography variant="body1" sx={{ opacity: 0.7, color: theme.palette.text.secondary }}>
                   {profileLoading ? 'Loading...' : vendorData.email}
                 </Typography>
+                <Chip 
+                  label={vendorData.specialty} 
+                  color="primary" 
+                  variant="outlined" 
+                  sx={{ mt: 1, fontWeight: 600 }}
+                />
               </Box>
             </Box>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: 'success.main',
-                      '& + .MuiSwitch-track': {
-                        backgroundColor: 'success.main',
-                      },
-                    },
-                  }}
-                />
-              }
-              label={
-                <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
-                  {isActive ? 'Active' : 'Inactive'}
-                </Typography>
-              }
-            />
+            
           </Box>
         </CardContent>
       </Card>
 
       {/* Booking Overview */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
-        Booking Overview
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 4, color: theme.palette.text.primary }}>
+        📅 Booking Overview
       </Typography>
       <Box sx={{ 
         display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+        gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
         gap: 3,
-        justifyContent: 'center',
-        maxWidth: '1400px',
-        mx: 'auto',
-        mb: 4
+        mb: 6
       }}>
         {bookingOverview.map((item, index) => (
           <Card 
             key={index}
             sx={{
               height: '100%',
-              minHeight: { xs: 140, sm: 150, md: 160 },
-              transition: 'transform 0.2s ease-in-out',
+              minHeight: 160,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${theme.palette[item.color].main}10 0%, ${theme.palette[item.color].main}05 100%)`,
+              border: `1px solid ${theme.palette[item.color].main}20`,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              transition: 'all 0.3s ease',
               '&:hover': {
-                transform: 'translateY(-4px)'
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
               }
             }}
           >
-            <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                mb: { xs: 1.5, sm: 2, md: 2.5 },
-                flex: 1
+                p: 2, 
+                borderRadius: 3, 
+                backgroundColor: `${item.color}.main`,
+                color: `${item.color}.contrastText`,
+                mb: 2,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
               }}>
-                <Box sx={{ 
-                  p: { xs: 1.5, sm: 1.8, md: 2 }, 
-                  borderRadius: 3, 
-                  backgroundColor: `${item.color}.light`,
-                  color: `${item.color}.contrastText`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: { xs: 48, sm: 56, md: 64 },
-                  minHeight: { xs: 48, sm: 56, md: 64 }
-                }}>
-                  {item.icon}
-                </Box>
+                {item.icon}
               </Box>
-              <Box sx={{ textAlign: 'center', flex: 1 }}>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
-                  {item.count}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
-                  {item.title}
-                </Typography>
-              </Box>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 700, mb: 1, color: theme.palette.text.primary }}>
+                {item.count}
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.text.secondary, textAlign: 'center' }}>
+                {item.title}
+              </Typography>
             </CardContent>
           </Card>
         ))}
       </Box>
 
       {/* Statistics */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
-        Your Statistics
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 4, color: theme.palette.text.primary }}>
+        📊 Your Statistics
       </Typography>
       <Box sx={{ 
         display: 'grid',
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+        gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
         gap: 3,
-        justifyContent: 'center',
-        maxWidth: '1400px',
-        mx: 'auto',
-        mb: 4
+        mb: 6
       }}>
         {statistics.map((stat, index) => (
           <Card 
             key={index}
             sx={{
               height: '100%',
-              minHeight: { xs: 140, sm: 150, md: 160 },
-              transition: 'transform 0.2s ease-in-out',
+              minHeight: 160,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${theme.palette[stat.color].main}10 0%, ${theme.palette[stat.color].main}05 100%)`,
+              border: `1px solid ${theme.palette[stat.color].main}20`,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+              transition: 'all 0.3s ease',
               '&:hover': {
-                transform: 'translateY(-4px)'
+                transform: 'translateY(-8px)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.15)'
               }
             }}
           >
-            <CardContent sx={{ p: { xs: 2, sm: 2.5 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                mb: { xs: 1.5, sm: 2, md: 2.5 },
-                flex: 1
+                p: 2, 
+                borderRadius: 3, 
+                backgroundColor: `${stat.color}.main`,
+                color: `${stat.color}.contrastText`,
+                mb: 2,
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
               }}>
-                <Box sx={{ 
-                  p: { xs: 1.5, sm: 1.8, md: 2 }, 
-                  borderRadius: 3, 
-                  backgroundColor: `${stat.color}.light`,
-                  color: `${stat.color}.contrastText`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minWidth: { xs: 48, sm: 56, md: 64 },
-                  minHeight: { xs: 48, sm: 56, md: 64 }
-                }}>
-                  {stat.icon}
-                </Box>
+                {stat.icon}
               </Box>
-              <Box sx={{ textAlign: 'center', flex: 1 }}>
-                <Typography variant="h4" component="div" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem', lg: '2rem' } }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500, mb: 0.5, fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' } }}>
-                  {stat.title}
-                </Typography>
-              </Box>
+              <Typography variant="h3" component="div" sx={{ fontWeight: 700, mb: 1, color: theme.palette.text.primary }}>
+                {stat.value}
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.text.secondary, textAlign: 'center' }}>
+                {stat.title}
+              </Typography>
             </CardContent>
           </Card>
         ))}
       </Box>
 
       {/* Visit Trends and Analytics */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
-        Visit Trends & Analytics
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 4, color: theme.palette.text.primary }}>
+        📈 Visit Trends & Analytics
       </Typography>
       
       {/* Visit Trends Chart - Full Width */}
-      <Box sx={{ maxWidth: '1400px', mx: 'auto', mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <Card sx={{ 
           height: '100%',
           minHeight: 400,
-          transition: 'transform 0.2s ease-in-out',
+          borderRadius: 3,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}05 0%, ${theme.palette.secondary.main}05 100%)`,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          transition: 'all 0.3s ease',
           '&:hover': {
-            transform: 'translateY(-2px)'
+            transform: 'translateY(-4px)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
           }
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-              Visit Trends
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3, color: theme.palette.text.primary }}>
+              📊 Visit Trends
             </Typography>
             <Box sx={{ width: '100%', height: 350 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={visitTrendsData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <RechartsTooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <XAxis dataKey="month" stroke={theme.palette.text.secondary} />
+                  <YAxis stroke={theme.palette.text.secondary} />
+                  <RechartsTooltip 
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: 8
+                    }}
+                  />
                   <Line 
                     type="monotone" 
                     dataKey="highest" 
                     stroke={theme.palette.success.main} 
                     strokeWidth={3}
                     name="Highest"
-                    dot={{ fill: theme.palette.success.main, strokeWidth: 2, r: 4 }}
+                    dot={{ fill: theme.palette.success.main, strokeWidth: 2, r: 6 }}
                   />
                   <Line 
                     type="monotone" 
@@ -466,7 +452,7 @@ const DoctorConsultationVendorDashboard = () => {
                     stroke={theme.palette.primary.main} 
                     strokeWidth={3}
                     name="Average"
-                    dot={{ fill: theme.palette.primary.main, strokeWidth: 2, r: 4 }}
+                    dot={{ fill: theme.palette.primary.main, strokeWidth: 2, r: 6 }}
                   />
                   <Line 
                     type="monotone" 
@@ -474,7 +460,7 @@ const DoctorConsultationVendorDashboard = () => {
                     stroke={theme.palette.warning.main} 
                     strokeWidth={3}
                     name="Lowest"
-                    dot={{ fill: theme.palette.warning.main, strokeWidth: 2, r: 4 }}
+                    dot={{ fill: theme.palette.warning.main, strokeWidth: 2, r: 6 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -484,18 +470,23 @@ const DoctorConsultationVendorDashboard = () => {
       </Box>
 
       {/* Analytics Chart - Full Width */}
-      <Box sx={{ maxWidth: '1400px', mx: 'auto', mb: 4 }}>
+      <Box sx={{ mb: 4 }}>
         <Card sx={{ 
           height: '100%',
           minHeight: 400,
-          transition: 'transform 0.2s ease-in-out',
+          borderRadius: 3,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}05 0%, ${theme.palette.secondary.main}05 100%)`,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          transition: 'all 0.3s ease',
           '&:hover': {
-            transform: 'translateY(-2px)'
+            transform: 'translateY(-4px)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
           }
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-              Consultation Types
+          <CardContent sx={{ p: 4 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 3, color: theme.palette.text.primary }}>
+              🎯 Consultation Types
             </Typography>
             <Box sx={{ width: '100%', height: 350 }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -513,24 +504,31 @@ const DoctorConsultationVendorDashboard = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <RechartsTooltip />
+                  <RechartsTooltip 
+                    contentStyle={{
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      borderRadius: 8
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
             <Box sx={{ mt: 3 }}>
               {analyticsData.map((type, index) => (
-                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: 2, backgroundColor: theme.palette.background.paper }}>
                   <Box sx={{ 
-                    width: 16, 
-                    height: 16, 
+                    width: 20, 
+                    height: 20, 
                     borderRadius: '50%', 
                     backgroundColor: type.color,
-                    mr: 2
+                    mr: 2,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                   }} />
-                  <Typography variant="body1" sx={{ flexGrow: 1 }}>
+                  <Typography variant="body1" sx={{ flexGrow: 1, fontWeight: 600 }}>
                     {type.name}
                   </Typography>
-                  <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
                     {type.value}%
                   </Typography>
                 </Box>
@@ -541,36 +539,67 @@ const DoctorConsultationVendorDashboard = () => {
       </Box>
 
       {/* Upcoming Appointments - Table Format */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3, textAlign: 'center' }}>
-        Upcoming Appointments
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 4, color: theme.palette.text.primary }}>
+        📋 Upcoming Appointments
       </Typography>
-      <Box sx={{ maxWidth: '1400px', mx: 'auto' }}>
+      <Box>
         <Card sx={{ 
-          transition: 'transform 0.2s ease-in-out',
+          borderRadius: 3,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}05 0%, ${theme.palette.secondary.main}05 100%)`,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          transition: 'all 0.3s ease',
           '&:hover': {
-            transform: 'translateY(-2px)'
+            transform: 'translateY(-4px)',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.15)'
           }
         }}>
-          <CardContent sx={{ p: 3 }}>
+          <CardContent sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Recent Bookings
+              <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
+                📅 Recent Bookings
               </Typography>
-              <Button variant="outlined" size="small">
+              <Button 
+                variant="outlined" 
+                size="small"
+                sx={{
+                  borderRadius: 2,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  borderColor: theme.palette.primary.main,
+                  color: theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primary.main,
+                    color: 'white',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+                  }
+                }}
+              >
                 View All
               </Button>
             </Box>
-            <TableContainer component={Paper} sx={{ boxShadow: 'none', border: `1px solid ${theme.palette.divider}` }}>
+            <TableContainer 
+              component={Paper} 
+              sx={{ 
+                boxShadow: 'none', 
+                border: `1px solid ${theme.palette.divider}`,
+                borderRadius: 2,
+                overflow: 'hidden'
+              }}
+            >
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow sx={{ backgroundColor: theme.palette.background.default }}>
-                    <TableCell sx={{ fontWeight: 600 }}>Patient</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Patient ID</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Type</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Specialty</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Patient</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Patient ID</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Date & Time</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Type</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Specialty</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '0.95rem', color: theme.palette.text.primary }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -580,30 +609,39 @@ const DoctorConsultationVendorDashboard = () => {
                       sx={{ 
                         '&:hover': { 
                           backgroundColor: theme.palette.action.hover 
+                        },
+                        '&:nth-of-type(even)': {
+                          backgroundColor: theme.palette.background.paper
                         }
                       }}
                     >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar sx={{ width: 32, height: 32 }}>
+                          <Avatar sx={{ 
+                            width: 36, 
+                            height: 36,
+                            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                            color: 'white',
+                            fontWeight: 600
+                          }}>
                             {appointment.patientName.split(' ').map(n => n[0]).join('')}
                           </Avatar>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
                             {appointment.patientName}
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                           {appointment.patientId}
                         </Typography>
                       </TableCell>
                       <TableCell>
                         <Box>
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
                             {appointment.date}
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
                             {appointment.time}
                           </Typography>
                         </Box>
@@ -611,7 +649,7 @@ const DoctorConsultationVendorDashboard = () => {
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           {getTypeIcon(appointment.type)}
-                          <Typography variant="body2">
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
                             {appointment.type}
                           </Typography>
                         </Box>
@@ -621,6 +659,7 @@ const DoctorConsultationVendorDashboard = () => {
                           label={appointment.specialty} 
                           size="small" 
                           variant="outlined"
+                          sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
                       <TableCell>
@@ -629,17 +668,36 @@ const DoctorConsultationVendorDashboard = () => {
                           size="small" 
                           color={getStatusColor(appointment.status)}
                           icon={getStatusIcon(appointment.status)}
+                          sx={{ fontWeight: 600 }}
                         />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="View Details">
-                            <IconButton size="small" color="primary">
+                            <IconButton 
+                              size="small" 
+                              sx={{
+                                color: theme.palette.primary.main,
+                                '&:hover': {
+                                  backgroundColor: theme.palette.primary.light,
+                                  transform: 'scale(1.1)'
+                                }
+                              }}
+                            >
                               <Visibility />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Start Consultation">
-                            <IconButton size="small" color="success">
+                            <IconButton 
+                              size="small" 
+                              sx={{
+                                color: theme.palette.success.main,
+                                '&:hover': {
+                                  backgroundColor: theme.palette.success.light,
+                                  transform: 'scale(1.1)'
+                                }
+                              }}
+                            >
                               <VideoCall />
                             </IconButton>
                           </Tooltip>

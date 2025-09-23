@@ -10,19 +10,14 @@ import {
     Chip,
     Box,
     Stack,
-    IconButton,
     CircularProgress,
-    Rating,
     Snackbar,
     Alert,
     useTheme,
-    useMediaQuery,
 
 } from '@mui/material';
 import {
     ShoppingCart,
-    Visibility,
-    Favorite,
     Warning,
     Cancel,
     CheckCircle
@@ -32,7 +27,7 @@ import { VendorProductService } from '../../../services/User/Products/vendor-pro
 import { getUserId, isAuthenticated } from '../../../services/User/Auth/auth.utils';
 import { fetchCartItems } from '../../../store/slices/cartSlice';
 
-// Styled Components (compact card)
+// Styled Components (compact card) aligned with featured ProductCard
 const StyledCard = styled(Card)(({ theme }) => ({
     height: 300,
     display: 'flex',
@@ -40,7 +35,6 @@ const StyledCard = styled(Card)(({ theme }) => ({
     borderRadius: 2,
     boxShadow: theme.shadows[1],
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-    border: '1px solid rgba(0, 0, 0, 0.06)',
     overflow: 'hidden',
     '&:hover': {
         transform: 'translateY(-2px)',
@@ -57,22 +51,21 @@ const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
     }
 }));
 
-// Image Fallback Icon Component
-const ImageIcon = () => (
-    <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        height: '100%',
-        color: 'text.disabled'
-    }}>
-        <Visibility sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
-        <Typography variant="body2" color="text.secondary">
-            Image not available
-        </Typography>
+// Simple text fallback similar to featured ProductCard
+const ImageFallback = ({ theme }) => (
+    <Box
+        sx={{
+            height: 120,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: theme.palette.grey[100],
+            color: theme.palette.text.secondary
+        }}
+    >
+        <Typography variant="body2">Image not available</Typography>
     </Box>
-    );
+);
 
 const ProductItem = ({ product }) => {
     const dispatch = useDispatch();
@@ -197,15 +190,7 @@ const ProductItem = ({ product }) => {
                         }}
                     />
                     {imageError && (
-                        <Box sx={{ 
-                            height: 120, 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center',
-                            background: 'rgba(0, 0, 0, 0.02)'
-                        }}>
-                            <ImageIcon />
-                        </Box>
+                        <ImageFallback theme={theme} />
                     )}
 
                     {/* Stock Badges */}

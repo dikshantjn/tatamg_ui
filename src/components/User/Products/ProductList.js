@@ -9,7 +9,6 @@ import {
     Card,
     CardContent,
     CardMedia,
-    Skeleton,
     IconButton,
     Paper,
     Chip,
@@ -81,18 +80,7 @@ const HeaderCard = styled(Paper)(({ theme, categorycolor }) => ({
     }
 }));
 
-// Compact Product Skeleton matching Products page cards
-const ProductSkeleton = () => (
-    <Card sx={{ height: 300, borderRadius: 2 }}>
-        <Skeleton variant="rectangular" height={120} />
-        <CardContent sx={{ p: 1.5 }}>
-            <Skeleton variant="text" height={22} sx={{ mb: 0.5 }} />
-            <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
-            <Skeleton variant="text" height={18} sx={{ mb: 1 }} />
-            <Skeleton variant="rectangular" height={36} />
-        </CardContent>
-    </Card>
-);
+// Removed shimmer skeletons to match fixed-size card design without loading shimmer
 
 // Category color mapping
 const categoryColors = {
@@ -261,19 +249,13 @@ const ProductList = () => {
 
                 {/* Products Grid */}
                 <Grid container spacing={2}>
-                {loading ? (
-                    Array.from({ length: 8 }).map((_, index) => (
-                            <Grid item xs={6} sm={6} md={4} lg={3} key={index}>
-                                <ProductSkeleton />
-                            </Grid>
-                    ))
-                ) : products.length > 0 ? (
+                {products.length > 0 ? (
                         products.map((product, index) => (
                             <Grid item xs={6} sm={6} md={4} lg={3} key={product.productId}>
                                 <ProductItem product={product} />
                             </Grid>
                     ))
-                ) : (
+                ) : !loading ? (
                         <Grid item xs={12}>
                             <Box sx={{ 
                                 textAlign: 'center', 
@@ -296,7 +278,7 @@ const ProductList = () => {
                                 </Button>
                             </Box>
                         </Grid>
-                    )}
+                    ) : null}
                 </Grid>
             </StyledContainer>
         </Box>

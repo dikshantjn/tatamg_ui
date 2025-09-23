@@ -32,7 +32,14 @@ import {
   Paper,
   Menu,
   MenuItem,
-  ListItemButton
+  ListItemButton,
+  CircularProgress,
+  Alert,
+  Snackbar,
+  Select,
+  FormControl,
+  InputLabel,
+  TextField
 } from '@mui/material';
 import {
   VideoCall,
@@ -63,8 +70,12 @@ import {
   LocalHospital,
   Computer,
   NotificationsActive,
-  MoneyOff
+  MoneyOff,
+  Call,
+  CallEnd
 } from '@mui/icons-material';
+import { doctorConsultationVendorService } from '../../../services/Vendors/DoctorConsultationVendor.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
 
 const DoctorConsultationVendorAppointments = () => {
   const theme = useTheme();
@@ -74,90 +85,128 @@ const DoctorConsultationVendorAppointments = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [selectedAppointmentForMenu, setSelectedAppointmentForMenu] = useState(null);
 
-  // Sample appointments data
-  const onlineAppointments = [
-    {
-      id: 1,
-      srNo: 1,
-      patientName: 'Sarah Johnson',
-      mobileNo: '+91 98765 43210',
-      appointmentType: 'Virtual',
-      dateTime: '2024-01-15 14:30',
-      paidAmount: 1500,
-      status: 'confirmed',
-      patientEmail: 'sarah.johnson@email.com',
-      symptoms: 'Chest pain, shortness of breath',
-      notes: 'Patient has history of heart conditions'
-    },
-    {
-      id: 2,
-      srNo: 2,
-      patientName: 'John Davis',
-      mobileNo: '+91 87654 32109',
-      appointmentType: 'Virtual',
-      dateTime: '2024-01-15 16:15',
-      paidAmount: 1200,
-      status: 'pending',
-      patientEmail: 'john.davis@email.com',
-      symptoms: 'Skin rash, itching',
-      notes: 'New patient consultation'
-    },
-    {
-      id: 3,
-      srNo: 3,
-      patientName: 'Maria Garcia',
-      mobileNo: '+91 76543 21098',
-      appointmentType: 'Virtual',
-      dateTime: '2024-01-16 10:00',
-      paidAmount: 2000,
-      status: 'confirmed',
-      patientEmail: 'maria.garcia@email.com',
-      symptoms: 'Headaches, dizziness',
-      notes: 'Follow-up consultation'
-    }
-  ];
+  // State for API data
+  const [onlineAppointments, setOnlineAppointments] = useState([]);
+  const [offlineAppointments, setOfflineAppointments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [vendorId, setVendorId] = useState(null);
+  
+  // State for status update dialog
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  
+  // State for call functionality
+  const [callingAppointment, setCallingAppointment] = useState(null);
+  const [callInProgress, setCallInProgress] = useState(false);
 
-  const offlineAppointments = [
-    {
-      id: 4,
-      srNo: 1,
-      patientName: 'David Wilson',
-      mobileNo: '+91 65432 10987',
-      appointmentType: 'In Clinic',
-      dateTime: '2024-01-15 11:00',
-      paidAmount: 800,
-      status: 'confirmed',
-      patientEmail: 'david.wilson@email.com',
-      symptoms: 'Fever, cough',
-      notes: 'Child consultation'
-    },
-    {
-      id: 5,
-      srNo: 2,
-      patientName: 'Emily Brown',
-      mobileNo: '+91 54321 09876',
-      appointmentType: 'In Clinic',
-      dateTime: '2024-01-16 15:30',
-      paidAmount: 1000,
-      status: 'pending',
-      patientEmail: 'emily.brown@email.com',
-      symptoms: 'Back pain, muscle stiffness',
-      notes: 'Physical examination required'
-    },
-    {
-      id: 6,
-      srNo: 3,
-      patientName: 'Michael Chen',
-      mobileNo: '+91 43210 98765',
-      appointmentType: 'In Clinic',
-      dateTime: '2024-01-17 09:00',
-      paidAmount: 1200,
-      status: 'confirmed',
-      patientEmail: 'michael.chen@email.com',
-      symptoms: 'Joint pain, swelling',
-      notes: 'Rheumatology consultation'
+  // Get vendor ID from auth service
+  useEffect(() => {
+    const authData = vendorAuthService.getVendorAuthData();
+    
+    // Try different possible field names for vendor ID
+    const possibleVendorId = authData?.vendorData?.vendorId || 
+                             authData?.vendorData?.id || 
+                             authData?.vendorData?.doctorId ||
+                             authData?.vendorId;
+    
+    if (possibleVendorId) {
+      setVendorId(possibleVendorId);
+    } else {
+      // Fallback to hardcoded vendor ID for testing
+      const testVendorId = 'f77b91b9-117f-41fa-93b0-76e986fa8999';
+      setVendorId(testVendorId);
     }
-  ];
+  }, []);
+
+  // Fetch appointments data
+  useEffect(() => {
+    if (vendorId) {
+      fetchAppointments();
+    }
+  }, [vendorId]);
+
+  const fetchAppointments = async () => {
+    if (!vendorId) return;
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch online appointments
+      const onlineData = await doctorConsultationVendorService.getOnlinePendingAppointments(vendorId);
+      const transformedOnlineData = onlineData.map((appointment, index) => 
+        doctorConsultationVendorService.transformAppointmentData(appointment, index)
+      );
+      setOnlineAppointments(transformedOnlineData);
+
+      // Fetch offline appointments
+      const offlineData = await doctorConsultationVendorService.getOfflinePendingAppointments(vendorId);
+      const transformedOfflineData = offlineData.map((appointment, index) => 
+        doctorConsultationVendorService.transformAppointmentData(appointment, index)
+      );
+      setOfflineAppointments(transformedOfflineData);
+
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError(err.message || 'Failed to fetch appointments');
+      setSnackbarMessage(err.message || 'Failed to fetch appointments');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchAppointments();
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleStatusUpdate = async () => {
+    if (!selectedAppointmentForMenu || !selectedStatus) {
+      console.log('Missing data:', { 
+        appointment: !!selectedAppointmentForMenu, 
+        status: selectedStatus 
+      });
+      return;
+    }
+
+    console.log('Updating status:', {
+      appointmentId: selectedAppointmentForMenu.clinicAppointmentId,
+      status: selectedStatus
+    });
+
+    setActionLoading(true);
+    
+    try {
+      await doctorConsultationVendorService.updateAppointmentStatus(
+        selectedAppointmentForMenu.clinicAppointmentId, 
+        selectedStatus
+      );
+      setSnackbarMessage(`Appointment status updated to ${selectedStatus}`);
+      setSnackbarOpen(true);
+      await fetchAppointments(); // Refresh the list
+      setStatusDialogOpen(false);
+      setSelectedStatus('');
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      setSnackbarMessage(`Error: ${error.message}`);
+      setSnackbarOpen(true);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStatusDialogClose = () => {
+    setStatusDialogOpen(false);
+    setSelectedStatus('');
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -165,6 +214,9 @@ const DoctorConsultationVendorAppointments = () => {
       case 'pending': return 'warning';
       case 'cancelled': return 'error';
       case 'completed': return 'info';
+      case 'postponed': return 'warning';
+      case 'rescheduled': return 'info';
+      case 'no_call': return 'error';
       default: return 'default';
     }
   };
@@ -174,9 +226,33 @@ const DoctorConsultationVendorAppointments = () => {
       case 'confirmed': return <CheckCircle />;
       case 'pending': return <Pending />;
       case 'cancelled': return <Cancel />;
-      case 'completed': return <Schedule />;
+      case 'completed': return <CheckCircle />;
+      case 'postponed': return <Schedule />;
+      case 'rescheduled': return <Schedule />;
+      case 'no_call': return <Phone />;
       default: return <Schedule />;
     }
+  };
+
+  const handleCall = (appointment) => {
+    console.log('Initiating call with patient:', appointment.patientName);
+    setCallingAppointment(appointment);
+    setCallInProgress(true);
+    
+    // TODO: Implement actual call functionality (WebRTC, etc.)
+    // For now, just show a success message
+    setTimeout(() => {
+      setSnackbarMessage(`Call initiated with ${appointment.patientName}`);
+      setSnackbarOpen(true);
+    }, 1000);
+  };
+
+  const handleEndCall = () => {
+    console.log('Ending call');
+    setCallInProgress(false);
+    setCallingAppointment(null);
+    setSnackbarMessage('Call ended');
+    setSnackbarOpen(true);
   };
 
   const getTypeIcon = (type) => {
@@ -219,34 +295,74 @@ const DoctorConsultationVendorAppointments = () => {
     setSelectedAppointment(null);
   };
 
-  const handleAction = (action) => {
-    if (selectedAppointmentForMenu) {
-      console.log(`${action} appointment ${selectedAppointmentForMenu.id}`);
-      // Handle different actions here
+  const handleAction = async (action) => {
+    if (!selectedAppointmentForMenu) return;
+
+    // Store the appointment data before closing menu
+    const appointmentData = selectedAppointmentForMenu;
+
+    // Only set loading for actions that make API calls immediately
+    const immediateApiActions = ['complete'];
+    if (immediateApiActions.includes(action)) {
+      setActionLoading(true);
+    }
+    
+    // Close menu first for all actions
+    handleMenuClose();
+    
+    try {
       switch (action) {
         case 'view':
-          handleAppointmentClick(selectedAppointmentForMenu);
+          handleAppointmentClick(appointmentData);
           break;
         case 'complete':
-          console.log('Complete appointment');
+          await doctorConsultationVendorService.completeAppointment(appointmentData.clinicAppointmentId);
+          setSnackbarMessage('Appointment completed successfully');
+          setSnackbarOpen(true);
+          await fetchAppointments(); // Refresh the list
           break;
         case 'postpone':
-          console.log('Postpone appointment');
+          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
+          setSelectedStatus('postponed');
+          setStatusDialogOpen(true);
           break;
         case 'cancel':
-          console.log('Cancel appointment');
+          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
+          setSelectedStatus('cancelled');
+          setStatusDialogOpen(true);
+          break;
+        case 'reschedule':
+          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
+          setSelectedStatus('rescheduled');
+          setStatusDialogOpen(true);
+          break;
+        case 'no_call':
+          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
+          setSelectedStatus('no_call');
+          setStatusDialogOpen(true);
           break;
         case 'notify':
-          console.log('Notify patient');
+          // TODO: Implement notification functionality
+          setSnackbarMessage('Notification sent to patient');
+          setSnackbarOpen(true);
           break;
         case 'refund':
-          console.log('Process refund');
+          // TODO: Implement refund functionality
+          setSnackbarMessage('Refund processed');
+          setSnackbarOpen(true);
           break;
         default:
           break;
       }
+    } catch (error) {
+      console.error(`Error performing ${action}:`, error);
+      setSnackbarMessage(`Error: ${error.message}`);
+      setSnackbarOpen(true);
+    } finally {
+      if (immediateApiActions.includes(action)) {
+        setActionLoading(false);
+      }
     }
-    handleMenuClose();
   };
 
   const currentAppointments = selectedTab === 0 ? onlineAppointments : offlineAppointments;
@@ -257,7 +373,8 @@ const DoctorConsultationVendorAppointments = () => {
       px: { xs: 2, sm: 3 }
     }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
           Appointments Management
         </Typography>
@@ -265,6 +382,24 @@ const DoctorConsultationVendorAppointments = () => {
           Manage and track all consultation appointments
         </Typography>
       </Box>
+        <Button
+          variant="outlined"
+          startIcon={<Refresh />}
+          onClick={handleRefresh}
+          disabled={loading}
+          sx={{ minWidth: 120 }}
+        >
+          {loading ? <CircularProgress size={20} /> : 'Refresh'}
+        </Button>
+      </Box>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
 
       {/* Tabs */}
       <Card sx={{ mb: 3 }}>
@@ -333,11 +468,30 @@ const DoctorConsultationVendorAppointments = () => {
               <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Paid Amount</TableCell>
               <TableCell sx={{ fontWeight: 600 }}>Status</TableCell>
+              {selectedTab === 0 && <TableCell sx={{ fontWeight: 600 }}>Call</TableCell>}
               <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {currentAppointments.map((appointment) => (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={selectedTab === 0 ? 8 : 7} sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                  <Typography variant="body2" sx={{ mt: 2 }}>
+                    Loading appointments...
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : currentAppointments.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={selectedTab === 0 ? 8 : 7} sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No appointments found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              currentAppointments.map((appointment) => (
               <TableRow 
                 key={appointment.id}
                 sx={{ 
@@ -392,6 +546,46 @@ const DoctorConsultationVendorAppointments = () => {
                     icon={getStatusIcon(appointment.status)}
                   />
                 </TableCell>
+                {selectedTab === 0 && (
+                  <TableCell>
+                    {callInProgress && callingAppointment?.id === appointment.id ? (
+                      <IconButton
+                        size="small"
+                        onClick={handleEndCall}
+                        sx={{ 
+                          color: 'error.main',
+                          backgroundColor: 'error.light',
+                          '&:hover': {
+                            backgroundColor: 'error.main',
+                            color: 'white'
+                          }
+                        }}
+                      >
+                        <CallEnd />
+                      </IconButton>
+                    ) : (
+                      <IconButton
+                        size="small"
+                        onClick={() => handleCall(appointment)}
+                        disabled={callInProgress}
+                        sx={{ 
+                          color: 'white',
+                          backgroundColor: 'success.main',
+                          '&:hover': {
+                            backgroundColor: 'success.dark',
+                            color: 'white'
+                          },
+                          '&:disabled': {
+                            backgroundColor: 'grey.300',
+                            color: 'grey.500'
+                          }
+                        }}
+                      >
+                        <Call />
+                      </IconButton>
+                    )}
+                  </TableCell>
+                )}
                 <TableCell>
                   <IconButton
                     size="small"
@@ -402,7 +596,8 @@ const DoctorConsultationVendorAppointments = () => {
                   </IconButton>
                 </TableCell>
               </TableRow>
-            ))}
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -435,31 +630,43 @@ const DoctorConsultationVendorAppointments = () => {
           </ListItemIcon>
           View Details
         </MenuItem>
-        <MenuItem onClick={() => handleAction('complete')}>
+        <MenuItem onClick={() => handleAction('complete')} disabled={actionLoading}>
           <ListItemIcon>
             <CheckCircle fontSize="small" />
           </ListItemIcon>
           Complete
         </MenuItem>
-        <MenuItem onClick={() => handleAction('postpone')}>
+        <MenuItem onClick={() => handleAction('postpone')} disabled={actionLoading}>
           <ListItemIcon>
             <Schedule fontSize="small" />
           </ListItemIcon>
           Postpone
         </MenuItem>
-        <MenuItem onClick={() => handleAction('cancel')}>
+        <MenuItem onClick={() => handleAction('cancel')} disabled={actionLoading}>
           <ListItemIcon>
             <Cancel fontSize="small" />
           </ListItemIcon>
           Cancel
         </MenuItem>
-        <MenuItem onClick={() => handleAction('notify')}>
+        <MenuItem onClick={() => handleAction('reschedule')} disabled={actionLoading}>
+          <ListItemIcon>
+            <Schedule fontSize="small" />
+          </ListItemIcon>
+          Reschedule
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('no_call')} disabled={actionLoading}>
+          <ListItemIcon>
+            <Phone fontSize="small" />
+          </ListItemIcon>
+          No Call
+        </MenuItem>
+        <MenuItem onClick={() => handleAction('notify')} disabled={actionLoading}>
           <ListItemIcon>
             <NotificationsActive fontSize="small" />
           </ListItemIcon>
           Notify
         </MenuItem>
-        <MenuItem onClick={() => handleAction('refund')}>
+        <MenuItem onClick={() => handleAction('refund')} disabled={actionLoading}>
           <ListItemIcon>
             <MoneyOff fontSize="small" />
           </ListItemIcon>
@@ -611,6 +818,69 @@ const DoctorConsultationVendorAppointments = () => {
           </>
         )}
       </Dialog>
+
+      {/* Status Update Dialog */}
+      <Dialog 
+        open={statusDialogOpen} 
+        onClose={handleStatusDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Update Appointment Status
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                label="Status"
+              >
+                {doctorConsultationVendorService.getAvailableStatuses().map((status) => (
+                  <MenuItem key={status} value={status}>
+                    <Chip 
+                      label={status} 
+                      size="small" 
+                      color={getStatusColor(status)}
+                      sx={{ mr: 1 }}
+                    />
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleStatusDialogClose} disabled={actionLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleStatusUpdate}
+            variant="contained"
+            disabled={actionLoading || !selectedStatus}
+            startIcon={actionLoading ? <CircularProgress size={20} /> : null}
+          >
+            {actionLoading ? 'Updating...' : 'Update Status'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

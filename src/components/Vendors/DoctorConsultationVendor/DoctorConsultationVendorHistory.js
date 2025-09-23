@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -28,7 +28,10 @@ import {
   Paper,
   Menu,
   MenuItem,
-  ListItemButton
+  ListItemButton,
+  CircularProgress,
+  Alert,
+  Snackbar
 } from '@mui/material';
 import {
   VideoCall,
@@ -46,8 +49,15 @@ import {
   Receipt,
   Payment,
   Computer,
-  LocalHospital
+  LocalHospital,
+  Refresh,
+  Cancel,
+  Schedule,
+  CheckCircleOutline,
+  ErrorOutline
 } from '@mui/icons-material';
+import { doctorConsultationVendorService } from '../../../services/Vendors/DoctorConsultationVendor.service';
+import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
 
 const DoctorConsultationVendorHistory = () => {
   const theme = useTheme();
@@ -56,99 +66,77 @@ const DoctorConsultationVendorHistory = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [selectedConsultationForMenu, setSelectedConsultationForMenu] = useState(null);
 
-  // Sample completed consultation history data
-  const completedConsultations = [
-    {
-      id: 1,
-      srNo: 1,
-      patientName: 'Sarah Johnson',
-      patientEmail: 'sarah.johnson@email.com',
-      patientPhone: '+91 98765 43210',
-      doctorName: 'Dr. Michael Smith',
-      doctorSpecialty: 'Cardiology',
-      date: '2024-01-10',
-      time: '14:30',
-      duration: 30,
-      type: 'video',
-      status: 'completed',
-      symptoms: 'Chest pain, shortness of breath',
-      diagnosis: 'Angina pectoris',
-      prescription: 'Nitroglycerin, Aspirin',
-      rating: 5,
-      consultationFee: 1500,
-      paymentStatus: 'paid',
-      notes: 'Patient responded well to treatment'
-    },
-    {
-      id: 2,
-      srNo: 2,
-      patientName: 'John Davis',
-      patientEmail: 'john.davis@email.com',
-      patientPhone: '+91 87654 32109',
-      doctorName: 'Dr. Emily Wilson',
-      doctorSpecialty: 'Dermatology',
-      date: '2024-01-09',
-      time: '16:15',
-      duration: 45,
-      type: 'voice',
-      status: 'completed',
-      symptoms: 'Skin rash, itching',
-      diagnosis: 'Contact dermatitis',
-      prescription: 'Hydrocortisone cream',
-      rating: 4,
-      consultationFee: 1200,
-      paymentStatus: 'paid',
-      notes: 'Allergic reaction to new soap'
-    },
-    {
-      id: 3,
-      srNo: 3,
-      patientName: 'Maria Garcia',
-      patientEmail: 'maria.garcia@email.com',
-      patientPhone: '+91 76543 21098',
-      doctorName: 'Dr. Robert Brown',
-      doctorSpecialty: 'Neurology',
-      date: '2024-01-08',
-      time: '10:00',
-      duration: 60,
-      type: 'video',
-      status: 'completed',
-      symptoms: 'Headaches, dizziness',
-      diagnosis: 'Migraine',
-      prescription: 'Sumatriptan, Propranolol',
-      rating: 5,
-      consultationFee: 2000,
-      paymentStatus: 'paid',
-      notes: 'Chronic migraine patient'
-    },
-    {
-      id: 4,
-      srNo: 4,
-      patientName: 'David Wilson',
-      patientEmail: 'david.wilson@email.com',
-      patientPhone: '+91 65432 10987',
-      doctorName: 'Dr. Lisa Anderson',
-      doctorSpecialty: 'Pediatrics',
-      date: '2024-01-07',
-      time: '11:00',
-      duration: 30,
-      type: 'chat',
-      status: 'completed',
-      symptoms: 'Fever, cough',
-      diagnosis: 'Upper respiratory infection',
-      prescription: 'Acetaminophen, Cough syrup',
-      rating: 4,
-      consultationFee: 800,
-      paymentStatus: 'paid',
-      notes: 'Child consultation'
+  // API state
+  const [completedConsultations, setCompletedConsultations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error');
+  const [vendorId, setVendorId] = useState(null);
+
+  // Get vendor ID from auth service
+  useEffect(() => {
+    const authData = vendorAuthService.getVendorAuthData();
+    console.log('History: Auth data:', authData);
+    
+    if (authData?.vendorData?.vendorId) {
+      setVendorId(authData.vendorData.vendorId);
+    } else if (authData?.vendorData?.id) {
+      setVendorId(authData.vendorData.id);
+    } else if (authData?.vendorData?.doctorId) {
+      setVendorId(authData.vendorData.doctorId);
+    } else if (authData?.vendorId) {
+      setVendorId(authData.vendorId);
+    } else {
+      console.error('History: No vendor ID found in auth data');
+      setError('Unable to identify vendor. Please login again.');
+      setLoading(false);
     }
-  ];
+  }, []);
+
+  // Fetch completed appointments when vendorId is available
+  useEffect(() => {
+    if (vendorId) {
+      fetchCompletedAppointments();
+    }
+  }, [vendorId]);
+
+  const fetchCompletedAppointments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      console.log('History: Fetching completed appointments for vendor:', vendorId);
+      
+      const appointments = await doctorConsultationVendorService.getCompletedAppointments(vendorId);
+      console.log('History: Fetched appointments:', appointments);
+      
+      setCompletedConsultations(appointments);
+    } catch (error) {
+      console.error('History: Error fetching completed appointments:', error);
+      setError('Failed to load consultation history. Please try again.');
+      setSnackbarMessage('Failed to load consultation history');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchCompletedAppointments();
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
 
   const getTypeIcon = (type) => {
     switch (type) {
       case 'video': return <Computer />;
       case 'voice': return <PhoneInTalk />;
       case 'chat': return <Message />;
+      case 'offline': return <LocalHospital />;
       default: return <VideoCall />;
     }
   };
@@ -158,7 +146,34 @@ const DoctorConsultationVendorHistory = () => {
       case 'video': return 'primary';
       case 'voice': return 'secondary';
       case 'chat': return 'info';
+      case 'offline': return 'warning';
       default: return 'default';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed': return 'success';
+      case 'cancelled': return 'error';
+      case 'pending': return 'warning';
+      case 'confirmed': return 'info';
+      case 'postponed': return 'secondary';
+      case 'rescheduled': return 'primary';
+      case 'no_call': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'completed': return <CheckCircleOutline />;
+      case 'cancelled': return <Cancel />;
+      case 'pending': return <Schedule />;
+      case 'confirmed': return <CheckCircle />;
+      case 'postponed': return <Schedule />;
+      case 'rescheduled': return <Schedule />;
+      case 'no_call': return <ErrorOutline />;
+      default: return <Schedule />;
     }
   };
 
@@ -190,13 +205,33 @@ const DoctorConsultationVendorHistory = () => {
           handleConsultationClick(selectedConsultationForMenu);
           break;
         case 'download':
-          console.log('Download invoice');
+          handleDownloadInvoice(selectedConsultationForMenu);
           break;
         default:
           break;
       }
     }
     handleMenuClose();
+  };
+
+  const handleDownloadInvoice = async (consultation) => {
+    try {
+      console.log('History: Downloading invoice for consultation:', consultation.id);
+      setSnackbarMessage('Downloading invoice...');
+      setSnackbarSeverity('info');
+      setSnackbarOpen(true);
+      
+      await doctorConsultationVendorService.downloadInvoice(consultation.clinicAppointmentId);
+      
+      setSnackbarMessage('Invoice downloaded successfully!');
+      setSnackbarSeverity('success');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('History: Error downloading invoice:', error);
+      setSnackbarMessage('Failed to download invoice. Please try again.');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
+    }
   };
 
   return (
@@ -206,38 +241,114 @@ const DoctorConsultationVendorHistory = () => {
     }}>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
           Consultation History
         </Typography>
         <Typography variant="body1" color="text.secondary">
           View completed consultation records and download invoices
         </Typography>
+          </Box>
+          <IconButton
+            onClick={handleRefresh}
+            disabled={loading}
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              color: 'white',
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark,
+              },
+              '&:disabled': {
+                backgroundColor: theme.palette.grey[300],
+                color: theme.palette.grey[500],
+              }
+            }}
+          >
+            <Refresh />
+          </IconButton>
+        </Box>
+        
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
       </Box>
 
-      {/* Consultations Table */}
-      <TableContainer component={Paper} sx={{ 
+      {/* Loading State */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+          <CircularProgress size={40} />
+          <Typography variant="body1" sx={{ ml: 2 }}>
+            Loading consultation history...
+          </Typography>
+        </Box>
+      ) : (
+        /* Consultations Table */
+        <Box sx={{ width: '100%' }}>
+          <TableContainer 
+            component={Paper} 
+            sx={{ 
         boxShadow: 'none', 
         border: `1px solid ${theme.palette.divider}`,
-        transition: 'transform 0.2s ease-in-out',
+              borderRadius: 2,
+              overflow: 'hidden',
+              maxWidth: '100%',
+              overflowX: 'auto',
+              '&::-webkit-scrollbar': {
+                height: 8,
+              },
+              '&::-webkit-scrollbar-track': {
+                backgroundColor: theme.palette.grey[100],
+                borderRadius: 4,
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: theme.palette.grey[400],
+                borderRadius: 4,
         '&:hover': {
-          transform: 'translateY(-2px)'
-        }
-      }}>
-        <Table sx={{ minWidth: 650 }}>
+                  backgroundColor: theme.palette.grey[600],
+                },
+              },
+            }}
+          >
+          <Table sx={{ 
+            minWidth: 800,
+            '& .MuiTableCell-root': {
+              whiteSpace: 'nowrap',
+              padding: '12px 8px'
+            }
+          }}>
           <TableHead>
-            <TableRow sx={{ backgroundColor: theme.palette.background.default }}>
-              <TableCell sx={{ fontWeight: 600 }}>Sr No</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Patient Name</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Consultation Type</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Date & Time</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Duration</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Rating</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Fee</TableCell>
-              <TableCell sx={{ fontWeight: 600 }}>Actions</TableCell>
+              <TableRow sx={{ 
+                backgroundColor: theme.palette.background.default,
+                position: 'sticky',
+                top: 0,
+                zIndex: 1
+              }}>
+                <TableCell sx={{ fontWeight: 600, minWidth: 80 }}>Sr No</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 200 }}>Patient Name</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 140 }}>Consultation Type</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 120 }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 150 }}>Date & Time</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Duration</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Fee</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 100 }}>Payment</TableCell>
+                <TableCell sx={{ fontWeight: 600, minWidth: 80 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {completedConsultations.map((consultation) => (
+              {completedConsultations.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      No consultation history found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                completedConsultations.map((consultation) => (
               <TableRow 
                 key={consultation.id}
                 sx={{ 
@@ -252,15 +363,15 @@ const DoctorConsultationVendorHistory = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Avatar sx={{ width: 32, height: 32 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 200 }}>
+                        <Avatar sx={{ width: 32, height: 32, backgroundColor: theme.palette.primary.main, flexShrink: 0 }}>
                       {consultation.patientName.split(' ').map(n => n[0]).join('')}
                     </Avatar>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        <Box sx={{ minWidth: 0, flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {consultation.patientName}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                         {consultation.patientEmail}
                       </Typography>
                     </Box>
@@ -274,6 +385,14 @@ const DoctorConsultationVendorHistory = () => {
                     icon={getTypeIcon(consultation.type)}
                   />
                 </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={consultation.status.toUpperCase()}
+                        size="small"
+                        color={getStatusColor(consultation.status)}
+                        icon={getStatusIcon(consultation.status)}
+                      />
+                    </TableCell>
                 <TableCell>
                   <Box>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -290,24 +409,17 @@ const DoctorConsultationVendorHistory = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {consultation.rating ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {consultation.rating}
-                      </Typography>
-                    </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">
-                      N/A
-                    </Typography>
-                  )}
-                </TableCell>
-                <TableCell>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'success.main' }}>
                     ₹{consultation.consultationFee}
                   </Typography>
                 </TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={consultation.paymentStatus.toUpperCase()}
+                        size="small"
+                        color={consultation.paymentStatus === 'paid' ? 'success' : 'warning'}
+                      />
+                    </TableCell>
                 <TableCell>
                   <IconButton
                     size="small"
@@ -318,10 +430,22 @@ const DoctorConsultationVendorHistory = () => {
                   </IconButton>
                 </TableCell>
               </TableRow>
-            ))}
+                ))
+              )}
           </TableBody>
         </Table>
       </TableContainer>
+        {/* Scroll Indicator */}
+        <Typography variant="caption" color="text.secondary" sx={{ 
+          display: 'block', 
+          textAlign: 'center', 
+          mt: 1,
+          opacity: 0.7
+        }}>
+          ← Scroll horizontally to view all columns →
+        </Typography>
+        </Box>
+      )}
 
       {/* Actions Menu */}
       <Menu
@@ -374,9 +498,9 @@ const DoctorConsultationVendorHistory = () => {
                   Consultation Details
                 </Typography>
                 <Chip
-                  label="Completed"
-                  color="success"
-                  icon={<CheckCircle />}
+                  label={selectedConsultation.status.toUpperCase()}
+                  color={getStatusColor(selectedConsultation.status)}
+                  icon={getStatusIcon(selectedConsultation.status)}
                 />
               </Box>
             </DialogTitle>
@@ -484,11 +608,21 @@ const DoctorConsultationVendorHistory = () => {
                           <strong>Fee:</strong> ₹{selectedConsultation.consultationFee}
                         </Typography>
                       </Box>
-                      {selectedConsultation.rating && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Typography variant="body2">
+                          <strong>Payment Status:</strong> 
+                          <Chip 
+                            label={selectedConsultation.paymentStatus.toUpperCase()}
+                            size="small"
+                            color={selectedConsultation.paymentStatus === 'paid' ? 'success' : 'warning'}
+                            sx={{ ml: 1 }}
+                          />
+                        </Typography>
+                      </Box>
+                      {selectedConsultation.meetingUrl && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <Star sx={{ fontSize: 16, color: 'warning.main' }} />
                           <Typography variant="body2">
-                            <strong>Rating:</strong> {selectedConsultation.rating}/5
+                            <strong>Meeting URL:</strong> {selectedConsultation.meetingUrl}
                           </Typography>
                         </Box>
                       )}
@@ -499,42 +633,36 @@ const DoctorConsultationVendorHistory = () => {
                 {/* Medical Information */}
                 <Grid item xs={12}>
                   <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                    Medical Information
+                    Additional Information
                   </Typography>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12}>
                       <Box sx={{ mb: 2 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                          Symptoms:
+                          Notes:
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {selectedConsultation.symptoms}
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                          Diagnosis:
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {selectedConsultation.diagnosis}
+                          {selectedConsultation.notes}
                         </Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={12} md={6}>
                       <Box sx={{ mb: 2 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                          Prescription:
+                          Created At:
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {selectedConsultation.prescription}
+                          {new Date(selectedConsultation.createdAt).toLocaleString()}
                         </Typography>
                       </Box>
-                      <Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ mb: 2 }}>
                         <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                          Notes:
+                          Last Updated:
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          {selectedConsultation.notes}
+                          {new Date(selectedConsultation.updatedAt).toLocaleString()}
                         </Typography>
                       </Box>
                     </Grid>
@@ -548,7 +676,7 @@ const DoctorConsultationVendorHistory = () => {
                 variant="outlined"
                 startIcon={<Receipt />}
                 onClick={() => {
-                  console.log('Download invoice', selectedConsultation.id);
+                  handleDownloadInvoice(selectedConsultation);
                 }}
               >
                 Download Invoice
@@ -557,6 +685,18 @@ const DoctorConsultationVendorHistory = () => {
           </>
         )}
       </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

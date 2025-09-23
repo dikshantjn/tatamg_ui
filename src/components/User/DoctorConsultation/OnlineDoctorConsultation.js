@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaFilter, FaStar, FaVideo, FaCalendarAlt, FaUserMd, FaStethoscope, FaNewspaper, FaQuestionCircle, FaHeart, FaUser } from 'react-icons/fa';
 import { colors } from '../../../styles/colors';
 import './OnlineDoctorConsultation.css';
 import { doctorConsultationService } from '../../../services/User/DoctorConsultation/doctor-consultation.service';
 
 const OnlineDoctorConsultation = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('');
@@ -54,9 +56,26 @@ const OnlineDoctorConsultation = () => {
     return matchesSearch && matchesSpecialty && matchesLanguage;
   });
 
-  const handleBookAppointment = (doctorId) => {
-    console.log('Booking appointment with doctor:', doctorId);
-    // Add booking logic here
+  const handleBookAppointment = (doctor) => {
+    // Format doctor data to match the expected structure for BookDoctorAppointment
+    const doctorData = {
+      id: doctor.id,
+      vendorId: doctor.vendorId || doctor.id, // Use vendorId if available, fallback to id
+      name: doctor.doctorName,
+      specialty: doctor.specializations?.join(', ') || 'General Medicine',
+      experience: doctor.experienceYears,
+      consultationFee: doctor.consultationFeesRange,
+      avatar: doctor.profilePicture,
+      languages: doctor.languageProficiency?.join(', ') || 'English',
+      education: doctor.educationalQualifications?.join(', ') || 'MBBS',
+      address: `${doctor.city}, ${doctor.state}`,
+      rating: 4.5 // Default rating since it's not provided in the API
+    };
+
+    // Navigate to the booking page with doctor data using vendorId
+    navigate(`/doctor-consultation/online/book/${doctorData.vendorId}`, { 
+      state: { doctorData } 
+    });
   };
 
   const handleImageError = (doctorId) => {
@@ -177,7 +196,7 @@ const OnlineDoctorConsultation = () => {
                       <div className="doctor-actions">
                         <button 
                           className="book-appointment-btn"
-                          onClick={() => handleBookAppointment(doctor.id)}
+                          onClick={() => handleBookAppointment(doctor)}
                         >
                           Book Now
                         </button>

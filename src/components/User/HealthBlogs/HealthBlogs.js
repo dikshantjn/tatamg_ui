@@ -96,24 +96,25 @@ const HealthBlogs = () => {
           mb: { xs: 2, md: 3 },
           py: { xs: 1, md: 1.5 },
         }}>
-          <Typography variant="h4" fontWeight={700} color={theme.palette.primary.main} sx={{ mb: 0.5 }}>
+          <Typography variant="h4" fontWeight={700} color={theme.palette.primary.main} sx={{ mb: 0.5, fontSize: { xs: '1.6rem', md: '2rem' } }}>
             Health Blog
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto', fontSize: { xs: '0.95rem', md: '1rem' } }}>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 640, mx: 'auto', fontSize: { xs: '0.95rem', md: '1rem' } }}>
             Expert tips, wellness guides, and the latest in health—curated for you.
           </Typography>
         </Box>
-        {/* Categories Filter */}
+        {/* Categories Filter - horizontal scroll only */}
         <Box sx={{ mb: { xs: 2, md: 3 } }}>
-          <Stack
-            direction="row"
-            spacing={1}
+          <Box
             sx={{
-              justifyContent: 'center',
-              flexWrap: 'wrap',
-              rowGap: 1,
-              columnGap: 1,
-              px: 1
+              display: 'flex',
+              gap: 1,
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              px: 1,
+              '&::-webkit-scrollbar': { display: 'none' },
+              justifyContent: { xs: 'flex-start', md: 'center' }
             }}
           >
             <Chip
@@ -126,6 +127,7 @@ const HealthBlogs = () => {
                   loadBlogs(null);
                 }
               }}
+              sx={{ flexShrink: 0 }}
             />
             {categories.map(cat => (
               <Chip
@@ -139,9 +141,10 @@ const HealthBlogs = () => {
                     loadBlogs(cat.categoryId);
                   }
                 }}
+                sx={{ flexShrink: 0 }}
               />
             ))}
-          </Stack>
+          </Box>
         </Box>
         {/* Selected Category Title */}
         <Box sx={{ textAlign: 'center', mb: { xs: 2, md: 3 } }}>
@@ -166,7 +169,7 @@ const HealthBlogs = () => {
         <Box
           sx={{
             borderRadius: 3,
-            p: { xs: 2, md: 3 },
+            p: { xs: 1.5, md: 3 },
             mb: { xs: 3, md: 4 },
             background: '#fff',
             border: '1px solid #e0e0e0',
@@ -174,8 +177,8 @@ const HealthBlogs = () => {
             mx: 'auto',
           }}
         >
-          <Grid container spacing={4} alignItems="center" direction="row" wrap="nowrap">
-            <Grid item xs={7} md={7} zeroMinWidth>
+          <Grid container spacing={{ xs: 2, md: 4 }} alignItems="center">
+            <Grid item xs={12} md={7} zeroMinWidth>
                 {imageError[featuredBlog.blogPostId] ? (
                   <Box sx={{
                     borderRadius: 3,
@@ -204,16 +207,16 @@ const HealthBlogs = () => {
               />
                 )}
             </Grid>
-            <Grid item xs={5} md={5} zeroMinWidth>
+            <Grid item xs={12} md={5} zeroMinWidth>
               <Stack direction="row" spacing={1} mb={2}>
                 {selectedCategoryId === null && (
                   <Chip label={getCategoryName(featuredBlog)} size="small" color="default" variant="outlined" />
                 )}
               </Stack>
-              <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: theme.palette.primary.main, mb: 2 }}>
+              <Typography variant="h5" fontWeight={600} gutterBottom sx={{ color: theme.palette.primary.main, mb: 1.5, fontSize: { xs: '1.1rem', md: '1.25rem' } }}>
                 {featuredBlog.title}
               </Typography>
-              <Typography variant="body1" color="text.secondary" mb={2} sx={{ lineHeight: 1.5 }}>
+              <Typography variant="body2" color="text.secondary" mb={{ xs: 1.5, md: 2 }} sx={{ lineHeight: 1.5 }}>
                   {removeFirstH1(featuredBlog.message).replace(/<[^>]+>/g, '').slice(0, 100)}...
               </Typography>
               <Stack direction="row" alignItems="center" spacing={2} mb={2}>
@@ -229,7 +232,7 @@ const HealthBlogs = () => {
                 endIcon={<OpenInNewIcon />}
                 component={RouterLink}
                   to={`/health-blogs/${featuredBlog.blogPostId}`}
-                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: 3 }}
+                sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 600, px: { xs: 2, md: 3 }, py: { xs: 0.75, md: 1 } }}
               >
                 Read More
               </Button>
@@ -240,14 +243,14 @@ const HealthBlogs = () => {
 
         {/* Recent Articles Section */}
         <Box mb={4} sx={{ textAlign: 'center' }}>
-          <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.primary.main, mb: 1 }}>
+          <Typography variant="h5" fontWeight={600} sx={{ color: theme.palette.primary.main, mb: 1, fontSize: { xs: '1.2rem', md: '1.5rem' } }}>
             Our Recent Articles
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Stay Informed with Our Latest Insights
           </Typography>
         </Box>
-        <Grid container spacing={3} justifyContent="center" sx={{ maxWidth: 1200, mx: 'auto' }}>
+        <Grid container spacing={{ xs: 2, md: 3 }} justifyContent="center" sx={{ maxWidth: 1200, mx: 'auto' }}>
           {recentArticles.map((blog) => (
             <Grid item xs={12} sm={6} md={4} key={blog.blogPostId} display="flex" justifyContent="center">
               <Card
@@ -258,7 +261,7 @@ const HealthBlogs = () => {
                   flexDirection: 'column',
                   background: '#fff',
                   border: '1px solid #e0e0e0',
-                  maxWidth: 350,
+                  maxWidth: { xs: 360, md: 350 },
                   mx: 'auto',
                   transition: 'transform 0.2s ease',
                   '&:hover': {
@@ -269,7 +272,7 @@ const HealthBlogs = () => {
               >
                 {imageError[blog.blogPostId] ? (
                   <Box sx={{
-                    height: 180,
+                    height: { xs: 160, md: 180 },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -286,14 +289,14 @@ const HealthBlogs = () => {
                   alt={blog.title || 'Blog image'}
                     onError={() => handleImageError(blog.blogPostId)}
                   sx={{
-                    height: 160,
+                    height: { xs: 150, md: 160 },
                     objectFit: 'cover',
                     borderTopLeftRadius: 8,
                     borderTopRightRadius: 8,
                   }}
                 />
                 )}
-                <CardContent sx={{ flexGrow: 1, p: 2.5, display: 'flex', flexDirection: 'column' }}>
+                <CardContent sx={{ flexGrow: 1, p: { xs: 2, md: 2.5 }, display: 'flex', flexDirection: 'column' }}>
                   {selectedCategoryId === null && (
                     <Box sx={{ mb: 1 }}>
                       <Chip label={getCategoryName(blog)} size="small" color="default" variant="outlined" />
@@ -305,7 +308,7 @@ const HealthBlogs = () => {
                       {new Date(blog.createdAt).toLocaleDateString()}
                     </Typography>
                   </Stack>
-                  <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: theme.palette.primary.main, mb: 1.5, fontSize: '1rem' }}>
+                  <Typography variant="h6" fontWeight={600} gutterBottom sx={{ color: theme.palette.primary.main, mb: 1.25, fontSize: { xs: '0.98rem', md: '1rem' } }}>
                     {blog.title}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" mb={2} sx={{ lineHeight: 1.5, flexGrow: 1 }}>
@@ -324,7 +327,7 @@ const HealthBlogs = () => {
                       fontWeight: 500, 
                       py: 0.5,
                       px: 2,
-                      fontSize: '0.875rem',
+                      fontSize: { xs: '0.85rem', md: '0.875rem' },
                       borderColor: theme.palette.primary.main,
                       color: theme.palette.primary.main,
                       '&:hover': {

@@ -1,92 +1,107 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '@mui/material/Modal';
+import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import Chip from '@mui/material/Chip';
+import { useTheme, styled } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CloseIcon from '@mui/icons-material/Close';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PaymentOutlinedIcon from '@mui/icons-material/PaymentOutlined';
 import CallIcon from '@mui/icons-material/Call';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import PersonIcon from '@mui/icons-material/Person';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import './OngoingBloodBankBookingModal.css';
+import Stepper from '@mui/material/Stepper';
+import Step from '@mui/material/Step';
+import StepLabel from '@mui/material/StepLabel';
+import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { useSocket } from '../../../hooks/useSocket';
 import BloodBankPaymentService from '../../../services/payment/blood-bank-payment.service';
 
-const STEPS = [
-  'PENDING',
-  'CONFIRMED',
-  'PAYMENT',
-  'WaitingForPickup',
-  'COMPLETED',
-];
+const RAW_STEPS = ['PENDING', 'CONFIRMED', 'PAYMENT', 'WaitingForPickup', 'COMPLETED'];
 const DISPLAY_NAMES = {
-  'PENDING': 'Pending',
-  'CONFIRMED': 'Confirmed',
-  'PAYMENT': 'Waiting for Payment',
-  'WaitingForPickup': 'Waiting for Pickup',
-  'COMPLETED': 'Completed',
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  PAYMENT: 'Waiting for Payment',
+  WaitingForPickup: 'Waiting for Pickup',
+  COMPLETED: 'Completed',
 };
 
-function Timeline({ steps, currentStepIndex, status }) {
-  // Map step to label, breaking long labels into multiple lines
-  const getLabelLines = (label) => {
-    if (label === 'Waiting for Pickup') return ['Waiting', 'for Pickup'];
-    if (label === 'Waiting for Payment') return ['Waiting', 'for Payment'];
-    if (label === 'Payment Completed') return ['Payment', 'Completed'];
-    return [label];
-  };
+// Copied helpers from OngoingAmbulanceBookingModal for consistent timeline styling
+const ColorConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 16,
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    height: 3,
+    border: 0,
+    backgroundColor: theme.palette.grey[300],
+    borderRadius: 2,
+  },
+}));
+
+function NumberedStepIcon(props) {
+  const { active, completed, icon } = props;
   return (
-    <div className="timeline-container">
-      <div className="timeline">
-        {steps.map((step, idx) => {
-          let label = DISPLAY_NAMES[step];
-          let isActive = idx === currentStepIndex;
-          let isCompleted = idx < currentStepIndex;
-          let isFilled = isCompleted || isActive;
-          if (step === 'PAYMENT') {
-            if (status === 'PaymentCompleted' || status === 'WaitingForPickup' || status === 'COMPLETED') {
-              label = 'Payment Completed';
-              isCompleted = true;
-              isFilled = true;
-            } else if (status === 'WaitingForPayment') {
-              label = 'Waiting for Payment';
-              isActive = true;
-              isFilled = true;
-            }
-          }
-          const isLast = idx === steps.length - 1;
-          const labelLines = getLabelLines(label);
-          return (
-            <div className="timeline-item" key={step}>
-              {/* Line before node */}
-              {idx > 0 && (
-                <div className={`timeline-line before ${isFilled ? 'completed' : ''}`}></div>
-              )}
-              {/* Node with number or tick */}
-              <div className={`timeline-circle${isFilled ? ' filled' : ''}${isActive ? ' active' : ''}`}> 
-                <span className={`timeline-number${isFilled ? ' filled' : ''}`}>{isCompleted ? <CheckCircleIcon style={{ fontSize: 16 }} /> : idx + 1}</span>
-              </div>
-              {/* Step label, multiline */}
-              <div className={`timeline-label${isActive ? ' active' : ''}${isCompleted ? ' completed' : ''}`}>{labelLines.map((line, i) => <div key={i}>{line}</div>)}</div>
-              {/* Line after node */}
-              {!isLast && (
-                <div className={`timeline-line after ${isFilled ? 'completed' : ''}`}></div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
+    <Box
+      sx={{
+        width: { xs: 28, sm: 32 },
+        height: { xs: 28, sm: 32 },
+        borderRadius: '50%',
+        bgcolor: completed ? 'success.main' : active ? 'primary.main' : 'grey.200',
+        border: active ? '3px solid' : '2px solid',
+        borderColor: completed ? 'success.main' : active ? 'primary.dark' : 'grey.300',
+        boxShadow: active ? '0 0 0 4px rgba(25,118,210,0.12)' : 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: completed || active ? 'common.white' : 'text.secondary',
+      }}
+    >
+      {completed ? (
+        <CheckCircleOutlineIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />
+      ) : (
+        <Typography sx={{ fontSize: { xs: 13, sm: 14 }, fontWeight: 700 }}>{icon}</Typography>
+      )}
+    </Box>
   );
 }
 
-export default function OngoingBloodBankBookingModal({ open, booking, onClose, onRefresh, onCallBloodBank, onPayNow }) {
+function BookingTimeline({ steps, currentStepIndex }) {
+  return (
+    <Box sx={{ width: '100%', overflowX: 'auto', px: 0.5 }}>
+      <Stepper
+        alternativeLabel
+        activeStep={currentStepIndex}
+        connector={<ColorConnector />}
+        sx={{ minWidth: { xs: 420, sm: 520 } }}
+      >
+        {steps.map((label, idx) => (
+          <Step key={label} completed={idx < currentStepIndex}>
+            <StepLabel StepIconComponent={NumberedStepIcon}>
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, fontWeight: idx === currentStepIndex ? 700 : 500 }}>
+                {label}
+              </Typography>
+            </StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+    </Box>
+  );
+}
+
+// (Old custom Timeline removed; replaced with MUI Stepper BookingTimeline)
+
+export default function OngoingBloodBankBookingModal({ open, booking, onClose, onRefresh, onCallBloodBank }) {
   const [refreshing, setRefreshing] = useState(false);
   const [paymentStatusMsg, setPaymentStatusMsg] = useState(null);
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   // Real-time socket for timeline updates
   const userId = booking?.user?.userId || booking?.userId;
   const { subscribe, unsubscribe } = useSocket(userId);
@@ -118,6 +133,7 @@ export default function OngoingBloodBankBookingModal({ open, booking, onClose, o
   } else {
     currentStepIndex = 0;
   }
+  const steps = RAW_STEPS.map(s => DISPLAY_NAMES[s]);
   const agency = booking.agency;
   const bloodRequest = booking.bloodRequest || {};
   const formattedDate = booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A';
@@ -159,30 +175,30 @@ export default function OngoingBloodBankBookingModal({ open, booking, onClose, o
   };
 
   return (
-    <Modal open={open} onClose={onClose} sx={{ zIndex: 1300 }}>
-      <Box sx={{
-        position: 'fixed',
-        right: { xs: 0, md: 0 },
-        left: { xs: 0, md: 'auto' },
-        bottom: { xs: 0, md: 'auto' },
-        top: { xs: 'auto', md: 0 },
-        width: { xs: '100vw', md: 420 },
-        height: { xs: 'auto', md: '100vh' },
-        maxHeight: { xs: '90vh', md: '100vh' },
-        bgcolor: 'white',
-        borderRadius: { xs: '24px 24px 0 0', md: '24px 0 0 24px' },
-        boxShadow: 3,
-        p: { xs: 2, md: 3 },
-        overflowY: 'auto',
-        zIndex: 1300,
-        outline: 'none',
-        mx: { xs: 0, md: 'auto' },
-        transition: 'all 0.3s',
-      }}>
-        <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
-          <BloodtypeIcon sx={{ fontSize: 32, color: '#e53935' }} />
-          <Typography variant="h6" fontWeight={700} mt={1}>{isCompleted ? 'Blood Request Completed' : 'Ongoing Blood Request'}</Typography>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      anchor={isMdUp ? 'right' : 'bottom'}
+      ModalProps={{ keepMounted: true }}
+      PaperProps={{
+        sx: {
+          width: isMdUp ? 420 : '100%',
+          borderRadius: isMdUp ? '24px 0 0 24px' : '24px 24px 0 0',
+          maxHeight: isMdUp ? '100vh' : '90vh',
+        }
+      }}
+    >
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <BloodtypeIcon sx={{ fontSize: 28, color: 'error.main' }} />
+            <Typography variant="h6" fontWeight={700}>{isCompleted ? 'Blood Request Completed' : 'Ongoing Blood Request'}</Typography>
+          </Box>
+          <IconButton onClick={onClose}>
+            <CloseIcon />
+          </IconButton>
         </Box>
+        <Divider sx={{ mb: 2 }} />
         <Box display="flex" alignItems="center" mb={2}>
           <PersonIcon sx={{ fontSize: 20, color: '#38A3A5' }} />
           <Typography ml={1} fontWeight={600}>Customer Name: </Typography>
@@ -203,11 +219,11 @@ export default function OngoingBloodBankBookingModal({ open, booking, onClose, o
           <Typography ml={1}>{units}</Typography>
         </Box>
         <Box mb={2}>
-          <Timeline steps={STEPS} currentStepIndex={currentStepIndex} status={status} />
+          <BookingTimeline steps={steps} currentStepIndex={currentStepIndex} />
         </Box>
         {isCompleted && (
           <Box width="100%" p={2} mb={2} borderRadius={2} border={1} borderColor={'green.200'} bgcolor={'green.50'} display="flex" alignItems="center">
-            <CheckCircleIcon sx={{ color: 'green', fontSize: 28, mr: 1 }} />
+            <CheckCircleOutlineIcon sx={{ color: 'green', fontSize: 28, mr: 1 }} />
             <Typography color="green" fontSize={16} fontWeight={600}>
               Blood has been successfully delivered to the patient
             </Typography>
@@ -221,7 +237,7 @@ export default function OngoingBloodBankBookingModal({ open, booking, onClose, o
               <Box flex={1} />
               {isPaymentCompleted && (
                 <Box px={1} py={0.5} bgcolor="#e6f9f0" borderRadius={1} display="flex" alignItems="center">
-                  <CheckCircleIcon sx={{ color: 'green', fontSize: 16, mr: 0.5 }} />
+                  <CheckCircleOutlineIcon sx={{ color: 'green', fontSize: 16, mr: 0.5 }} />
                   <Typography color="green" fontSize={12}>PAID</Typography>
                 </Box>
               )}
@@ -277,6 +293,6 @@ export default function OngoingBloodBankBookingModal({ open, booking, onClose, o
           </Button>
         )}
       </Box>
-    </Modal>
+    </Drawer>
   );
 } 

@@ -41,6 +41,17 @@ export const API_CONFIG = {
       GET_USER_APPOINTMENTS: "/clinic-appointments/user/:userId",
       GET_PROFILE: "/clinic/profile/:vendorId",
       UPDATE_PROFILE: "/clinic/profile/:vendorId",
+      GET_TIMESLOTS: "/clinic-timeslots/vendor/:vendorId/date/:date",
+      GET_ONLINE_PENDING_APPOINTMENTS: "/clinic-appointments/vendor/:vendorId/pending/online",
+      GET_OFFLINE_PENDING_APPOINTMENTS: "/clinic-appointments/vendor/:vendorId/pending/offline",
+      GET_COMPLETED_APPOINTMENTS: "/clinic-appointments/vendor/:vendorId/completed",
+      UPDATE_APPOINTMENT_STATUS: "/clinic-appointments/:appointmentId/status",
+    },
+    CLINIC_TIMESLOTS: {
+      GET_TIMESLOTS: "/clinic-timeslots/vendor/:vendorId",
+      CREATE_TIMESLOT: "/clinic-timeslots",
+      UPDATE_TIMESLOT: "/clinic-timeslots/:timeSlotId",
+      DELETE_TIMESLOT: "/clinic-timeslots/:timeSlotId",
     },
     CLINIC_INVOICE: {
       GET_INVOICE: "/clinic-invoice/invoice/:appointmentId",

@@ -1,23 +1,46 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './BloodBank.css';
 import { getActiveBloodBanks, createBloodBankRequest, getOngoingBloodBankBooking } from '../../../services/User/BloodBank/blood-bank.service';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import OngoingBloodBankBookingModal from './OngoingBloodBankBookingModal';
 import userService from '../../../services/User/Profile/user.service';
+import {
+  Box,
+  Typography,
+  TextField,
+  Chip,
+  IconButton,
+  Button,
+  Divider,
+  Drawer,
+  Snackbar,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Stack,
+} from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+// Removed search controls; keep minimal icons
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import CloseIcon from '@mui/icons-material/Close';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 
 const BLOOD_TYPES = [
   'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
 ];
 
 // Default location for static map
-const defaultLocation = "18.5204, 73.8567"; // Pune coordinates
+const defaultLocation = { lat: 18.5204, lng: 73.8567 }; // Pune coordinates
 
 function BloodBank() {
-  const [locationEnabled, setLocationEnabled] = useState(true);
-  const [showLocationDialog, setShowLocationDialog] = useState(false);
-  const [userLocation, setUserLocation] = useState(null);
-  const [sidePanelOpen, setSidePanelOpen] = useState(true);
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
+
+  // Location defaults to Pune when unavailable
+  const [userLocation, setUserLocation] = useState(defaultLocation);
   const [selectedBloodTypes, setSelectedBloodTypes] = useState([]);
   const [units, setUnits] = useState('');
   const [prescription, setPrescription] = useState(null);
@@ -34,9 +57,9 @@ function BloodBank() {
   });
   const [donorSubmitted, setDonorSubmitted] = useState(false);
   const [bloodBanks, setBloodBanks] = useState([]);
-  const [selectedBloodBank, setSelectedBloodBank] = useState(null);
+  const [requestDrawerOpen, setRequestDrawerOpen] = useState(true);
   const [requestLoading, setRequestLoading] = useState(false);
-  const [requestNotification, setRequestNotification] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [formError, setFormError] = useState('');
   const [ongoingBooking, setOngoingBooking] = useState(null);
   const [ongoingModalOpen, setOngoingModalOpen] = useState(false);
@@ -44,31 +67,22 @@ function BloodBank() {
 
   // Get map center coordinates
   const getMapCenter = () => {
-    if (userLocation) {
-      return `${userLocation.lat},${userLocation.lng}`;
-    }
-    return defaultLocation;
+    const loc = userLocation || defaultLocation;
+    return `${loc.lat},${loc.lng}`;
   };
 
   // Geolocation on mount
   useEffect(() => {
     if (!navigator.geolocation) {
-      setLocationEnabled(false);
-      setShowLocationDialog(true);
+      setUserLocation(defaultLocation);
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        });
-        setLocationEnabled(true);
-        setShowLocationDialog(false);
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       },
       () => {
-        setLocationEnabled(false);
-        setShowLocationDialog(true);
+        setUserLocation(defaultLocation);
       }
     );
   }, []);
@@ -92,16 +106,13 @@ function BloodBank() {
       if (booking) {
         setOngoingBooking(booking);
         setOngoingModalOpen(true);
-        setSidePanelOpen(false);
       } else {
         setOngoingBooking(null);
         setOngoingModalOpen(false);
-        setSidePanelOpen(true);
       }
     } catch (err) {
       setOngoingBooking(null);
       setOngoingModalOpen(false);
-      setSidePanelOpen(true);
     }
   };
 
@@ -112,15 +123,17 @@ function BloodBank() {
   const renderMap = () => {
     const centerCoords = getMapCenter();
     return (
-      <iframe
-        src={`https://maps.google.com/maps?q=${centerCoords}&z=13&output=embed`}
-        width="100%"
-        height="100%"
-        style={{ border: 0 }}
-        allowFullScreen=""
-        loading="lazy"
-        referrerPolicy="no-referrer-when-downgrade"
-      />
+      <Box sx={{ position: 'relative', height: '100%', width: '100%' }}>
+        <iframe
+          src={`https://maps.google.com/maps?q=${centerCoords}&z=13&output=embed`}
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen=""
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+      </Box>
     );
   };
 
@@ -142,7 +155,7 @@ function BloodBank() {
   const handleRequestSubmit = async (e) => {
     e.preventDefault();
     setRequestLoading(true);
-    setRequestNotification(null);
+    setSnackbar({ open: false, message: '', severity: 'success' });
     setFormError('');
     try {
       const userId = getUserId && getUserId();
@@ -174,20 +187,20 @@ function BloodBank() {
         longitude: userLocation.lng,
         radius: 50
       });
-      setRequestNotification({ type: res.success ? 'success' : 'error', message: res.message || (res.success ? 'Request submitted!' : 'Failed to submit request') });
+      setSnackbar({ open: true, severity: res.success ? 'success' : 'error', message: res.message || (res.success ? 'Request submitted!' : 'Failed to submit request') });
       if (res.success) {
         setRequestSubmitted(true);
         setTimeout(() => {
           setRequestSubmitted(false);
-          setSidePanelOpen(false);
           setSelectedBloodTypes([]);
           setUnits('');
           setPrescription(null);
+          setRequestDrawerOpen(false);
         }, 2000);
       }
     } catch (err) {
       setFormError(err.message || 'Failed to submit request');
-      setRequestNotification({ type: 'error', message: err.message || 'Failed to submit request' });
+      setSnackbar({ open: true, severity: 'error', message: err.message || 'Failed to submit request' });
     }
     setRequestLoading(false);
   };
@@ -210,198 +223,138 @@ function BloodBank() {
     }, 2000);
   };
 
-  // Dialog for location
-  if (showLocationDialog) {
-    return (
-      <div className="bloodbank-dialog-overlay">
-        <div className="bloodbank-dialog">
-          <h2>Enable Location</h2>
-          <p>We need your location to show nearby blood banks and donors.</p>
-          <div className="dialog-actions">
-            <button className="primary" onClick={() => window.location.reload()}>Enable Location</button>
-            <button className="secondary" onClick={() => navigate('/')}>Go Back</button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // No location dialog; silently default to Pune when blocked
 
   return (
-    <div className="blood-bank-map-root">
-      {/* Ongoing Blood Bank Booking Modal */}
+    <Box sx={{ position: 'relative', height: '100vh', width: '100%', bgcolor: 'background.default' }}>
+      {/* Ongoing Bookings */}
       <OngoingBloodBankBookingModal
         open={ongoingModalOpen}
         booking={ongoingBooking}
-        onClose={() => { setOngoingModalOpen(false); setSidePanelOpen(true); }}
+        onClose={() => setOngoingModalOpen(false)}
         onRefresh={fetchOngoingBooking}
       />
-      {/* Notification for blood request */}
-      {requestNotification && (
-        <div className={`bloodbank-request-notification ${requestNotification.type}`}
-          style={{ position: 'fixed', top: 24, right: 24, zIndex: 3000, background: requestNotification.type === 'success' ? '#e6f9f0' : '#ffeaea', color: requestNotification.type === 'success' ? '#1a7f5a' : '#b91c1c', padding: '16px 28px', borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', fontWeight: 600 }}>
-          {requestNotification.message}
-          <button style={{ marginLeft: 16, background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: 'inherit' }} onClick={() => setRequestNotification(null)}>&times;</button>
-        </div>
-      )}
-      {/* Google Map */}
-      <div className="bloodbank-map">
-        {renderMap()}
-      </div>
 
-      {/* Blood Bank Info Side Panel (left) */}
-      {selectedBloodBank && (
-        <div className="bloodbank-info-panel animate-in">
-          <div className="side-panel-header">
-            <h3>{selectedBloodBank.agencyName}</h3>
-            <button className="close-panel-btn" onClick={() => setSelectedBloodBank(null)} aria-label="Close panel">&times;</button>
-          </div>
-          <div className="side-panel-section">
-            <div className="side-panel-label">Address</div>
-            <div className="side-panel-value">{selectedBloodBank.completeAddress}</div>
-            {selectedBloodBank.nearbyLandmark && (
-              <div className="side-panel-value" style={{ color: '#555', fontSize: '0.97rem' }}>
-                Landmark: {selectedBloodBank.nearbyLandmark}
-              </div>
-            )}
-            {(selectedBloodBank.city || selectedBloodBank.state || selectedBloodBank.pincode) && (
-              <div className="side-panel-value" style={{ color: '#888', fontSize: '0.97rem' }}>
-                {[selectedBloodBank.city, selectedBloodBank.state, selectedBloodBank.pincode].filter(Boolean).join(', ')}
-              </div>
-            )}
-          </div>
-          <div className="side-panel-divider"></div>
-          <div className="side-panel-section">
-            <div className="side-panel-label">Contact</div>
-            <div className="side-panel-value">{selectedBloodBank.phoneNumber || (selectedBloodBank.Vendor && selectedBloodBank.Vendor.phoneNumber) || 'N/A'}</div>
-            {selectedBloodBank.email && (
-              <div className="side-panel-value" style={{ color: '#888', fontSize: '0.97rem' }}>
-                {selectedBloodBank.email}
-              </div>
-            )}
-            {selectedBloodBank.website && (
-              <div className="side-panel-value" style={{ color: '#888', fontSize: '0.97rem' }}>
-                <a href={selectedBloodBank.website.startsWith('http') ? selectedBloodBank.website : `https://${selectedBloodBank.website}`} target="_blank" rel="noopener noreferrer">{selectedBloodBank.website}</a>
-              </div>
-            )}
-          </div>
-          <div className="side-panel-divider"></div>
-          <div className="side-panel-section">
-            <div className="side-panel-label">Available Blood Types</div>
-            <div className="side-panel-chips">
-              {(() => {
-                const types = [
-                  ...(selectedBloodBank.bloodServicesProvided || []),
-                  ...(selectedBloodBank.plateletServicesProvided || []),
-                  ...(selectedBloodBank.otherServicesProvided || [])
-                ].filter(t => t && t !== 'NA' && t !== 'Yes');
-                return types.length > 0
-                  ? types.map((type, idx) => (
-                      <span className="type-chip" key={idx}>{type}</span>
-                    ))
-                  : <span style={{ color: '#888' }}>N/A</span>;
-              })()}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Snackbar notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar(s => ({ ...s, open: false }))} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
-      {/* Floating Donor Button */}
-      <button className="floating-donor-btn" onClick={() => setDonorPanelOpen(true)}>
-        <span role="img" aria-label="donor">🩸</span> Are you a donor?
-      </button>
+      {/* Map (full-screen on mobile) */}
+      <Box sx={{ position: 'absolute', inset: 0 }}>{renderMap()}</Box>
 
-      {/* Side Panel for Blood Request */}
-      <div className={`bloodbank-sidepanel ${sidePanelOpen ? 'open' : ''}`}>
-        <div className="bottomsheet-handle" />
-        <div className="sidepanel-header">
-          <h2>Request Blood</h2>
-          <button className="close-btn" style={{ color: '#38A3A5' }} onClick={() => setSidePanelOpen(false)}>&times;</button>
-        </div>
-        <div className="sidepanel-content">
-          <form className="sidepanel-form" onSubmit={handleRequestSubmit}>
-            <label htmlFor="units">Units Required</label>
-            <input
-              id="units"
-              type="number"
-              min="1"
-              value={units}
-              onChange={e => setUnits(e.target.value)}
-              required
-              placeholder="Enter units"
-            />
-            <label htmlFor="bloodType">Select Blood Type(s)</label>
-            <div className="bloodtype-list">
-              {BLOOD_TYPES.map(type => (
-                <button
-                  type="button"
-                  key={type}
-                  className={`bloodtype-btn${selectedBloodTypes.includes(type) ? ' selected' : ''}`}
-                  onClick={() => handleBloodTypeToggle(type)}
-                >
-                  {type}
-                </button>
-              ))}
-            </div>
-            {selectedBloodTypes.length > 0 && (
-              <>
-                <label htmlFor="prescription">Upload Prescription</label>
-                <input
-                  type="file"
-                  id="prescription"
-                  accept="image/*,application/pdf"
-                  onChange={handlePrescriptionChange}
-                  required
-                />
-                <button type="submit" className="submit-btn" disabled={requestSubmitted || requestLoading}>
-                  {requestLoading ? 'Submitting...' : (requestSubmitted ? 'Submitted!' : 'Submit Request')}
-                </button>
-              </>
-            )}
-            {formError && <div style={{ color: '#b91c1c', marginTop: 8, fontWeight: 500 }}>{formError}</div>}
-          </form>
-        </div>
-        <button
-          className="submit-btn inpanel-donor-btn"
-          type="button"
-          onClick={() => setDonorPanelOpen(true)}
+      {/* Top-left actions */}
+      <Box sx={{ position: 'absolute', top: 16, left: 16, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          startIcon={<AddLocationAltIcon />}
+          size="small"
+          onClick={() => setRequestDrawerOpen(true)}
+          sx={{ bgcolor: 'primary.main', color: 'white', '&:hover': { bgcolor: 'primary.dark' } }}
         >
-          <span role="img" aria-label="donor">🩸</span> Are you a donor?
-        </button>
-      </div>
+          Request Blood
+        </Button>
+        <Button
+          variant="contained"
+          startIcon={<BloodtypeIcon />}
+          size="small"
+          onClick={() => setDonorPanelOpen(true)}
+          sx={{ bgcolor: 'secondary.main', color: 'white', '&:hover': { bgcolor: 'secondary.dark' } }}
+        >
+          Are you a donor?
+        </Button>
+      </Box>
 
-      {/* Donor Registration Side Panel */}
-      <div className={`donor-sidepanel ${donorPanelOpen ? 'open' : ''}`}>
-        <div className="bottomsheet-handle" />
-        <div className="sidepanel-header">
-          <h2>Register as Donor</h2>
-          <button className="close-btn" style={{ color: '#38A3A5' }} onClick={() => setDonorPanelOpen(false)}>&times;</button>
-        </div>
-        <form className="sidepanel-form" onSubmit={handleDonorSubmit}>
-          <label>Full Name</label>
-          <input name="fullName" value={donorForm.fullName} onChange={handleDonorChange} required />
-          <label>Phone Number</label>
-          <input name="phone" value={donorForm.phone} onChange={handleDonorChange} required />
-          <label>City</label>
-          <input name="city" value={donorForm.city} onChange={handleDonorChange} required />
-          <label>State</label>
-          <input name="state" value={donorForm.state} onChange={handleDonorChange} required />
-          <label>Country</label>
-          <input name="country" value={donorForm.country} onChange={handleDonorChange} required />
-          <label>Blood Type</label>
-          <select name="bloodType" value={donorForm.bloodType} onChange={handleDonorChange} required>
-            <option value="">Select</option>
-            {BLOOD_TYPES.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <label>Date</label>
-          <input type="date" name="date" value={donorForm.date} onChange={handleDonorChange} required />
-          <button type="submit" className="submit-btn" disabled={donorSubmitted}>
+      {/* Floating Actions removed; actions moved to top-left */}
+
+      {/* Request Blood Drawer (right) */}
+      <Drawer anchor={isMdUp ? 'right' : 'bottom'} open={requestDrawerOpen} onClose={() => setRequestDrawerOpen(false)} PaperProps={{ sx: { width: isMdUp ? 400 : '100%', p: 2 } }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Typography variant="h6">Request Blood</Typography>
+          <IconButton onClick={() => setRequestDrawerOpen(false)}><CloseIcon /></IconButton>
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+        <Box component="form" onSubmit={handleRequestSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            label="Units Required"
+            type="number"
+            inputProps={{ min: 1 }}
+            value={units}
+            onChange={(e) => setUnits(e.target.value)}
+            required
+          />
+          <Box>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>Select Blood Type(s)</Typography>
+            <Stack direction="row" flexWrap="wrap" useFlexGap gap={1}>
+              {BLOOD_TYPES.map(type => (
+                <Chip
+                  key={type}
+                  label={type}
+                  color={selectedBloodTypes.includes(type) ? 'primary' : 'default'}
+                  onClick={() => handleBloodTypeToggle(type)}
+                />
+              ))}
+            </Stack>
+          </Box>
+          {selectedBloodTypes.length > 0 && (
+            <>
+              <Button variant="outlined" component="label">
+                Upload Prescription
+                <input type="file" accept="image/*,application/pdf" hidden onChange={handlePrescriptionChange} />
+              </Button>
+              <Button type="submit" variant="contained" disabled={requestSubmitted || requestLoading}>
+                {requestLoading ? 'Submitting...' : (requestSubmitted ? 'Submitted!' : 'Submit Request')}
+              </Button>
+            </>
+          )}
+          {formError && <Alert severity="error">{formError}</Alert>}
+        </Box>
+      </Drawer>
+
+      {/* Donor Registration Bottom Sheet (mobile) / Drawer (desktop) */}
+      <Drawer
+        anchor={isMdUp ? 'right' : 'bottom'}
+        open={donorPanelOpen}
+        onClose={() => setDonorPanelOpen(false)}
+        PaperProps={{ sx: { width: isMdUp ? 420 : '100%', p: 2 } }}
+      >
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Typography variant="h6">Register as Donor</Typography>
+          <IconButton onClick={() => setDonorPanelOpen(false)}><CloseIcon /></IconButton>
+        </Stack>
+        <Divider sx={{ mb: 2 }} />
+        <Box component="form" onSubmit={handleDonorSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField label="Full Name" name="fullName" value={donorForm.fullName} onChange={handleDonorChange} required />
+          <TextField label="Phone Number" name="phone" value={donorForm.phone} onChange={handleDonorChange} required />
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <TextField fullWidth label="City" name="city" value={donorForm.city} onChange={handleDonorChange} required />
+            <TextField fullWidth label="State" name="state" value={donorForm.state} onChange={handleDonorChange} required />
+          </Stack>
+          <TextField label="Country" name="country" value={donorForm.country} onChange={handleDonorChange} required />
+          <FormControl fullWidth>
+            <InputLabel id="blood-type-label">Blood Type</InputLabel>
+            <Select labelId="blood-type-label" label="Blood Type" name="bloodType" value={donorForm.bloodType} onChange={handleDonorChange} required>
+              {BLOOD_TYPES.map(type => (
+                <MenuItem key={type} value={type}>{type}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField label="Date" type="date" name="date" value={donorForm.date} onChange={handleDonorChange} required InputLabelProps={{ shrink: true }} />
+          <Button type="submit" variant="contained" disabled={donorSubmitted}>
             {donorSubmitted ? 'Registering...' : 'Register as Donor'}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Drawer>
+
+      {/* Location defaults to Pune if not granted */}
+    </Box>
   );
 }
 

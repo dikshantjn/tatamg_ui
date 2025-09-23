@@ -22,6 +22,7 @@ import HospitalVendorSettings from './components/Vendors/HospitalVendor/Hospital
 import DoctorConsultationVendorDashboard from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorDashboard';
 import DoctorConsultationVendorLayout from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorLayout';
 import DoctorConsultationVendorAppointments from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorAppointments';
+import DoctorConsultationVendorTimeslots from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorTimeslots';
 import DoctorConsultationVendorHistory from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorHistory';
 import DoctorConsultationVendorProfile from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorProfile';
 import DoctorConsultationVendorEditProfile from './components/Vendors/DoctorConsultationVendor/DoctorConsultationVendorEditProfile';
@@ -182,6 +183,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
           <Route path="/doctor-consultation/offline" element={<OfflineDoctorConsultation />} />
           <Route path="/doctor-consultation/online" element={<OnlineDoctorConsultation />} />
           <Route path="/doctor-consultation/offline/book/:vendorId" element={<BookOfflineAppointment />} />
+          <Route path="/doctor-consultation/online/book/:vendorId" element={<BookOfflineAppointment />} />
           <Route path="/ambulance" element={<Ambulance />} />
           <Route path="/membership" element={<Membership />} />
           <Route path="/lab-tests" element={<LabTests />} />
@@ -248,6 +250,13 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
             <VendorThemeProvider>
               <DoctorConsultationVendorLayout title="Appointments">
                 <DoctorConsultationVendorAppointments />
+              </DoctorConsultationVendorLayout>
+            </VendorThemeProvider>
+          } />
+          <Route path="/vendor/doctor-consultation/timeslots" element={
+            <VendorThemeProvider>
+              <DoctorConsultationVendorLayout title="Time Slots">
+                <DoctorConsultationVendorTimeslots />
               </DoctorConsultationVendorLayout>
             </VendorThemeProvider>
           } />
