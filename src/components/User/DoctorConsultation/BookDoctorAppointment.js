@@ -4,12 +4,34 @@ import './BookDoctorAppointment.css';
 import doctorAppointmentPaymentService from '../../../services/payment/doctor-appointment-payment.service';
 import { doctorConsultationService } from '../../../services/User/DoctorConsultation/doctor-consultation.service';
 import { getUserData, getUserId } from '../../../services/User/Auth/auth.utils';
+import { getHealthRecordsForAppointment } from '../../../services/User/HealthRecords/health-records.service';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Checkbox from '@mui/material/Checkbox';
+import Divider from '@mui/material/Divider';
+import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ShareIcon from '@mui/icons-material/Share';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 const BookDoctorAppointment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { vendorId } = useParams();
   const { doctorData } = location.state || {};
+  const theme = useTheme();
+  const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
   const [expandedFaq, setExpandedFaq] = useState(null);
@@ -23,6 +45,11 @@ const BookDoctorAppointment = () => {
     message: '',
     details: {}
   });
+  const [showHealthRecordsModal, setShowHealthRecordsModal] = useState(false);
+  const [healthRecords, setHealthRecords] = useState([]);
+  const [selectedHealthRecords, setSelectedHealthRecords] = useState([]);
+  const [loadingHealthRecords, setLoadingHealthRecords] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Sample blog posts and FAQs
   const blogPosts = [
@@ -67,6 +94,21 @@ const BookDoctorAppointment = () => {
       setTimeslotsData(null);
     } finally {
       setLoadingTimeslots(false);
+    }
+  };
+
+  const fetchHealthRecords = async () => {
+    if (!currentUser?.uid) return;
+    
+    try {
+      setLoadingHealthRecords(true);
+      const data = await getHealthRecordsForAppointment(currentUser.uid);
+      setHealthRecords(data);
+    } catch (error) {
+      console.error('Error fetching health records:', error);
+      setHealthRecords([]);
+    } finally {
+      setLoadingHealthRecords(false);
     }
   };
 
@@ -127,6 +169,35 @@ const BookDoctorAppointment = () => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
+  const handleShareHealthRecords = () => {
+    setShowHealthRecordsModal(true);
+    fetchHealthRecords();
+  };
+
+  const handleHealthRecordToggle = (recordId) => {
+    setSelectedHealthRecords(prev => 
+      prev.includes(recordId) 
+        ? prev.filter(id => id !== recordId)
+        : [...prev, recordId]
+    );
+  };
+
+  const handleCloseHealthRecordsModal = () => {
+    setShowHealthRecordsModal(false);
+    setSelectedHealthRecords([]);
+    setSearchQuery('');
+  };
+
+  const handleConfirmHealthRecords = () => {
+    setShowHealthRecordsModal(false);
+  };
+
+  // Filter health records based on search query
+  const filteredHealthRecords = healthRecords.filter(record =>
+    record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    record.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleCallDoctor = () => {
     // Check if doctor has a phone number
     if (doctorData.phoneNumber) {
@@ -161,7 +232,8 @@ const BookDoctorAppointment = () => {
       selectedTimeSlot: formattedTime,
       consultationFee: parseInt(doctorData.consultationFee),
       isOnline: location.pathname.includes('/doctor-consultation/online'),
-      reason: "General consultation"
+      reason: "General consultation",
+      healthRecordIds: selectedHealthRecords
     };
 
     console.log('Preparing appointment data:', appointmentData);
@@ -366,6 +438,19 @@ const BookDoctorAppointment = () => {
             <span>₹{doctorData.consultationFee}</span>
           </div>
 
+          {/* Share Health Records Button */}
+          <button 
+            className="share-health-records-btn"
+            onClick={handleShareHealthRecords}
+            disabled={isProcessing}
+          >
+            <i className="fas fa-share-alt"></i>
+            Share Health Records
+            {selectedHealthRecords.length > 0 && (
+              <span className="selected-count">({selectedHealthRecords.length} selected)</span>
+            )}
+          </button>
+
           {/* Confirm Button */}
           <button 
             className={`confirm-btn ${selectedDate && selectedTimeSlot && !isProcessing ? 'active' : 'disabled'}`}
@@ -437,6 +522,190 @@ const BookDoctorAppointment = () => {
         </div>
       </div>
       
+      {/* Health Records Modal/Bottomsheet */}
+      <Drawer
+        open={showHealthRecordsModal}
+        onClose={handleCloseHealthRecordsModal}
+        anchor={isMdUp ? 'right' : 'bottom'}
+        ModalProps={{
+          keepMounted: true,
+          BackdropProps: { invisible: true, sx: { backgroundColor: 'transparent' } }
+        }}
+        PaperProps={{
+          sx: {
+            top: isMdUp ? 64 : 'auto',
+            height: isMdUp ? `calc(100vh - 64px)` : 'auto',
+            maxHeight: isMdUp ? `calc(100vh - 64px)` : `calc(100vh - 100px)`,
+            width: isMdUp ? 400 : '100%',
+            borderRadius: isMdUp ? '24px 0 0 24px' : '24px 24px 0 0',
+            zIndex: 1300 // Higher than bottom navigation
+          }
+        }}
+      >
+        <Box sx={{ p: { xs: 2, md: 3 }, height: '100%', overflowY: 'auto' }}>
+          {/* Compact Header */}
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" fontWeight={700}>
+              Share Health Records
+            </Typography>
+            <IconButton onClick={handleCloseHealthRecordsModal} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Search Box */}
+          {healthRecords.length > 0 && (
+            <Box mb={2}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Search health records..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchQuery && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearchQuery('')}>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                sx={{ mb: 2 }}
+              />
+            </Box>
+          )}
+
+          {/* Content */}
+          {loadingHealthRecords ? (
+            <Box textAlign="center" py={4}>
+              <Typography variant="body2" color="text.secondary">
+                Loading health records...
+              </Typography>
+            </Box>
+          ) : healthRecords.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <DescriptionIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                No Health Records Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={3}>
+                Upload your medical documents to share them with doctors.
+              </Typography>
+              <Button 
+                variant="contained" 
+                onClick={() => navigate('/health-records')}
+                startIcon={<DescriptionIcon />}
+              >
+                Upload Health Records
+              </Button>
+            </Box>
+          ) : filteredHealthRecords.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <SearchIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                No Records Found
+              </Typography>
+              <Typography variant="body2" color="text.secondary" mb={2}>
+                No health records match your search criteria.
+              </Typography>
+              <Button variant="outlined" onClick={() => setSearchQuery('')}>
+                Clear Search
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              {/* Selection Summary */}
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="body2" color="text.secondary">
+                  {selectedHealthRecords.length} of {filteredHealthRecords.length} selected
+                </Typography>
+                {selectedHealthRecords.length > 0 && (
+                  <Button 
+                    size="small" 
+                    onClick={() => setSelectedHealthRecords([])}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </Box>
+
+              {/* Records List */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {filteredHealthRecords.map((record) => (
+                  <Card 
+                    key={record.healthRecordId}
+                    sx={{ 
+                      cursor: 'pointer',
+                      border: selectedHealthRecords.includes(record.healthRecordId) ? 2 : 1,
+                      borderColor: selectedHealthRecords.includes(record.healthRecordId) ? 'primary.main' : 'divider',
+                      bgcolor: selectedHealthRecords.includes(record.healthRecordId) ? 'primary.50' : 'background.paper',
+                      '&:hover': {
+                        borderColor: 'primary.main',
+                        bgcolor: 'primary.50'
+                      }
+                    }}
+                    onClick={() => handleHealthRecordToggle(record.healthRecordId)}
+                  >
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                      <Box display="flex" alignItems="center" gap={2}>
+                        <Checkbox
+                          checked={selectedHealthRecords.includes(record.healthRecordId)}
+                          size="small"
+                        />
+                        <Box flex={1}>
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            {record.name}
+                          </Typography>
+                          <Chip 
+                            label={record.type.replace('_', ' ').toUpperCase()} 
+                            size="small" 
+                            color="primary" 
+                            variant="outlined"
+                            sx={{ mt: 0.5, fontSize: '0.7rem' }}
+                          />
+                        </Box>
+                        <DescriptionIcon color="primary" />
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Box>
+          )}
+        </Box>
+
+        {/* Compact Footer */}
+        {healthRecords.length > 0 && (
+          <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Box display="flex" gap={1}>
+              <Button 
+                variant="outlined" 
+                onClick={handleCloseHealthRecordsModal}
+                sx={{ flex: 1 }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="contained"
+                onClick={handleConfirmHealthRecords}
+                disabled={selectedHealthRecords.length === 0}
+                startIcon={<ShareIcon />}
+                sx={{ flex: 1 }}
+              >
+                Share {selectedHealthRecords.length} Record{selectedHealthRecords.length !== 1 ? 's' : ''}
+              </Button>
+            </Box>
+          </Box>
+        )}
+      </Drawer>
+
       {/* Add Dialog */}
       {showDialog && (
         <div className="appointment-dialog-overlay">

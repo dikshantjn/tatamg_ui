@@ -452,6 +452,15 @@ class OrderHistoryService {
             meetingUrl: appointment.meetingUrl,
             reminderTime: appointment.reminderTime,
             reminderSent: appointment.reminderSent,
+            notes: appointment.notes || '',
+            attachments: appointment.attachments || [],
+            healthRecordIds: appointment.healthRecordIds || [],
+            rescheduledAt: appointment.rescheduledAt,
+            rescheduledBy: appointment.rescheduledBy,
+            cancelReason: appointment.cancelReason,
+            cancelBy: appointment.cancelBy,
+            doctorAttendanceStatus: appointment.doctorAttendanceStatus,
+            userAttendanceStatus: appointment.userAttendanceStatus,
             createdAt: appointment.createdAt,
             updatedAt: appointment.updatedAt,
             user: {
@@ -462,7 +471,8 @@ class OrderHistoryService {
             doctor: {
                 name: appointment.doctor?.doctorName || '',
                 specializations: appointment.doctor?.specializations || [],
-                id: appointment.doctorId
+                id: appointment.doctorId,
+                vendorId: appointment.doctor?.vendorId
             }
         };
     }

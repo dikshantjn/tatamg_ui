@@ -864,4 +864,61 @@
 
 .dialog-content.error .primary-btn:hover {
   background: #d32f2f;
-} 
+}
+
+/* Share Health Records Button */
+.share-health-records-btn {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #38A3A5;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #FFFFFF;
+  color: #38A3A5;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.share-health-records-btn:hover {
+  background: #38A3A5;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56, 163, 165, 0.2);
+}
+
+.share-health-records-btn:disabled {
+  background: #E2E8F0;
+  color: #64748B;
+  border-color: #E2E8F0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.share-health-records-btn i {
+  font-size: 1rem;
+}
+
+.selected-count {
+  background: #38A3A5;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.share-health-records-btn:hover .selected-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Health Records Modal - Now using MUI Drawer */ 

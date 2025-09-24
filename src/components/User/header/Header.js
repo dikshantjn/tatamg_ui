@@ -459,8 +459,33 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [mobilePlaceholderIndex, setMobilePlaceholderIndex] = useState(0);
   const topBarRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
+
+  // Mobile search placeholders
+  const mobilePlaceholders = [
+    'Search for doctors...',
+    'Search for hospitals...',
+    'Search for blood banks...',
+    'Search for pharmacies...',
+    'Search for ambulance...',
+    'Search for lab tests...',
+    'Search for medicine delivery...',
+    'Search for bed booking...',
+    'Search for consultations...',
+    'Search for physiotherapy...',
+    'Search for care at home...',
+    'Search for medical tourism...'
+  ];
+
+  // Rotate mobile placeholder text
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMobilePlaceholderIndex((prev) => (prev + 1) % mobilePlaceholders.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [mobilePlaceholders.length]);
 
   // Fetch cart items when user is authenticated
   useEffect(() => {
@@ -479,14 +504,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
 
       if (isMobile) {
         if (currentScrollY < 10) {
+          // At the top - show header
           setIsHeaderVisible(true);
-        } else if (scrollDifference > 0 && currentScrollY > 100) {
-          // Scrolling down beyond threshold – hide top bar
+        } else if (scrollDifference > 0 && currentScrollY > 10) {
+          // Scrolling down - hide top bar
           setIsHeaderVisible(false);
-        } else if (scrollDifference < 0) {
-          // Scrolling up – show top bar
-          setIsHeaderVisible(true);
         }
+        // Don't show header when scrolling up - only show at top
       } else {
         // Desktop keeps header visible
         setIsHeaderVisible(true);
@@ -1066,27 +1090,29 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
           </Box>
         </Toolbar>
 
-        {/* Mobile Search Bar - Inside same container */}
-        {isMobile && (
-          <Box sx={{ 
-            px: 2, 
-            pb: 1,
-            display: { xs: 'block', md: 'none' },
-            bgcolor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'white',
-            borderTop: '1px solid #E2E8F0',
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 1,
-            transition: 'all 0.25s ease',
-            borderRadius: 0
-          }}>
+         {/* Mobile Search Bar - Inside same container */}
+         {isMobile && (
+           <Box sx={{ 
+             px: 2, 
+             pb: 1,
+             pt: 1,
+             display: { xs: 'block', md: 'none' },
+             bgcolor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'white',
+             borderTop: '1px solid #E2E8F0',
+             position: 'absolute',
+             left: 0,
+             right: 0,
+             bottom: 0,
+             zIndex: 1,
+             transition: 'all 0.25s ease',
+             borderTopLeftRadius: 12,
+             borderTopRightRadius: 12
+           }}>
             <TextField
               ref={mobileSearchInputRef}
               fullWidth
               size="small"
-              placeholder="Search for doctors, hospitals, services..."
+               placeholder={mobilePlaceholders[mobilePlaceholderIndex]}
               value={mobileSearchQuery}
               onChange={handleMobileSearchChange}
               onFocus={handleMobileSearchFocus}
@@ -1094,7 +1120,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon sx={{ color: '#64748B' }} />
+                     <SearchIcon sx={{ color: colors.primary }} />
                   </InputAdornment>
                 ),
                 endAdornment: (
@@ -1105,18 +1131,29 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                   </InputAdornment>
                 )
               }}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  bgcolor: isScrolled ? 'rgba(248, 250, 252, 0.8)' : '#F8FAFC',
-                  borderRadius: 2,
-                  border: `1px solid ${colors.primary}`,
-                  py: 0.5,
-                  '&:focus-within': {
-                    bgcolor: 'white',
-                    transform: 'scale(1.01)'
-                  }
-                }
-              }}
+               sx={{
+                 '& .MuiOutlinedInput-root': {
+                   bgcolor: isScrolled ? 'rgba(248, 250, 252, 0.8)' : '#F8FAFC',
+                   borderRadius: '20px !important',
+                   borderTopLeftRadius: '20px !important',
+                   borderTopRightRadius: '20px !important',
+                   borderBottomLeftRadius: '20px !important',
+                   borderBottomRightRadius: '20px !important',
+                   border: `1px solid ${colors.primary}`,
+                   py: 0.5,
+                   '&:focus-within': {
+                     bgcolor: 'white',
+                     transform: 'scale(1.01)'
+                   },
+                   '& .MuiOutlinedInput-notchedOutline': {
+                     borderRadius: '20px !important',
+                     borderTopLeftRadius: '20px !important',
+                     borderTopRightRadius: '20px !important',
+                     borderBottomLeftRadius: '20px !important',
+                     borderBottomRightRadius: '20px !important',
+                   }
+                 }
+               }}
             />
 
             {/* Mobile Search Suggestions Menu */}
@@ -1630,6 +1667,142 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Separate Sticky Search Bar for Mobile - Only when header is hidden */}
+      {isMobile && !isHeaderVisible && (
+        <Box sx={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: (theme) => theme.zIndex.appBar + 1,
+          bgcolor: 'white',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+          px: 2,
+          py: 1,
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+        }}>
+          <TextField
+            ref={mobileSearchInputRef}
+            fullWidth
+            size="small"
+               placeholder={mobilePlaceholders[mobilePlaceholderIndex]}
+            value={mobileSearchQuery}
+            onChange={handleMobileSearchChange}
+            onFocus={handleMobileSearchFocus}
+            onClick={handleMobileSearchInputClick}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                     <SearchIcon sx={{ color: colors.primary }} />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={handleSpeakClick}>
+                    <MicIcon sx={{ color: colors.primary }} />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+             sx={{
+               '& .MuiOutlinedInput-root': {
+                 bgcolor: '#F8FAFC',
+                 borderRadius: '20px !important',
+                 borderTopLeftRadius: '20px !important',
+                 borderTopRightRadius: '20px !important',
+                 borderBottomLeftRadius: '20px !important',
+                 borderBottomRightRadius: '20px !important',
+                 border: `1px solid ${colors.primary}`,
+                 py: 0.5,
+                 '&:focus-within': {
+                   bgcolor: 'white',
+                   transform: 'scale(1.01)'
+                 },
+                 '& .MuiOutlinedInput-notchedOutline': {
+                   borderRadius: '20px !important',
+                   borderTopLeftRadius: '20px !important',
+                   borderTopRightRadius: '20px !important',
+                   borderBottomLeftRadius: '20px !important',
+                   borderBottomRightRadius: '20px !important',
+                 }
+               }
+             }}
+          />
+
+          {/* Mobile Search Suggestions Menu for Sticky Search */}
+          <Menu
+            anchorEl={mobileSearchAnchorEl}
+            open={Boolean(mobileSearchAnchorEl)}
+            onClose={handleMobileSearchClose}
+            disableAutoFocus
+            disableEnforceFocus
+            disableRestoreFocus
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'left',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+            PaperProps={{
+              sx: {
+                width: '90vw',
+                maxWidth: 400,
+                maxHeight: 400,
+                mt: 1,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                border: '1px solid #E2E8F0',
+                borderRadius: 2
+              }
+            }}
+          >
+            <Box sx={{ p: 2, pb: 1 }}>
+              <Typography variant="subtitle2" sx={{ color: '#64748B', mb: 1, fontSize: '0.8rem' }}>
+                Search Suggestions
+              </Typography>
+            </Box>
+            <Divider />
+            {filteredMobileSuggestions.length > 0 ? (
+              filteredMobileSuggestions.slice(0, 8).map((suggestion, index) => (
+                <MenuItem 
+                  key={index}
+                  onClick={() => handleMobileSearchSelect(suggestion)}
+                  sx={{ 
+                    mx: 1, 
+                    borderRadius: 1,
+                    py: 1.5,
+                    '&:hover': {
+                      bgcolor: 'rgba(56, 163, 165, 0.05)'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
+                    <Box sx={{ fontSize: '1.2rem' }}>
+                      {suggestion.icon}
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2" fontWeight={500} sx={{ color: '#1A365D' }}>
+                        {suggestion.text}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.75rem' }}>
+                        {suggestion.category}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </MenuItem>
+              ))
+            ) : (
+              <Box sx={{ p: 2, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  No suggestions found
+                </Typography>
+              </Box>
+            )}
+          </Menu>
+        </Box>
+      )}
     </Box>
   );
 };

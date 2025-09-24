@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import findDoctorImg from '../../../assets/Find Doctors Near You.png';
+import findDoctorImg from '../../../assets/female doctor.jpg';
 import consultImg from '../../../assets/consult.jpg';
 import {
   Box,
@@ -74,114 +74,554 @@ function ConsultDoctors() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 2, md: 4 } }}>
-      <Grid container spacing={3} justifyContent="center">
-        <Grid item xs={12} md={5}>
-          <Box
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              cursor: 'pointer',
-              borderRadius: 3,
-              border: '1px solid',
-              borderColor: 'divider',
-              background: 'linear-gradient(180deg, #ffffff 0%, #F6FBFC 100%)',
-              '&:hover': { boxShadow: 3 }
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 3, md: 4 } }}>
+      {/* Main Consultation Options */}
+      <Box sx={{ mb: { xs: 4, md: 6 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 6 } }}>
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              fontWeight: 800, 
+              fontSize: { xs: '2rem', md: '2.75rem' },
+              color: 'text.primary',
+              mb: 2,
+              letterSpacing: '-0.02em'
             }}
-            onClick={() => navigate('/doctor-consultation/offline')}
           >
-            <Box sx={{ position: 'relative' }}>
-              <img src={findDoctorImg} alt="Find Doctor Near You" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} />
-              <Chip label="2,847 Doctors" size="small" sx={{ position: 'absolute', bottom: -8, left: 0 }} />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" fontWeight={700}>Find Doctor Near You</Typography>
-              <Typography variant="body2" color="text.secondary">Book appointments with top doctors in your area</Typography>
-              <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                <Chip icon={<LocationOnIcon />} label="Nearby" size="small" />
-                <Chip icon={<StarIcon />} label="Top Rated" size="small" />
-                <Chip icon={<AccessTimeIcon />} label="Same Day" size="small" />
+            Choose Your Consultation
+          </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'text.secondary',
+              fontWeight: 400,
+              fontSize: { xs: '1rem', md: '1.125rem' },
+              maxWidth: 600,
+              mx: 'auto',
+              lineHeight: 1.6
+            }}
+          >
+            Connect with healthcare professionals through our seamless consultation platform
+          </Typography>
+        </Box>
+        
+        <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="center">
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                p: { xs: 3, md: 4 },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 3, sm: 3 },
+                alignItems: 'center',
+                cursor: 'pointer',
+                borderRadius: 4,
+                border: '2px solid',
+                borderColor: '#8B5CF6',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.04) 100%)',
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  borderColor: '#7C3AED',
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.06) 100%)',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+              onClick={() => navigate('/doctor-consultation/offline')}
+            >
+              <Box sx={{ 
+                width: { xs: 80, sm: 96 }, 
+                height: { xs: 80, sm: 96 },
+                borderRadius: 3,
+                overflow: 'hidden',
+                flexShrink: 0
+              }}>
+                <img 
+                  src={findDoctorImg} 
+                  alt="Find Doctor Near You" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover' 
+                  }} 
+                />
               </Box>
-              <Button
-                sx={{ mt: 1, borderColor: 'grey.400', color: 'text.primary', '&:hover': { backgroundColor: 'action.hover', borderColor: 'grey.500' } }}
-                size="small"
-                variant="outlined"
-              >
-                Find Now
-              </Button>
+              <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    mb: 1,
+                    fontSize: { xs: '1.25rem', md: '1.5rem' },
+                    color: '#8B5CF6'
+                  }}
+                >
+                  Find Doctor Near You
+                </Typography>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    color: 'text.secondary', 
+                    mb: 2,
+                    fontSize: { xs: '0.9rem', md: '1rem' }
+                  }}
+                >
+                  Book appointments with top doctors in your area
+                </Typography>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 1.5, 
+                  mb: 2, 
+                  flexWrap: 'wrap',
+                  justifyContent: { xs: 'center', sm: 'flex-start' }
+                }}>
+                  <Chip 
+                    icon={<LocationOnIcon sx={{ fontSize: '1rem' }} />} 
+                    label="Nearby" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                      color: '#8B5CF6',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(139, 92, 246, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+                  <Chip 
+                    icon={<StarIcon sx={{ fontSize: '1rem' }} />} 
+                    label="Top Rated" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                      color: '#8B5CF6',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(139, 92, 246, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+                  <Chip 
+                    icon={<AccessTimeIcon sx={{ fontSize: '1rem' }} />} 
+                    label="Same Day" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                      color: '#8B5CF6',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(139, 92, 246, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+              </Box>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    borderRadius: 3,
+                    px: 3,
+                    py: 1,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    fontSize: '0.9rem',
+                    borderColor: '#8B5CF6',
+                    color: '#8B5CF6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(139, 92, 246, 0.15)',
+                      borderColor: '#7C3AED',
+                      color: '#7C3AED',
+                      transform: 'translateY(-1px)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Find Now
+                </Button>
             </Box>
           </Box>
         </Grid>
-        <Grid item xs={12} md={5}>
-          <Box
-            sx={{
-              p: 2.5,
-              display: 'flex',
-              gap: 2,
-              alignItems: 'center',
-              cursor: 'pointer',
-              borderRadius: 3,
-              border: '1px solid',
-              borderColor: 'divider',
-              background: 'linear-gradient(180deg, #ffffff 0%, #F6FBFC 100%)',
-              '&:hover': { boxShadow: 3 }
-            }}
-            onClick={() => navigate('/doctor-consultation/online')}
-          >
-            <Box sx={{ position: 'relative' }}>
-              <img src={consultImg} alt="Online Doctor Consultation" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8 }} />
-              <Chip label="1,234 Online" size="small" sx={{ position: 'absolute', bottom: -8, left: 0 }} />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Typography variant="h6" fontWeight={700}>Online Doctor Consultation</Typography>
-              <Typography variant="body2" color="text.secondary">Instant video or chat with certified doctors</Typography>
-              <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-                <Chip icon={<VideocamIcon />} label="HD Video" size="small" />
-                <Chip icon={<FlashOnIcon />} label="Instant" size="small" />
-                <Chip icon={<ShieldIcon />} label="Secure" size="small" />
+          
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                p: { xs: 3, md: 4 },
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 3, sm: 3 },
+                alignItems: 'center',
+                cursor: 'pointer',
+                borderRadius: 4,
+                border: '2px solid',
+                borderColor: '#10B981',
+                background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%)',
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  borderColor: '#059669',
+                  background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.06) 100%)',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+              onClick={() => navigate('/doctor-consultation/online')}
+            >
+              <Box sx={{ 
+                width: { xs: 80, sm: 96 }, 
+                height: { xs: 80, sm: 96 },
+                borderRadius: 3,
+                overflow: 'hidden',
+                flexShrink: 0
+              }}>
+                <img 
+                  src={consultImg} 
+                  alt="Online Doctor Consultation" 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover' 
+                  }} 
+                />
               </Box>
-              <Button
-                sx={{ mt: 1, borderColor: 'grey.400', color: 'text.primary', '&:hover': { backgroundColor: 'action.hover', borderColor: 'grey.500' } }}
-                size="small"
-                variant="outlined"
-              >
-                Consult Now
-              </Button>
+              <Box sx={{ flex: 1, textAlign: { xs: 'center', sm: 'left' } }}>
+                <Typography 
+                  variant="h5" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    mb: 1,
+                    fontSize: { xs: '1.25rem', md: '1.5rem' },
+                    color: '#10B981'
+                  }}
+                >
+                  Online Doctor Consultation
+                </Typography>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    color: 'text.secondary', 
+                    mb: 2,
+                    fontSize: { xs: '0.9rem', md: '1rem' }
+                  }}
+                >
+                  Instant video or chat with certified doctors
+                </Typography>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 1.5, 
+                  mb: 2, 
+                  flexWrap: 'wrap',
+                  justifyContent: { xs: 'center', sm: 'flex-start' }
+                }}>
+                  <Chip 
+                    icon={<VideocamIcon sx={{ fontSize: '1rem' }} />} 
+                    label="HD Video" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      color: '#10B981',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(16, 185, 129, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+                  <Chip 
+                    icon={<FlashOnIcon sx={{ fontSize: '1rem' }} />} 
+                    label="Instant" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      color: '#10B981',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(16, 185, 129, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+                  <Chip 
+                    icon={<ShieldIcon sx={{ fontSize: '1rem' }} />} 
+                    label="Secure" 
+                    size="medium" 
+                    sx={{ 
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      color: '#10B981',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      height: 32,
+                      borderRadius: 3,
+                      border: '1px solid',
+                      borderColor: 'rgba(16, 185, 129, 0.3)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }} 
+                  />
+                </Box>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  sx={{ 
+                    borderRadius: 3,
+                    px: 3,
+                    py: 1,
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    fontSize: '0.9rem',
+                    borderColor: '#10B981',
+                    color: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                      borderColor: '#059669',
+                      color: '#059669',
+                      transform: 'translateY(-1px)'
+                    },
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  Consult Now
+                </Button>
             </Box>
           </Box>
         </Grid>
       </Grid>
+      </Box>
 
 
-      <Box sx={{ mt: 5 }}>
-        <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>Special Offers</Typography>
-        <Box sx={{ position: 'relative' }}>
-          <IconButton onClick={() => scrollOffers(-1)} sx={{ position: 'absolute', left: -8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper', boxShadow: 2 }} aria-label="Scroll left">
+      {/* Special Offers Section */}
+      <Box sx={{ mt: { xs: 6, md: 8 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 4, md: 5 } }}>
+          <Typography 
+            variant="h3" 
+            sx={{ 
+              fontWeight: 800, 
+              fontSize: { xs: '2rem', md: '2.75rem' },
+              color: 'text.primary',
+              mb: 2,
+              letterSpacing: '-0.02em'
+            }}
+          >
+            Special Offers
+          </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'text.secondary',
+              fontWeight: 400,
+              fontSize: { xs: '1rem', md: '1.125rem' },
+              maxWidth: 600,
+              mx: 'auto',
+              lineHeight: 1.6
+            }}
+          >
+            Exclusive deals and discounts for your healthcare needs
+          </Typography>
+        </Box>
+        
+        <Box sx={{ position: 'relative', px: { xs: 1, md: 2 } }}>
+          {/* Navigation Buttons */}
+          <IconButton 
+            onClick={() => scrollOffers(-1)} 
+            sx={{ 
+              position: 'absolute', 
+              left: { xs: -8, md: -12 }, 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              backgroundColor: 'background.paper',
+              border: '2px solid',
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              zIndex: 2,
+              '&:hover': {
+                backgroundColor: 'primary.main',
+                color: 'white'
+              },
+              display: { xs: 'none', sm: 'flex' }
+            }} 
+            aria-label="Scroll left"
+          >
             <ChevronLeftIcon />
           </IconButton>
-          <Box ref={offersListRef} sx={{ display: 'flex', gap: 2, overflowX: 'auto', px: 6, '::-webkit-scrollbar': { display: 'none' }, scrollbarWidth: 'none' }}>
-            {offers.map((offer, idx) => (
-              <Paper key={idx} sx={{ p: 2, minWidth: 280, background: offer.color, color: '#0f172a', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                <Chip label={offer.badge} sx={{ background: offer.badgeColor, color: offer.badgeTextColor, mb: 1, fontWeight: 700 }} />
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <Box sx={{ fontSize: 0 }}>{offer.icon}</Box>
-                  <Box>
-                    <Typography fontWeight={700}>{offer.title}</Typography>
-                    <Typography variant="body2" color="text.secondary">{offer.desc}</Typography>
-                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Chip size="small" label={offer.code} variant="outlined" />
-                      <Button size="small" variant="contained" color="primary" sx={{ color: 'common.white' }}>Use Now</Button>
-                    </Box>
-                  </Box>
-                </Box>
-              </Paper>
-            ))}
-          </Box>
-          <IconButton onClick={() => scrollOffers(1)} sx={{ position: 'absolute', right: -8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'background.paper', boxShadow: 2 }} aria-label="Scroll right">
+          
+          <IconButton 
+            onClick={() => scrollOffers(1)} 
+            sx={{ 
+              position: 'absolute', 
+              right: { xs: -8, md: -12 }, 
+              top: '50%', 
+              transform: 'translateY(-50%)', 
+              backgroundColor: 'background.paper',
+              border: '2px solid',
+              borderColor: 'primary.main',
+              color: 'primary.main',
+              zIndex: 2,
+              '&:hover': {
+                backgroundColor: 'primary.main',
+                color: 'white'
+              },
+              display: { xs: 'none', sm: 'flex' }
+            }} 
+            aria-label="Scroll right"
+          >
             <ChevronRightIcon />
           </IconButton>
+          
+          {/* Offers Container */}
+          <Box 
+            ref={offersListRef} 
+            sx={{ 
+              display: 'flex', 
+              gap: { xs: 2, md: 3 }, 
+              overflowX: 'auto', 
+              px: { xs: 2, md: 4 },
+              pb: 2,
+              width: '100%',
+              '::-webkit-scrollbar': { 
+                height: 6,
+                backgroundColor: 'transparent'
+              },
+              '::-webkit-scrollbar-thumb': {
+                backgroundColor: 'primary.light',
+                borderRadius: 3
+              },
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'primary.light transparent'
+            }}
+          >
+            {offers.map((offer, idx) => (
+              <Box 
+                key={idx} 
+                sx={{ 
+                  minWidth: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.333% - 16px)' },
+                  maxWidth: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.333% - 16px)' },
+                  flex: { xs: '0 0 100%', sm: '0 0 calc(50% - 12px)', md: '0 0 calc(33.333% - 16px)' },
+                  p: { xs: 3, md: 4 },
+                  borderRadius: 4,
+                  border: '2px solid',
+                  borderColor: 'primary.light',
+                  background: offer.color,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    transform: 'translateY(-4px)'
+                  }
+                }}
+              >
+                {/* Badge */}
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                  <Chip 
+                    label={offer.badge} 
+                    sx={{ 
+                      background: offer.badgeColor, 
+                      color: offer.badgeTextColor, 
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      px: 2,
+                      py: 1,
+                      borderRadius: 3
+                    }} 
+                  />
+                </Box>
+                
+                {/* Content */}
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box sx={{ mb: 2 }}>
+                    {offer.icon}
+                    </Box>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 700, 
+                      mb: 2,
+                      fontSize: { xs: '1.1rem', md: '1.25rem' },
+                      color: 'text.primary'
+                    }}
+                  >
+                    {offer.title}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: 'text.secondary', 
+                      mb: 3,
+                      fontSize: { xs: '0.9rem', md: '1rem' },
+                      lineHeight: 1.6
+                    }}
+                  >
+                    {offer.desc}
+                  </Typography>
+                  
+                  {/* Action Buttons */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    gap: 2,
+                    alignItems: 'center'
+                  }}>
+                    <Chip 
+                      label={offer.code} 
+                      variant="outlined"
+                      sx={{ 
+                        fontWeight: 600,
+                        borderColor: 'primary.main',
+                        color: 'primary.main'
+                      }} 
+                    />
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      sx={{ 
+                        borderRadius: 3,
+                        px: 4,
+                        py: 1.5,
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        fontSize: '0.9rem',
+                        minWidth: 120
+                      }}
+                    >
+                      Use Now
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Box>
     </Box>

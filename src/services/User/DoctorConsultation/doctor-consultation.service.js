@@ -160,5 +160,147 @@ export const doctorConsultationService = {
             console.error('Error deleting timeslot:', error);
             throw error;
         }
+    },
+
+    getAppointmentHealthRecords: async (appointmentId) => {
+        try {
+            console.log('Fetching health records for appointment:', appointmentId);
+            
+            const token = getToken();
+            const endpoint = API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_APPOINTMENT_HEALTH_RECORDS.replace(':appointmentId', appointmentId);
+            const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+            
+            console.log('Making API call to:', url);
+            
+            const response = await apiClient.get(url, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Health records API response:', response);
+
+            if (response.status !== 200) {
+                throw new Error(`Failed to fetch health records: ${response.status}`);
+            }
+
+            const responseData = response.data;
+            console.log('Health records data:', responseData);
+
+            if (!responseData.success) {
+                throw new Error(responseData.message || 'Failed to fetch health records');
+            }
+
+            return responseData;
+        } catch (error) {
+            console.error('Error fetching appointment health records:', error);
+            throw error;
+        }
+    },
+
+    rescheduleAppointment: async (appointmentId, rescheduleData) => {
+        try {
+            console.log('Rescheduling appointment:', appointmentId, rescheduleData);
+            
+            const token = getToken();
+            const endpoint = API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.RESCHEDULE_APPOINTMENT.replace(':appointmentId', appointmentId);
+            const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+            
+            console.log('Making reschedule API call to:', url);
+            
+            const response = await apiClient.put(url, rescheduleData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Reschedule API response:', response);
+
+            if (response.status !== 200) {
+                throw new Error(`Failed to reschedule appointment: ${response.status}`);
+            }
+
+            const responseData = response.data;
+            console.log('Reschedule response data:', responseData);
+
+            return responseData;
+        } catch (error) {
+            console.error('Error rescheduling appointment:', error);
+            throw error;
+        }
+    },
+
+    updateAppointmentNote: async (appointmentId, noteData) => {
+        try {
+            console.log('Updating appointment note:', appointmentId, noteData);
+            
+            const token = getToken();
+            const endpoint = API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.UPDATE_APPOINTMENT_NOTE.replace(':appointmentId', appointmentId);
+            const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+            
+            console.log('Making note update API call to:', url);
+            
+            const response = await apiClient.put(url, noteData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            console.log('Note update API response:', response);
+
+            if (response.status !== 200) {
+                throw new Error(`Failed to update appointment note: ${response.status}`);
+            }
+
+            const responseData = response.data;
+            console.log('Note update response data:', responseData);
+
+            return responseData;
+        } catch (error) {
+            console.error('Error updating appointment note:', error);
+            throw error;
+        }
+    },
+
+    uploadAppointmentFiles: async (appointmentId, files) => {
+        try {
+            console.log('Uploading appointment files:', appointmentId, files);
+            
+            const token = getToken();
+            const endpoint = API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.UPLOAD_APPOINTMENT_FILES.replace(':appointmentId', appointmentId);
+            const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+            
+            console.log('Making file upload API call to:', url);
+            
+            // Create FormData for file upload
+            const formData = new FormData();
+            files.forEach((file, index) => {
+                formData.append('files', file);
+            });
+            
+            const response = await apiClient.post(url, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            console.log('File upload API response:', response);
+
+            if (response.status !== 200 && response.status !== 201) {
+                throw new Error(`Failed to upload appointment files: ${response.status}`);
+            }
+
+            const responseData = response.data;
+            console.log('File upload response data:', responseData);
+
+            return responseData;
+        } catch (error) {
+            console.error('Error uploading appointment files:', error);
+            throw error;
+        }
     }
 }; 

@@ -594,336 +594,525 @@ const DoctorConsultationVendorTimeslots = () => {
         onClose={() => setSidebarOpen(false)}
         sx={{
           '& .MuiDrawer-paper': {
-            width: { xs: '100%', sm: 500 },
+            width: { xs: '100%', sm: 480 },
             backgroundColor: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.divider}`,
-            boxShadow: '0 16px 48px rgba(0,0,0,0.2)'
+            border: 'none',
+            boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 20px 60px rgba(0,0,0,0.15)',
+            backdropFilter: 'blur(10px)',
+            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
+            marginTop: '72px', // Add margin to account for the header
+            height: 'calc(100vh - 72px)', // Adjust height
+            top: 0,
+            zIndex: 1200
           }
         }}
       >
-        <AppBar position="static" elevation={0} sx={{ backgroundColor: theme.palette.background.paper }}>
-          <Toolbar sx={{ justifyContent: 'space-between', px: 3 }}>
+        {/* Minimalistic Header */}
+        <Box sx={{ 
+          p: 3, 
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main}08 0%, ${theme.palette.secondary.main}08 100%)`,
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Background Pattern */}
+          <Box sx={{
+            position: 'absolute',
+            top: -50,
+            right: -50,
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${theme.palette.primary.main}15 0%, transparent 70%)`,
+            opacity: 0.6
+          }} />
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box sx={{ 
-                p: 1.5, 
-                borderRadius: 2, 
-                backgroundColor: theme.palette.primary.main,
+                width: 40,
+                height: 40,
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 color: 'white',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
+                boxShadow: '0 8px 24px rgba(0,0,0,0.15)'
               }}>
-                {sidebarType === 'view' ? <Visibility /> : <Settings />}
+                {sidebarType === 'view' ? <Visibility sx={{ fontSize: 20 }} /> : <Settings sx={{ fontSize: 20 }} />}
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.text.primary }}>
-                  {sidebarType === 'add' ? 'Add New Time Slot' : 
-                   sidebarType === 'edit' ? 'Edit Time Slot' : 'View Time Slot'}
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 700, 
+                  color: theme.palette.text.primary,
+                  fontSize: '1.1rem',
+                  mb: 0.5
+                }}>
+                  {sidebarType === 'add' ? 'New Time Slot' : 
+                   sidebarType === 'edit' ? 'Edit Time Slot' : 'Time Slot Details'}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {sidebarType === 'view' ? 'View timeslot details' : 
-                   sidebarType === 'edit' ? 'Update your consultation schedule' : 'Create a new consultation schedule'}
+                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
+                  {sidebarType === 'view' ? 'View consultation schedule details' : 
+                   sidebarType === 'edit' ? 'Modify your consultation schedule' : 'Set up your consultation schedule'}
                 </Typography>
               </Box>
             </Box>
-            <IconButton onClick={() => setSidebarOpen(false)}>
-              <Close />
+            <IconButton 
+              onClick={() => setSidebarOpen(false)}
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                backgroundColor: theme.palette.grey[100],
+                color: theme.palette.text.secondary,
+                '&:hover': {
+                  backgroundColor: theme.palette.grey[200],
+                  transform: 'scale(1.05)'
+                },
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Close sx={{ fontSize: 18 }} />
             </IconButton>
-          </Toolbar>
-        </AppBar>
+          </Box>
+        </Box>
 
-        <Box sx={{ p: 3, height: '100%', overflow: 'auto' }}>
+        <Box sx={{ 
+          height: 'calc(100% - 100px)', 
+          overflow: 'auto',
+          '&::-webkit-scrollbar': {
+            width: 6,
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: theme.palette.grey[300],
+            borderRadius: 3,
+            '&:hover': {
+              backgroundColor: theme.palette.grey[400],
+            },
+          },
+        }}>
           {sidebarType === 'view' ? (
-            // View Content
-            <Box>
+            // View Content - Ultra Compact Design
+            <Box sx={{ p: 2 }}>
               {viewingTimeslot && (
                 <Box>
-                  <Box sx={{ mb: 3 }}>
-                    <Chip
-                      label={viewingTimeslot.isActive ? 'Active' : 'Inactive'}
-                      color={getStatusColor(viewingTimeslot.isActive)}
-                      icon={getStatusIcon(viewingTimeslot.isActive)}
-                      sx={{ fontWeight: 600 }}
-                    />
+                  {/* Schedule Details - Compact Single Row */}
+                  <Box sx={{ 
+                    mb: 2,
+                    p: 1.5,
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}08 0%, ${theme.palette.secondary.main}08 100%)`,
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                      <Typography variant="subtitle2" sx={{ 
+                        fontWeight: 700, 
+                        color: theme.palette.text.primary,
+                        fontSize: '0.9rem'
+                      }}>
+                        Schedule Details
+                      </Typography>
+                      {/* Active Status on Right */}
+                      <Box sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: '8px',
+                        backgroundColor: viewingTimeslot.isActive ? theme.palette.success.main : theme.palette.error.main,
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        boxShadow: `0 2px 6px ${viewingTimeslot.isActive ? theme.palette.success.main : theme.palette.error.main}30`
+                      }}>
+                        {getStatusIcon(viewingTimeslot.isActive)}
+                        {viewingTimeslot.isActive ? 'Active' : 'Inactive'}
+                      </Box>
+                    </Box>
+                    
+                    {/* Edit Button directly below Active Status */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5 }}>
+                      <Button 
+                        variant="contained"
+                        size="small"
+                        startIcon={<Edit />}
+                        onClick={() => {
+                          setSidebarType('edit');
+                          setFormData({
+                            day: viewingTimeslot.day,
+                            startTime: dayjs(viewingTimeslot.startTime, 'HH:mm'),
+                            endTime: dayjs(viewingTimeslot.endTime, 'HH:mm'),
+                            intervalMinutes: viewingTimeslot.intervalMinutes,
+                            isActive: viewingTimeslot.isActive
+                          });
+                          setEditingTimeslot(viewingTimeslot);
+                        }}
+                        sx={{
+                          borderRadius: '6px',
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          px: 1.5,
+                          py: 0.5,
+                          fontSize: '0.7rem',
+                          minWidth: 'auto',
+                          background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          }
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </Box>
+                    
+                    {/* All Details in One Row */}
+                    <Grid container spacing={1}>
+                      <Grid item xs={2.4}>
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.65rem' }}>
+                            Day
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.75rem' }}>
+                            {viewingTimeslot.day.slice(0, 3)}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.65rem' }}>
+                            Slots
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.75rem' }}>
+                            {viewingTimeslot.generatedSlots.length}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.65rem' }}>
+                            Start
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.75rem' }}>
+                            {viewingTimeslot.startTime}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.65rem' }}>
+                            End
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.75rem' }}>
+                            {viewingTimeslot.endTime}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={2.4}>
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, display: 'block', mb: 0.5, fontSize: '0.65rem' }}>
+                            Duration
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.75rem' }}>
+                            {viewingTimeslot.intervalMinutes}m
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    </Grid>
                   </Box>
                   
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: theme.palette.text.primary }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CalendarToday sx={{ fontSize: 20, color: theme.palette.primary.main }} />
-                          Schedule Information
-                        </Box>
-                      </Typography>
-                      <Box sx={{ 
-                        p: 3, 
-                        borderRadius: 2, 
-                        backgroundColor: theme.palette.background.paper,
-                        border: `1px solid ${theme.palette.divider}`,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.05)'
-                      }}>
-                        <List>
-                          <ListItem sx={{ px: 0 }}>
-                            <ListItemIcon>
-                              <CalendarToday sx={{ color: theme.palette.primary.main }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Day of Week"
-                              secondary={viewingTimeslot.day}
-                              primaryTypographyProps={{ fontWeight: 600 }}
-                            />
-                          </ListItem>
-                          <ListItem sx={{ px: 0 }}>
-                            <ListItemIcon>
-                              <AccessTime sx={{ color: theme.palette.primary.main }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Time Range"
-                              secondary={`${viewingTimeslot.startTime} - ${viewingTimeslot.endTime}`}
-                              primaryTypographyProps={{ fontWeight: 600 }}
-                            />
-                          </ListItem>
-                          <ListItem sx={{ px: 0 }}>
-                            <ListItemIcon>
-                              <Timer sx={{ color: theme.palette.primary.main }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Interval Duration"
-                              secondary={`${viewingTimeslot.intervalMinutes} minutes`}
-                              primaryTypographyProps={{ fontWeight: 600 }}
-                            />
-                          </ListItem>
-                          <ListItem sx={{ px: 0 }}>
-                            <ListItemIcon>
-                              <Schedule sx={{ color: theme.palette.primary.main }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Total Slots"
-                              secondary={viewingTimeslot.generatedSlots.length}
-                              primaryTypographyProps={{ fontWeight: 600 }}
-                            />
-                          </ListItem>
-                        </List>
-                      </Box>
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: theme.palette.text.primary }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <AccessTime sx={{ fontSize: 20, color: theme.palette.primary.main }} />
-                          Available Time Slots
-                        </Box>
-                      </Typography>
-                      <Box sx={{ 
-                        maxHeight: 300, 
-                        overflow: 'auto',
-                        border: `1px solid ${theme.palette.divider}`,
+                  {/* Time Slots Grid */}
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      fontWeight: 700, 
+                      mb: 1.5, 
+                      color: theme.palette.text.primary,
+                      fontSize: '0.9rem'
+                    }}>
+                      Available Time Slots
+                    </Typography>
+                    <Box sx={{ 
+                      maxHeight: 200, 
+                      overflow: 'auto',
+                      borderRadius: '8px',
+                      p: 1.5,
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      '&::-webkit-scrollbar': {
+                        width: 4,
+                      },
+                      '&::-webkit-scrollbar-track': {
+                        backgroundColor: 'transparent',
+                      },
+                      '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: theme.palette.grey[300],
                         borderRadius: 2,
-                        p: 2,
-                        backgroundColor: theme.palette.background.paper,
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.05)'
-                      }}>
-                        <Grid container spacing={1}>
-                          {viewingTimeslot.generatedSlots.map((slot, index) => (
-                            <Grid item xs={6} sm={4} key={index}>
-                              <Box sx={{
-                                p: 1.5,
-                                borderRadius: 2,
-                                backgroundColor: theme.palette.primary.main,
-                                color: 'white',
-                                textAlign: 'center',
-                                fontWeight: 600,
-                                fontSize: '0.875rem',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                  transform: 'translateY(-2px)',
-                                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                                }
-                              }}>
-                                {slot}
-                              </Box>
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  
-                  <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-                    <Button 
-                      variant="outlined"
-                      startIcon={<Edit />}
-                      onClick={() => {
-                        setSidebarType('edit');
-                        setFormData({
-                          day: viewingTimeslot.day,
-                          startTime: dayjs(viewingTimeslot.startTime, 'HH:mm'),
-                          endTime: dayjs(viewingTimeslot.endTime, 'HH:mm'),
-                          intervalMinutes: viewingTimeslot.intervalMinutes,
-                          isActive: viewingTimeslot.isActive
-                        });
-                        setEditingTimeslot(viewingTimeslot);
-                      }}
-                      sx={{
-                        borderRadius: 2,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        px: 3,
-                        py: 1.5,
-                        borderColor: theme.palette.primary.main,
-                        color: theme.palette.primary.main,
-                        '&:hover': {
-                          backgroundColor: theme.palette.primary.main,
-                          color: 'white',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 16px rgba(0,0,0,0.1)'
-                        }
-                      }}
-                    >
-                      Edit Time Slot
-                    </Button>
+                      },
+                    }}>
+                      <Grid container spacing={0.5}>
+                        {viewingTimeslot.generatedSlots.map((slot, index) => (
+                          <Grid item xs={6} sm={4} key={index}>
+                            <Box sx={{
+                              p: 1,
+                              borderRadius: '6px',
+                              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                              color: 'white',
+                              textAlign: 'center',
+                              fontWeight: 600,
+                              fontSize: '0.7rem',
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                transform: 'translateY(-1px)',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                              }
+                            }}>
+                              {slot}
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </Box>
                   </Box>
                 </Box>
               )}
             </Box>
           ) : (
-            // Add/Edit Form Content
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              gap: 3,
-              '& .MuiFormControl-root': {
-                '& .MuiInputLabel-root': {
-                  fontWeight: 600,
-                  color: theme.palette.text.primary
-                },
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: theme.palette.primary.main,
-                    borderWidth: 2
+            // Add/Edit Form Content - Compact Minimalistic Design
+            <Box sx={{ p: 2 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: 2,
+                '& .MuiFormControl-root': {
+                  '& .MuiInputLabel-root': {
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                    fontSize: '0.85rem'
                   },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: theme.palette.primary.main,
-                    borderWidth: 2
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                    backgroundColor: theme.palette.background.paper,
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: 2
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: 2
+                    }
                   }
                 }
-              }
-            }}>
-              {/* Day Selection */}
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.text.primary }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CalendarToday sx={{ fontSize: 18, color: theme.palette.primary.main }} />
-                    Select Day of Week
+              }}>
+                {/* Day Selection */}
+                <Box>
+                  <Box sx={{ 
+                    mb: 1.5,
+                    p: 1.5,
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}08 0%, ${theme.palette.secondary.main}08 100%)`,
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Box sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        backgroundColor: theme.palette.primary.main,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white'
+                      }}>
+                        <CalendarToday sx={{ fontSize: 14 }} />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Select Day
+                      </Typography>
+                    </Box>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Day of Week</InputLabel>
+                      <Select
+                        value={formData.day}
+                        onChange={(e) => setFormData({ ...formData, day: e.target.value })}
+                        label="Day of Week"
+                      >
+                        {daysOfWeek.map((day) => (
+                          <MenuItem key={day} value={day}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CalendarToday sx={{ fontSize: 14, color: theme.palette.primary.main }} />
+                              {day}
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Box>
-                </Typography>
-                <FormControl fullWidth>
-                  <InputLabel>Day of Week</InputLabel>
-                  <Select
-                    value={formData.day}
-                    onChange={(e) => setFormData({ ...formData, day: e.target.value })}
-                    label="Day of Week"
-                  >
-                    {daysOfWeek.map((day) => (
-                      <MenuItem key={day} value={day}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <CalendarToday sx={{ fontSize: 18 }} />
-                          {day}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              
-              {/* Time Range */}
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.text.primary }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <AccessTime sx={{ fontSize: 18, color: theme.palette.primary.main }} />
-                    Set Time Range
+                </Box>
+                
+                {/* Time Range - Compact Single Row */}
+                <Box>
+                  <Box sx={{ 
+                    mb: 1.5,
+                    p: 1.5,
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${theme.palette.secondary.main}08 0%, ${theme.palette.primary.main}08 100%)`,
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Box sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        backgroundColor: theme.palette.secondary.main,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white'
+                      }}>
+                        <AccessTime sx={{ fontSize: 14 }} />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Time Range
+                      </Typography>
+                    </Box>
+                    <Grid container spacing={1}>
+                      <Grid item xs={6}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <TimePicker
+                            label="Start Time"
+                            value={formData.startTime}
+                            onChange={(newValue) => setFormData({ ...formData, startTime: newValue })}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                size: 'small',
+                                InputLabelProps: { shrink: true }
+                              }
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <TimePicker
+                            label="End Time"
+                            value={formData.endTime}
+                            onChange={(newValue) => setFormData({ ...formData, endTime: newValue })}
+                            slotProps={{
+                              textField: {
+                                fullWidth: true,
+                                size: 'small',
+                                InputLabelProps: { shrink: true }
+                              }
+                            }}
+                          />
+                        </LocalizationProvider>
+                      </Grid>
+                    </Grid>
                   </Box>
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <TimePicker
-                        label="Start Time"
-                        value={formData.startTime}
-                        onChange={(newValue) => setFormData({ ...formData, startTime: newValue })}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            InputLabelProps: { shrink: true }
-                          }
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <TimePicker
-                        label="End Time"
-                        value={formData.endTime}
-                        onChange={(newValue) => setFormData({ ...formData, endTime: newValue })}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            InputLabelProps: { shrink: true }
-                          }
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </Grid>
-                </Grid>
-              </Box>
-              
-              {/* Interval Duration */}
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.text.primary }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Timer sx={{ fontSize: 18, color: theme.palette.primary.main }} />
-                    Consultation Duration
+                </Box>
+                
+                {/* Interval Duration */}
+                <Box>
+                  <Box sx={{ 
+                    mb: 1.5,
+                    p: 1.5,
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${theme.palette.success.main}08 0%, ${theme.palette.warning.main}08 100%)`,
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Box sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        backgroundColor: theme.palette.success.main,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white'
+                      }}>
+                        <Timer sx={{ fontSize: 14 }} />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Duration per Slot
+                      </Typography>
+                    </Box>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Interval Duration</InputLabel>
+                      <Select
+                        value={formData.intervalMinutes}
+                        onChange={(e) => setFormData({ ...formData, intervalMinutes: e.target.value })}
+                        label="Interval Duration"
+                      >
+                        {intervalOptions.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Timer sx={{ fontSize: 14, color: theme.palette.success.main }} />
+                              {option.label}
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Box>
-                </Typography>
-                <FormControl fullWidth>
-                  <InputLabel>Interval Duration</InputLabel>
-                  <Select
-                    value={formData.intervalMinutes}
-                    onChange={(e) => setFormData({ ...formData, intervalMinutes: e.target.value })}
-                    label="Interval Duration"
-                  >
-                    {intervalOptions.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Timer sx={{ fontSize: 18 }} />
-                          {option.label}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              
-              {/* Status Toggle */}
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: theme.palette.text.primary }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Settings sx={{ fontSize: 18, color: theme.palette.primary.main }} />
-                    Availability Status
-                  </Box>
-                </Typography>
-                <Box sx={{ 
-                  p: 2, 
-                  borderRadius: 2, 
-                  backgroundColor: theme.palette.background.paper,
-                  border: `1px solid ${theme.palette.divider}`
-                }}>
-                  <FormControlLabel
-                    control={
+                </Box>
+                
+                {/* Status Toggle */}
+                <Box>
+                  <Box sx={{ 
+                    mb: 1.5,
+                    p: 1.5,
+                    borderRadius: '8px',
+                    background: `linear-gradient(135deg, ${theme.palette.info.main}08 0%, ${theme.palette.error.main}08 100%)`,
+                    border: `1px solid ${theme.palette.divider}`
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <Box sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        backgroundColor: theme.palette.info.main,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white'
+                      }}>
+                        <Settings sx={{ fontSize: 14 }} />
+                      </Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: theme.palette.text.primary, fontSize: '0.85rem' }}>
+                        Availability Status
+                      </Typography>
+                    </Box>
+                    <Box sx={{ 
+                      p: 1.5, 
+                      borderRadius: '6px', 
+                      backgroundColor: theme.palette.background.paper,
+                      border: `1px solid ${theme.palette.divider}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {formData.isActive ? 
+                          <CheckCircle sx={{ color: theme.palette.success.main, fontSize: 16 }} /> : 
+                          <Cancel sx={{ color: theme.palette.error.main, fontSize: 16 }} />
+                        }
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: theme.palette.text.primary, fontSize: '0.8rem' }}>
+                          {formData.isActive ? 'Active' : 'Inactive'}
+                        </Typography>
+                      </Box>
                       <Switch
                         checked={formData.isActive}
                         onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                        size="small"
                         sx={{
                           '& .MuiSwitch-switchBase.Mui-checked': {
                             color: theme.palette.success.main,
@@ -933,58 +1122,69 @@ const DoctorConsultationVendorTimeslots = () => {
                           },
                         }}
                       />
-                    }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {formData.isActive ? <CheckCircle sx={{ color: 'success.main' }} /> : <Cancel sx={{ color: 'error.main' }} />}
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {formData.isActive ? 'Active - Available for bookings' : 'Inactive - Not accepting bookings'}
-                        </Typography>
-                      </Box>
-                    }
-                  />
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
+                      {formData.isActive ? 'Available for bookings' : 'Not accepting bookings'}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-              
-              {/* Action Buttons */}
-              <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-                <Button 
-                  onClick={() => setSidebarOpen(false)}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    px: 3,
-                    py: 1.5
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="contained" 
-                  onClick={handleSaveTimeslot}
-                  disabled={actionLoading || !formData.day || !formData.startTime || !formData.endTime}
-                  startIcon={actionLoading ? <CircularProgress size={16} /> : <Save />}
-                  sx={{
-                    borderRadius: 2,
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 12px 32px rgba(0,0,0,0.2)'
-                    },
-                    '&:disabled': {
-                      background: theme.palette.grey[300],
-                      color: theme.palette.grey[500]
-                    }
-                  }}
-                >
-                  {editingTimeslot ? 'Update Time Slot' : 'Create Time Slot'}
-                </Button>
+                
+                {/* Action Buttons */}
+                <Box sx={{ mt: 3, display: 'flex', gap: 1.5 }}>
+                  <Button 
+                    onClick={() => setSidebarOpen(false)}
+                    size="small"
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      px: 2,
+                      py: 1,
+                      flex: 1,
+                      backgroundColor: theme.palette.grey[100],
+                      color: theme.palette.text.secondary,
+                      fontSize: '0.85rem',
+                      '&:hover': {
+                        backgroundColor: theme.palette.grey[200],
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="contained" 
+                    size="small"
+                    onClick={handleSaveTimeslot}
+                    disabled={actionLoading || !formData.day || !formData.startTime || !formData.endTime}
+                    startIcon={actionLoading ? <CircularProgress size={14} /> : <Save />}
+                    sx={{
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      px: 3,
+                      py: 1,
+                      flex: 2,
+                      fontSize: '0.85rem',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                      '&:hover': {
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
+                      },
+                      '&:disabled': {
+                        background: theme.palette.grey[300],
+                        color: theme.palette.grey[500],
+                        transform: 'none',
+                        boxShadow: 'none'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {editingTimeslot ? 'Update' : 'Create'}
+                  </Button>
+                </Box>
               </Box>
             </Box>
           )}

@@ -110,18 +110,23 @@ const Login = ({ onAuthChange }) => {
     };
   }, []);
 
-  // Initialize reCAPTCHA verifier
-    const initializeRecaptcha = async () => {
+  // Initialize reCAPTCHA verifier with retry mechanism
+    const initializeRecaptcha = async (retryCount = 0) => {
         try {
-      cleanupRecaptcha();
+            // Clean up any existing verifier first
+            cleanupRecaptcha();
 
-      const recaptchaContainer = document.createElement('div');
-      recaptchaContainer.id = 'recaptcha-container';
-      recaptchaContainer.style.display = 'none';
-      recaptchaContainer.style.position = 'absolute';
-      recaptchaContainer.style.left = '-9999px';
-      recaptchaContainer.style.top = '-9999px';
-      document.body.appendChild(recaptchaContainer);
+            // Check if reCAPTCHA container already exists
+            let recaptchaContainer = document.getElementById('recaptcha-container');
+            if (!recaptchaContainer) {
+                recaptchaContainer = document.createElement('div');
+                recaptchaContainer.id = 'recaptcha-container';
+                recaptchaContainer.style.display = 'none';
+                recaptchaContainer.style.position = 'absolute';
+                recaptchaContainer.style.left = '-9999px';
+                recaptchaContainer.style.top = '-9999px';
+                document.body.appendChild(recaptchaContainer);
+            }
 
             const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                 size: 'invisible',
@@ -129,23 +134,50 @@ const Login = ({ onAuthChange }) => {
                     console.log("reCAPTCHA verified successfully");
                 },
                 'expired-callback': () => {
+                    console.log("reCAPTCHA expired");
                     setError("reCAPTCHA expired. Please try again.");
                     setLoading(false);
-          cleanupRecaptcha();
+                    cleanupRecaptcha();
                 },
-                'error-callback': () => {
+                'error-callback': (error) => {
+                    console.error("reCAPTCHA error:", error);
                     setError("reCAPTCHA error. Please refresh and try again.");
                     setLoading(false);
-          cleanupRecaptcha();
+                    cleanupRecaptcha();
                 }
             });
 
             await verifier.render();
             setRecaptchaVerifier(verifier);
+            console.log("reCAPTCHA initialized successfully");
         } catch (error) {
             console.error("Error initializing reCAPTCHA:", error);
-            setError("Failed to initialize verification. Please refresh and try again.");
-      cleanupRecaptcha();
+            
+            // Retry mechanism for network errors
+            if ((error.code === 'auth/network-request-failed' || 
+                 error.message?.includes('timeout') || 
+                 error.message?.includes('Network Error')) && 
+                retryCount < 2) {
+                console.log(`Retrying reCAPTCHA initialization (attempt ${retryCount + 1})`);
+                setTimeout(() => {
+                    initializeRecaptcha(retryCount + 1);
+                }, 2000 * (retryCount + 1)); // Exponential backoff
+                return;
+            }
+            
+            // Handle specific Firebase errors
+            if (error.code === 'auth/network-request-failed') {
+                setError("Network error. Please check your internet connection and try again.");
+            } else if (error.code === 'auth/too-many-requests') {
+                setError("Too many requests. Please try again later.");
+            } else if (error.message && error.message.includes('timeout')) {
+                setError("Request timeout. Please check your internet connection and try again.");
+            } else {
+                setError("Failed to initialize verification. Please refresh and try again.");
+            }
+            
+            setLoading(false);
+            cleanupRecaptcha();
         }
     };
 

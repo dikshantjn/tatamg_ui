@@ -72,10 +72,17 @@ import {
   NotificationsActive,
   MoneyOff,
   Call,
-  CallEnd
+  CallEnd,
+  Description as DescriptionIcon,
+  ChevronLeft,
+  ChevronRight,
+  Note,
+  AttachFile,
+  Upload
 } from '@mui/icons-material';
 import { doctorConsultationVendorService } from '../../../services/Vendors/DoctorConsultationVendor.service';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { doctorConsultationService } from '../../../services/User/DoctorConsultation/doctor-consultation.service';
 
 const DoctorConsultationVendorAppointments = () => {
   const theme = useTheme();
@@ -102,6 +109,35 @@ const DoctorConsultationVendorAppointments = () => {
   // State for call functionality
   const [callingAppointment, setCallingAppointment] = useState(null);
   const [callInProgress, setCallInProgress] = useState(false);
+  
+  // State for health records
+  const [healthRecordsDialogOpen, setHealthRecordsDialogOpen] = useState(false);
+  const [healthRecords, setHealthRecords] = useState([]);
+  const [loadingHealthRecords, setLoadingHealthRecords] = useState(false);
+  const [selectedHealthRecord, setSelectedHealthRecord] = useState(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  
+  // State for reschedule functionality
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [availableTimeslots, setAvailableTimeslots] = useState([]);
+  const [loadingTimeslots, setLoadingTimeslots] = useState(false);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
+  
+  // State for horizontal date picker
+  const [currentDateRange, setCurrentDateRange] = useState(new Date());
+  const [dateOptions, setDateOptions] = useState([]);
+  
+  // State for note dialog
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [noteLoading, setNoteLoading] = useState(false);
+  
+  // State for file upload dialog
+  const [fileUploadDialogOpen, setFileUploadDialogOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [fileUploadLoading, setFileUploadLoading] = useState(false);
 
   // Get vendor ID from auth service
   useEffect(() => {
@@ -255,6 +291,308 @@ const DoctorConsultationVendorAppointments = () => {
     setSnackbarOpen(true);
   };
 
+  const fetchHealthRecords = async (appointmentId) => {
+    setLoadingHealthRecords(true);
+    try {
+      console.log('Fetching health records for appointment:', appointmentId);
+      
+      const response = await doctorConsultationService.getAppointmentHealthRecords(appointmentId);
+      
+      console.log('Health records API response:', response);
+      
+      if (response.success) {
+        const healthRecordsData = response.healthRecords || [];
+        console.log('Health records data:', healthRecordsData);
+        
+        setHealthRecords(healthRecordsData);
+        setHealthRecordsDialogOpen(true);
+        
+        if (healthRecordsData.length === 0) {
+          setSnackbarMessage('No health records found for this appointment');
+          setSnackbarOpen(true);
+        }
+      } else {
+        console.error('API response error:', response);
+        setSnackbarMessage('Failed to fetch health records');
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching health records:', error);
+      
+      // More specific error messages
+      if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+        setSnackbarMessage('Network error: Please check your internet connection');
+      } else if (error.response?.status === 404) {
+        setSnackbarMessage('No health records found for this appointment');
+      } else if (error.response?.status === 500) {
+        setSnackbarMessage('Server error: Please try again later');
+      } else {
+        setSnackbarMessage(`Error fetching health records: ${error.message}`);
+      }
+      
+      setSnackbarOpen(true);
+    } finally {
+      setLoadingHealthRecords(false);
+    }
+  };
+
+  const handleHealthRecordClick = (record) => {
+    setSelectedHealthRecord(record);
+    setPreviewDialogOpen(true);
+  };
+
+  const handleCloseHealthRecordsDialog = () => {
+    setHealthRecordsDialogOpen(false);
+    setHealthRecords([]);
+  };
+
+  const handleClosePreviewDialog = () => {
+    setPreviewDialogOpen(false);
+    setSelectedHealthRecord(null);
+  };
+
+  const fetchTimeslots = async (date) => {
+    if (!vendorId || !date) return;
+    
+    setLoadingTimeslots(true);
+    try {
+      console.log('Fetching timeslots for date:', date, 'vendorId:', vendorId);
+      
+      const response = await doctorConsultationService.getTimeslots(vendorId, date);
+      console.log('Timeslots response:', response);
+      
+      if (response.availableSlots && Array.isArray(response.availableSlots)) {
+        // Get booked times and normalize format (remove seconds if present)
+        const bookedTimes = response.bookedSlots ? response.bookedSlots.map(slot => {
+          const time = slot.time;
+          return time.includes(':') && time.split(':').length === 3 
+            ? time.substring(0, 5) // Remove seconds from "10:00:00" format
+            : time; // Keep as is if already in "10:00" format
+        }) : [];
+        
+        // Get all available slots
+        const availableTimes = response.availableSlots || [];
+        
+        // Combine available and booked times to get all possible timeslots
+        const allTimes = [...new Set([...availableTimes, ...bookedTimes])].sort();
+        
+        // Transform all timeslots into the expected format
+        const timeslots = allTimes.map((time, index) => ({
+          id: `slot_${index}`,
+          time: time,
+          available: availableTimes.includes(time) && !bookedTimes.includes(time),
+          booked: bookedTimes.includes(time)
+        }));
+        
+        setAvailableTimeslots(timeslots);
+      } else {
+        setAvailableTimeslots([]);
+      }
+    } catch (error) {
+      console.error('Error fetching timeslots:', error);
+      setSnackbarMessage('Error fetching available timeslots');
+      setSnackbarOpen(true);
+      setAvailableTimeslots([]);
+    } finally {
+      setLoadingTimeslots(false);
+    }
+  };
+
+  const handleRescheduleClick = (appointment) => {
+    setSelectedAppointmentForMenu(appointment);
+    setRescheduleDialogOpen(true);
+    setSelectedDate('');
+    setSelectedTime('');
+    setAvailableTimeslots([]);
+  };
+
+  const handleDateChange = (event) => {
+    const date = event.target.value;
+    setSelectedDate(date);
+    setSelectedTime(''); // Reset time when date changes
+    if (date) {
+      fetchTimeslots(date);
+    } else {
+      setAvailableTimeslots([]);
+    }
+  };
+
+  const handleReschedule = async () => {
+    if (!selectedAppointmentForMenu || !selectedDate || !selectedTime) {
+      setSnackbarMessage('Please select both date and time');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setRescheduleLoading(true);
+    try {
+      const rescheduleData = {
+        date: selectedDate,
+        time: selectedTime,
+        by: "doctor"
+      };
+
+      console.log('Rescheduling appointment with data:', rescheduleData);
+      
+      await doctorConsultationService.rescheduleAppointment(
+        selectedAppointmentForMenu.clinicAppointmentId, 
+        rescheduleData
+      );
+      
+      setSnackbarMessage('Appointment rescheduled successfully');
+      setSnackbarOpen(true);
+      setRescheduleDialogOpen(false);
+      setSelectedDate('');
+      setSelectedTime('');
+      setAvailableTimeslots([]);
+      await fetchAppointments(); // Refresh the list
+    } catch (error) {
+      console.error('Error rescheduling appointment:', error);
+      setSnackbarMessage(`Error rescheduling appointment: ${error.message}`);
+      setSnackbarOpen(true);
+    } finally {
+      setRescheduleLoading(false);
+    }
+  };
+
+  const handleCloseRescheduleDialog = () => {
+    setRescheduleDialogOpen(false);
+    setSelectedDate('');
+    setSelectedTime('');
+    setAvailableTimeslots([]);
+  };
+
+  // Note dialog handlers
+  const handleNoteClick = (appointment) => {
+    setSelectedAppointmentForMenu(appointment);
+    setNoteText(appointment.notes || '');
+    setNoteDialogOpen(true);
+  };
+
+  const handleCloseNoteDialog = () => {
+    setNoteDialogOpen(false);
+    setNoteText('');
+    setSelectedAppointmentForMenu(null);
+  };
+
+  const handleSaveNote = async () => {
+    if (!selectedAppointmentForMenu || !noteText.trim()) {
+      setSnackbarMessage('Please enter a note');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setNoteLoading(true);
+    try {
+      await doctorConsultationService.updateAppointmentNote(
+        selectedAppointmentForMenu.clinicAppointmentId,
+        { note: noteText.trim() }
+      );
+      
+      setSnackbarMessage('Note updated successfully');
+      setSnackbarOpen(true);
+      setNoteDialogOpen(false);
+      setNoteText('');
+      await fetchAppointments(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating note:', error);
+      setSnackbarMessage(`Error updating note: ${error.message}`);
+      setSnackbarOpen(true);
+    } finally {
+      setNoteLoading(false);
+    }
+  };
+
+  // File upload dialog handlers
+  const handleFileUploadClick = (appointment) => {
+    setSelectedAppointmentForMenu(appointment);
+    setSelectedFiles([]);
+    setFileUploadDialogOpen(true);
+  };
+
+  const handleCloseFileUploadDialog = () => {
+    setFileUploadDialogOpen(false);
+    setSelectedFiles([]);
+    setSelectedAppointmentForMenu(null);
+  };
+
+  const handleFileSelect = (event) => {
+    const files = Array.from(event.target.files);
+    setSelectedFiles(files);
+  };
+
+  const handleUploadFiles = async () => {
+    if (!selectedAppointmentForMenu || selectedFiles.length === 0) {
+      setSnackbarMessage('Please select files to upload');
+      setSnackbarOpen(true);
+      return;
+    }
+
+    setFileUploadLoading(true);
+    try {
+      await doctorConsultationService.uploadAppointmentFiles(
+        selectedAppointmentForMenu.clinicAppointmentId,
+        selectedFiles
+      );
+      
+      setSnackbarMessage('Files uploaded successfully');
+      setSnackbarOpen(true);
+      setFileUploadDialogOpen(false);
+      setSelectedFiles([]);
+      await fetchAppointments(); // Refresh the list
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      setSnackbarMessage(`Error uploading files: ${error.message}`);
+      setSnackbarOpen(true);
+    } finally {
+      setFileUploadLoading(false);
+    }
+  };
+
+  // Generate date options for horizontal picker
+  const generateDateOptions = (startDate) => {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      dates.push({
+        date: date.toISOString().split('T')[0],
+        day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+        fullDay: date.toLocaleDateString('en-US', { weekday: 'long' }),
+        dayNumber: date.getDate(),
+        month: date.toLocaleDateString('en-US', { month: 'short' }),
+        year: date.getFullYear()
+      });
+    }
+    return dates;
+  };
+
+  // Initialize date options when reschedule dialog opens
+  useEffect(() => {
+    if (rescheduleDialogOpen) {
+      const today = new Date();
+      const options = generateDateOptions(today);
+      setDateOptions(options);
+      setCurrentDateRange(today);
+    }
+  }, [rescheduleDialogOpen]);
+
+  // Navigate date range
+  const navigateDateRange = (direction) => {
+    const newDate = new Date(currentDateRange);
+    newDate.setDate(currentDateRange.getDate() + (direction === 'next' ? 7 : -7));
+    setCurrentDateRange(newDate);
+    const options = generateDateOptions(newDate);
+    setDateOptions(options);
+  };
+
+  // Handle date selection from horizontal picker
+  const handleDateSelect = (dateString) => {
+    setSelectedDate(dateString);
+    setSelectedTime(''); // Reset time when date changes
+    fetchTimeslots(dateString);
+  };
+
   const getTypeIcon = (type) => {
     switch (type) {
       case 'Virtual': return <Computer />;
@@ -321,35 +659,21 @@ const DoctorConsultationVendorAppointments = () => {
           setSnackbarOpen(true);
           await fetchAppointments(); // Refresh the list
           break;
-        case 'postpone':
+        case 'update_status':
           setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
-          setSelectedStatus('postponed');
           setStatusDialogOpen(true);
           break;
-        case 'cancel':
-          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
-          setSelectedStatus('cancelled');
-          setStatusDialogOpen(true);
+        case 'view_health_records':
+          await fetchHealthRecords(appointmentData.clinicAppointmentId);
           break;
         case 'reschedule':
-          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
-          setSelectedStatus('rescheduled');
-          setStatusDialogOpen(true);
+          handleRescheduleClick(appointmentData);
           break;
-        case 'no_call':
-          setSelectedAppointmentForMenu(appointmentData); // Restore appointment data
-          setSelectedStatus('no_call');
-          setStatusDialogOpen(true);
+        case 'add_note':
+          handleNoteClick(appointmentData);
           break;
-        case 'notify':
-          // TODO: Implement notification functionality
-          setSnackbarMessage('Notification sent to patient');
-          setSnackbarOpen(true);
-          break;
-        case 'refund':
-          // TODO: Implement refund functionality
-          setSnackbarMessage('Refund processed');
-          setSnackbarOpen(true);
+        case 'upload_files':
+          handleFileUploadClick(appointmentData);
           break;
         default:
           break;
@@ -636,43 +960,37 @@ const DoctorConsultationVendorAppointments = () => {
           </ListItemIcon>
           Complete
         </MenuItem>
-        <MenuItem onClick={() => handleAction('postpone')} disabled={actionLoading}>
+        <MenuItem onClick={() => handleAction('update_status')} disabled={actionLoading}>
           <ListItemIcon>
-            <Schedule fontSize="small" />
+            <Edit fontSize="small" />
           </ListItemIcon>
-          Postpone
+          Update Status
         </MenuItem>
-        <MenuItem onClick={() => handleAction('cancel')} disabled={actionLoading}>
-          <ListItemIcon>
-            <Cancel fontSize="small" />
-          </ListItemIcon>
-          Cancel
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('reschedule')} disabled={actionLoading}>
-          <ListItemIcon>
-            <Schedule fontSize="small" />
-          </ListItemIcon>
-          Reschedule
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('no_call')} disabled={actionLoading}>
-          <ListItemIcon>
-            <Phone fontSize="small" />
-          </ListItemIcon>
-          No Call
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('notify')} disabled={actionLoading}>
-          <ListItemIcon>
-            <NotificationsActive fontSize="small" />
-          </ListItemIcon>
-          Notify
-        </MenuItem>
-        <MenuItem onClick={() => handleAction('refund')} disabled={actionLoading}>
-          <ListItemIcon>
-            <MoneyOff fontSize="small" />
-          </ListItemIcon>
-          Refund
-        </MenuItem>
-      </Menu>
+         <MenuItem onClick={() => handleAction('view_health_records')} disabled={loadingHealthRecords}>
+           <ListItemIcon>
+             <DescriptionIcon fontSize="small" />
+           </ListItemIcon>
+           View Health Records
+         </MenuItem>
+         <MenuItem onClick={() => handleAction('reschedule')}>
+           <ListItemIcon>
+             <Schedule fontSize="small" />
+           </ListItemIcon>
+           Reschedule
+         </MenuItem>
+         <MenuItem onClick={() => handleAction('add_note')}>
+           <ListItemIcon>
+             <Note fontSize="small" />
+           </ListItemIcon>
+           Add Note
+         </MenuItem>
+         <MenuItem onClick={() => handleAction('upload_files')}>
+           <ListItemIcon>
+             <AttachFile fontSize="small" />
+           </ListItemIcon>
+           Upload Files
+         </MenuItem>
+       </Menu>
 
       {/* Appointment Details Dialog */}
       <Dialog 
@@ -870,19 +1188,604 @@ const DoctorConsultationVendorAppointments = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      {/* Health Records Dialog */}
+      <Dialog 
+        open={healthRecordsDialogOpen} 
+        onClose={handleCloseHealthRecordsDialog}
+        maxWidth="md"
+        fullWidth
       >
-        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
-  );
-};
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Patient Health Records
+            </Typography>
+            <Chip
+              label={`${healthRecords.length} Records`}
+              color="primary"
+              variant="outlined"
+            />
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {loadingHealthRecords ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
+              <CircularProgress />
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                Loading health records...
+              </Typography>
+            </Box>
+           ) : healthRecords.length === 0 ? (
+             <Box sx={{ textAlign: 'center', py: 4 }}>
+               <DescriptionIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
+               <Typography variant="h6" gutterBottom>
+                 No Health Records
+               </Typography>
+               <Typography variant="body2" color="text.secondary" mb={2}>
+                 No health records were shared for this appointment.
+               </Typography>
+               <Button 
+                 variant="outlined" 
+                 onClick={() => fetchHealthRecords(selectedAppointmentForMenu?.clinicAppointmentId)}
+                 startIcon={<Refresh />}
+               >
+                 Retry
+               </Button>
+             </Box>
+          ) : (
+            <Grid container spacing={2}>
+              {healthRecords.map((record) => (
+                <Grid item xs={12} sm={6} md={4} key={record.healthRecordId}>
+                  <Card 
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover': {
+                        boxShadow: theme.shadows[4],
+                        transform: 'translateY(-2px)'
+                      },
+                      transition: 'all 0.2s ease-in-out'
+                    }}
+                    onClick={() => handleHealthRecordClick(record)}
+                  >
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        <DescriptionIcon color="primary" />
+                        <Typography variant="subtitle2" fontWeight={600} noWrap>
+                          {record.name}
+                        </Typography>
+                      </Box>
+                      <Chip 
+                        label={record.type.replace('_', ' ').toUpperCase()} 
+                        size="small" 
+                        color="primary" 
+                        variant="outlined"
+                        sx={{ mb: 1 }}
+                      />
+                      <Typography variant="caption" color="text.secondary" display="block">
+                        {new Date(record.uploadedAt).toLocaleDateString()}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+        </DialogContent>
+         <DialogActions>
+           <Button onClick={handleCloseHealthRecordsDialog}>Close</Button>
+           {healthRecords.length === 0 && (
+             <Button 
+               variant="outlined" 
+               onClick={() => fetchHealthRecords(selectedAppointmentForMenu?.clinicAppointmentId)}
+               startIcon={<Refresh />}
+             >
+               Retry
+             </Button>
+           )}
+         </DialogActions>
+      </Dialog>
+
+      {/* Health Record Preview Dialog */}
+      <Dialog 
+        open={previewDialogOpen} 
+        onClose={handleClosePreviewDialog}
+        maxWidth="lg"
+        fullWidth
+      >
+        {selectedHealthRecord && (
+          <>
+            <DialogTitle>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <DescriptionIcon color="primary" />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {selectedHealthRecord.name}
+                  </Typography>
+                </Box>
+                <Chip 
+                  label={selectedHealthRecord.type.replace('_', ' ').toUpperCase()} 
+                  color="primary" 
+                  variant="outlined"
+                />
+              </Box>
+            </DialogTitle>
+            <DialogContent>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                  Upload Date:
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {new Date(selectedHealthRecord.uploadedAt).toLocaleString()}
+                </Typography>
+              </Box>
+              
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                  File Preview:
+                </Typography>
+                <Box 
+                  sx={{ 
+                    border: 1, 
+                    borderColor: 'divider', 
+                    borderRadius: 1, 
+                    p: 2, 
+                    minHeight: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'grey.50'
+                  }}
+                >
+                  {selectedHealthRecord.fileUrl.includes('.pdf') ? (
+                    <Box sx={{ textAlign: 'center' }}>
+                      <DescriptionIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+                      <Typography variant="h6" gutterBottom>
+                        PDF Document
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" mb={2}>
+                        Click the button below to view the full document
+                      </Typography>
+                      <Button 
+                        variant="contained" 
+                        onClick={() => window.open(selectedHealthRecord.fileUrl, '_blank')}
+                        startIcon={<DescriptionIcon />}
+                      >
+                        Open PDF
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Box sx={{ textAlign: 'center' }}>
+                      <img 
+                        src={selectedHealthRecord.fileUrl} 
+                        alt={selectedHealthRecord.name}
+                        style={{ 
+                          maxWidth: '100%', 
+                          maxHeight: '400px', 
+                          objectFit: 'contain',
+                          borderRadius: '8px'
+                        }}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'block';
+                        }}
+                      />
+                      <Box sx={{ display: 'none', textAlign: 'center' }}>
+                        <DescriptionIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="h6" gutterBottom>
+                          Image Preview
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" mb={2}>
+                          Unable to load image preview
+                        </Typography>
+                        <Button 
+                          variant="contained" 
+                          onClick={() => window.open(selectedHealthRecord.fileUrl, '_blank')}
+                          startIcon={<DescriptionIcon />}
+                        >
+                          Open Image
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClosePreviewDialog}>Close</Button>
+              <Button 
+                variant="contained" 
+                onClick={() => window.open(selectedHealthRecord.fileUrl, '_blank')}
+                startIcon={<DescriptionIcon />}
+              >
+                Open Full Document
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+       {/* Reschedule Dialog */}
+       <Dialog 
+         open={rescheduleDialogOpen} 
+         onClose={handleCloseRescheduleDialog}
+         maxWidth="sm"
+         fullWidth
+       >
+         <DialogTitle>
+           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+             <Schedule color="primary" />
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>
+               Reschedule Appointment
+             </Typography>
+           </Box>
+         </DialogTitle>
+         <DialogContent>
+           {selectedAppointmentForMenu && (
+             <Box sx={{ mt: 2 }}>
+               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                 Patient: {selectedAppointmentForMenu.patientName}
+               </Typography>
+               
+               {/* Horizontal Date Picker */}
+               <Box sx={{ mb: 3 }}>
+                 <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                   Select Date:
+                 </Typography>
+                 
+                 {/* Month-Year Header */}
+                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                     {dateOptions.length > 0 && `${dateOptions[0].month} ${dateOptions[0].year}`}
+                   </Typography>
+                 </Box>
+                 
+                 {/* Date Navigation */}
+                 <Box sx={{ mb: 2 }}>
+                   {/* Navigation Buttons Row */}
+                   <Box sx={{ 
+                     display: 'flex', 
+                     justifyContent: 'space-between', 
+                     alignItems: 'center',
+                     mb: 1
+                   }}>
+                     <IconButton 
+                       onClick={() => navigateDateRange('prev')}
+                       size="small"
+                       sx={{ 
+                         color: 'text.primary',
+                         '&:hover': { backgroundColor: 'action.hover' },
+                         p: 1
+                       }}
+                     >
+                       <ChevronLeft />
+                     </IconButton>
+                     
+                     <IconButton 
+                       onClick={() => navigateDateRange('next')}
+                       size="small"
+                       sx={{ 
+                         color: 'text.primary',
+                         '&:hover': { backgroundColor: 'action.hover' },
+                         p: 1
+                       }}
+                     >
+                       <ChevronRight />
+                     </IconButton>
+                   </Box>
+                   
+                   {/* Dates Row */}
+                   <Box sx={{ 
+                     display: 'flex', 
+                     justifyContent: 'space-between',
+                     alignItems: 'center',
+                     gap: { xs: 0.5, sm: 1 },
+                     px: { xs: 0.5, sm: 1 }
+                   }}>
+                     {dateOptions.map((dateOption) => (
+                       <Box
+                         key={dateOption.date}
+                         onClick={() => handleDateSelect(dateOption.date)}
+                         sx={{
+                           flex: 1,
+                           minWidth: 0,
+                           p: { xs: 0.75, sm: 1 },
+                           borderRadius: 2,
+                           textAlign: 'center',
+                           cursor: 'pointer',
+                           border: selectedDate === dateOption.date ? 2 : 1,
+                           borderColor: selectedDate === dateOption.date ? 'primary.main' : 'divider',
+                           backgroundColor: selectedDate === dateOption.date ? 'primary.light' : 'transparent',
+                           transition: 'all 0.2s ease-in-out',
+                           '&:hover': {
+                             backgroundColor: selectedDate === dateOption.date ? 'primary.main' : 'action.hover',
+                             color: selectedDate === dateOption.date ? 'white' : 'inherit'
+                           }
+                         }}
+                       >
+                         <Typography 
+                           variant="caption" 
+                           sx={{ 
+                             fontWeight: 600, 
+                             display: 'block',
+                             fontSize: { xs: '0.6rem', sm: '0.7rem' },
+                             lineHeight: 1
+                           }}
+                         >
+                           {dateOption.day}
+                         </Typography>
+                         <Typography 
+                           variant="h6" 
+                           sx={{ 
+                             fontWeight: 700,
+                             fontSize: { xs: '0.9rem', sm: '1.1rem' },
+                             lineHeight: 1.2
+                           }}
+                         >
+                           {dateOption.dayNumber}
+                         </Typography>
+                       </Box>
+                     ))}
+                   </Box>
+                 </Box>
+               </Box>
+
+               {selectedDate && (
+                 <Box sx={{ mb: 3 }}>
+                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                     Available Time Slots:
+                   </Typography>
+                   
+                   {loadingTimeslots ? (
+                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 2 }}>
+                       <CircularProgress size={20} />
+                       <Typography variant="body2">Loading available timeslots...</Typography>
+                     </Box>
+                   ) : availableTimeslots.length === 0 ? (
+                     <Box sx={{ py: 2 }}>
+                       <Typography variant="body2" color="text.secondary">
+                         No available timeslots for this date
+                       </Typography>
+                     </Box>
+                   ) : (
+                     <Grid container spacing={{ xs: 0.5, sm: 1 }}>
+                       {availableTimeslots.map((timeslot) => (
+                         <Grid item xs={6} sm={4} md={3} key={timeslot.id}>
+                           <Box sx={{ position: 'relative' }}>
+                             <Button
+                               variant={selectedTime === timeslot.time ? "contained" : "outlined"}
+                               size="small"
+                               onClick={() => !timeslot.booked && setSelectedTime(timeslot.time)}
+                               disabled={timeslot.booked}
+                               fullWidth
+                               sx={{ 
+                                 minHeight: { xs: 36, sm: 40 },
+                                 fontSize: { xs: '0.75rem', sm: '0.8rem' },
+                                 opacity: timeslot.booked ? 0.6 : 1,
+                                 backgroundColor: timeslot.booked ? 'grey.200' : 'inherit',
+                                 color: timeslot.booked ? 'text.disabled' : 'inherit',
+                                 '&:disabled': {
+                                   backgroundColor: 'grey.200',
+                                   color: 'text.disabled'
+                                 }
+                               }}
+                             >
+                               {timeslot.time}
+                             </Button>
+                             {timeslot.booked && (
+                               <Chip
+                                 label="Booked"
+                                 size="small"
+                                 sx={{
+                                   position: 'absolute',
+                                   top: -8,
+                                   right: -8,
+                                   fontSize: { xs: '0.5rem', sm: '0.6rem' },
+                                   height: { xs: 14, sm: 16 },
+                                   backgroundColor: 'error.main',
+                                   color: 'white',
+                                   '& .MuiChip-label': {
+                                     px: 0.5
+                                   }
+                                 }}
+                               />
+                             )}
+                           </Box>
+                         </Grid>
+                       ))}
+                     </Grid>
+                   )}
+                 </Box>
+               )}
+
+               {selectedDate && selectedTime && (
+                 <Box sx={{ 
+                   p: 2, 
+                   backgroundColor: 'primary.light', 
+                   borderRadius: 1,
+                   border: 1,
+                   borderColor: 'primary.main',
+                   color: 'primary.contrastText'
+                 }}>
+                   <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1, color: 'primary.dark' }}>
+                     New Appointment Details:
+                   </Typography>
+                   <Typography variant="body2" sx={{ color: 'primary.dark' }}>
+                     <strong>Date:</strong> {new Date(selectedDate).toLocaleDateString()}
+                   </Typography>
+                   <Typography variant="body2" sx={{ color: 'primary.dark' }}>
+                     <strong>Time:</strong> {selectedTime}
+                   </Typography>
+                 </Box>
+               )}
+             </Box>
+           )}
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={handleCloseRescheduleDialog} disabled={rescheduleLoading}>
+             Cancel
+           </Button>
+           <Button 
+             onClick={handleReschedule}
+             variant="contained"
+             disabled={rescheduleLoading || !selectedDate || !selectedTime}
+             startIcon={rescheduleLoading ? <CircularProgress size={20} /> : <Schedule />}
+           >
+             {rescheduleLoading ? 'Rescheduling...' : 'Reschedule'}
+           </Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Note Dialog */}
+       <Dialog 
+         open={noteDialogOpen} 
+         onClose={handleCloseNoteDialog}
+         maxWidth="sm"
+         fullWidth
+       >
+         <DialogTitle>
+           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+             <Note color="primary" />
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>
+               Add/Update Note
+             </Typography>
+           </Box>
+         </DialogTitle>
+         <DialogContent>
+           {selectedAppointmentForMenu && (
+             <Box sx={{ mt: 2 }}>
+               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                 Patient: {selectedAppointmentForMenu.patientName}
+               </Typography>
+               
+               <TextField
+                 fullWidth
+                 multiline
+                 rows={6}
+                 value={noteText}
+                 onChange={(e) => setNoteText(e.target.value)}
+                 placeholder="Enter your notes about this appointment..."
+                 variant="outlined"
+                 sx={{ mt: 2 }}
+               />
+             </Box>
+           )}
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={handleCloseNoteDialog} disabled={noteLoading}>
+             Cancel
+           </Button>
+           <Button 
+             onClick={handleSaveNote}
+             variant="contained"
+             disabled={noteLoading || !noteText.trim()}
+             startIcon={noteLoading ? <CircularProgress size={20} /> : <Note />}
+           >
+             {noteLoading ? 'Saving...' : 'Save Note'}
+           </Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* File Upload Dialog */}
+       <Dialog 
+         open={fileUploadDialogOpen} 
+         onClose={handleCloseFileUploadDialog}
+         maxWidth="sm"
+         fullWidth
+       >
+         <DialogTitle>
+           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+             <AttachFile color="primary" />
+             <Typography variant="h6" sx={{ fontWeight: 600 }}>
+               Upload Files
+             </Typography>
+           </Box>
+         </DialogTitle>
+         <DialogContent>
+           {selectedAppointmentForMenu && (
+             <Box sx={{ mt: 2 }}>
+               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                 Patient: {selectedAppointmentForMenu.patientName}
+               </Typography>
+               
+               <Box sx={{ mt: 2 }}>
+                 <input
+                   accept="*/*"
+                   style={{ display: 'none' }}
+                   id="file-upload"
+                   multiple
+                   type="file"
+                   onChange={handleFileSelect}
+                 />
+                 <label htmlFor="file-upload">
+                   <Button
+                     variant="outlined"
+                     component="span"
+                     startIcon={<Upload />}
+                     sx={{ mb: 2 }}
+                   >
+                     Select Files
+                   </Button>
+                 </label>
+                 
+                 {selectedFiles.length > 0 && (
+                   <Box sx={{ mt: 2 }}>
+                     <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                       Selected Files:
+                     </Typography>
+                     {selectedFiles.map((file, index) => (
+                       <Box key={index} sx={{ 
+                         display: 'flex', 
+                         alignItems: 'center', 
+                         gap: 1, 
+                         mb: 1,
+                         p: 1,
+                         border: 1,
+                         borderColor: 'divider',
+                         borderRadius: 1
+                       }}>
+                         <AttachFile fontSize="small" />
+                         <Typography variant="body2" sx={{ flex: 1 }}>
+                           {file.name}
+                         </Typography>
+                         <Typography variant="caption" color="text.secondary">
+                           {(file.size / 1024 / 1024).toFixed(2)} MB
+                         </Typography>
+                       </Box>
+                     ))}
+                   </Box>
+                 )}
+               </Box>
+             </Box>
+           )}
+         </DialogContent>
+         <DialogActions>
+           <Button onClick={handleCloseFileUploadDialog} disabled={fileUploadLoading}>
+             Cancel
+           </Button>
+           <Button 
+             onClick={handleUploadFiles}
+             variant="contained"
+             disabled={fileUploadLoading || selectedFiles.length === 0}
+             startIcon={fileUploadLoading ? <CircularProgress size={20} /> : <Upload />}
+           >
+             {fileUploadLoading ? 'Uploading...' : 'Upload Files'}
+           </Button>
+         </DialogActions>
+       </Dialog>
+
+       {/* Snackbar for notifications */}
+       <Snackbar
+         open={snackbarOpen}
+         autoHideDuration={6000}
+         onClose={handleSnackbarClose}
+         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+       >
+         <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+           {snackbarMessage}
+         </Alert>
+       </Snackbar>
+     </Box>
+   );
+ };
 
 export default DoctorConsultationVendorAppointments; 

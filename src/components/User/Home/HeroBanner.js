@@ -21,126 +21,126 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
     const banners = [
         {
             id: 1,
-            title: "20% off on Medicines!",
-            subtitle: "Use code MED20 for 20% off.",
-            description: "Save big on your medicine orders",
-            cta: "Shop Now",
+            title: "Medicine Discount Alert!",
+            subtitle: "Save 20% on All Medicines",
+            description: "Get premium quality medicines at discounted prices. Use code MED20 for instant savings on your healthcare essentials.",
+            cta: "Shop Medicines",
             link: "/search?category=medicines",
             backgroundColor: "linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)",
             accentColor: "#0D89C7",
-            icon: <LocalPharmacy sx={{ fontSize: 32, color: '#0D89C7' }} />,
+            icon: <LocalPharmacy sx={{ fontSize: 28, color: '#0D89C7' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "20% OFF",
             type: "discount"
         },
         {
             id: 2,
-            title: "Buy 1 Get 1 Free on Lab Tests!",
-            subtitle: "Get one test free on purchase.",
-            description: "Comprehensive health checkup",
-            cta: "Book Now",
+            title: "Lab Test Special Offer",
+            subtitle: "Buy 1 Get 1 Free",
+            description: "Comprehensive health checkups at half the price. Book any lab test and get another one absolutely free.",
+            cta: "Book Tests",
             link: "/lab-tests",
             backgroundColor: "linear-gradient(135deg, #E0F2FE 0%, #B3E5FC 100%)",
             accentColor: "#0E76B5",
-            icon: <MonitorHeart sx={{ fontSize: 32, color: '#0E76B5' }} />,
+            icon: <MonitorHeart sx={{ fontSize: 28, color: '#0E76B5' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "B1G1",
             type: "offer"
         },
         {
             id: 3,
-            title: "Blood Bank Donation!",
-            subtitle: "Donate blood, save lives.",
-            description: "Make a difference today",
+            title: "Blood Donation Drive",
+            subtitle: "Donate Blood, Save Lives",
+            description: "Join our life-saving mission. Your single donation can save up to 3 lives. Book your donation slot today.",
             cta: "Donate Now",
             link: "/blood-bank",
             backgroundColor: "linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)",
             accentColor: "#FCD100",
-            icon: <Favorite sx={{ fontSize: 32, color: '#FCD100' }} />,
+            icon: <Favorite sx={{ fontSize: 28, color: '#FCD100' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "SAVE LIVES",
             type: "offer"
         },
         {
             id: 4,
-            title: "Flat 15% off on Orders!",
-            subtitle: "Get 15% off on all orders.",
-            description: "Limited time offer",
-            cta: "Order Now",
+            title: "Flash Sale Alert",
+            subtitle: "15% Off Everything",
+            description: "Limited time offer! Get 15% discount on all healthcare products and services. Don't miss out on these savings.",
+            cta: "Shop Now",
             link: "/search",
             backgroundColor: "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
-            accentColor: "#F1E398",
-            icon: <LocalPharmacy sx={{ fontSize: 32, color: '#F1E398' }} />,
+            accentColor: "#874292",
+            icon: <LocalPharmacy sx={{ fontSize: 28, color: '#874292' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "15% OFF",
             type: "discount"
         },
         {
             id: 5,
-            title: "10% off on Health Checkups!",
-            subtitle: "Book a checkup and save 10%.",
-            description: "Preventive healthcare",
-            cta: "Book Now",
+            title: "Health Checkup Special",
+            subtitle: "10% Off Preventive Care",
+            description: "Invest in your health today. Get comprehensive health checkups at discounted rates and stay ahead of health issues.",
+            cta: "Book Checkup",
             link: "/health-screening",
-            backgroundColor: "linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%)",
-            accentColor: "#874292",
-            icon: <HealthAndSafety sx={{ fontSize: 32, color: '#874292' }} />,
+            backgroundColor: "linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%)",
+            accentColor: "#4CAF50",
+            icon: <HealthAndSafety sx={{ fontSize: 28, color: '#4CAF50' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "10% OFF",
             type: "discount"
         },
         {
             id: 6,
-            title: "Free Delivery on Orders!",
-            subtitle: "Free delivery for all orders.",
-            description: "No delivery charges",
+            title: "Free Delivery Service",
+            subtitle: "No Delivery Charges",
+            description: "Enjoy free doorstep delivery on all orders. Fast, safe, and contactless delivery to your home.",
             cta: "Order Now",
             link: "/new-medicine-order",
-            backgroundColor: "linear-gradient(135deg, #E8F5E8 0%, #C8E6C9 100%)",
-            accentColor: "#6A5D7B",
-            icon: <LocalShipping sx={{ fontSize: 32, color: '#6A5D7B' }} />,
+            backgroundColor: "linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%)",
+            accentColor: "#FF9800",
+            icon: <LocalShipping sx={{ fontSize: 28, color: '#FF9800' }} />,
             image: require("../../../assets/offers/offer.png"),
             discount: "FREE",
             type: "offer"
         },
         {
             id: 7,
-            title: "World Kidney Day - 13 March",
-            subtitle: "Get your kidney tested today for early detection and preventive measures.",
-            description: "Raise awareness about kidney health",
-            cta: "Learn More",
+            title: "World Kidney Day",
+            subtitle: "Early Detection Saves Lives",
+            description: "March 13th - Get your kidney function tested today. Early detection of kidney disease can prevent serious complications.",
+            cta: "Get Tested",
             link: "/health-screening?test=kidney",
             backgroundColor: "linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%)",
             accentColor: "#3B5998",
-            icon: <HealthAndSafety sx={{ fontSize: 32, color: '#3B5998' }} />,
+            icon: <HealthAndSafety sx={{ fontSize: 28, color: '#3B5998' }} />,
             image: require("../../../assets/healthDays/worldKidneyDay.png"),
             discount: "HEALTH DAY",
             type: "health_days"
         },
         {
             id: 8,
-            title: "Glaucoma Day - 12 March",
-            subtitle: "Protect your eyes! Get tested today for early detection and preventive care.",
-            description: "Early detection can save vision",
-            cta: "Book Test",
+            title: "Glaucoma Awareness Day",
+            subtitle: "Protect Your Vision",
+            description: "March 12th - Regular eye checkups can prevent vision loss. Book your comprehensive eye examination today.",
+            cta: "Book Eye Test",
             link: "/lab-tests?test=eye",
             backgroundColor: "linear-gradient(135deg, #E0F2FE 0%, #B3E5FC 100%)",
             accentColor: "#2E86C1",
-            icon: <HealthAndSafety sx={{ fontSize: 32, color: '#2E86C1' }} />,
+            icon: <HealthAndSafety sx={{ fontSize: 28, color: '#2E86C1' }} />,
             image: require("../../../assets/healthDays/glaucoma.png"),
             discount: "EYE CARE",
             type: "health_days"
         },
         {
             id: 9,
-            title: "Measles Immunization Day - 16 March",
-            subtitle: "Vaccinate your children to prevent measles! Ensure they receive two doses.",
-            description: "Protect your children",
+            title: "Measles Immunization Day",
+            subtitle: "Protect Your Children",
+            description: "March 16th - Ensure your children receive complete measles vaccination. Two doses provide 97% protection.",
             cta: "Vaccinate Now",
             link: "/vaccines",
             backgroundColor: "linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%)",
             accentColor: "#E74C3C",
-            icon: <HealthAndSafety sx={{ fontSize: 32, color: '#E74C3C' }} />,
+            icon: <HealthAndSafety sx={{ fontSize: 28, color: '#E74C3C' }} />,
             image: require("../../../assets/healthDays/glaucoma.png"),
             discount: "VACCINE",
             type: "health_days"
@@ -177,7 +177,7 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                 width: '100%',
                 overflow: 'hidden',
                 backgroundColor: '#f8f9fa',
-                py: { xs: 2, sm: 3 },
+                py: { xs: 1.5, sm: 2 },
                 position: 'relative'
             }}
             onMouseEnter={() => setIsPaused(true)}
@@ -209,11 +209,12 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                px: { xs: 2, sm: 3, md: 6 },
-                                py: { xs: 4, sm: 5 },
-                                gap: 3,
+                                px: { xs: 2, sm: 3, md: 4 },
+                                py: { xs: 3, sm: 4 },
+                                gap: { xs: 2, sm: 3 },
                                 position: 'relative',
-                                overflow: 'hidden'
+                                overflow: 'hidden',
+                                minHeight: { xs: '140px', sm: '160px', md: '180px' }
                             }}
                             onClick={(e) => handleNavigation(banner.link, e)}
                         >
@@ -313,16 +314,23 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                                     />
                                 </>
                             )}
-                            {/* Text */}
-                            <Box sx={{ flex: 1, position: 'relative', zIndex: 1 }}>
-                                <Box sx={{ mb: 1 }}>{banner.icon}</Box>
+                            
+                            {/* Text Content */}
+                            <Box sx={{ 
+                                flex: 1, 
+                                position: 'relative', 
+                                zIndex: 1,
+                                pr: { xs: 1, sm: 2 }
+                            }}>
+                                <Box sx={{ mb: 0.5 }}>{banner.icon}</Box>
                                 <Typography
                                     sx={{
-                                        fontWeight: 800,
+                                        fontWeight: 700,
                                         color: 'text.primary',
-                                        fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.2rem' },
+                                        fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.6rem' },
                                         lineHeight: 1.2,
-                                        mb: 1
+                                        mb: 0.5,
+                                        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif'
                                     }}
                                 >
                                     {banner.subtitle}
@@ -330,8 +338,11 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                                 <Typography
                                     sx={{
                                         color: 'text.secondary',
-                                        fontSize: { xs: '0.9rem', sm: '1rem' },
-                                        mb: 2
+                                        fontSize: { xs: '0.75rem', sm: '0.85rem', md: '0.9rem' },
+                                        mb: 1.5,
+                                        lineHeight: 1.4,
+                                        fontWeight: 400,
+                                        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif'
                                     }}
                                 >
                                     {banner.description}
@@ -347,33 +358,46 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                                         borderColor: banner.accentColor,
                                         color: banner.accentColor,
                                         textTransform: 'none',
-                                        fontWeight: 700,
-                                        px: 2.5,
+                                        fontWeight: 600,
+                                        px: { xs: 1.5, sm: 2 },
+                                        py: 0.5,
+                                        fontSize: { xs: '0.75rem', sm: '0.8rem' },
                                         backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                        borderRadius: '8px',
+                                        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
                                         '&:hover': { 
                                             backgroundColor: banner.accentColor, 
                                             color: 'white',
-                                            borderColor: banner.accentColor
-                                        }
+                                            borderColor: banner.accentColor,
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: `0 4px 12px ${banner.accentColor}40`
+                                        },
+                                        transition: 'all 0.2s ease-in-out'
                                     }}
                                 >
                                     {banner.cta}
                                 </Button>
                             </Box>
 
-                            {/* Image */}
+                            {/* Image - Responsive positioning */}
                             <Box
                                 component="img"
                                 src={banner.image}
                                 alt={banner.title}
                                 sx={{
-                                    width: { xs: 120, sm: 160, md: 220 },
-                                    height: 'auto',
+                                    width: { xs: 80, sm: 120, md: 160 },
+                                    height: { xs: 80, sm: 120, md: 160 },
                                     borderRadius: 2,
-                                    boxShadow: '0 10px 24px rgba(0,0,0,0.12)',
-                                    display: { xs: 'none', sm: 'block' },
+                                    boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
                                     position: 'relative',
-                                    zIndex: 1
+                                    zIndex: 1,
+                                    objectFit: 'cover',
+                                    // Mobile: top right positioning
+                                    position: { xs: 'absolute', sm: 'relative' },
+                                    top: { xs: 8, sm: 'auto' },
+                                    right: { xs: 8, sm: 'auto' },
+                                    // Ensure image is visible on mobile
+                                    display: 'block'
                                 }}
                             />
 
@@ -381,12 +405,12 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                             <Box 
                                 sx={{ 
                                     position: 'absolute',
-                                    bottom: 16,
+                                    bottom: 8,
                                     left: '50%',
                                     transform: 'translateX(-50%)',
                                     display: 'flex', 
                                     justifyContent: 'center', 
-                                    gap: 1,
+                                    gap: 0.5,
                                     zIndex: 2
                                 }}
                             >
@@ -398,8 +422,8 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
                                             setCurrentIndex(i);
                                         }}
                                         sx={{
-                                            width: 8,
-                                            height: 8,
+                                            width: 6,
+                                            height: 6,
                                             borderRadius: '50%',
                                             backgroundColor: i === currentIndex ? 'rgba(0,0,0,0.8)' : 'rgba(0,0,0,0.3)',
                                             cursor: 'pointer',

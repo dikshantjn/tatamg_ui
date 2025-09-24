@@ -116,6 +116,35 @@ export const getHealthRecords = async (userId) => {
         console.error('Error fetching health records:', error);
         throw error;
     }
+};
+
+export const getHealthRecordsForAppointment = async (userId) => {
+    try {
+        console.log('Fetching health records for appointment for userId:', userId);
+        
+        const endpoint = API_CONFIG.ENDPOINTS.HEALTH_RECORDS.GET_HEALTH_RECORDS.replace(':userId', userId);
+        const url = `${API_BASE_URL}${endpoint}`;
+        
+        console.log('Making API call to:', url);
+        
+        const response = await apiClient.get(url, {
+            headers: {
+                ...getAuthHeader(),
+            }
+        });
+
+        if (response.status !== 200) {
+            const errorData = response.data;
+            throw new Error(errorData.message || `Failed to fetch health records: ${response.status}`);
+        }
+
+        const { data } = response.data;
+        console.log('Health records fetched successfully for appointment:', data);
+        return data;
+    } catch (error) {
+        console.error('Error fetching health records for appointment:', error);
+        throw error;
+    }
 }; 
 
 export const addHealthRecord = async (recordData) => {

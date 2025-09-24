@@ -62,7 +62,7 @@ class DoctorAppointmentPaymentService {
                             paymentStatus: "Paid",
                             userResponseStatus: "pending",
                             isOnline: appointmentData.isOnline,
-                            healthRecordIds: [],
+                            healthRecordIds: appointmentData.healthRecordIds || [],
                             patientName: this.getUserName() || "",
                             patientContact: this.getUserPhone() || "",
                             patientEmail: this.getUserEmail() || "",

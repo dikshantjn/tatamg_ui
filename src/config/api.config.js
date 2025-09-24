@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.39:5000/api",
-  SOCKET_URL: "http://192.168.1.39:5000",
+  BASE_URL: "http://192.168.1.37:5000/api",
+  SOCKET_URL: "http://192.168.1.37:5000",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
   ENDPOINTS: {
@@ -46,6 +46,10 @@ export const API_CONFIG = {
       GET_OFFLINE_PENDING_APPOINTMENTS: "/clinic-appointments/vendor/:vendorId/pending/offline",
       GET_COMPLETED_APPOINTMENTS: "/clinic-appointments/vendor/:vendorId/completed",
       UPDATE_APPOINTMENT_STATUS: "/clinic-appointments/:appointmentId/status",
+      GET_APPOINTMENT_HEALTH_RECORDS: "/clinic-appointments/health-records/:appointmentId",
+      RESCHEDULE_APPOINTMENT: "/clinic-appointments/:appointmentId/reschedule",
+      UPDATE_APPOINTMENT_NOTE: "/clinic-appointments/:appointmentId/note",
+      UPLOAD_APPOINTMENT_FILES: "/clinic-appointments/:appointmentId/files",
     },
     CLINIC_TIMESLOTS: {
       GET_TIMESLOTS: "/clinic-timeslots/vendor/:vendorId",
