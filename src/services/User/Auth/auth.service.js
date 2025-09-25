@@ -1,6 +1,8 @@
 import { API_CONFIG, getApiUrl } from '../../../config/api.config';
 import { apiClient } from '../../../config/apiClient';
-import { storeAuthData, clearAuthData, getToken, isAuthenticated as checkAuth } from '../Auth/auth.utils';
+import { storeAuthData, clearAuthData, getToken, isAuthenticated as checkAuth, getUserId } from '../Auth/auth.utils';
+import { fcmService } from '../FCM/fcm.service';
+import { getFCMToken, getNotificationPermissionStatus, onPermissionChange } from '../../../firebase/config';
 
 class AuthService {
     setAuthToken(token, userId, userData = null) {
@@ -32,8 +34,24 @@ class AuthService {
             }
 
             // Store the JWT token and user data received from backend
+            console.log('🔔 Auth Service: Backend response data:', data);
+            console.log('🔔 Auth Service: Has token:', !!data.token);
+            console.log('🔔 Auth Service: Has userId:', !!data.userId);
+            
             if (data.token && data.userId) {
+                console.log('🔔 Auth Service: Setting auth token and scheduling FCM token save...');
                 this.setAuthToken(data.token, data.userId, data.userData);
+                
+                // Save FCM token after successful authentication
+                // Use setTimeout to ensure auth data is stored first
+                setTimeout(() => {
+                    console.log('🔔 Auth Service: Executing FCM token save for userId:', data.userId);
+                    this.saveFCMTokenAfterLogin(data.userId);
+                }, 1000);
+            } else {
+                console.log('🔔 Auth Service: Skipping FCM token save - missing token or userId');
+                console.log('🔔 Auth Service: Token present:', !!data.token);
+                console.log('🔔 Auth Service: UserId present:', !!data.userId);
             }
 
             return {
@@ -112,6 +130,71 @@ class AuthService {
         clearAuthData();
     }
 
+    // Save FCM token after successful authentication
+    async saveFCMTokenAfterLogin(userId) {
+        try {
+            console.log('🔔 Attempting to save FCM token after login for userId:', userId);
+            
+            // Wait a bit for FCM to initialize
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Check if FCM is supported
+            if (!('Notification' in window)) {
+                console.log('❌ Notifications not supported, skipping FCM token save');
+                return;
+            }
+            
+            // Get FCM token
+            const fcmToken = await getFCMToken();
+            
+            if (fcmToken) {
+                console.log('✅ FCM token obtained:', fcmToken.substring(0, 20) + '...');
+                console.log('💾 Saving FCM token to backend...');
+                
+                // Try to save the token
+                try {
+                    const response = await fcmService.saveFCMToken(userId, fcmToken);
+                    console.log('✅ FCM token saved successfully:', response);
+                } catch (error) {
+                    console.log('⚠️ Failed to save FCM token, trying to update instead...');
+                    console.log('Error details:', error);
+                    // If save fails, try to update
+                    try {
+                        const response = await fcmService.updateFCMToken(userId, fcmToken);
+                        console.log('✅ FCM token updated successfully:', response);
+                    } catch (updateError) {
+                        console.error('❌ Failed to save/update FCM token:', updateError);
+                    }
+                }
+            } else {
+                console.log('❌ No FCM token available to save');
+                console.log('🔍 Checking FCM initialization status...');
+                
+                // Check if we can get token with retry
+                for (let i = 0; i < 3; i++) {
+                    console.log(`🔄 Retry ${i + 1}/3 to get FCM token...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    const retryToken = await getFCMToken();
+                    if (retryToken) {
+                        console.log('✅ FCM token obtained on retry:', retryToken.substring(0, 20) + '...');
+                        try {
+                            await fcmService.saveFCMToken(userId, retryToken);
+                            console.log('✅ FCM token saved successfully on retry');
+                            return;
+                        } catch (error) {
+                            console.error('❌ Failed to save FCM token on retry:', error);
+                        }
+                    }
+                }
+                
+                console.log('❌ Could not obtain FCM token after retries');
+            }
+        } catch (error) {
+            console.error('❌ Error in saveFCMTokenAfterLogin:', error);
+        }
+    }
+
     async updatePlatform(phoneNumber, platform, token) {
         try {
             console.log('Updating platform for phone:', phoneNumber, 'platform:', platform);
@@ -168,6 +251,93 @@ class AuthService {
             }
             
             throw error;
+        }
+    }
+
+    // Manual FCM token save for debugging (can be called from console)
+    async manualSaveFCMToken() {
+        const userId = getUserId();
+        if (!userId) {
+            console.log('❌ No user ID found, please login first');
+            return;
+        }
+        
+        console.log('🔧 Manual FCM token save triggered for userId:', userId);
+        await this.saveFCMTokenAfterLogin(userId);
+    }
+
+    // Start listening for notification permission changes
+    startPermissionListener() {
+        console.log('🔔 Auth Service: Starting permission listener...');
+        
+        const cleanup = onPermissionChange((newPermission) => {
+            console.log('🔔 Auth Service: Permission changed to:', newPermission);
+            
+            if (newPermission === 'granted') {
+                console.log('🔔 Auth Service: Permission granted! Attempting to save FCM token...');
+                const userId = getUserId();
+                if (userId) {
+                    // Save FCM token when permission is granted
+                    setTimeout(() => {
+                        this.saveFCMTokenAfterLogin(userId);
+                    }, 1000);
+                }
+            }
+        });
+
+        // Store cleanup function for later use
+        this.permissionListenerCleanup = cleanup;
+    }
+
+    // Stop listening for permission changes
+    stopPermissionListener() {
+        if (this.permissionListenerCleanup) {
+            console.log('🔔 Auth Service: Stopping permission listener...');
+            this.permissionListenerCleanup();
+            this.permissionListenerCleanup = null;
+        }
+    }
+
+    // Check if we should show permission dialog
+    shouldShowPermissionDialog() {
+        const permission = getNotificationPermissionStatus();
+        console.log('🔔 Auth Service: Current permission status:', permission);
+        
+        // Show dialog if permission is default (not requested yet) or denied
+        return permission === 'default' || permission === 'denied';
+    }
+
+    // Manual FCM token save with detailed debugging
+    async debugSaveFCMToken() {
+        const userId = getUserId();
+        if (!userId) {
+            console.log('❌ Debug: No user ID found, please login first');
+            return;
+        }
+        
+        console.log('🔧 Debug: Manual FCM token save for userId:', userId);
+        console.log('🔧 Debug: Current notification permission:', Notification.permission);
+        
+        // Import debug function
+        const { debugFCMToken } = await import('../../../firebase/config');
+        
+        // Try to get FCM token
+        const token = await debugFCMToken();
+        
+        if (token) {
+            console.log('🔧 Debug: Attempting to save FCM token to backend...');
+            try {
+                const response = await fcmService.saveFCMToken(userId, token);
+                console.log('✅ Debug: FCM token saved successfully:', response);
+                return response;
+            } catch (error) {
+                console.error('❌ Debug: Failed to save FCM token:', error);
+                console.error('❌ Debug: Error response:', error.response?.data);
+                return null;
+            }
+        } else {
+            console.log('❌ Debug: No FCM token available to save');
+            return null;
         }
     }
 

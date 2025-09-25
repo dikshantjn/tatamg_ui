@@ -73,6 +73,7 @@ const Login = ({ onAuthChange }) => {
     const [timer, setTimer] = useState(0);
     const [confirmationResult, setConfirmationResult] = useState(null);
     const [recaptchaVerifier, setRecaptchaVerifier] = useState(null);
+    const [showRetryButton, setShowRetryButton] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const vendorRoles = [
@@ -113,8 +114,18 @@ const Login = ({ onAuthChange }) => {
   // Initialize reCAPTCHA verifier with retry mechanism
     const initializeRecaptcha = async (retryCount = 0) => {
         try {
+            console.log("🚀 Initializing reCAPTCHA...");
+            
+            // Check network connectivity first
+            if (!navigator.onLine) {
+                throw new Error("No internet connection detected");
+            }
+            
             // Clean up any existing verifier first
             cleanupRecaptcha();
+            
+            // Wait a bit for cleanup to complete
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
             // Check if reCAPTCHA container already exists
             let recaptchaContainer = document.getElementById('recaptcha-container');
@@ -125,7 +136,16 @@ const Login = ({ onAuthChange }) => {
                 recaptchaContainer.style.position = 'absolute';
                 recaptchaContainer.style.left = '-9999px';
                 recaptchaContainer.style.top = '-9999px';
+                recaptchaContainer.style.zIndex = '-9999';
                 document.body.appendChild(recaptchaContainer);
+            }
+
+            // Clear any existing content in the container
+            recaptchaContainer.innerHTML = '';
+
+            // Ensure container exists and is ready
+            if (!recaptchaContainer) {
+                throw new Error("reCAPTCHA container not found");
             }
 
             const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -147,93 +167,171 @@ const Login = ({ onAuthChange }) => {
                 }
             });
 
-            await verifier.render();
-            setRecaptchaVerifier(verifier);
-            console.log("reCAPTCHA initialized successfully");
+            // Add timeout to prevent hanging - reduced timeout for faster retry
+            try {
+                const renderPromise = verifier.render();
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('reCAPTCHA render timeout')), 5000); // Reduced to 5 seconds
+                });
+                
+                await Promise.race([renderPromise, timeoutPromise]);
+                setRecaptchaVerifier(verifier);
+                setShowRetryButton(false); // Hide retry button on success
+                console.log("✅ reCAPTCHA initialized successfully");
+            } catch (renderError) {
+                console.error("Error during reCAPTCHA render:", renderError);
+                // Clean up the verifier if render fails
+                try {
+                    verifier.clear();
+                } catch (clearError) {
+                    console.log("Error clearing verifier after render failure:", clearError);
+                }
+                throw renderError;
+            }
         } catch (error) {
             console.error("Error initializing reCAPTCHA:", error);
             
-            // Retry mechanism for network errors
+            // Enhanced retry mechanism for network errors
             if ((error.code === 'auth/network-request-failed' || 
                  error.message?.includes('timeout') || 
-                 error.message?.includes('Network Error')) && 
-                retryCount < 2) {
-                console.log(`Retrying reCAPTCHA initialization (attempt ${retryCount + 1})`);
+                 error.message?.includes('Network Error') ||
+                 error.message?.includes('Timeout')) && 
+                retryCount < 3) {
+                console.log(`🔄 Retrying reCAPTCHA initialization (attempt ${retryCount + 1}/3)`);
+                console.log(`⏳ Waiting ${2000 * (retryCount + 1)}ms before retry...`);
+                
+                // Clean up before retry
+                cleanupRecaptcha();
+                
                 setTimeout(() => {
                     initializeRecaptcha(retryCount + 1);
-                }, 2000 * (retryCount + 1)); // Exponential backoff
+                }, 2000 * (retryCount + 1)); // Shorter exponential backoff
                 return;
             }
             
-            // Handle specific Firebase errors
+            // Handle specific Firebase errors with better user feedback
             if (error.code === 'auth/network-request-failed') {
-                setError("Network error. Please check your internet connection and try again.");
+                setError("🌐 Network error. Please check your internet connection and try again.");
+                console.log("🔍 Network connectivity check:");
+                console.log("- Online status:", navigator.onLine);
+                console.log("- User agent:", navigator.userAgent);
             } else if (error.code === 'auth/too-many-requests') {
-                setError("Too many requests. Please try again later.");
+                setError("⚠️ Too many requests. Please try again later.");
             } else if (error.message && error.message.includes('timeout')) {
-                setError("Request timeout. Please check your internet connection and try again.");
+                setError("⏰ reCAPTCHA initialization timeout. The verification widget may appear white - this is normal. Please try again.");
+            } else if (error.name === 'TypeError' && error.message.includes("Cannot read properties of null")) {
+                setError("❌ reCAPTCHA initialization error. Please refresh the page and try again.");
+                console.log("💡 This error usually occurs when reCAPTCHA elements are removed too aggressively. Refreshing the page will fix it.");
             } else {
-                setError("Failed to initialize verification. Please refresh and try again.");
+                setError("❌ Failed to initialize verification. If you see a white screen, please refresh the page and try again.");
+            }
+            
+            // Add fallback option for network issues
+            if (error.code === 'auth/network-request-failed' || 
+                error.message?.includes('timeout') || 
+                error.message?.includes('Network Error')) {
+                console.log("💡 Suggestions to fix network issues:");
+                console.log("1. Check your internet connection");
+                console.log("2. Try refreshing the page");
+                console.log("3. Check if firewall/proxy is blocking Firebase");
+                console.log("4. Try using a different network");
             }
             
             setLoading(false);
             cleanupRecaptcha();
+            
+            // Show retry button for network issues and TypeError
+            if (error.code === 'auth/network-request-failed' || 
+                error.message?.includes('timeout') || 
+                error.message?.includes('Network Error') ||
+                error.message?.includes('No internet connection') ||
+                (error.name === 'TypeError' && error.message.includes("Cannot read properties of null"))) {
+                setShowRetryButton(true);
+            }
         }
     };
 
   // Cleanup reCAPTCHA
     const cleanupRecaptcha = () => {
         try {
+            console.log("🧹 Cleaning up reCAPTCHA...");
+            
             if (recaptchaVerifier) {
                 try {
                     recaptchaVerifier.clear();
+                    console.log("✅ reCAPTCHA verifier cleared");
                 } catch (clearError) {
                     console.log('reCAPTCHA clear error (expected):', clearError);
                 }
                 setRecaptchaVerifier(null);
             }
       
-      const container = document.getElementById('recaptcha-container');
-      if (container) {
-        container.remove();
-      }
-      
-      const recaptchaElements = document.querySelectorAll('.grecaptcha-badge, .rc-imageselect-target, .rc-imageselect-tile, .rc-imageselect-challenge');
-      recaptchaElements.forEach(element => {
-        try {
-          if (element && element.parentNode) {
-            element.parentNode.removeChild(element);
-          }
-        } catch (removeError) {
-          console.log('Error removing reCAPTCHA element:', removeError);
-        }
-      });
-      
-      const recaptchaIframes = document.querySelectorAll('iframe[src*="recaptcha"]');
-      recaptchaIframes.forEach(iframe => {
-        try {
-          if (iframe && iframe.parentNode) {
-            iframe.parentNode.removeChild(iframe);
-          }
-        } catch (iframeError) {
-          console.log('Error removing reCAPTCHA iframe:', iframeError);
-        }
-      });
-      
-      const recaptchaScripts = document.querySelectorAll('script[src*="recaptcha"]');
-      recaptchaScripts.forEach(script => {
-        try {
-          if (script && script.parentNode) {
-            script.parentNode.removeChild(script);
-          }
-        } catch (scriptError) {
-          console.log('Error removing reCAPTCHA script:', scriptError);
-        }
-      });
-      
+            // Only clear the container content, don't remove it completely
+            const container = document.getElementById('recaptcha-container');
+            if (container) {
+                container.innerHTML = '';
+                console.log("✅ reCAPTCHA container cleared");
+            }
+            
+            // Remove only specific problematic elements, not all reCAPTCHA elements
+            const problematicSelectors = [
+                '.rc-imageselect-target', 
+                '.rc-imageselect-tile', 
+                '.rc-imageselect-challenge'
+            ];
+            
+            problematicSelectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    try {
+                        if (element && element.parentNode) {
+                            element.parentNode.removeChild(element);
+                            console.log(`✅ Removed problematic element: ${selector}`);
+                        }
+                    } catch (removeError) {
+                        console.log(`Error removing element ${selector}:`, removeError);
+                    }
+                });
+            });
+            
+            // Remove only iframes that are causing issues (not all reCAPTCHA iframes)
+            const problematicIframes = document.querySelectorAll('iframe[src*="recaptcha"][style*="position: fixed"]');
+            problematicIframes.forEach(iframe => {
+                try {
+                    if (iframe && iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
+                        console.log("✅ Removed problematic iframe");
+                    }
+                } catch (iframeError) {
+                    console.log('Error removing problematic iframe:', iframeError);
+                }
+            });
+            
+            // Remove only white overlays that are positioned fixed
+            const whiteOverlays = document.querySelectorAll('div[style*="background-color: white"][style*="position: fixed"], div[style*="background: white"][style*="position: fixed"]');
+            whiteOverlays.forEach(overlay => {
+                try {
+                    if (overlay && overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                        console.log("✅ Removed white overlay");
+                    }
+                } catch (overlayError) {
+                    console.log('Error removing white overlay:', overlayError);
+                }
+            });
+            
+            console.log("✅ reCAPTCHA cleanup completed");
         } catch (error) {
             console.error("Error cleaning up reCAPTCHA:", error);
         }
+    };
+
+    // Manual retry function for reCAPTCHA
+    const handleRetryRecaptcha = () => {
+        console.log("🔄 Manual retry triggered");
+        setError('');
+        setShowRetryButton(false);
+        initializeRecaptcha(0);
     };
 
   // Send OTP
@@ -310,8 +408,9 @@ const Login = ({ onAuthChange }) => {
             const isNewUser = result.additionalUserInfo?.isNewUser || false;
             console.log('Is new user in Firebase:', isNewUser);
             
+            console.log('🔔 Login: About to call verifyOtpWithBackend with token:', idToken.substring(0, 20) + '...');
             const backendResponse = await authService.verifyOtpWithBackend(idToken);
-            console.log('Backend verification response:', backendResponse);
+            console.log('🔔 Login: Backend verification response:', backendResponse);
             
             if (backendResponse && backendResponse.data) {
                 const { token, userId } = backendResponse.data;
@@ -368,6 +467,14 @@ const Login = ({ onAuthChange }) => {
                 if (success) {
                     console.log('Auth data stored successfully:', { userId: finalUserId, token: finalToken });
                     console.log('Calling onAuthChange with true');
+                    
+                    // Additional FCM token save as backup (in case auth service didn't trigger it)
+                    console.log('🔔 Login: Scheduling backup FCM token save...');
+                    setTimeout(() => {
+                        console.log('🔔 Login: Executing backup FCM token save for userId:', finalUserId);
+                        authService.saveFCMTokenAfterLogin(finalUserId);
+                    }, 3000);
+                    
           onAuthChange(true);
                     
                     setTimeout(() => {
@@ -428,6 +535,14 @@ const Login = ({ onAuthChange }) => {
                 if (success) {
                     console.log('Firebase auth data stored successfully:', { userId: result.user.uid, token: idToken });
                     console.log('Calling onAuthChange with true (Firebase fallback)');
+                    
+                    // Save FCM token for Firebase fallback scenario
+                    console.log('🔔 Login: Scheduling FCM token save for Firebase fallback...');
+                    setTimeout(() => {
+                        console.log('🔔 Login: Executing FCM token save for Firebase fallback userId:', result.user.uid);
+                        authService.saveFCMTokenAfterLogin(result.user.uid);
+                    }, 2000);
+                    
           onAuthChange(true);
                     
                     setTimeout(() => {
@@ -650,6 +765,21 @@ const Login = ({ onAuthChange }) => {
             {error && (
               <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
+                {showRetryButton && (
+                  <Box sx={{ mt: 2 }}>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={handleRetryRecaptcha}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      🔄 Retry Connection
+                    </Button>
+                    <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary', fontSize: '0.75rem' }}>
+                      If you see a white screen, this is normal during reCAPTCHA initialization. The retry will fix it.
+                    </Typography>
+                  </Box>
+                )}
               </Alert>
             )}
             

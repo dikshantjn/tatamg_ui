@@ -55,6 +55,8 @@ import Logo from '../../ui/Logo';
 import { colors } from '../../../styles/colors';
 import { clearAuthData, getUserId } from '../../../services/User/Auth/auth.utils';
 import { userService } from '../../../services/User/Profile/user.service';
+import { notificationService } from '../../../services/User/Notifications/notification.service';
+import { fcmService } from '../../../services/User/FCM/fcm.service';
 import { fetchCartItems, selectCartItemCount } from '../../../store/slices/cartSlice';
 
 // Add CSS animation for gradient border
@@ -442,7 +444,7 @@ const SearchBox = () => {
   );
 };
 
-const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
+const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn = () => {} }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useDispatch();
@@ -460,6 +462,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [mobilePlaceholderIndex, setMobilePlaceholderIndex] = useState(0);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const topBarRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
 
@@ -548,6 +551,32 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
     };
 
     fetchUserProfile();
+  }, [isAuthenticated]);
+
+  // Fetch unread notification count when authenticated
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      if (isAuthenticated) {
+        try {
+          const userId = getUserId();
+          if (userId) {
+            const count = await notificationService.getUnreadCount(userId);
+            setUnreadNotificationCount(count);
+          }
+        } catch (error) {
+          console.error('Error fetching unread notification count:', error);
+          setUnreadNotificationCount(0);
+        }
+      } else {
+        setUnreadNotificationCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Refresh notification count every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
   }, [isAuthenticated]);
 
   // Handle profile menu
@@ -652,10 +681,22 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   };
 
   // Handle Logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setProfileAnchorEl(null);
     setIsDrawerOpen(false);
     document.body.style.overflow = 'auto';
+
+    // Remove FCM token before clearing auth data
+    try {
+      const userId = getUserId();
+      if (userId) {
+        console.log('🔔 Removing FCM token on logout for userId:', userId);
+        await fcmService.removeFCMToken(userId);
+        console.log('✅ FCM token removed successfully');
+      }
+    } catch (error) {
+      console.error('❌ Error removing FCM token on logout:', error);
+    }
 
     clearAuthData();
     if (onAuthChange && typeof onAuthChange === 'function') {
@@ -674,6 +715,7 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
   // Profile dropdown items
   const profileDropdownItems = [
     { path: '/profile', text: 'My Profile', icon: <AccountCircleIcon /> },
+    { path: '/notifications', text: 'Notifications', icon: <NotificationsIcon />, badge: unreadNotificationCount },
     { path: '/order-history', text: 'My Orders', icon: <HistoryIcon /> },
     { path: '/track-order', text: 'Track Order', icon: <TrackingIcon /> },
     { path: '/health-records', text: 'Health Records', icon: <HealthRecordsIcon /> }
@@ -813,6 +855,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                     fontSize: '0.9rem'
                   }}
                 />
+                {item.badge && item.badge > 0 && (
+                  <Badge 
+                    badgeContent={item.badge} 
+                    color="error" 
+                    sx={{ ml: 1 }}
+                  />
+                )}
               </MenuItem>
             ))}
             <Divider />
@@ -1050,6 +1099,22 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
             >
               Emergency
             </Button>
+
+            {/* Notifications Button */}
+            <IconButton
+              component={Link}
+              to="/notifications"
+              sx={{
+                color: '#1A365D',
+                '&:hover': {
+                  bgcolor: 'rgba(56, 163, 165, 0.1)'
+                }
+              }}
+            >
+              <Badge badgeContent={unreadNotificationCount} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
 
             {/* Cart Button */}
             <IconButton
@@ -1414,6 +1479,9 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
 
               {/* Notifications */}
               <ListItem
+                component={Link}
+                to="/notifications"
+                onClick={() => handleLinkClick('/notifications')}
                 sx={{
                   px: 2.5,
                   py: 1.5,
@@ -1433,6 +1501,13 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
                     fontSize: '0.95rem'
                   }} 
                 />
+                {unreadNotificationCount > 0 && (
+                  <Badge 
+                    badgeContent={unreadNotificationCount} 
+                    color="error" 
+                    sx={{ ml: 1 }}
+                  />
+                )}
               </ListItem>
 
               {/* Health Records */}
@@ -1805,13 +1880,6 @@ const Header = ({ isAuthenticated, onAuthChange, onShowSignIn }) => {
       )}
     </Box>
   );
-};
-
-// Default props to prevent errors
-Header.defaultProps = {
-  isAuthenticated: false,
-  onAuthChange: () => {},
-  onShowSignIn: () => {}
 };
 
 export default Header;

@@ -5,6 +5,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import healthcareTheme from './theme/healthcareTheme';
+import { useFCM } from './hooks/useFCM';
+import NotificationPopup from './components/ui/NotificationPopup';
+import InAppNotification from './components/ui/InAppNotification';
+import BrowserSupportNotification from './components/ui/BrowserSupportNotification';
+import PermissionRequestBanner from './components/ui/PermissionRequestBanner';
+import NotificationPermissionDialog from './components/ui/NotificationPermissionDialog';
+import { authService } from './services/User/Auth/auth.service';
 
 import Header from './components/User/header/Header';
 import Footer from './components/Footer';
@@ -67,6 +74,7 @@ import OfflineDoctorConsultation from './components/User/DoctorConsultation/Offl
 import OnlineDoctorConsultation from './components/User/DoctorConsultation/OnlineDoctorConsultation';
 import BookOfflineAppointment from './components/User/DoctorConsultation/BookDoctorAppointment';
 import HealthRecords from './components/User/HealthRecords/HealthRecords';
+import Notifications from './components/User/Notifications/Notifications';
 import ProductVendorOrders from './components/Vendors/ProductVendor/ProductVendorOrders';
 import ProductVendorReports from './components/Vendors/ProductVendor/ProductVendorReports';
 import MedicalStoreVendorReports from './components/Vendors/MedicalStoreVendor/MedicalStoreVendorReports';
@@ -91,6 +99,26 @@ import BlogDetail from './components/User/HealthBlogs/BlogDetail';
 const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
   const location = useLocation();
   const [isAuthVerified, setIsAuthVerified] = useState(false);
+  
+  // Initialize FCM
+  const {
+    currentNotification,
+    isInitialized,
+    browserSupport,
+    initializeFCM,
+    clearNotification,
+    handleNotificationAction,
+    removeFCMToken
+  } = useFCM();
+
+  // Browser support notification state
+  const [showBrowserSupportNotification, setShowBrowserSupportNotification] = useState(false);
+  
+  // Permission request banner state
+  const [showPermissionBanner, setShowPermissionBanner] = useState(false);
+  
+  // Notification permission dialog state
+  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
 
 
 
@@ -138,6 +166,61 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
     setIsAuthVerified(true);
   }, [userType, onAuthChange]);
 
+  // Initialize FCM when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && userType === 'user' && !isInitialized) {
+      console.log('🔔 Initializing FCM for authenticated user...');
+      initializeFCM();
+    }
+  }, [isAuthenticated, userType, isInitialized, initializeFCM]);
+
+  // Cleanup FCM token on logout
+  useEffect(() => {
+    if (!isAuthenticated && isInitialized) {
+      console.log('🔇 Cleaning up FCM token on logout...');
+      removeFCMToken();
+    }
+  }, [isAuthenticated, isInitialized, removeFCMToken]);
+
+  // Start permission listener when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && userType === 'user') {
+      console.log('🔔 Starting permission listener...');
+      authService.startPermissionListener();
+      
+      // Check if we should show permission dialog
+      if (authService.shouldShowPermissionDialog()) {
+        console.log('🔔 Should show permission dialog');
+        setShowPermissionDialog(true);
+      }
+    } else {
+      console.log('🔔 Stopping permission listener...');
+      authService.stopPermissionListener();
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      authService.stopPermissionListener();
+    };
+  }, [isAuthenticated, userType]);
+
+  // Show browser support notification
+  useEffect(() => {
+    if (browserSupport && !browserSupport.supported && isAuthenticated && userType === 'user') {
+      setShowBrowserSupportNotification(true);
+    }
+  }, [browserSupport, isAuthenticated, userType]);
+
+  // Show permission request banner
+  useEffect(() => {
+    if (isAuthenticated && userType === 'user' && isInitialized) {
+      // Check if permission is default and notifications are supported
+      if ('Notification' in window && Notification.permission === 'default') {
+        setShowPermissionBanner(true);
+      }
+    }
+  }, [isAuthenticated, userType, isInitialized]);
+
 
 
 
@@ -154,6 +237,52 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
   return (
     <div className="app">
       {console.log('🎭 AppContent render - userType:', userType, 'isAuthenticated:', isAuthenticated, 'isAuthVerified:', isAuthVerified)}
+      
+      {/* Permission Request Banner */}
+      {showPermissionBanner && (
+        <PermissionRequestBanner
+          onClose={() => setShowPermissionBanner(false)}
+          onPermissionGranted={() => {
+            console.log('✅ Notification permission granted');
+            setShowPermissionBanner(false);
+          }}
+        />
+      )}
+      
+      {/* Notification Permission Dialog */}
+      <NotificationPermissionDialog
+        open={showPermissionDialog}
+        onClose={() => setShowPermissionDialog(false)}
+        onPermissionGranted={() => {
+          console.log('✅ Notification permission granted via dialog');
+          setShowPermissionDialog(false);
+          // FCM token will be automatically saved by the permission listener
+        }}
+      />
+      
+      {/* Browser Support Notification */}
+      {showBrowserSupportNotification && (
+        <BrowserSupportNotification
+          browserSupport={browserSupport}
+          onClose={() => setShowBrowserSupportNotification(false)}
+        />
+      )}
+      
+      {/* FCM Notification - Choose component based on browser support */}
+      {browserSupport?.supported ? (
+        <NotificationPopup
+          notification={currentNotification}
+          onClose={clearNotification}
+          onAction={handleNotificationAction}
+        />
+      ) : (
+        <InAppNotification
+          notification={currentNotification}
+          onClose={clearNotification}
+          onAction={handleNotificationAction}
+        />
+      )}
+      
       {userType !== 'vendor' && (
         <Header 
           isAuthenticated={isAuthenticated} 
@@ -199,6 +328,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/health-records" element={<HealthRecords />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/health-blogs" element={<HealthBlogs />} />
           <Route path="/health-blogs/:id" element={<BlogDetail />} />
 
@@ -400,6 +530,15 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [userType, setUserType] = useState(null);
 
+  // Expose auth service globally for debugging
+  useEffect(() => {
+    window.authService = authService;
+    console.log('🔧 Auth service exposed globally for debugging. Use: window.authService.manualSaveFCMToken()');
+    console.log('🔧 Debug functions available:');
+    console.log('  - window.authService.debugSaveFCMToken() - Debug FCM token save');
+    console.log('  - window.debugFCMToken() - Debug FCM token generation');
+  }, []);
+
   useEffect(() => {
     verifyAuth();
   }, []);
@@ -539,7 +678,7 @@ function App() {
           </div>
         </div>
         
-        <style jsx>{`
+        <style>{`
           .loading-screen {
             position: fixed;
             top: 0;

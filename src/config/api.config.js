@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "http://192.168.1.37:5000/api",
-  SOCKET_URL: "http://192.168.1.37:5000",
+  BASE_URL: "http://192.168.1.38:5000/api",
+  SOCKET_URL: "http://192.168.1.38:5000",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
   ENDPOINTS: {
@@ -224,6 +224,19 @@ export const API_CONFIG = {
       CREATE_ORDER: "/membership/order",
       VERIFY_PAYMENT: "/membership/verify-payment",
       GET_CURRENT_USER_PLAN: "/membership/user/:userId/current-plan",
+    },
+    NOTIFICATIONS: {
+      GET_NOTIFICATIONS: "/notifications",
+      MARK_AS_READ: "/notifications/:notificationId/read",
+      MARK_ALL_AS_READ: "/notifications/mark-all-read",
+      DELETE_NOTIFICATION: "/notifications/:notificationId",
+    },
+    FCM: {
+      SAVE_TOKEN: "/fcm/save-token",
+      UPDATE_TOKEN: "/fcm/update-token",
+      REMOVE_TOKEN: "/fcm/delete-token",
+      VENDOR_UPDATE: "/fcm/vendor/update",
+      VENDOR_DELETE: "/fcm/vendor/delete",
     },
   },
 };

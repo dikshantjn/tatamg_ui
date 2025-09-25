@@ -13,7 +13,7 @@ import {
     MonitorHeart
 } from '@mui/icons-material';
 
-const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
+const HeroBanner = ({ isAuthenticated = false, onAuthChange = () => {} }) => {
     const navigate = useNavigate();
     const [isPaused, setIsPaused] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -443,12 +443,6 @@ const HeroBanner = ({ isAuthenticated, onAuthChange }) => {
 
         </Box>
     );
-};
-
-// Default props to prevent errors
-HeroBanner.defaultProps = {
-    isAuthenticated: false,
-    onAuthChange: () => {}
 };
 
 export default HeroBanner;
