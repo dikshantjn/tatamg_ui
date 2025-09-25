@@ -182,11 +182,14 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
     }
   }, [isAuthenticated, isInitialized, removeFCMToken]);
 
-  // Start permission listener when user is authenticated
+  // Start permission listener and token refresh when user is authenticated
   useEffect(() => {
     if (isAuthenticated && userType === 'user') {
       console.log('🔔 Starting permission listener...');
       authService.startPermissionListener();
+      
+      console.log('🔄 Starting FCM token refresh...');
+      authService.startTokenRefresh();
       
       // Check if we should show permission dialog
       if (authService.shouldShowPermissionDialog()) {
@@ -196,11 +199,15 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
     } else {
       console.log('🔔 Stopping permission listener...');
       authService.stopPermissionListener();
+      
+      console.log('🔄 Stopping FCM token refresh...');
+      authService.stopTokenRefresh();
     }
     
     // Cleanup on unmount
     return () => {
       authService.stopPermissionListener();
+      authService.stopTokenRefresh();
     };
   }, [isAuthenticated, userType]);
 
@@ -536,7 +543,10 @@ function App() {
     console.log('🔧 Auth service exposed globally for debugging. Use: window.authService.manualSaveFCMToken()');
     console.log('🔧 Debug functions available:');
     console.log('  - window.authService.debugSaveFCMToken() - Debug FCM token save');
+    console.log('  - window.authService.forceRefreshFCMToken() - Force refresh FCM token');
     console.log('  - window.debugFCMToken() - Debug FCM token generation');
+    console.log('  - window.refreshFCMToken() - Refresh FCM token');
+    console.log('  - window.isFCMTokenValid(token) - Check if token is valid');
   }, []);
 
   useEffect(() => {

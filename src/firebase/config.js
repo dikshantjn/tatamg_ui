@@ -249,8 +249,58 @@ export const debugFCMToken = async () => {
   }
 };
 
+// Function to refresh FCM token (call this periodically)
+export const refreshFCMToken = async () => {
+  try {
+    console.log('🔄 Refreshing FCM token...');
+    
+    if (!messagingSupported || !messaging) {
+      console.log('❌ FCM not supported, cannot refresh token');
+      return null;
+    }
+    
+    if (Notification.permission !== 'granted') {
+      console.log('❌ Notification permission not granted, cannot refresh token');
+      return null;
+    }
+    
+    // Get new token
+    const newToken = await getFCMToken();
+    
+    if (newToken) {
+      console.log('✅ FCM token refreshed successfully');
+      return newToken;
+    } else {
+      console.log('❌ Failed to refresh FCM token');
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Error refreshing FCM token:', error);
+    return null;
+  }
+};
+
+// Function to check if FCM token is valid
+export const isFCMTokenValid = async (token) => {
+  if (!token) return false;
+  
+  try {
+    // Try to use the token to check if it's valid
+    // This is a simple check - in production you might want to validate with your backend
+    return token.length > 100 && token.includes(':');
+  } catch (error) {
+    console.error('❌ Error validating FCM token:', error);
+    return false;
+  }
+};
+
 // Expose debug function globally for console testing
 if (typeof window !== 'undefined') {
   window.debugFCMToken = debugFCMToken;
-  console.log('🔧 Debug function available: window.debugFCMToken()');
+  window.refreshFCMToken = refreshFCMToken;
+  window.isFCMTokenValid = isFCMTokenValid;
+  console.log('🔧 Debug functions available:');
+  console.log('  - window.debugFCMToken() - Debug FCM token generation');
+  console.log('  - window.refreshFCMToken() - Refresh FCM token');
+  console.log('  - window.isFCMTokenValid(token) - Check if token is valid');
 } 

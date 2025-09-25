@@ -2,7 +2,8 @@ import { API_CONFIG, getApiUrl } from '../../../config/api.config';
 import { apiClient } from '../../../config/apiClient';
 import { storeAuthData, clearAuthData, getToken, isAuthenticated as checkAuth, getUserId } from '../Auth/auth.utils';
 import { fcmService } from '../FCM/fcm.service';
-import { getFCMToken, getNotificationPermissionStatus, onPermissionChange } from '../../../firebase/config';
+import { getFCMToken, getNotificationPermissionStatus, onPermissionChange, refreshFCMToken, isFCMTokenValid } from '../../../firebase/config';
+import { getDeviceInfo, getTokenRefreshInterval, logDeviceInfo } from '../../../utils/deviceDetection';
 
 class AuthService {
     setAuthToken(token, userId, userData = null) {
@@ -133,7 +134,9 @@ class AuthService {
     // Save FCM token after successful authentication
     async saveFCMTokenAfterLogin(userId) {
         try {
+            const deviceInfo = getDeviceInfo();
             console.log('🔔 Attempting to save FCM token after login for userId:', userId);
+            console.log('📱 Device type:', deviceInfo.type);
             
             // Wait a bit for FCM to initialize
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -155,6 +158,23 @@ class AuthService {
                 try {
                     const response = await fcmService.saveFCMToken(userId, fcmToken);
                     console.log('✅ FCM token saved successfully:', response);
+                    
+                    // For mobile/tablet devices, schedule an immediate refresh after 5 minutes
+                    if (deviceInfo.isMobile || deviceInfo.isTablet) {
+                        console.log('📱 Mobile/Tablet detected - scheduling immediate token refresh in 5 minutes...');
+                        setTimeout(async () => {
+                            console.log('🔄 Mobile/Tablet: Refreshing FCM token...');
+                            try {
+                                const newToken = await refreshFCMToken();
+                                if (newToken) {
+                                    await fcmService.updateFCMToken(userId, newToken);
+                                    console.log('✅ Mobile/Tablet: FCM token refreshed successfully');
+                                }
+                            } catch (error) {
+                                console.error('❌ Mobile/Tablet: Error refreshing FCM token:', error);
+                            }
+                        }, 5 * 60 * 1000); // 5 minutes
+                    }
                 } catch (error) {
                     console.log('⚠️ Failed to save FCM token, trying to update instead...');
                     console.log('Error details:', error);
@@ -337,6 +357,73 @@ class AuthService {
             }
         } else {
             console.log('❌ Debug: No FCM token available to save');
+            return null;
+        }
+    }
+
+    // Start periodic FCM token refresh
+    startTokenRefresh() {
+        const deviceInfo = getDeviceInfo();
+        const refreshInterval = getTokenRefreshInterval();
+        
+        console.log('🔄 Auth Service: Starting periodic FCM token refresh...');
+        console.log('📱 Device type:', deviceInfo.type);
+        console.log('⏰ Refresh interval:', refreshInterval / 1000 / 60, 'minutes');
+        
+        // Log device info for debugging
+        logDeviceInfo();
+        
+        // Refresh token based on device type
+        this.tokenRefreshInterval = setInterval(async () => {
+            const userId = getUserId();
+            if (userId && Notification.permission === 'granted') {
+                console.log('🔄 Auth Service: Refreshing FCM token...');
+                try {
+                    const newToken = await refreshFCMToken();
+                    if (newToken) {
+                        console.log('🔄 Auth Service: Updating FCM token in backend...');
+                        await fcmService.updateFCMToken(userId, newToken);
+                        console.log('✅ Auth Service: FCM token refreshed and updated successfully');
+                    }
+                } catch (error) {
+                    console.error('❌ Auth Service: Error refreshing FCM token:', error);
+                }
+            }
+        }, refreshInterval);
+    }
+
+    // Stop periodic FCM token refresh
+    stopTokenRefresh() {
+        if (this.tokenRefreshInterval) {
+            console.log('🔄 Auth Service: Stopping periodic FCM token refresh...');
+            clearInterval(this.tokenRefreshInterval);
+            this.tokenRefreshInterval = null;
+        }
+    }
+
+    // Force refresh FCM token (can be called manually)
+    async forceRefreshFCMToken() {
+        const userId = getUserId();
+        if (!userId) {
+            console.log('❌ No user ID found, please login first');
+            return null;
+        }
+        
+        console.log('🔄 Auth Service: Force refreshing FCM token for userId:', userId);
+        
+        try {
+            const newToken = await refreshFCMToken();
+            if (newToken) {
+                console.log('🔄 Auth Service: Updating FCM token in backend...');
+                const response = await fcmService.updateFCMToken(userId, newToken);
+                console.log('✅ Auth Service: FCM token force refreshed and updated successfully');
+                return response;
+            } else {
+                console.log('❌ Auth Service: Failed to refresh FCM token');
+                return null;
+            }
+        } catch (error) {
+            console.error('❌ Auth Service: Error force refreshing FCM token:', error);
             return null;
         }
     }
