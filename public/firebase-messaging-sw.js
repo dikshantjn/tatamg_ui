@@ -7,12 +7,11 @@ firebase.initializeApp({
   apiKey: "AIzaSyA4RBpkDfIFjPPoiQyP6LkHB_cILz-tekU",
   authDomain: "vedikahealthcare-59980.firebaseapp.com",
   projectId: "vedikahealthcare-59980",
-  storageBucket: "vedikahealthcare-59980.appspot.com", // ✅ FIXED
+  storageBucket: "vedikahealthcare-59980.firebasestorage.app",
   messagingSenderId: "1021794706756",
   appId: "1:1021794706756:web:743a02ce8dda477751e311",
   measurementId: "G-8KJ946S3EF"
 });
-
 
 // Initialize Firebase Messaging
 const messaging = firebase.messaging();

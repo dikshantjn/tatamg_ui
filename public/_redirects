@@ -1,0 +1,11 @@
+# Netlify redirects for Single Page Application (SPA)
+# This ensures all routes are handled by React Router
+
+# Redirect all routes to index.html for client-side routing
+/*    /index.html   200
+
+# Optional: Handle specific API routes if you have any
+# /api/*  https://your-backend-url.com/api/:splat  200
+
+# Optional: Handle specific static assets
+# /static/*  /static/:splat  200
