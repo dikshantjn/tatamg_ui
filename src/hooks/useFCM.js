@@ -115,13 +115,44 @@ export const useFCM = () => {
 
     // Check if we're in foreground (tab is active)
     const isForeground = !document.hidden;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    console.log('📱 Device info:', { isForeground, isMobile, userAgent: navigator.userAgent });
+    
+    // For mobile devices, always show native notifications if permission is granted
+    if (isMobile && Notification.permission === 'granted') {
+      console.log('📱 Mobile device - showing native notification');
+      const browserNotification = new Notification(notification.title, {
+        body: notification.body,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico',
+        tag: notification.notificationId || 'fcm-notification',
+        data: notification.data,
+        requireInteraction: true, // Keep notification visible until user interacts
+        silent: false // Ensure notification makes sound
+      });
+
+      browserNotification.onclick = () => {
+        window.focus();
+        browserNotification.close();
+        // Handle notification click action
+        if (notification.data.actionUrl) {
+          window.location.href = notification.data.actionUrl;
+        }
+      };
+      
+      // Also show in-app notification for better UX on mobile
+      setCurrentNotification(notification);
+      console.log('📱 Mobile: Showing both native and in-app notification');
+      return;
+    }
     
     if (isForeground) {
-      // Show custom popup for foreground
+      // Show custom popup for foreground (desktop)
       setCurrentNotification(notification);
-      console.log('📱 Showing custom popup (foreground)');
+      console.log('📱 Showing custom popup (foreground desktop)');
     } else {
-      // Show browser notification for background
+      // Show browser notification for background (desktop)
       if (Notification.permission === 'granted') {
         const browserNotification = new Notification(notification.title, {
           body: notification.body,
@@ -139,7 +170,7 @@ export const useFCM = () => {
             window.location.href = notification.data.actionUrl;
           }
         };
-        console.log('📱 Showing browser notification (background)');
+        console.log('📱 Showing browser notification (background desktop)');
       }
     }
   }, [browserSupport]);

@@ -162,6 +162,36 @@ export const requestNotificationPermission = async () => {
     
     if (permission === 'granted') {
       console.log('✅ Notification permission granted!');
+      
+      // Test notification on mobile devices
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        console.log('📱 Mobile device detected - testing notification');
+        try {
+          const testNotification = new Notification('Vedika Healthcare', {
+            body: 'Notifications are now enabled!',
+            icon: '/favicon.ico',
+            badge: '/favicon.ico',
+            tag: 'permission-test',
+            requireInteraction: true,
+            silent: false
+          });
+          
+          testNotification.onclick = () => {
+            testNotification.close();
+          };
+          
+          // Auto-close after 3 seconds
+          setTimeout(() => {
+            testNotification.close();
+          }, 3000);
+          
+          console.log('✅ Test notification sent on mobile');
+        } catch (testError) {
+          console.log('⚠️ Test notification failed:', testError);
+        }
+      }
+      
       return true;
     } else if (permission === 'denied') {
       console.log('❌ Notification permission denied');
