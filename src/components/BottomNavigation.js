@@ -10,6 +10,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import PhoneIcon from '@mui/icons-material/Phone';
 import MicIcon from '@mui/icons-material/Mic';
 import { keyframes } from '@mui/system';
+import VedikaAIModal from './User/VedikaAI/VedikaAIModal';
 
 function BottomNavigation() {
     const location = useLocation();
@@ -71,7 +72,6 @@ function BottomNavigation() {
 
     const handleSpeakClick = () => {
         setShowVoiceRecognition(true);
-        // Implement voice recognition overlay/modal if needed
     };
 
     const handleEmergencyClick = () => {
@@ -94,6 +94,9 @@ function BottomNavigation() {
                 transition: 'transform 300ms ease',
             }}
         >
+            {/* Vedika AI Modal */}
+            <VedikaAIModal open={showVoiceRecognition} onClose={() => setShowVoiceRecognition(false)} />
+
             {/* Layout container to reserve space for circular button */}
             <Box
                 sx={{

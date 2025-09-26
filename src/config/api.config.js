@@ -1,10 +1,12 @@
 import axios from "axios";
 
 export const API_CONFIG = {
-  BASE_URL: "https://9298eb0a2b0f.ngrok-free.app/api",
-  SOCKET_URL: "https://9298eb0a2b0f.ngrok-free.app",
+  // BASE_URL: "https://9298eb0a2b0f.ngrok-free.app/api",
+  // SOCKET_URL: "https://9298eb0a2b0f.ngrok-free.app",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
+BASE_URL: "http://localhost:5000/api",
+  SOCKET_URL: "http://localhost:5000",
   ENDPOINTS: {
     AUTH: {
       VERIFY_OTP: "/otp/verify-otp",
@@ -161,6 +163,7 @@ export const API_CONFIG = {
     },
     LAB_TEST: {
       GET_ALL_DIAGNOSTIC_CENTERS: "/lab-test/all-diagnostic-centers",
+      GET_PROFILE: "/lab-test/profile/:vendorId",
       CREATE_BOOKING: "/labtest-booking/create",
       GET_COMPLETED_BOOKINGS: "/labtest-booking/bookings/user/completed/:userId",
     },
@@ -237,6 +240,9 @@ export const API_CONFIG = {
       REMOVE_TOKEN: "/fcm/delete-token",
       VENDOR_UPDATE: "/fcm/vendor/update",
       VENDOR_DELETE: "/fcm/vendor/delete",
+    },
+    VEDIKA_AI: {
+      RESOLVE_INTENT: "/speakAI/intent",
     },
   },
 };

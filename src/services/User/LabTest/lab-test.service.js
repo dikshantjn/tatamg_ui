@@ -229,6 +229,48 @@ class LabTestService {
     }
   }
 
+  // Get lab profile by vendorId
+  async getLabProfile(vendorId) {
+    try {
+      console.log('Fetching lab profile for vendorId:', vendorId);
+      
+      const token = getToken();
+
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const endpoint = API_CONFIG.ENDPOINTS.LAB_TEST.GET_PROFILE.replace(':vendorId', vendorId);
+      const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+      
+      console.log('Making API call to:', url);
+
+      const response = await apiClient.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Lab profile API response:', response);
+
+      if (response.status !== 200) {
+        throw new Error(`Failed to fetch lab profile: ${response.status}`);
+      }
+
+      const responseData = response.data;
+      console.log('Lab profile data:', responseData);
+
+      // Extract diagnostic center data from response
+      const diagnosticCenterData = responseData.diagnosticCenter || responseData.data || responseData;
+      console.log('Extracted diagnostic center data:', diagnosticCenterData);
+
+      return diagnosticCenterData;
+    } catch (error) {
+      console.error('Error fetching lab profile:', error);
+      throw error;
+    }
+  }
+
   // Get all diagnostic centers
   async getAllDiagnosticCenters() {
     try {

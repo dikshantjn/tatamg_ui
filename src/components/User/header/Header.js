@@ -52,6 +52,7 @@ import {
   DescriptionOutlined as TermsIcon
 } from '@mui/icons-material';
 import Logo from '../../ui/Logo';
+import VedikaAIModal from '../VedikaAI/VedikaAIModal';
 import { colors } from '../../../styles/colors';
 import { clearAuthData, getUserId } from '../../../services/User/Auth/auth.utils';
 import { userService } from '../../../services/User/Profile/user.service';
@@ -463,6 +464,7 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [mobilePlaceholderIndex, setMobilePlaceholderIndex] = useState(0);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [showVedikaAI, setShowVedikaAI] = useState(false);
   const topBarRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
 
@@ -654,30 +656,7 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
 
   // Handle speech recognition
   const handleSpeakClick = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-      const recognition = new SpeechRecognition();
-      
-      recognition.lang = 'en-US';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        setMobileSearchQuery(transcript);
-        if (transcript.trim()) {
-          setMobileSearchAnchorEl(mobileSearchInputRef.current);
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-      };
-
-      recognition.start();
-    } else {
-      alert('Speech recognition is not supported in your browser. Please try using Chrome or Edge.');
-    }
+    setShowVedikaAI(true);
   };
 
   // Handle Logout
@@ -1304,6 +1283,9 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
         transition: 'height 0.25s ease',
         flexShrink: 0
       }} />
+
+      {/* Vedika AI Modal (desktop and mobile) */}
+      <VedikaAIModal open={showVedikaAI} onClose={() => setShowVedikaAI(false)} />
 
       {/* Mobile Drawer */}
       <Drawer

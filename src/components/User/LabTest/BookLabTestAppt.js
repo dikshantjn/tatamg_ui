@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import labTestPaymentService from '../../../services/payment/lab-test-payment.service';
+import labTestService from '../../../services/User/LabTest/lab-test.service';
 import PaymentSuccessDialog from './PaymentSuccessDialog';
 import { getUserId } from '../../../services/User/Auth/auth.utils';
 import {
@@ -18,7 +19,10 @@ import {
   IconButton,
   Card,
   CardContent,
-  Container
+  Container,
+  CircularProgress,
+  Skeleton,
+  Divider
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PersonIcon from '@mui/icons-material/Person';
@@ -26,6 +30,16 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ImageIcon from '@mui/icons-material/Image';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import BusinessIcon from '@mui/icons-material/Business';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import LanguageIcon from '@mui/icons-material/Language';
+import EmailIcon from '@mui/icons-material/Email';
+import WebIcon from '@mui/icons-material/Web';
+import LocalParkingIcon from '@mui/icons-material/LocalParking';
+import AccessibilityIcon from '@mui/icons-material/Accessibility';
+import ElevatorIcon from '@mui/icons-material/Elevator';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
 const timeSlots = [
   '08:00 AM', '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
@@ -33,11 +47,13 @@ const timeSlots = [
 ];
 
 const BookLabTestAppt = () => {
-  const { labId } = useParams();
+  const { vendorId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const lab = location.state?.lab;
+  const initialLab = location.state?.lab;
 
+  const [lab, setLab] = useState(initialLab || null);
+  const [loadingLabProfile, setLoadingLabProfile] = useState(false);
   const [selectedTests, setSelectedTests] = useState([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -49,6 +65,101 @@ const BookLabTestAppt = () => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
+
+  // Fetch lab profile by vendorId
+  const fetchLabProfile = async () => {
+    if (!vendorId) return;
+    
+    // If we already have complete lab data, don't fetch again
+    if (lab && lab.name && lab.testTypes && lab.address) {
+      console.log('Lab data already available:', lab);
+      return;
+    }
+    
+    try {
+      setLoadingLabProfile(true);
+      console.log('Fetching lab profile for vendorId:', vendorId);
+      
+      const profileData = await labTestService.getLabProfile(vendorId);
+      console.log('Fetched lab profile:', profileData);
+      
+      // Map API response to component expected structure
+      const mappedLabData = {
+        id: profileData.diagnosticCenterId || profileData.id,
+        vendorId: profileData.vendorId,
+        name: profileData.name || 'Unknown Lab',
+        address: profileData.address ? `${profileData.address}, ${profileData.city}, ${profileData.state} - ${profileData.pincode}` : 'Address not available',
+        phone: profileData.mainContactNumber || '',
+        emergencyPhone: profileData.emergencyContactNumber || '',
+        email: profileData.email || '',
+        website: profileData.website || '',
+        timing: profileData.businessTimings || 'N/A',
+        businessDays: profileData.businessDays || [],
+        services: profileData.testTypes || [],
+        image: profileData.centerPhotosUrl || '',
+        sampleCollectionMethod: profileData.sampleCollectionMethod || 'Both',
+        homeCollectionLimit: profileData.homeCollectionGeoLimit || 'N/A',
+        emergencyHandling: profileData.emergencyHandlingFastTrack || false,
+        parkingAvailable: profileData.parkingAvailable || false,
+        wheelchairAccess: profileData.wheelchairAccess || false,
+        liftAccess: profileData.liftAccess || false,
+        ambulanceService: profileData.ambulanceServiceAvailable || false,
+        nearbyLandmark: profileData.nearbyLandmark || '',
+        languagesSpoken: profileData.languagesSpoken || [],
+        generatedId: profileData.generatedId || '',
+        ownerName: profileData.ownerName || '',
+        gstNumber: profileData.gstNumber || '',
+        panNumber: profileData.panNumber || '',
+        location: profileData.location || '',
+        floor: profileData.floor || '',
+        filesAndImages: profileData.filesAndImages || [],
+        googleMapsLocationUrl: profileData.googleMapsLocationUrl || '',
+        // Keep original fields for backward compatibility
+        ...profileData
+      };
+      
+      console.log('Mapped lab data:', mappedLabData);
+      
+      // Update the lab with mapped profile
+      setLab(mappedLabData);
+    } catch (error) {
+      console.error('Error fetching lab profile:', error);
+      // Don't show error to user, just log it
+    } finally {
+      setLoadingLabProfile(false);
+    }
+  };
+
+  // Fetch lab profile on component mount
+  useEffect(() => {
+    fetchLabProfile();
+  }, [vendorId]);
+
+  if (!lab && loadingLabProfile) {
+    return (
+      <Box sx={{ p: { xs: 2, md: 3 } }}>
+        <Paper sx={{ p: 2, display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <IconButton onClick={() => navigate(-1)}><ArrowBackIcon /></IconButton>
+          <Typography variant="h6" fontWeight={700}>Loading Lab Profile...</Typography>
+        </Paper>
+        <Container maxWidth="md">
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Skeleton variant="circular" width={56} height={56} />
+              <Box sx={{ flex: 1 }}>
+                <Skeleton variant="text" width="60%" height={32} />
+                <Skeleton variant="text" width="40%" height={24} />
+                <Skeleton variant="text" width="30%" height={20} />
+              </Box>
+            </Stack>
+          </Paper>
+          <Skeleton variant="rounded" height={200} sx={{ mb: 2 }} />
+          <Skeleton variant="rounded" height={200} sx={{ mb: 2 }} />
+          <Skeleton variant="rounded" height={200} />
+        </Container>
+      </Box>
+    );
+  }
 
   if (!lab) {
     return (
@@ -120,11 +231,11 @@ const BookLabTestAppt = () => {
     setIsSubmitting(true);
 
     // Get vendorId and userId for console logging
-    const vendorId = lab.vendorId; // Use the actual vendorId from lab data
+    const labVendorId = lab.vendorId; // Use the actual vendorId from lab data
     const userId = getUserId();
 
     console.log('🔍 Booking Lab Test Appointment:');
-    console.log('📋 Vendor ID:', vendorId);
+    console.log('📋 Vendor ID:', labVendorId);
     console.log('👤 User ID:', userId);
     console.log('👤 Lab Name:', lab.name);
 
@@ -132,7 +243,7 @@ const BookLabTestAppt = () => {
     try {
       const appointmentData = {
         appointmentId: `LAB_${Date.now()}`,
-        labId: labId,
+        labId: vendorId, // Use vendorId from URL params
         vendorId: lab.vendorId, // Pass the vendorId from lab data
         labName: lab.name,
         selectedTests: selectedTests,
@@ -194,7 +305,73 @@ const BookLabTestAppt = () => {
               {(lab.services || []).slice(0, 4).map((s, idx) => (
                 <Chip key={idx} size="small" label={s} variant="outlined" />
               ))}
+              {(lab.services || []).length > 4 && (
+                <Chip size="small" label={`+${(lab.services || []).length - 4} more`} variant="outlined" />
+              )}
             </Stack>
+            
+            {/* Additional Lab Information */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Lab Information</Typography>
+              <Grid container spacing={1}>
+                {lab.timing && (
+                  <Grid item xs={12} sm={6}>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <AccessTimeIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">{lab.timing}</Typography>
+                    </Stack>
+                  </Grid>
+                )}
+                {lab.sampleCollectionMethod && (
+                  <Grid item xs={12} sm={6}>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <BusinessIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">{lab.sampleCollectionMethod}</Typography>
+                    </Stack>
+                  </Grid>
+                )}
+                {lab.homeCollectionLimit && (
+                  <Grid item xs={12} sm={6}>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">Home Collection: {lab.homeCollectionLimit}</Typography>
+                    </Stack>
+                  </Grid>
+                )}
+                {lab.nearbyLandmark && (
+                  <Grid item xs={12} sm={6}>
+                    <Stack direction="row" spacing={0.5} alignItems="center">
+                      <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                      <Typography variant="caption" color="text.secondary">Near: {lab.nearbyLandmark}</Typography>
+                    </Stack>
+                  </Grid>
+                )}
+              </Grid>
+              
+              {/* Lab Facilities */}
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>Facilities:</Typography>
+                <Stack direction="row" spacing={0.5} flexWrap="wrap">
+                  {lab.parkingAvailable && <Chip size="small" icon={<LocalParkingIcon />} label="Parking" variant="outlined" />}
+                  {lab.wheelchairAccess && <Chip size="small" icon={<AccessibilityIcon />} label="Wheelchair Access" variant="outlined" />}
+                  {lab.liftAccess && <Chip size="small" icon={<ElevatorIcon />} label="Lift Access" variant="outlined" />}
+                  {lab.emergencyHandling && <Chip size="small" icon={<LocalHospitalIcon />} label="Emergency Handling" variant="outlined" />}
+                  {lab.ambulanceService && <Chip size="small" icon={<LocalHospitalIcon />} label="Ambulance Service" variant="outlined" />}
+                </Stack>
+              </Box>
+              
+              {/* Languages Spoken */}
+              {lab.languagesSpoken && lab.languagesSpoken.length > 0 && (
+                <Box sx={{ mt: 1 }}>
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <LanguageIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                    <Typography variant="caption" color="text.secondary">
+                      Languages: {lab.languagesSpoken.join(', ')}
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
+            </Box>
           </Box>
         </Stack>
       </Paper>
@@ -319,6 +496,91 @@ const BookLabTestAppt = () => {
           </Paper>
         </Grid>
       </Grid>
+      
+      {/* Additional Lab Details Section */}
+      <Container maxWidth="md" sx={{ mt: 2 }}>
+        <Paper sx={{ p: { xs: 1.5, md: 2 }, border: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Lab Details</Typography>
+          
+          <Grid container spacing={2}>
+            {/* Contact Information */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Contact Information</Typography>
+              <Stack spacing={1}>
+                {lab.email && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <EmailIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <Typography variant="body2">{lab.email}</Typography>
+                  </Stack>
+                )}
+                {lab.website && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <WebIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <Typography variant="body2" component="a" href={lab.website} target="_blank" rel="noopener noreferrer" sx={{ textDecoration: 'none', color: 'primary.main' }}>
+                      {lab.website}
+                    </Typography>
+                  </Stack>
+                )}
+                {lab.emergencyPhone && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <PhoneIcon sx={{ fontSize: 18, color: 'error.main' }} />
+                    <Typography variant="body2" color="error.main">Emergency: {lab.emergencyPhone}</Typography>
+                  </Stack>
+                )}
+              </Stack>
+            </Grid>
+            
+            {/* Business Information */}
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Business Information</Typography>
+              <Stack spacing={1}>
+                {lab.generatedId && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <BusinessIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <Typography variant="body2">ID: {lab.generatedId}</Typography>
+                  </Stack>
+                )}
+                {lab.ownerName && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <PersonIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <Typography variant="body2">Owner: {lab.ownerName}</Typography>
+                  </Stack>
+                )}
+                {lab.floor && (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <BusinessIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                    <Typography variant="body2">Floor: {lab.floor}</Typography>
+                  </Stack>
+                )}
+              </Stack>
+            </Grid>
+            
+            {/* Business Days */}
+            {lab.businessDays && lab.businessDays.length > 0 && (
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Operating Days</Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {lab.businessDays.map((day, idx) => (
+                    <Chip key={idx} label={day} size="small" variant="outlined" />
+                  ))}
+                </Stack>
+              </Grid>
+            )}
+            
+            {/* Available Tests */}
+            {lab.services && lab.services.length > 0 && (
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>Available Tests</Typography>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {lab.services.map((test, idx) => (
+                    <Chip key={idx} label={test} size="small" color="primary" variant="outlined" />
+                  ))}
+                </Stack>
+              </Grid>
+            )}
+          </Grid>
+        </Paper>
+      </Container>
       </Container>
 
       {/* Payment Success Dialog */}

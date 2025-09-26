@@ -316,7 +316,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
           <Route path="/ambulance" element={<Ambulance />} />
           <Route path="/membership" element={<Membership />} />
           <Route path="/lab-tests" element={<LabTests />} />
-          <Route path="/lab-tests/book/:labId" element={<BookLabTestAppt />} />
+          <Route path="/lab-tests/book/:vendorId" element={<BookLabTestAppt />} />
           <Route path="/blood-bank" element={<BloodBank />} />
           <Route path="/medicine-order" element={<MedicineDelivery />} />
           <Route path="/new-medicine-order" element={<NewMedicineOrder />} />

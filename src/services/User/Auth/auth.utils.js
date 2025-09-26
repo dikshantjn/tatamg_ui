@@ -68,10 +68,14 @@ export const getToken = () => {
 export const getUserId = () => {
     try {
         const userId = localStorage.getItem(USER_ID_KEY);
+        console.log('🔍 Auth Utils - getUserId called, USER_ID_KEY:', USER_ID_KEY);
+        console.log('🔍 Auth Utils - Raw userId from localStorage:', userId);
+        console.log('🔍 Auth Utils - All localStorage keys:', Object.keys(localStorage));
         if (!userId) {
             console.log('No user ID found in localStorage');
             return null;
         }
+        console.log('🔍 Auth Utils - Returning userId:', userId);
         return userId;
     } catch (error) {
         console.error('Error getting user ID from localStorage:', error);

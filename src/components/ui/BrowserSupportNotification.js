@@ -6,18 +6,30 @@ import {
   Typography,
   Chip,
   Button,
-  Collapse
+  Paper,
+  Fade
 } from '@mui/material';
 import {
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
   Close as CloseIcon,
-  Notifications as NotificationIcon
+  Notifications as NotificationIcon,
+  ArrowUpward as ArrowUpwardIcon
 } from '@mui/icons-material';
 
 const BrowserSupportNotification = ({ browserSupport, onClose }) => {
   const [permissionStatus, setPermissionStatus] = React.useState(Notification?.permission || 'default');
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    // Ensure component is mounted and DOM is ready
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleRequestPermission = async () => {
     try {
@@ -31,132 +43,210 @@ const BrowserSupportNotification = ({ browserSupport, onClose }) => {
     }
   };
 
-  if (!browserSupport) return null;
+  if (!browserSupport || !isMounted) return null;
 
-  const getAlertProps = () => {
+  const getStatusConfig = () => {
     if (browserSupport.supported) {
       return {
-        severity: 'success',
-        icon: <CheckCircleIcon />,
-        title: 'Push Notifications Supported',
-        color: '#4CAF50'
+        icon: <CheckCircleIcon sx={{ color: '#4CAF50', fontSize: 20 }} />,
+        title: 'Notifications Ready',
+        subtitle: 'Your browser supports push notifications',
+        bgColor: 'rgba(76, 175, 80, 0.1)',
+        borderColor: '#4CAF50'
       };
     } else {
       return {
-        severity: 'warning',
-        icon: <WarningIcon />,
-        title: 'Push Notifications Limited',
-        color: '#FF9800'
+        icon: <WarningIcon sx={{ color: '#FF9800', fontSize: 20 }} />,
+        title: 'Enable Notifications',
+        subtitle: 'Click the notification icon above to enable',
+        bgColor: 'rgba(255, 152, 0, 0.1)',
+        borderColor: '#FF9800'
       };
     }
   };
 
-  const alertProps = getAlertProps();
+  const statusConfig = getStatusConfig();
 
   return (
-    <Alert
-      severity={alertProps.severity}
-      icon={alertProps.icon}
+    <Box
       sx={{
         position: 'fixed',
-        top: 20,
-        left: 20,
-        right: 20,
+        top: 80, // Position below notification bar
+        left: '50%',
+        transform: 'translateX(-50%)',
         zIndex: 10000,
-        borderRadius: 2,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        maxWidth: 500,
-        mx: 'auto'
+        maxWidth: 320,
+        width: '90%',
+        opacity: isMounted ? 1 : 0,
+        transition: 'opacity 0.5s ease-in-out'
       }}
-      action={
-        <Button
-          size="small"
-          onClick={onClose}
-          sx={{ 
-            color: 'inherit',
-            minWidth: 'auto',
-            p: 0.5
+    >
+        {/* Arrow pointing up to notification bar */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            mb: 1
           }}
         >
-          <CloseIcon fontSize="small" />
-        </Button>
-      }
-    >
-      <AlertTitle sx={{ fontWeight: 600 }}>
-        {alertProps.title}
-      </AlertTitle>
-      
-      <Typography variant="body2" sx={{ mb: 1 }}>
-        {browserSupport.reason}
-      </Typography>
-      
-      {browserSupport.browserInfo && (
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-          <Chip
-            label={`${browserSupport.browserInfo.browserName} ${browserSupport.browserInfo.browserVersion}`}
-            size="small"
-            variant="outlined"
-            sx={{ fontSize: '0.75rem' }}
+          <Box
+            sx={{
+              width: 0,
+              height: 0,
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderBottom: `12px solid ${statusConfig.borderColor}`,
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: -2,
+                left: -6,
+                width: 0,
+                height: 0,
+                borderLeft: '6px solid transparent',
+                borderRight: '6px solid transparent',
+                borderBottom: '10px solid white'
+              }
+            }}
           />
-          {browserSupport.browserInfo.isMobile && (
-            <Chip
-              label="Mobile"
-              size="small"
-              variant="outlined"
-              sx={{ fontSize: '0.75rem' }}
-            />
-          )}
-          {browserSupport.browserInfo.isTablet && (
-            <Chip
-              label="Tablet"
-              size="small"
-              variant="outlined"
-              sx={{ fontSize: '0.75rem' }}
-            />
-          )}
         </Box>
-      )}
-      
-      {!browserSupport.supported && (
-        <Box sx={{ mt: 1 }}>
-          <Typography variant="body2" sx={{ mb: 1, opacity: 0.8 }}>
-            You can still receive notifications through the app's notification center.
-          </Typography>
-          
-          {permissionStatus === 'default' && (
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<NotificationIcon />}
-              onClick={handleRequestPermission}
-              sx={{
-                textTransform: 'none',
-                fontSize: '0.75rem',
-                borderColor: '#FF9800',
-                color: '#FF9800',
-                '&:hover': {
-                  bgcolor: 'rgba(255, 152, 0, 0.1)'
-                }
-              }}
-            >
-              Enable Notifications
-            </Button>
-          )}
-          
-          {permissionStatus === 'granted' && (
-            <Typography variant="body2" sx={{ color: '#4CAF50', fontWeight: 500 }}>
-              ✅ Notifications enabled
+
+        {/* Dashed line */}
+        <Box
+          sx={{
+            height: 2,
+            background: `repeating-linear-gradient(
+              to right,
+              ${statusConfig.borderColor} 0px,
+              ${statusConfig.borderColor} 8px,
+              transparent 8px,
+              transparent 16px
+            )`,
+            mb: 1
+          }}
+        />
+
+        {/* Main dialog */}
+        <Paper
+          elevation={8}
+          sx={{
+            borderRadius: 3,
+            border: `2px solid ${statusConfig.borderColor}`,
+            backgroundColor: statusConfig.bgColor,
+            backdropFilter: 'blur(10px)',
+            overflow: 'hidden'
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            {/* Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {statusConfig.icon}
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                  {statusConfig.title}
+                </Typography>
+              </Box>
+              <Button
+                size="small"
+                onClick={onClose}
+                sx={{ 
+                  color: 'inherit',
+                  minWidth: 'auto',
+                  p: 0.5,
+                  opacity: 0.7,
+                  '&:hover': { opacity: 1 }
+                }}
+              >
+                <CloseIcon fontSize="small" />
+              </Button>
+            </Box>
+
+            {/* Content */}
+            <Typography variant="body2" sx={{ mb: 1.5, opacity: 0.8, fontSize: '0.8rem' }}>
+              {statusConfig.subtitle}
             </Typography>
-          )}
-          
-          {permissionStatus === 'denied' && (
-            <Typography variant="body2" sx={{ color: '#F44336', fontWeight: 500 }}>
-              ❌ Notifications blocked
-            </Typography>
-          )}
-        </Box>
-      )}
-    </Alert>
+
+            {/* Browser info chips */}
+            {browserSupport.browserInfo && (
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1.5 }}>
+                <Chip
+                  label={`${browserSupport.browserInfo.browserName}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ 
+                    fontSize: '0.7rem',
+                    height: 20,
+                    borderColor: statusConfig.borderColor,
+                    color: statusConfig.borderColor
+                  }}
+                />
+                {browserSupport.browserInfo.isMobile && (
+                  <Chip
+                    label="Mobile"
+                    size="small"
+                    variant="outlined"
+                    sx={{ 
+                      fontSize: '0.7rem',
+                      height: 20,
+                      borderColor: statusConfig.borderColor,
+                      color: statusConfig.borderColor
+                    }}
+                  />
+                )}
+              </Box>
+            )}
+
+            {/* Action button for unsupported browsers */}
+            {!browserSupport.supported && permissionStatus === 'default' && (
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<NotificationIcon />}
+                onClick={handleRequestPermission}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  backgroundColor: statusConfig.borderColor,
+                  color: 'white',
+                  borderRadius: 2,
+                  px: 2,
+                  py: 0.5,
+                  '&:hover': {
+                    backgroundColor: statusConfig.borderColor,
+                    opacity: 0.9
+                  }
+                }}
+              >
+                Enable Now
+              </Button>
+            )}
+
+            {/* Status indicators */}
+            {!browserSupport.supported && (
+              <Box sx={{ mt: 1 }}>
+                {permissionStatus === 'granted' && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <CheckCircleIcon sx={{ color: '#4CAF50', fontSize: 16 }} />
+                    <Typography variant="caption" sx={{ color: '#4CAF50', fontWeight: 500 }}>
+                      Notifications enabled
+                    </Typography>
+                  </Box>
+                )}
+                
+                {permissionStatus === 'denied' && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <WarningIcon sx={{ color: '#F44336', fontSize: 16 }} />
+                    <Typography variant="caption" sx={{ color: '#F44336', fontWeight: 500 }}>
+                      Notifications blocked
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </Box>
+        </Paper>
+    </Box>
   );
 };
 

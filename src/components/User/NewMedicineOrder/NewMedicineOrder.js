@@ -156,30 +156,39 @@ const NewMedicineOrder = () => {
       }
       
       formData.append('quantityPreference', combinedOrderDetails.join('\n\n'));
-      formData.append('skipNotes', skipNotes);
+      formData.append('skipNotes', skipNotes || '');
       
-      // Append all files
+      // Append all files (only if there are files)
       prescriptionFiles.forEach((file, index) => {
         formData.append('files', file);
       });
+      
+      // If no files are uploaded, add an empty file field to ensure FormData is valid
+      if (prescriptionFiles.length === 0) {
+        // Create an empty file-like object to ensure the FormData structure is consistent
+        const emptyFile = new File([''], 'empty.txt', { type: 'text/plain' });
+        formData.append('files', emptyFile);
+      }
       
       const response = await medicalStoresService.sendPrescription(formData);
       
       setSnackbar({
         open: true,
-        message: 'Prescription sent successfully!',
+        message: 'Order submitted successfully!',
         severity: 'success'
       });
       
       setUploadDialogOpen(false);
       setPrescriptionFiles([]);
+      setGeneralProducts('');
       setQuantityPreference('');
-      setSkipNotes(false);
+      setSkipNotes('');
       setSelectedStore(null);
     } catch (err) {
+      console.error('Error submitting order:', err);
       setSnackbar({
         open: true,
-        message: 'Failed to send prescription',
+        message: 'Failed to submit order. Please try again.',
         severity: 'error'
       });
     } finally {

@@ -35,6 +35,37 @@ export const doctorConsultationService = {
         }
     },
 
+    getDoctorProfile: async (vendorId) => {
+        try {
+            console.log('Fetching doctor profile for vendorId:', vendorId);
+            
+            const endpoint = API_CONFIG.ENDPOINTS.DOCTOR_CONSULTATION.GET_PROFILE.replace(':vendorId', vendorId);
+            const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+            
+            console.log('Making API call to:', url);
+            
+            const response = await apiClient.get(url);
+
+            console.log('Doctor profile API response:', response);
+
+            if (response.status !== 200) {
+                throw new Error(`Failed to fetch doctor profile: ${response.status}`);
+            }
+
+            const responseData = response.data;
+            console.log('Doctor profile data:', responseData);
+
+            // Extract clinic data from response
+            const clinicData = responseData.clinic || responseData.data || responseData;
+            console.log('Extracted clinic data:', clinicData);
+
+            return clinicData;
+        } catch (error) {
+            console.error('Error fetching doctor profile:', error);
+            throw error;
+        }
+    },
+
     createAppointment: async (appointmentData) => {
         try {
             // Log the request data for debugging

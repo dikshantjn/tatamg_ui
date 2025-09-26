@@ -76,7 +76,7 @@ function LabTests() {
 
   const handleBook = (lab, e) => {
     if (e) e.stopPropagation();
-    navigate(`/lab-tests/book/${lab.id}`, { state: { lab } });
+    navigate(`/lab-tests/book/${lab.vendorId}`, { state: { lab } });
   };
 
   const renderMap = () => {

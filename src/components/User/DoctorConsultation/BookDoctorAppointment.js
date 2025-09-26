@@ -29,7 +29,7 @@ const BookDoctorAppointment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { vendorId } = useParams();
-  const { doctorData } = location.state || {};
+  const { doctorData: initialDoctorData } = location.state || {};
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up('md'));
   const [selectedDate, setSelectedDate] = useState(null);
@@ -50,6 +50,8 @@ const BookDoctorAppointment = () => {
   const [selectedHealthRecords, setSelectedHealthRecords] = useState([]);
   const [loadingHealthRecords, setLoadingHealthRecords] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loadingDoctorProfile, setLoadingDoctorProfile] = useState(false);
+  const [doctorData, setDoctorData] = useState(initialDoctorData || null);
 
   // Sample blog posts and FAQs
   const blogPosts = [
@@ -70,12 +72,77 @@ const BookDoctorAppointment = () => {
     }
   ];
 
+  // Fetch doctor profile if not available or incomplete
+  const fetchDoctorProfile = async () => {
+    if (!vendorId) return;
+    
+    // If we already have complete doctor data, don't fetch again
+    if (doctorData && doctorData.name && doctorData.languages && doctorData.specialty) {
+      console.log('Doctor data already available:', doctorData);
+      return;
+    }
+    
+    try {
+      setLoadingDoctorProfile(true);
+      console.log('Fetching doctor profile for vendorId:', vendorId);
+      
+      const profileData = await doctorConsultationService.getDoctorProfile(vendorId);
+      console.log('Fetched doctor profile:', profileData);
+      
+       // Map API response to component expected structure
+      const mappedDoctorData = {
+        name: profileData.doctorName || 'Dr. Unknown',
+        specialty: profileData.specializations ? profileData.specializations.join(', ') : 'General Medicine',
+        languages: profileData.languageProficiency ? profileData.languageProficiency.join(', ') : 'English',
+        experience: profileData.experienceYears || 'N/A',
+        consultationFee: profileData.consultationFeesRange || 'N/A',
+        address: profileData.address ? `${profileData.address}, ${profileData.city}, ${profileData.state} - ${profileData.pincode}` : 'Address not available',
+        education: profileData.educationalQualifications ? profileData.educationalQualifications.join(', ') : 'N/A',
+        avatar: profileData.profilePicture || '',
+        phoneNumber: profileData.phoneNumber || '',
+        email: profileData.email || '',
+        gender: profileData.gender || '',
+        licenseNumber: profileData.licenseNumber || '',
+        hasTelemedicineExperience: profileData.hasTelemedicineExperience || false,
+        consultationTypes: profileData.consultationTypes || [],
+        insurancePartners: profileData.insurancePartners || [],
+        otherFacilities: profileData.otherFacilities || [],
+        clinicPhotos: profileData.clinicPhotos || [],
+        location: profileData.location || '',
+        nearbyLandmark: profileData.nearbyLandmark || '',
+        floor: profileData.floor || '',
+        hasLiftAccess: profileData.hasLiftAccess || false,
+        hasWheelchairAccess: profileData.hasWheelchairAccess || false,
+        hasParking: profileData.hasParking || false,
+        consultationDays: profileData.consultationDays || [],
+        consultationTimeSlots: profileData.consultationTimeSlots || [],
+        // Keep original fields for backward compatibility
+        ...profileData
+      };
+      
+      console.log('Mapped doctor data:', mappedDoctorData);
+      
+      // Update the doctorData with mapped profile
+      setDoctorData(mappedDoctorData);
+    } catch (error) {
+      console.error('Error fetching doctor profile:', error);
+      // Don't show error to user, just log it
+    } finally {
+      setLoadingDoctorProfile(false);
+    }
+  };
+
   // Get current user on component mount
   useEffect(() => {
     const userData = getUserData();
     const userId = getUserId();
     setCurrentUser({ ...userData, uid: userId });
   }, []);
+
+  // Fetch doctor profile when component mounts or vendorId changes
+  useEffect(() => {
+    fetchDoctorProfile();
+  }, [vendorId]);
 
   // Fetch timeslots when date is selected
   useEffect(() => {
@@ -285,6 +352,21 @@ const BookDoctorAppointment = () => {
     }
   };
 
+  if (!doctorData && loadingDoctorProfile) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '50vh',
+        flexDirection: 'column',
+        gap: '16px'
+      }}>
+        <div>Loading doctor profile...</div>
+      </div>
+    );
+  }
+
   if (!doctorData) {
     return <div className="error-message">No doctor data available</div>;
   }
@@ -304,11 +386,11 @@ const BookDoctorAppointment = () => {
               onError={(e) => e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23CBD5E0'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E"}
             />
             <div className="doctor-info">
-              <h2>{doctorData.name}</h2>
-              <p>{doctorData.specialty}</p>
+              <h2>{doctorData.name || 'Dr. Unknown'}</h2>
+              <p>{doctorData.specialty || 'General Medicine'}</p>
               <div className="doctor-stats">
-                <span>{doctorData.experience} yrs exp</span>
-                <span>₹{doctorData.consultationFee}</span>
+                <span>{doctorData.experience || 'N/A'} yrs exp</span>
+                <span>₹{doctorData.consultationFee || 'N/A'}</span>
               </div>
             </div>
             </div>
@@ -326,22 +408,27 @@ const BookDoctorAppointment = () => {
 
           {/* Doctor Stats */}
           <div className="doctor-quick-stats">
-                    <div className="stat-item address-stat">
-          <i className="fas fa-map-marker-alt"></i>
-          <p>Address</p>
-          <div className="address-content">
-            <p>{doctorData.address}</p>
-          </div>
-        </div>
+            <div className="stat-item address-stat">
+              <i className="fas fa-map-marker-alt"></i>
+              <p>Address</p>
+              <div className="address-content">
+                <p>{doctorData.address || 'Address not available'}</p>
+              </div>
+            </div>
             <div className="stat-item">
               <i className="fas fa-language"></i>
               <p>Languages</p>
-              <h3>{doctorData.languages.split(',').length}</h3>
+              <h3>{doctorData.languages ? doctorData.languages.split(',').length : 0}</h3>
             </div>
             <div className="stat-item">
-              <i className="fas fa-star"></i>
-              <p>Rating</p>
-              <h3>4.8</h3>
+              <i className="fas fa-graduation-cap"></i>
+              <p>Experience</p>
+              <h3>{doctorData.experience} yrs</h3>
+            </div>
+            <div className="stat-item">
+              <i className="fas fa-video"></i>
+              <p>Telemedicine</p>
+              <h3>{doctorData.hasTelemedicineExperience ? 'Yes' : 'No'}</h3>
             </div>
           </div>
 
@@ -349,8 +436,9 @@ const BookDoctorAppointment = () => {
           <div className="about-doctor">
             <h3>About Doctor</h3>
             <p>
-              Dr. {doctorData.name} is a specialist in {doctorData.specialty} with {doctorData.experience} years of experience. 
-              They are proficient in {doctorData.languages} and have qualifications in {doctorData.education}.
+              Dr. {doctorData.name || 'Unknown'} is a specialist in {doctorData.specialty || 'General Medicine'} with {doctorData.experience || 'N/A'} years of experience. 
+              {doctorData.languages && ` They are proficient in ${doctorData.languages}.`}
+              {doctorData.education && ` They have qualifications in ${doctorData.education}.`}
             </p>
           </div>
 
@@ -358,12 +446,126 @@ const BookDoctorAppointment = () => {
           <div className="doctor-specializations">
             <h3>Specializations</h3>
             <div className="specialty-chips">
-              {doctorData.specialty.split(',').map((spec, index) => (
+              {doctorData.specialty ? doctorData.specialty.split(',').map((spec, index) => (
                 <span key={index} className="specialty-chip">
                   <i className="fas fa-stethoscope"></i>
                   {spec.trim()}
                 </span>
-              ))}
+              )) : (
+                <span className="specialty-chip">
+                  <i className="fas fa-stethoscope"></i>
+                  General Medicine
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Additional Doctor Information */}
+          <div className="doctor-additional-info">
+            <h3>Additional Information</h3>
+            
+            {/* Education & Qualifications */}
+            {doctorData.education && doctorData.education !== 'N/A' && (
+              <div className="info-section">
+                <h4><i className="fas fa-graduation-cap"></i> Education & Qualifications</h4>
+                <p>{doctorData.education}</p>
+              </div>
+            )}
+
+            {/* License Information */}
+            {doctorData.licenseNumber && (
+              <div className="info-section">
+                <h4><i className="fas fa-certificate"></i> Medical License</h4>
+                <p>License Number: {doctorData.licenseNumber}</p>
+              </div>
+            )}
+
+            {/* Consultation Types */}
+            {doctorData.consultationTypes && doctorData.consultationTypes.length > 0 && (
+              <div className="info-section">
+                <h4><i className="fas fa-video"></i> Available Consultation Types</h4>
+                <div className="consultation-types">
+                  {doctorData.consultationTypes.map((type, index) => (
+                    <span key={index} className={`consultation-type ${type.toLowerCase()}`}>
+                      <i className={`fas fa-${type.toLowerCase() === 'online' ? 'video' : 'user'}`}></i>
+                      {type}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Insurance Partners */}
+            {doctorData.insurancePartners && doctorData.insurancePartners.length > 0 && (
+              <div className="info-section">
+                <h4><i className="fas fa-shield-alt"></i> Insurance Partners</h4>
+                <div className="insurance-partners">
+                  {doctorData.insurancePartners.map((partner, index) => (
+                    <span key={index} className="insurance-partner">
+                      {partner}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Clinic Facilities */}
+            {doctorData.otherFacilities && doctorData.otherFacilities.length > 0 && (
+              <div className="info-section">
+                <h4><i className="fas fa-building"></i> Clinic Facilities</h4>
+                <div className="facilities">
+                  {doctorData.otherFacilities.map((facility, index) => (
+                    <span key={index} className="facility">
+                      <i className="fas fa-check"></i>
+                      {facility}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Accessibility Features */}
+            <div className="info-section">
+              <h4><i className="fas fa-universal-access"></i> Accessibility</h4>
+              <div className="accessibility-features">
+                {doctorData.hasLiftAccess && (
+                  <span className="accessibility-feature">
+                    <i className="fas fa-elevator"></i>
+                    Lift Access
+                  </span>
+                )}
+                {doctorData.hasWheelchairAccess && (
+                  <span className="accessibility-feature">
+                    <i className="fas fa-wheelchair"></i>
+                    Wheelchair Access
+                  </span>
+                )}
+                {doctorData.hasParking && (
+                  <span className="accessibility-feature">
+                    <i className="fas fa-parking"></i>
+                    Parking Available
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="info-section">
+              <h4><i className="fas fa-phone"></i> Contact Information</h4>
+              <div className="contact-info">
+                {doctorData.phoneNumber && (
+                  <p><strong>Phone:</strong> {doctorData.phoneNumber}</p>
+                )}
+                {doctorData.email && (
+                  <p><strong>Email:</strong> {doctorData.email}</p>
+                )}
+                {doctorData.nearbyLandmark && (
+                  <p><strong>Nearby Landmark:</strong> {doctorData.nearbyLandmark}</p>
+                )}
+                {doctorData.floor && (
+                  <p><strong>Floor:</strong> {doctorData.floor}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -435,7 +637,7 @@ const BookDoctorAppointment = () => {
           {/* Consultation Fee */}
           <div className="consultation-fee">
             <span>Consultation Fee</span>
-            <span>₹{doctorData.consultationFee}</span>
+            <span>₹{doctorData.consultationFee || 'N/A'}</span>
           </div>
 
           {/* Share Health Records Button */}
