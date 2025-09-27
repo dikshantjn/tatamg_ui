@@ -11,11 +11,13 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import MicIcon from '@mui/icons-material/Mic';
 import { keyframes } from '@mui/system';
 import VedikaAIModal from './User/VedikaAI/VedikaAIModal';
+import EmergencyCallModal from './ui/EmergencyCallModal';
 
 function BottomNavigation() {
     const location = useLocation();
     const [isVisible, setIsVisible] = useState(true);
     const [showVoiceRecognition, setShowVoiceRecognition] = useState(false);
+    const [showEmergencyModal, setShowEmergencyModal] = useState(false);
     const containerRef = useRef(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -75,7 +77,7 @@ function BottomNavigation() {
     };
 
     const handleEmergencyClick = () => {
-        // Implement emergency modal logic if needed
+        setShowEmergencyModal(true);
     };
 
     if (!isMobile) return null;
@@ -96,6 +98,9 @@ function BottomNavigation() {
         >
             {/* Vedika AI Modal */}
             <VedikaAIModal open={showVoiceRecognition} onClose={() => setShowVoiceRecognition(false)} />
+            
+            {/* Emergency Call Modal */}
+            <EmergencyCallModal open={showEmergencyModal} onClose={() => setShowEmergencyModal(false)} />
 
             {/* Layout container to reserve space for circular button */}
             <Box

@@ -5,8 +5,8 @@ export const API_CONFIG = {
   // SOCKET_URL: "https://9298eb0a2b0f.ngrok-free.app",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
-BASE_URL: "http://localhost:5000/api",
-  SOCKET_URL: "http://localhost:5000",
+BASE_URL: "http://192.168.1.37:5000/api",
+  SOCKET_URL: "http://192.168.1.37:5000",
   ENDPOINTS: {
     AUTH: {
       VERIFY_OTP: "/otp/verify-otp",
@@ -195,6 +195,7 @@ BASE_URL: "http://localhost:5000/api",
       UPDATE_PROFILE: "/vendors/update",
       GET_PENDING_REQUESTS: "/prescription/requests/:vendorId",
       GET_PENDING_PRESCRIPTIONS: "/medicine-delivery/prescriptions/pending/:vendorId",
+      GET_PRESCRIPTION_COUNT: "/medicine-delivery/prescriptions/pending/:vendorId",
       ACCEPT_PRESCRIPTION: "/prescription/accept-status",
       ACCEPT_PRESCRIPTION_NEW: "/medicine-delivery/prescriptions/:prescriptionId/accept",
       GET_ALL_ORDERS: "/orders/getOrders/:vendorId",

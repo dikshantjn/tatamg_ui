@@ -31,6 +31,11 @@ export const membershipService = {
       const response = await axios.get(url);
       return response.data;
     } catch (error) {
+      // If 404, user has no current plan - this is not an error
+      if (error.response && error.response.status === 404) {
+        console.log('No current plan found for user - this is normal for new users');
+        return { currentPlan: null };
+      }
       console.error('Error fetching current user plan:', error);
       throw error;
     }

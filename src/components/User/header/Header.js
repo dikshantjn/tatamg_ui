@@ -53,6 +53,7 @@ import {
 } from '@mui/icons-material';
 import Logo from '../../ui/Logo';
 import VedikaAIModal from '../VedikaAI/VedikaAIModal';
+import EmergencyCallModal from '../../ui/EmergencyCallModal';
 import { colors } from '../../../styles/colors';
 import { clearAuthData, getUserId } from '../../../services/User/Auth/auth.utils';
 import { userService } from '../../../services/User/Profile/user.service';
@@ -595,13 +596,6 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
     setShowEmergencyModal(true);
   };
 
-  const proceedToCall = () => {
-    setShowEmergencyModal(false);
-    const confirmCall = window.confirm("Do you want to call emergency services?");
-    if (confirmCall) {
-      window.location.href = "tel:+919921003190";
-    }
-  };
 
   // Navigation function
   const handleLinkClick = (path) => {
@@ -1166,13 +1160,6 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
                   <InputAdornment position="start">
                      <SearchIcon sx={{ color: colors.primary }} />
                   </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={handleSpeakClick}>
-                      <MicIcon sx={{ color: colors.primary }} />
-                    </IconButton>
-                  </InputAdornment>
                 )
               }}
                sx={{
@@ -1670,60 +1657,10 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
       </Drawer>
 
       {/* Emergency Modal */}
-      <Dialog
-        open={showEmergencyModal}
-        onClose={() => setShowEmergencyModal(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle sx={{ textAlign: 'center', fontWeight: 600 }}>
-          Emergency Service
-        </DialogTitle>
-        <DialogContent sx={{ textAlign: 'center' }}>
-          <Typography variant="h6" gutterBottom>
-            English
-          </Typography>
-          <Typography paragraph>
-            Thank you for choosing our Emergency Service. For immediate assistance and 24/7 support, please select one of our Premium Membership Plans that includes:
-          </Typography>
-          <Box component="ul" sx={{ textAlign: 'left', mb: 2 }}>
-            <li>24/7 Priority Emergency Support</li>
-            <li>Instant Lab Test Booking & Report Delivery</li>
-            <li>Direct Access to Healthcare Professionals</li>
-            <li>Unlimited Digital Health Records Storage</li>
-          </Box>
-
-          <Typography variant="h6" gutterBottom>
-            हिंदी
-          </Typography>
-          <Typography paragraph>
-            आपातकालीन सेवा चुनने के लिए धन्यवाद। तत्काल सहायता और 24/7 सपोर्ट के लिए, कृपया हमारी प्रीमियम सदस्यता योजनाओं में से एक चुनें जिसमें शामिल हैं:
-          </Typography>
-          <Box component="ul" sx={{ textAlign: 'left' }}>
-            <li>24/7 प्राथमिकता आपातकालीन सहायता</li>
-            <li>तत्काल लैब टेस्ट बुकिंग और रिपोर्ट डिलीवरी</li>
-            <li>स्वास्थ्य पेशेवरों तक सीधी पहुंच</li>
-            <li>असीमित डिजिटल स्वास्थ्य रिकॉर्ड स्टोरेज</li>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ justifyContent: 'center', gap: 2, p: 3 }}>
-          <Button
-            onClick={proceedToCall}
-            variant="contained"
-            color="error"
-            sx={{ textTransform: 'none' }}
-          >
-            Connect to Emergency Support
-          </Button>
-          <Button
-            onClick={() => setShowEmergencyModal(false)}
-            variant="outlined"
-            sx={{ textTransform: 'none' }}
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EmergencyCallModal 
+        open={showEmergencyModal} 
+        onClose={() => setShowEmergencyModal(false)} 
+      />
 
       {/* Separate Sticky Search Bar for Mobile - Only when header is hidden */}
       {isMobile && !isHeaderVisible && (
@@ -1737,8 +1674,12 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
           borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
           px: 2,
           py: 1,
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
         }}>
+          {/* Search Box */}
           <TextField
             ref={mobileSearchInputRef}
             fullWidth
@@ -1751,14 +1692,44 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                     <SearchIcon sx={{ color: colors.primary }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={handleSpeakClick}>
-                    <MicIcon sx={{ color: colors.primary }} />
-                  </IconButton>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {/* Profile Icon inside search box */}
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleDrawer();
+                      }}
+                      size="small"
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        p: 0,
+                        '&:hover': {
+                          bgcolor: 'rgba(56, 163, 165, 0.1)'
+                        }
+                      }}
+                    >
+                      <Avatar 
+                        src={userProfile?.photo}
+                        sx={{ 
+                          width: 28, 
+                          height: 28,
+                          bgcolor: colors.primary,
+                          color: 'white',
+                          fontWeight: 600,
+                          fontSize: '0.8rem'
+                        }}
+                        imgProps={{
+                          onError: (e) => {
+                            e.target.style.display = 'none';
+                          }
+                        }}
+                      >
+                        {isAuthenticated && userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon sx={{ fontSize: 16 }} />}
+                      </Avatar>
+                    </IconButton>
+                    <SearchIcon sx={{ color: colors.primary }} />
+                  </Box>
                 </InputAdornment>
               )
             }}
@@ -1786,6 +1757,22 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
                }
              }}
           />
+
+          {/* Cart Icon */}
+          <IconButton
+            component={Link}
+            to="/checkout-product-medicine"
+            sx={{
+              color: '#1A365D',
+              '&:hover': {
+                bgcolor: 'rgba(56, 163, 165, 0.1)'
+              }
+            }}
+          >
+            <Badge badgeContent={cartItemCount} color="primary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
 
           {/* Mobile Search Suggestions Menu for Sticky Search */}
           <Menu

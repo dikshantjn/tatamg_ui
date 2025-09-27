@@ -82,6 +82,45 @@ export const getPendingPrescriptions = async (vendorId) => {
   }
 };
 
+export const getPrescriptionCount = async (vendorId) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.GET_PRESCRIPTION_COUNT, { vendorId })
+    );
+    console.log('🌐 API URL for prescription count:', url);
+    const response = await apiClient.get(url);
+    console.log('📡 API Response:', response.data);
+    
+    // Handle the API response structure: { success, count, data }
+    if (response.data && response.data.success) {
+      return response.data.data; // Return the data array for length calculation
+    }
+    return []; // Return empty array if no data
+  } catch (error) {
+    console.error('🚨 API Error:', error);
+    throw error;
+  }
+};
+
+// Alternative function that returns just the count number
+export const getPrescriptionCountNumber = async (vendorId) => {
+  try {
+    const url = getApiUrl(
+      replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICAL_STORE_VENDOR.GET_PRESCRIPTION_COUNT, { vendorId })
+    );
+    const response = await apiClient.get(url);
+    
+    // Handle the API response structure: { success, count, data }
+    if (response.data && response.data.success) {
+      return response.data.count || 0; // Return the count directly
+    }
+    return 0; // Return 0 if no data
+  } catch (error) {
+    console.error('🚨 API Error:', error);
+    throw error;
+  }
+};
+
 export const getAllOrders = async (vendorId) => {
   try {
     const url = getApiUrl(

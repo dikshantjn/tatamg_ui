@@ -20,12 +20,26 @@ function Membership() {
         const fetchPlansAndCurrent = async () => {
             try {
                 setLoading(true);
-                const plansPromise = membershipService.getMembershipPlans();
-                const userId = getUserId();
-                const currentPromise = userId ? membershipService.getCurrentUserPlan(userId) : Promise.resolve({ currentPlan: null });
-                const [plans, current] = await Promise.all([plansPromise, currentPromise]);
+                setError(null);
+                
+                // Fetch plans first
+                const plans = await membershipService.getMembershipPlans();
                 setMembershipPlans(plans);
-                setCurrentPlan(current?.currentPlan || null);
+                
+                // Then fetch current plan (this won't fail the entire operation if 404)
+                const userId = getUserId();
+                if (userId) {
+                    try {
+                        const current = await membershipService.getCurrentUserPlan(userId);
+                        setCurrentPlan(current?.currentPlan || null);
+                    } catch (currentPlanError) {
+                        // If current plan fails, just log it and continue
+                        console.log('Could not fetch current plan, user likely has no active plan:', currentPlanError.message);
+                        setCurrentPlan(null);
+                    }
+                } else {
+                    setCurrentPlan(null);
+                }
             } catch (err) {
                 setError('Failed to load membership plans');
                 console.error('Error fetching plans:', err);

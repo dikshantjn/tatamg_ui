@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, useTheme, useMediaQuery, LinearProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { vendorAuthService } from '../../../services/Vendors/VendorAuth/vendor-auth.service';
+import { getPrescriptionCountNumber } from '../../../services/Vendors/MedicalStoreVendor.service';
 import { useVendorTheme } from '../../../contexts/VendorThemeContext';
 import MedicalStoreVendorHeader from './MedicalStoreVendorHeader';
 import MedicalStoreVendorSidebar from './MedicalStoreVendorSidebar';
@@ -18,13 +19,14 @@ const MedicalStoreVendorLayout = ({ children, title = "Dashboard", notificationC
   const [drawerOpen, setDrawerOpen] = useState(!isMobile);
   const [loading, setLoading] = useState(true);
   const [sidebarActive, setSidebarActive] = useState(true);
+  const [prescriptionCount, setPrescriptionCount] = useState(0);
 
   // Check authentication on component mount
   useEffect(() => {
     checkAuthentication();
   }, []);
 
-  const checkAuthentication = () => {
+  const checkAuthentication = async () => {
     const authData = vendorAuthService.getVendorAuthData();
     if (!authData || authData.userType !== 'vendor') {
       console.log('Vendor not authenticated, redirecting to login');
@@ -33,6 +35,18 @@ const MedicalStoreVendorLayout = ({ children, title = "Dashboard", notificationC
     }
 
     setVendorData(authData.vendorData);
+    
+    // Fetch prescription count
+    try {
+      console.log('🔍 Fetching prescription count for vendorId:', authData.vendorData.vendorId);
+      const count = await getPrescriptionCountNumber(authData.vendorData.vendorId);
+      console.log('📊 Prescription count received:', count);
+      setPrescriptionCount(count);
+    } catch (error) {
+      console.error('❌ Error fetching prescription count:', error);
+      setPrescriptionCount(0);
+    }
+    
     setLoading(false);
     console.log('Medical store vendor authenticated:', authData.vendorData);
   };
@@ -73,6 +87,7 @@ const MedicalStoreVendorLayout = ({ children, title = "Dashboard", notificationC
         vendorData={vendorData}
         sidebarActive={sidebarActive}
         setSidebarActive={setSidebarActive}
+        prescriptionCount={prescriptionCount}
       />
 
       {/* Main Content */}

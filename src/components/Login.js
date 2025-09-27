@@ -887,6 +887,7 @@ const Login = ({ onAuthChange }) => {
                           inputProps={{
                             'data-index': index,
                             maxLength: 1,
+                            type: 'tel',
                             style: { textAlign: 'center', fontSize: '1.2rem', fontWeight: '600' }
                           }}
                           sx={{

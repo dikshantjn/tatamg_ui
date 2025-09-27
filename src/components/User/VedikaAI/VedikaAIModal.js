@@ -6,12 +6,16 @@ import IconButton from '@mui/material/IconButton';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import CloseIcon from '@mui/icons-material/Close';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import SendIcon from '@mui/icons-material/Send';
 import VedikaAIService from '../../../services/VedikaAI/VedikaAIService';
 import IntentNavigationService from '../../../services/VedikaAI/IntentNavigationService';
 import IntentResultsView from './IntentResultsView';
@@ -37,6 +41,7 @@ function VedikaAIModal({ open, onClose }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [hasResult, setHasResult] = useState(false);
     const [intentData, setIntentData] = useState(null);
+    const [textInput, setTextInput] = useState('');
     const recognitionRef = useRef(null);
     const streamRef = useRef(null);
     const silenceTimeoutRef = useRef(null);
@@ -254,6 +259,26 @@ function VedikaAIModal({ open, onClose }) {
         }
     };
 
+    const handleTextSubmit = async () => {
+        if (!textInput.trim()) return;
+        
+        console.log('📝 Text input submitted:', textInput);
+        
+        // Reset states
+        setTranscript('');
+        setHasResult(false);
+        setIntentData(null);
+        setIsProcessing(false);
+        setError('');
+        transcriptRef.current = '';
+        
+        // Process the text input
+        await processTranscript(textInput.trim());
+        
+        // Clear the input
+        setTextInput('');
+    };
+
     const handleActionPressed = async (resultItem, action) => {
         console.log('🎯 Action pressed:', { resultItem, action });
         
@@ -391,8 +416,8 @@ function VedikaAIModal({ open, onClose }) {
                         overflow: 'hidden',
                         background: 'rgba(0,0,0,0.95)', // Pure black background
                         backdropFilter: 'blur(12px)',
-                        color: 'common.white',
-                        border: isListening ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                        color: 'white',
+                        border: isListening ? 'none' : '1px solid rgba(255,255,255,0.2)',
                         touchAction: 'manipulation',
                         WebkitTapHighlightColor: 'transparent',
                         pointerEvents: 'auto', // Ensure it can receive pointer events
@@ -440,7 +465,7 @@ function VedikaAIModal({ open, onClose }) {
                     }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Box component="img" src="/vedika-health-logo.png" alt="Vedika AI" sx={{ width: 24, height: 24, borderRadius: 0.5 }} />
-                            <Typography sx={{ fontWeight: 700 }}>Vedika AI</Typography>
+                            <Typography sx={{ fontWeight: 700, color: 'white' }}>Vedika AI</Typography>
                         </Box>
                         <Box
                             onClick={() => {
@@ -462,20 +487,20 @@ function VedikaAIModal({ open, onClose }) {
                                 width: 32,
                                 height: 32,
                                 borderRadius: '50%',
-                                border: '1px solid rgba(255,255,255,0.2)',
-                                bgcolor: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.3)',
+                                bgcolor: 'rgba(255,255,255,0.1)',
                                 backdropFilter: 'blur(4px)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 cursor: 'pointer',
-                                color: 'rgba(255,255,255,0.8)',
+                                color: 'white',
                                 touchAction: 'manipulation',
                                 WebkitTapHighlightColor: 'transparent',
                                 '&:hover': { 
                                     color: 'white',
-                                    bgcolor: 'rgba(255,255,255,0.1)',
-                                    border: '1px solid rgba(255,255,255,0.3)'
+                                    bgcolor: 'rgba(255,255,255,0.2)',
+                                    border: '1px solid rgba(255,255,255,0.5)'
                                 },
                                 '&:active': {
                                     transform: 'scale(0.95)',
@@ -522,13 +547,13 @@ function VedikaAIModal({ open, onClose }) {
                             }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <CircularProgress size={20} sx={{ color: '#8A2BE2' }} />
-                                    <Typography sx={{ color: 'white', fontSize: 14, fontWeight: 500 }}>
+                                <Typography sx={{ color: 'white', fontSize: 14, fontWeight: 600 }}>
                                         Listening...
                                     </Typography>
                                 </Box>
                                 {transcript && transcript.trim() && (
                                     <Typography sx={{ 
-                                        color: 'rgba(255,255,255,0.8)', 
+                                        color: 'rgba(255,255,255,0.9)', 
                                         fontSize: 12,
                                         textAlign: 'center',
                                         fontStyle: 'italic',
@@ -536,8 +561,8 @@ function VedikaAIModal({ open, onClose }) {
                                         wordWrap: 'break-word',
                                         p: 1.5,
                                         borderRadius: 1.5,
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(255,255,255,0.1)'
+                                        background: 'rgba(255,255,255,0.08)',
+                                        border: '1px solid rgba(255,255,255,0.2)'
                                     }}>
                                         "{transcript.replace(/\|.*$/, '').trim()}"
                                     </Typography>
@@ -555,15 +580,15 @@ function VedikaAIModal({ open, onClose }) {
                                 py: 2
                             }}>
                                 <Typography sx={{ 
-                                    color: 'rgba(255,255,255,0.9)', 
+                                    color: 'white', 
                                     fontSize: 13,
                                     textAlign: 'center',
-                                    fontWeight: 500
+                                    fontWeight: 600
                                 }}>
                                     You said:
                                 </Typography>
                                 <Typography sx={{ 
-                                    color: 'rgba(255,255,255,0.8)', 
+                                    color: 'rgba(255,255,255,0.9)', 
                                     fontSize: 12,
                                     textAlign: 'center',
                                     fontStyle: 'italic',
@@ -571,8 +596,8 @@ function VedikaAIModal({ open, onClose }) {
                                     wordWrap: 'break-word',
                                     p: 1.5,
                                     borderRadius: 1.5,
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.1)'
+                                    background: 'rgba(255,255,255,0.08)',
+                                    border: '1px solid rgba(255,255,255,0.2)'
                                 }}>
                                     "{transcript.replace(/\|.*$/, '').trim()}"
                                 </Typography>
@@ -590,12 +615,12 @@ function VedikaAIModal({ open, onClose }) {
                             }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                     <ErrorOutlineIcon sx={{ fontSize: 20, color: '#ff6b6b' }} />
-                                    <Typography sx={{ color: '#ff6b6b', fontSize: 14, fontWeight: 500 }}>
+                                    <Typography sx={{ color: '#ff6b6b', fontSize: 14, fontWeight: 600 }}>
                                         Error
                                     </Typography>
                                 </Box>
                                 <Typography sx={{ 
-                                    color: 'rgba(255,255,255,0.8)', 
+                                    color: 'rgba(255,255,255,0.9)', 
                                     fontSize: 12,
                                     textAlign: 'center',
                                     maxWidth: '100%',
@@ -682,12 +707,9 @@ function VedikaAIModal({ open, onClose }) {
                                 >
                                     <Typography sx={{ 
                                         fontSize: 14, 
-                                        fontWeight: 500,
+                                        fontWeight: 600,
                                         textAlign: 'center',
-                                        background: 'linear-gradient(45deg, #8A2BE2, #4169E1, #FF1493)',
-                                        backgroundClip: 'text',
-                                        WebkitBackgroundClip: 'text',
-                                        WebkitTextFillColor: 'transparent',
+                                        color: 'white',
                                         animation: 'suggestion-fade 0.8s ease-in-out',
                                         '@keyframes suggestion-fade': {
                                             '0%': { opacity: 0, transform: 'translateY(10px)' },
@@ -754,15 +776,132 @@ function VedikaAIModal({ open, onClose }) {
                         borderTop: '1px solid rgba(255,255,255,0.1)',
                         gap: 1
                     }}>
-                        {/* Mic button - always visible */}
+                        {/* Input Row: Upload + Search Box + Send + Mic */}
+                        <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 1,
+                            width: '100%',
+                            maxWidth: 400
+                        }}>
+                            {/* Upload File Button */}
+                            <Box
+                                onClick={() => {
+                                    console.log('📁 Upload file clicked');
+                                    // TODO: Implement file upload functionality
+                                }}
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    borderRadius: '50%',
+                                    background: 'rgba(255,255,255,0.1)',
+                                    color: 'rgba(255,255,255,0.8)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    touchAction: 'manipulation',
+                                    WebkitTapHighlightColor: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    '&:hover': { 
+                                        background: 'rgba(255,255,255,0.2)',
+                                        color: 'white',
+                                        border: '1px solid rgba(255,255,255,0.4)'
+                                    },
+                                    '&:active': {
+                                        transform: 'scale(0.95)',
+                                        transition: 'transform 0.1s ease'
+                                    }
+                                }}
+                            >
+                                <UploadFileIcon sx={{ fontSize: 20 }} />
+                            </Box>
+
+                            {/* Text Input */}
+                            <TextField
+                                value={textInput}
+                                onChange={(e) => setTextInput(e.target.value)}
+                                onKeyPress={(e) => {
+                                    if (e.key === 'Enter') {
+                                        handleTextSubmit();
+                                    }
+                                }}
+                                placeholder="Type your message..."
+                                variant="outlined"
+                                size="small"
+                                sx={{
+                                    flex: 1,
+                                    '& .MuiOutlinedInput-root': {
+                                        backgroundColor: 'rgba(255,255,255,0.08)',
+                                        borderRadius: 2,
+                                        border: '1px solid rgba(255,255,255,0.3)',
+                                        color: 'white',
+                                        fontSize: '14px',
+                                        '& fieldset': {
+                                            border: 'none',
+                                        },
+                                        '&:hover fieldset': {
+                                            border: '1px solid rgba(255,255,255,0.5)',
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            border: '1px solid rgba(138,43,226,0.7)',
+                                        },
+                                    },
+                                    '& .MuiInputBase-input': {
+                                        color: 'white',
+                                        '&::placeholder': {
+                                            color: 'rgba(255,255,255,0.7)',
+                                            opacity: 1,
+                                        },
+                                    },
+                                }}
+                            />
+
+                            {/* Send Button - Only show when there's text */}
+                            {textInput.trim() && (
+                                <Box
+                                    onClick={handleTextSubmit}
+                                    sx={{
+                                        width: 40,
+                                        height: 40,
+                                        borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #8A2BE2, #4169E1)',
+                                        color: 'white',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        cursor: 'pointer',
+                                        touchAction: 'manipulation',
+                                        WebkitTapHighlightColor: 'transparent',
+                                        animation: 'send-button-appear 0.2s ease-in-out',
+                                        '@keyframes send-button-appear': {
+                                            '0%': { opacity: 0, transform: 'scale(0.8)' },
+                                            '100%': { opacity: 1, transform: 'scale(1)' }
+                                        },
+                                        '&:hover': { 
+                                            background: 'linear-gradient(135deg, #7a24d2, #365ecf)',
+                                            transform: 'scale(1.05)',
+                                            boxShadow: '0 4px 12px rgba(138,43,226,0.3)'
+                                        },
+                                        '&:active': {
+                                            transform: 'scale(0.95)',
+                                            transition: 'transform 0.1s ease'
+                                        }
+                                    }}
+                                >
+                                    <SendIcon sx={{ fontSize: 20 }} />
+                                </Box>
+                            )}
+
+                            {/* Mic Button */}
                         <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {/* Wave animation rings when listening */}
                             {isListening && (
                                 <>
                                     <Box sx={{
                                         position: 'absolute',
-                                        width: 60,
-                                        height: 60,
+                                            width: 50,
+                                            height: 50,
                                         borderRadius: '50%',
                                         border: '2px solid rgba(138,43,226,0.3)',
                                         animation: 'vedika-wave-1 2s ease-in-out infinite',
@@ -774,8 +913,8 @@ function VedikaAIModal({ open, onClose }) {
                                     }} />
                                     <Box sx={{
                                         position: 'absolute',
-                                        width: 72,
-                                        height: 72,
+                                            width: 60,
+                                            height: 60,
                                         borderRadius: '50%',
                                         border: '2px solid rgba(65,105,225,0.2)',
                                         animation: 'vedika-wave-2 2s ease-in-out infinite 0.5s',
@@ -783,19 +922,6 @@ function VedikaAIModal({ open, onClose }) {
                                             '0%': { transform: 'scale(0.7)', opacity: 0.6 },
                                             '50%': { transform: 'scale(1.3)', opacity: 0.2 },
                                             '100%': { transform: 'scale(0.7)', opacity: 0.6 }
-                                        }
-                                    }} />
-                                    <Box sx={{
-                                        position: 'absolute',
-                                        width: 84,
-                                        height: 84,
-                                        borderRadius: '50%',
-                                        border: '2px solid rgba(255,20,147,0.15)',
-                                        animation: 'vedika-wave-3 2s ease-in-out infinite 1s',
-                                        '@keyframes vedika-wave-3': {
-                                            '0%': { transform: 'scale(0.6)', opacity: 0.4 },
-                                            '50%': { transform: 'scale(1.4)', opacity: 0.1 },
-                                            '100%': { transform: 'scale(0.6)', opacity: 0.4 }
                                         }
                                     }} />
                                 </>
@@ -817,6 +943,7 @@ function VedikaAIModal({ open, onClose }) {
                                         setIntentData(null);
                                         setIsProcessing(false);
                                         setError('');
+                                            setTextInput('');
                                         transcriptRef.current = ''; // Reset ref
                                         startListening();
                                     }
@@ -840,17 +967,19 @@ function VedikaAIModal({ open, onClose }) {
                                         setIntentData(null);
                                         setIsProcessing(false);
                                         setError('');
+                                            setTextInput('');
                                         transcriptRef.current = ''; // Reset ref
                                         startListening();
                                     }
                                 }}
                                 sx={{
-                                    width: 48,
-                                    height: 48,
+                                        width: 40,
+                                        height: 40,
                                     borderRadius: '50%',
-                                    background: isListening ? 'linear-gradient(135deg, #8A2BE2, #4169E1)' : 'rgba(255,255,255,0.08)',
+                                     background: isListening ? 'linear-gradient(135deg, #8A2BE2, #4169E1)' : 'rgba(255,255,255,0.1)',
                                     color: 'white',
-                                    boxShadow: isListening ? '0 8px 24px rgba(65,105,225,0.5)' : 'none',
+                                     boxShadow: isListening ? '0 8px 24px rgba(65,105,225,0.5)' : '0 2px 8px rgba(0,0,0,0.3)',
+                                     border: isListening ? 'none' : '1px solid rgba(255,255,255,0.2)',
                                     position: 'relative',
                                     zIndex: 2,
                                     display: 'flex',
@@ -860,7 +989,8 @@ function VedikaAIModal({ open, onClose }) {
                                     touchAction: 'manipulation',
                                     WebkitTapHighlightColor: 'transparent',
                                     '&:hover': { 
-                                        background: isListening ? 'linear-gradient(135deg, #7a24d2, #365ecf)' : 'rgba(255,255,255,0.12)' 
+                                         background: isListening ? 'linear-gradient(135deg, #7a24d2, #365ecf)' : 'rgba(255,255,255,0.2)',
+                                         border: isListening ? 'none' : '1px solid rgba(255,255,255,0.4)'
                                     },
                                     '&:active': {
                                         transform: 'scale(0.95)',
@@ -869,7 +999,7 @@ function VedikaAIModal({ open, onClose }) {
                                 }}
                             >
                                 <MicIcon sx={{ 
-                                    fontSize: 24,
+                                        fontSize: 20,
                                     animation: isListening ? 'vedika-mic-wave 1.5s ease-in-out infinite' : 'none',
                                     '@keyframes vedika-mic-wave': {
                                         '0%': { transform: 'scale(1)' },
@@ -877,12 +1007,13 @@ function VedikaAIModal({ open, onClose }) {
                                         '100%': { transform: 'scale(1)' }
                                     }
                                 }} />
+                                </Box>
                             </Box>
                         </Box>
                         
                         {/* Footer hint text */}
-                        <Typography sx={{ fontSize: 12, opacity: 0.6 }}>
-                            {isListening ? 'Listening… tap to stop' : 'Tap to speak'}
+                        <Typography sx={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>
+                            {isListening ? 'Listening… tap to stop' : 'Type or speak your message'}
                         </Typography>
                     </Box>
                 </Paper>

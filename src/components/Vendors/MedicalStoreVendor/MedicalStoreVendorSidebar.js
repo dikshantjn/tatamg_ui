@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Drawer,
   Box,
@@ -30,13 +30,26 @@ const MedicalStoreVendorSidebar = ({
   onToggle, 
   vendorData, 
   sidebarActive, 
-  setSidebarActive 
+  setSidebarActive,
+  prescriptionCount = 0
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isDarkMode } = useVendorTheme();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Debug prescription count
+  console.log('🎯 Sidebar received prescriptionCount:', prescriptionCount);
+
+  // Track prescription count changes
+  useEffect(() => {
+    console.log('🔄 Prescription count updated in sidebar:', prescriptionCount);
+  }, [prescriptionCount]);
+
+  // Debug badge calculation
+  const ordersBadge = prescriptionCount > 0 ? prescriptionCount.toString() : null;
+  console.log('🏷️ Orders badge calculated:', ordersBadge, 'from count:', prescriptionCount);
 
   // Navigation menu items
   const menuItems = [
@@ -50,7 +63,7 @@ const MedicalStoreVendorSidebar = ({
       text: 'Orders', 
       icon: <ShoppingCart />, 
       path: '/vendor/pharmacy/orders',
-      badge: '12'
+      badge: ordersBadge
     },
     { 
       text: 'Products', 
