@@ -60,6 +60,7 @@ import { userService } from '../../../services/User/Profile/user.service';
 import { notificationService } from '../../../services/User/Notifications/notification.service';
 import { fcmService } from '../../../services/User/FCM/fcm.service';
 import { fetchCartItems, selectCartItemCount } from '../../../store/slices/cartSlice';
+import MainServices from '../Home/MainServices';
 
 // Add CSS animation for gradient border
 const gradientBorderStyle = `
@@ -204,8 +205,8 @@ const SearchBox = () => {
   return (
     <Box sx={{ 
       flex: 1, 
-      maxWidth: 800, 
-      mx: 2,
+      maxWidth: 1400, 
+      mx: 1,
       display: { xs: 'none', md: 'flex' }
     }}>
       <Paper
@@ -467,7 +468,9 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
   const [showVedikaAI, setShowVedikaAI] = useState(false);
   const topBarRef = useRef(null);
+  const headerContainerRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
+  const [headerSpacerHeight, setHeaderSpacerHeight] = useState(260);
 
   // Mobile search placeholders
   const mobilePlaceholders = [
@@ -492,6 +495,29 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
     }, 3000);
     return () => clearInterval(interval);
   }, [mobilePlaceholders.length]);
+
+  // Measure header height to align content immediately below
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      if (headerContainerRef.current) {
+        const h = headerContainerRef.current.offsetHeight || 0;
+        if (h && Math.abs(h - headerSpacerHeight) > 2) {
+          setHeaderSpacerHeight(h);
+        }
+      }
+    };
+
+    // Initial and deferred measurement
+    updateHeaderHeight();
+    const id = setTimeout(updateHeaderHeight, 50);
+
+    // On resize
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => {
+      window.removeEventListener('resize', updateHeaderHeight);
+      clearTimeout(id);
+    };
+  }, [isHeaderVisible, isMobile]);
 
   // Fetch cart items when user is authenticated
   useEffect(() => {
@@ -912,29 +938,114 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
           }
         }}
       >
-        <Box sx={{
+        <Box ref={headerContainerRef} sx={{
           position: 'relative',
-          overflow: 'hidden',
-          height: isMobile ? (isHeaderVisible ? 120 : 56) : 'auto',
+          overflow: { xs: 'hidden', md: 'visible' },
+          height: isMobile ? (isHeaderVisible ? 'auto' : 56) : 'auto',
           transition: 'height 0.25s ease'
         }}>
         {/* Top Toolbar */}
         <Toolbar ref={topBarRef}
           sx={{ 
             px: { xs: 2, sm: 4 },
-            py: 0.75,
-            minHeight: '64px !important',
+            py: 0,
+            height: { xs: 'auto', md: 168 },
+            minHeight: { xs: 120, md: 168 },
             transition: 'transform 0.25s ease',
             transform: isMobile && !isHeaderVisible ? 'translateY(-100%)' : 'translateY(0)'
           }}
         >
+          {/* Mobile layout: logo left, icons above search on the right */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center', width: '100%', gap: 1 }}>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', height: '100%' }}>
+              <Logo size={'xlarge'} variant="whiteBg" sx={{ m: 0, height: 88 }} />
+            </Link>
+            <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
+                {/* Vedika Plus Button - Mobile */}
+                <Button
+                  component={Link}
+                  to="/membership"
+                  sx={{
+                    color: 'primary.main',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    px: 1.5,
+                    minHeight: 28,
+                    borderRadius: 2,
+                    display: { xs: 'flex', md: 'none' },
+                    background: 'white',
+                    border: '1px solid transparent',
+                    '&:hover': {
+                      bgcolor: 'transparent',
+                      border: '1px solid #8A2BE2'
+                    }
+                  }}
+                >
+                  <Box component="span" sx={{ color: 'black', fontSize: '0.85rem' }}>Vedika</Box>
+                  <Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5, fontSize: '0.85rem' }}>Plus</Box>
+                </Button>
+                <IconButton
+                  component={Link}
+                  to="/checkout-product-medicine"
+                  sx={{ color: '#1A365D' }}
+                >
+                  <Badge badgeContent={cartItemCount} color="primary">
+                    <ShoppingCartIcon />
+                  </Badge>
+                </IconButton>
+                <IconButton onClick={toggleDrawer} sx={{ color: '#1A365D' }}>
+                  <Avatar
+                    src={userProfile?.photo}
+                    sx={{ width: 28, height: 28, bgcolor: colors.primary, color: 'white', fontSize: '0.8rem' }}
+                    imgProps={{ onError: (e) => { e.target.style.display = 'none'; } }}
+                  >
+                    {userProfile?.name?.charAt(0)?.toUpperCase() || <PersonIcon sx={{ fontSize: 16 }} />}
+                  </Avatar>
+                </IconButton>
+              </Box>
+              <TextField
+                ref={mobileSearchInputRef}
+                fullWidth
+                size="small"
+                placeholder={mobilePlaceholders[mobilePlaceholderIndex]}
+                value={mobileSearchQuery}
+                onChange={handleMobileSearchChange}
+                onFocus={handleMobileSearchFocus}
+                onClick={handleMobileSearchInputClick}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon sx={{ color: colors.primary }} />
+                    </InputAdornment>
+                  )
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: '#F8FAFC',
+                    borderRadius: '20px !important',
+                    border: `1px solid ${colors.primary}`,
+                    height: 40,
+                    py: 0.5,
+                    '&:focus-within': {
+                      bgcolor: 'white',
+                      transform: 'scale(1.01)'
+                    }
+                  }
+                }}
+              />
+            </Box>
+          </Box>
+
           {/* Logo Section */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            gap: 2,
-            minWidth: { xs: 'auto', md: 280 }
-          }}>
+            gap: 1,
+            minWidth: { xs: 'auto', md: 240, lg: 200 },
+            height: '100%',
+            py: { xs: 0, md: 0.5 }
+          , display: { xs: 'none', md: 'flex' } }}>
             {isMobile && (
               <IconButton
                 onClick={toggleDrawer}
@@ -967,44 +1078,48 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
               </IconButton>
             )}
             
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-              <Logo size={isMobile ? 'small' : 'small'} />
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', height: '100%' }}>
+              <Logo size={'xlarge'} variant="whiteBg" sx={{ m: 0, height: { md: 150, lg: 160 }, mr: 1, my: { md: 0.5, lg: 1 } }} />
             </Link>
 
-            {/* Vedika Plus Button - Desktop Only */}
-            <Button
-              component={Link}
-              to="/membership"
-              sx={{
-                color: 'primary.main',
-                textTransform: 'none',
-                fontWeight: 600,
-                px: 2,
-                borderRadius: 2,
-                display: { xs: 'none', md: 'flex' },
-                background: 'white',
-                border: '1px solid transparent',
-                '&:hover': {
-                  bgcolor: 'transparent',
-                  border: '1px solid #8A2BE2'
-                }
-              }}
-            >
-              <Box component="span" sx={{ color: 'black' }}>Vedika</Box><Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5 }}>Plus</Box>
-            </Button>
+            {/* Vedika Plus Button - Desktop Only (moved to right column row) */}
           </Box>
 
-          {/* Search Box - Desktop Only */}
-          <SearchBox />
+          {/* Right column: search/actions + main services */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, flexDirection: 'column', flex: 1, ml: { xs: 'auto', md: 0 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              {/* Vedika Plus Button first, right next to logo */}
+              <Button
+                component={Link}
+                to="/membership"
+                sx={{
+                  color: 'primary.main',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  px: 2,
+                  borderRadius: 2,
+                  display: { xs: 'none', md: 'flex' },
+                  background: 'white',
+                  border: '1px solid transparent',
+                  '&:hover': {
+                    bgcolor: 'transparent',
+                    border: '1px solid #8A2BE2'
+                  }
+                }}
+              >
+                <Box component="span" sx={{ color: 'black' }}>Vedika</Box><Box component="span" sx={{ color: 'white', bgcolor: '#8A2BE2', px: 0.5, borderRadius: 2, ml: 0.5 }}>Plus</Box>
+              </Button>
 
-          {/* Right Actions */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1.5,
-            mr: { xs: 0, md: 0.5 },
-            ml: { xs: 'auto', md: 0 }
-          }}>
+              {/* Search Box - Desktop Only, expanded */}
+              <SearchBox />
+
+              {/* Right Actions */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1.5,
+                mr: { xs: 0, md: 0.5 }
+              }}>
 
             {/* Vedika AI Button */}
             <Button
@@ -1125,69 +1240,18 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
                 Sign In
               </Button>
             )}
+              </Box>
+            </Box>
+
+            {/* Main Services immediately below Vedika Plus/search row */}
+            <Box sx={{ display: { xs: 'none', md: 'block' }, mt: 0.5, ml: 0 }}>
+              <MainServices compact />
+            </Box>
           </Box>
         </Toolbar>
 
-         {/* Mobile Search Bar - Inside same container */}
-         {isMobile && (
-           <Box sx={{ 
-             px: 2, 
-             pb: 1,
-             pt: 1,
-             display: { xs: 'block', md: 'none' },
-             bgcolor: isScrolled ? 'rgba(255, 255, 255, 0.95)' : 'white',
-             borderTop: '1px solid #E2E8F0',
-             position: 'absolute',
-             left: 0,
-             right: 0,
-             bottom: 0,
-             zIndex: 1,
-             transition: 'all 0.25s ease',
-             borderTopLeftRadius: 12,
-             borderTopRightRadius: 12
-           }}>
-            <TextField
-              ref={mobileSearchInputRef}
-              fullWidth
-              size="small"
-               placeholder={mobilePlaceholders[mobilePlaceholderIndex]}
-              value={mobileSearchQuery}
-              onChange={handleMobileSearchChange}
-              onFocus={handleMobileSearchFocus}
-              onClick={handleMobileSearchInputClick}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                     <SearchIcon sx={{ color: colors.primary }} />
-                  </InputAdornment>
-                )
-              }}
-               sx={{
-                 '& .MuiOutlinedInput-root': {
-                   bgcolor: isScrolled ? 'rgba(248, 250, 252, 0.8)' : '#F8FAFC',
-                   borderRadius: '20px !important',
-                   borderTopLeftRadius: '20px !important',
-                   borderTopRightRadius: '20px !important',
-                   borderBottomLeftRadius: '20px !important',
-                   borderBottomRightRadius: '20px !important',
-                   border: `1px solid ${colors.primary}`,
-                   py: 0.5,
-                   '&:focus-within': {
-                     bgcolor: 'white',
-                     transform: 'scale(1.01)'
-                   },
-                   '& .MuiOutlinedInput-notchedOutline': {
-                     borderRadius: '20px !important',
-                     borderTopLeftRadius: '20px !important',
-                     borderTopRightRadius: '20px !important',
-                     borderBottomLeftRadius: '20px !important',
-                     borderBottomRightRadius: '20px !important',
-                   }
-                 }
-               }}
-            />
-
-            {/* Mobile Search Suggestions Menu */}
+          {/* Mobile Search Suggestions Menu (shared) */}
+          {isMobile && (
             <Menu
               anchorEl={mobileSearchAnchorEl}
               open={Boolean(mobileSearchAnchorEl)}
@@ -1195,24 +1259,10 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
               disableAutoFocus
               disableEnforceFocus
               disableRestoreFocus
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
               PaperProps={{
-                sx: {
-                  width: '90vw',
-                  maxWidth: 400,
-                  maxHeight: 400,
-                  mt: 1,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                  border: '1px solid #E2E8F0',
-                  borderRadius: 2
-                }
+                sx: { width: '90vw', maxWidth: 400, maxHeight: 400, mt: 1, boxShadow: '0 4px 20px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0', borderRadius: 2 }
               }}
             >
               <Box sx={{ p: 2, pb: 1 }}>
@@ -1223,22 +1273,9 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
               <Divider />
               {filteredMobileSuggestions.length > 0 ? (
                 filteredMobileSuggestions.slice(0, 8).map((suggestion, index) => (
-                  <MenuItem 
-                    key={index}
-                    onClick={() => handleMobileSearchSelect(suggestion)}
-                    sx={{ 
-                      mx: 1, 
-                      borderRadius: 1,
-                      py: 1.5,
-                      '&:hover': {
-                        bgcolor: 'rgba(56, 163, 165, 0.05)'
-                      }
-                    }}
-                  >
+                  <MenuItem key={index} onClick={() => handleMobileSearchSelect(suggestion)} sx={{ mx: 1, borderRadius: 1, py: 1.5, '&:hover': { bgcolor: 'rgba(56, 163, 165, 0.05)' } }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, width: '100%' }}>
-                      <Box sx={{ fontSize: '1.2rem' }}>
-                        {suggestion.icon}
-                      </Box>
+                      <Box sx={{ fontSize: '1.2rem' }}>{suggestion.icon}</Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="body2" fontWeight={500} sx={{ color: '#1A365D' }}>
                           {suggestion.text}
@@ -1258,15 +1295,15 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
                 </Box>
               )}
             </Menu>
-          </Box>
-        )}
+          )}
+
         </Box>
 
       </AppBar>
 
       {/* Spacer to account for fixed header without layout shift */}
       <Box sx={{ 
-        height: isMobile ? 120 : 64,
+        height: headerSpacerHeight,
         transition: 'height 0.25s ease',
         flexShrink: 0
       }} />

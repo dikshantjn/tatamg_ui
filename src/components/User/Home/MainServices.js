@@ -17,7 +17,7 @@ import {
   Article
 } from '@mui/icons-material';
 
-function MainServices() {
+function MainServices({ compact = false }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -82,50 +82,24 @@ function MainServices() {
     <Box
       sx={{
         width: '100%',
-        py: { xs: 2, sm: 3 },
-        backgroundColor: 'white',
+        py: compact ? 1 : { xs: 2, sm: 3 },
+        backgroundColor: 'transparent',
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      {/* Stronger blurry accents */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -50,
-          left: -50,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(239,68,68,0.35), transparent 70%)',
-          filter: 'blur(80px)',
-          zIndex: 0
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -50,
-          right: -50,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.35), transparent 70%)',
-          filter: 'blur(80px)',
-          zIndex: 0
-        }}
-      />
 
       {/* Services Grid */}
       <Box
         sx={{
           display: isMobile ? 'flex' : 'grid',
           gridTemplateColumns: {
-            sm: 'repeat(4, 1fr)',
-            md: 'repeat(8, 1fr)'
+            sm: 'repeat(8, minmax(100px, 1fr))',
+            md: 'repeat(8, minmax(120px, 1fr))'
           },
-          gap: { xs: 1.5, sm: 2 },
-          px: { xs: 2, sm: 3, md: 4 },
+          columnGap: isMobile ? 1 : (compact ? 1.5 : 2),
+          rowGap: isMobile ? 0 : (compact ? 1 : 2),
+          px: compact ? 0 : { xs: 2, sm: 3, md: 0 },
           position: 'relative',
           zIndex: 1,
           overflowX: isMobile ? 'auto' : 'visible',
@@ -134,6 +108,7 @@ function MainServices() {
           },
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
+          scrollSnapType: isMobile ? 'x mandatory' : 'none'
         }}
       >
         {services.map((service, index) => (
@@ -145,28 +120,30 @@ function MainServices() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: isMobile ? 90 : { sm: 110 },
-              width: isMobile ? 80 : 'auto',
+              height: compact ? 78 : (isMobile ? 88 : 96),
+              width: isMobile ? 'calc(25% - 8px)' : '100%',
+              flex: isMobile ? '0 0 calc(25% - 8px)' : '0 0 auto',
               flexShrink: 0,
-              p: { xs: 1.5, sm: 2 },
+              p: compact ? 1 : { xs: 1.5, sm: 2 },
               borderRadius: 2,
-              border: `1px solid ${service.color}50`,
-              backgroundColor: `${service.color}25`,
+              border: '1px solid rgba(0,0,0,0.08)',
+              backgroundColor: 'transparent',
               cursor: 'pointer',
               position: 'relative',
               overflow: 'hidden',
               transition: 'all 0.3s ease',
               textAlign: 'center',
+              scrollSnapAlign: isMobile ? 'start' : 'none',
               '&:hover': {
                 transform: 'translateY(-3px)',
-                backgroundColor: `${service.color}35`,
-                boxShadow: `0 6px 20px ${service.color}50`
+                backgroundColor: 'rgba(0,0,0,0.02)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
               }
             }}
           >
             {/* Icon */}
             <Box sx={{ mb: 0.5 }}>
-              {service.icon}
+              {React.cloneElement(service.icon, { sx: { ...service.icon.props.sx, fontSize: compact ? 28 : service.icon.props.sx.fontSize } })}
             </Box>
 
             {/* Title */}
@@ -174,7 +151,7 @@ function MainServices() {
               sx={{
                 fontWeight: 600,
                 color: 'text.primary',
-                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                fontSize: compact ? '0.75rem' : { xs: '0.8rem', sm: '0.9rem' },
                 lineHeight: 1.2
               }}
             >

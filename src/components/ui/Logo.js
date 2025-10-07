@@ -1,20 +1,39 @@
 import React from 'react';
-import styles from './Logo.module.css';
-import logoImg from '../../assets/logo/Logo.png';
+import { Box } from '@mui/material';
+import logoPng from '../../assets/logo/Logo.png';
 
-const Logo = ({ size = 'regular', onClick }) => {
-  const imageSize = size === 'large' ? 96 : size === 'small' ? 40 : 64;
+const SIZE_TO_PX = {
+  small: 28,
+  medium: 40,
+  large: 56,
+  xlarge: 72
+};
+
+const Logo = ({ size = 'small', variant: _variant = 'transparent', sx = {}, ...props }) => {
+  const height = SIZE_TO_PX[size] || SIZE_TO_PX.small;
+  const src = logoPng;
 
   return (
-    <div className={styles.logoContainer} onClick={onClick}>
-      <img
-        src={logoImg}
-        alt="Vedika Health logo"
-        className={styles.logoImage}
-        style={{ width: imageSize, height: imageSize }}
-      />
-    </div>
+    <Box
+      component="img"
+      src={src}
+      alt="Vedika Health"
+      sx={{
+        display: 'block',
+        height,
+        width: 'auto',
+        objectFit: 'contain',
+        filter: 'drop-shadow(0 0 0 rgba(0,0,0,0))',
+        margin: 0,
+        padding: 0,
+        lineHeight: 0,
+        ...sx
+      }}
+      {...props}
+    />
   );
 };
 
-export default Logo; 
+export default Logo;
+
+

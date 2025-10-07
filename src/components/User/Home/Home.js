@@ -22,8 +22,8 @@ function Home() {
                 overflow: 'hidden'
             }}
         >
-            {/* Main Services Section - Full Width */}
-            <MainServices />
+            {/* Main Services Section - Mobile only */}
+            {isMobile && <MainServices compact />}
             
             {/* Hero Banner Section - Full Width */}
             <HeroBanner />
