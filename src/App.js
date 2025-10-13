@@ -94,6 +94,7 @@ import Logo from './components/ui/Logo';
 import ProductPartnerVendorProfile from './components/Vendors/ProductVendor/ProductPartnerVendorProfile';
 import HealthBlogs from './components/User/HealthBlogs/HealthBlogs';
 import BlogDetail from './components/User/HealthBlogs/BlogDetail';
+import HerPhases from './components/User/HerPhases/HerPhases';
 
 // Component to handle route-based authentication display
 const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
@@ -331,6 +332,7 @@ const AppContent = ({ isAuthenticated, onAuthChange, userType, isLoading }) => {
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/health-blogs" element={<HealthBlogs />} />
           <Route path="/health-blogs/:id" element={<BlogDetail />} />
+          <Route path="/her-phases" element={<HerPhases />} />
 
           {/* Vendor Routes */}
           <Route path="/vendor/product-partner/dashboard" element={<ProductVendorDashboard />} />

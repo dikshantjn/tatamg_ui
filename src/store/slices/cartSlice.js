@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { VendorProductService } from '../../services/User/Products/vendor-product.service';
 import { getUserId, isAuthenticated } from '../../services/User/Auth/auth.utils';
+import { getMedicineCartCount as getMedicineCartCountService } from '../../services/User/MedicineDelivery/medicine-delivery.service';
 
 // Async thunk for fetching cart items from backend
 export const fetchCartItems = createAsyncThunk(
@@ -25,10 +26,34 @@ export const fetchCartItems = createAsyncThunk(
   }
 );
 
+// Async thunk for fetching medicine cart count
+export const fetchMedicineCartCount = createAsyncThunk(
+  'cart/fetchMedicineCartCount',
+  async (_, { rejectWithValue }) => {
+    try {
+      if (!isAuthenticated()) {
+        return 0;
+      }
+
+      const userId = getUserId();
+      if (!userId) {
+        return 0;
+      }
+
+      const count = await getMedicineCartCountService(userId);
+      return count ?? 0;
+    } catch (error) {
+      console.error('Error fetching medicine cart count:', error);
+      return rejectWithValue(error.message || 'Failed to fetch medicine cart count');
+    }
+  }
+);
+
 const initialState = {
   items: [],
   total: 0,
   itemCount: 0,
+  medicineItemCount: 0,
   loading: false,
   error: null,
 };
@@ -127,6 +152,12 @@ const cartSlice = createSlice({
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchMedicineCartCount.fulfilled, (state, action) => {
+        state.medicineItemCount = typeof action.payload === 'number' ? action.payload : 0;
+      })
+      .addCase(fetchMedicineCartCount.rejected, (state) => {
+        state.medicineItemCount = 0;
       });
   },
 });
@@ -146,6 +177,8 @@ export const {
 export const selectCartItems = (state) => state.cart.items;
 export const selectCartTotal = (state) => state.cart.total;
 export const selectCartItemCount = (state) => state.cart.itemCount;
+export const selectMedicineCartItemCount = (state) => state.cart.medicineItemCount;
+export const selectCombinedCartItemCount = (state) => (state.cart.itemCount || 0) + (state.cart.medicineItemCount || 0);
 export const selectCartLoading = (state) => state.cart.loading;
 export const selectCartError = (state) => state.cart.error;
 export const selectCartItemById = (state, itemId) => 

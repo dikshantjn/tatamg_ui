@@ -1,6 +1,12 @@
 import { apiClient } from '../../../config/apiClient';
 import { API_CONFIG, getApiUrl, replaceUrlParams } from '../../../config/api.config';
 
+export const getMedicineCartCount = async (userId) => {
+  const endpoint = getApiUrl(replaceUrlParams(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.MEDICINE_CART_COUNT, { userId }));
+  const response = await apiClient.get(endpoint);
+  return response.data?.medicineCartCount ?? 0;
+};
+
 export const uploadPrescriptionService = async (userId, prescriptionUrl, userLocation) => {
   const endpoint = getApiUrl(API_CONFIG.ENDPOINTS.MEDICINE_DELIVERY.UPLOAD_PRESCRIPTION);
   const payload = { userId, prescriptionUrl, userLocation };

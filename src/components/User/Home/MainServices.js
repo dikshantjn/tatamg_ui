@@ -21,6 +21,7 @@ function MainServices({ compact = false }) {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const tileSize = compact ? 90 : (isMobile ? 104 : 116);
 
   const handleNavigation = (path, e) => {
     if (e) e.preventDefault();
@@ -75,6 +76,12 @@ function MainServices({ compact = false }) {
       icon: <Article sx={{ fontSize: { xs: 34, sm: 40 }, color: '#8B5A2B' }} />,
       color: '#8B5A2B',
       link: '/health-blogs'
+    },
+    {
+      title: 'Her Phases',
+      icon: <Science sx={{ fontSize: { xs: 34, sm: 40 }, color: '#D946EF' }} />,
+      color: '#D946EF',
+      link: '/her-phases'
     }
   ];
 
@@ -92,23 +99,18 @@ function MainServices({ compact = false }) {
       {/* Services Grid */}
       <Box
         sx={{
-          display: isMobile ? 'flex' : 'grid',
-          gridTemplateColumns: {
-            sm: 'repeat(8, minmax(100px, 1fr))',
-            md: 'repeat(8, minmax(120px, 1fr))'
-          },
-          columnGap: isMobile ? 1 : (compact ? 1.5 : 2),
-          rowGap: isMobile ? 0 : (compact ? 1 : 2),
+          display: 'flex',
+          flexWrap: 'nowrap',
+          gap: isMobile ? 8/8 : (compact ? 12/8 : 16/8),
           px: compact ? 0 : { xs: 2, sm: 3, md: 0 },
           position: 'relative',
           zIndex: 1,
-          overflowX: isMobile ? 'auto' : 'visible',
-          '&::-webkit-scrollbar': {
-            display: 'none',
-          },
+          overflowX: 'auto',
+          overflowY: 'hidden',
+          '&::-webkit-scrollbar': { display: 'none' },
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          scrollSnapType: isMobile ? 'x mandatory' : 'none'
+          scrollSnapType: 'x mandatory'
         }}
       >
         {services.map((service, index) => (
@@ -120,19 +122,20 @@ function MainServices({ compact = false }) {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              height: compact ? 78 : (isMobile ? 88 : 96),
-              width: isMobile ? 'calc(25% - 8px)' : '100%',
-              flex: isMobile ? '0 0 calc(25% - 8px)' : '0 0 auto',
+              height: tileSize,
+              width: tileSize,
+              flex: isMobile ? '0 0 auto' : '0 0 auto',
               flexShrink: 0,
               p: compact ? 1 : { xs: 1.5, sm: 2 },
-              borderRadius: 2,
-              border: '1px solid rgba(0,0,0,0.08)',
+              borderRadius: '50%',
+              border: '2px solid #CDB276',
               backgroundColor: 'transparent',
               cursor: 'pointer',
               position: 'relative',
               overflow: 'hidden',
               transition: 'all 0.3s ease',
               textAlign: 'center',
+              mx: 0,
               scrollSnapAlign: isMobile ? 'start' : 'none',
               '&:hover': {
                 transform: 'translateY(-3px)',

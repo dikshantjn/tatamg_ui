@@ -23,11 +23,7 @@ import {
   Drawer,
   List,
   ListItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
+  
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -59,7 +55,7 @@ import { clearAuthData, getUserId } from '../../../services/User/Auth/auth.utils
 import { userService } from '../../../services/User/Profile/user.service';
 import { notificationService } from '../../../services/User/Notifications/notification.service';
 import { fcmService } from '../../../services/User/FCM/fcm.service';
-import { fetchCartItems, selectCartItemCount } from '../../../store/slices/cartSlice';
+import { fetchCartItems, fetchMedicineCartCount, selectCombinedCartItemCount } from '../../../store/slices/cartSlice';
 import MainServices from '../Home/MainServices';
 
 // Add CSS animation for gradient border
@@ -451,7 +447,7 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const dispatch = useDispatch();
-  const cartItemCount = useSelector(selectCartItemCount);
+  const cartItemCount = useSelector(selectCombinedCartItemCount);
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -523,6 +519,7 @@ const Header = ({ isAuthenticated = false, onAuthChange = () => {}, onShowSignIn
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchCartItems());
+      dispatch(fetchMedicineCartCount());
     }
   }, [dispatch, isAuthenticated]);
 

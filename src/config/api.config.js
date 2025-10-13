@@ -5,8 +5,8 @@ export const API_CONFIG = {
   // SOCKET_URL: "https://9298eb0a2b0f.ngrok-free.app",
 // BASE_URL: "http://localhost:5000/api",
 //   SOCKET_URL: "http://localhost:5000.app",
-BASE_URL: "http://10.242.226.210:5000/api",
-  SOCKET_URL: "http://10.242.226.210:5000",
+BASE_URL: "http://192.168.1.42:5000/api",
+SOCKET_URL: "http://192.168.1.42:5000",
   ENDPOINTS: {
     AUTH: {
       VERIFY_OTP: "/otp/verify-otp",
@@ -160,6 +160,7 @@ BASE_URL: "http://10.242.226.210:5000/api",
       GET_INVOICE: "/medicine-delivery/invoice/:orderId",
       GET_PENDING_ORDERS: "/medicine-delivery/orders/user/:userId/pending-payments",
       PLACE_MEDICINE_ORDER: "/medicine-delivery/place-medicine-order",
+      MEDICINE_CART_COUNT: "/medicine-delivery/medicine-cart-count/:userId",
     },
     LAB_TEST: {
       GET_ALL_DIAGNOSTIC_CENTERS: "/lab-test/all-diagnostic-centers",
@@ -244,6 +245,9 @@ BASE_URL: "http://10.242.226.210:5000/api",
     },
     VEDIKA_AI: {
       RESOLVE_INTENT: "/speakAI/intent",
+    },
+    HER_PHASES: {
+      CREATE: "/herPhases",
     },
   },
 };
