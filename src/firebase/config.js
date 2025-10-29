@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
+import { getAnalytics, logEvent, isSupported as isAnalyticsSupported } from 'firebase/analytics';
+import { getPerformance } from 'firebase/performance';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -41,6 +43,63 @@ const checkMessagingSupport = async () => {
 checkMessagingSupport();
 
 export { messaging, messagingSupported };
+
+// Initialize Analytics and Performance (web-safe)
+let analytics = null;
+let performance = null;
+
+const initAnalyticsAndPerformance = async () => {
+  try {
+    // Analytics requires a measurementId and browser support
+    const analyticsSupport = await isAnalyticsSupported().catch(() => false);
+    if (firebaseConfig.measurementId && analyticsSupport && typeof window !== 'undefined') {
+      analytics = getAnalytics(app);
+      // Mark app start
+      try { logEvent(analytics, 'app_start'); } catch (_) {}
+    } else {
+      if (!firebaseConfig.measurementId) {
+        console.warn('⚠️ Firebase Analytics not initialized: missing measurementId');
+      }
+    }
+  } catch (e) {
+    console.warn('⚠️ Analytics init failed:', e);
+  }
+
+  try {
+    const perfSupport = typeof window !== 'undefined' && typeof window.performance !== 'undefined';
+    if (perfSupport) {
+      performance = getPerformance(app);
+    }
+  } catch (e) {
+    console.warn('⚠️ Performance init failed:', e);
+  }
+
+  // Lightweight global error forwarding to Analytics as a web Crashlytics fallback
+  if (typeof window !== 'undefined' && !window.__vedikaAnalyticsErrorHooked) {
+    window.__vedikaAnalyticsErrorHooked = true;
+    const sendException = (description, fatal) => {
+      try {
+        if (analytics) {
+          logEvent(analytics, 'exception', { description: String(description).slice(0, 1000), fatal: !!fatal });
+        }
+      } catch (_) {}
+    };
+
+    window.addEventListener('error', (event) => {
+      const err = event?.error || event?.message || 'Unknown error';
+      sendException(err, true);
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+      const reason = event?.reason || 'Unhandled rejection';
+      sendException(reason, true);
+    });
+  }
+};
+
+// Kick off initialization (non-blocking)
+initAnalyticsAndPerformance();
+
+export { analytics, performance };
 
 // VAPID key for web push notifications
 const vapidKey = process.env.VAPIDKEY;
